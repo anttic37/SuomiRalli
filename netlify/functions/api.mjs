@@ -10,6 +10,16 @@ export const config = { path: ['/api/top', '/api/ghost', '/api/lap'] };
 export default async (req) => handle(req, getStore({ name: 'suomiralli', consistency: 'strong' }));
 
 const MAX_ROWS = 500;
+// struck-off laps: a row with this driver AND this exact time is dropped from the board (and its ghost deleted) the first time
+// the board is read or written after a deploy. A later honest lap by the same name is kept as usual.
+const STRUCK = [
+  { k: 'anba', t: 86.277, why: 'mutka oikaistu (Antti itse, 26.9.)' },
+];
+async function strike(store, tid, top) {
+  const bad = top.list.filter(r => STRUCK.some(s => s.k === r.k && Math.abs(s.t - r.t) < 0.0015)); if (!bad.length) return top;
+  top.list = top.list.filter(r => !bad.includes(r)); await store.setJSON('top/' + tid + '.json', top);
+  for (const r of bad) { const key = 'ghost/' + tid + '/' + encodeURIComponent(r.k) + '.json', g = await store.get(key, { type: 'json' }); if (g && Math.abs(g.t - r.t) < 0.0015) await store.delete(key); }
+  return top; }
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 // FNV-1a: a short, file-name-safe id for a track signature
 const trackId = (sig) => { let h = 0x811c9dc5; for (const ch of String(sig)) { h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); };
@@ -39,7 +49,7 @@ export async function handle(req, store) {
   try {
     if (req.method === 'GET' && route === 'top') {
       const sig = url.searchParams.get('sig'); if (!sig) return json({ error: 'sig' }, 400);
-      const top = await store.get('top/' + trackId(sig) + '.json', { type: 'json' });
+      const tid = trackId(sig), top0 = await store.get('top/' + tid + '.json', { type: 'json' }), top = top0 && await strike(store, tid, top0);
       return json({ list: top ? top.list : [] });
     }
     if (req.method === 'GET' && route === 'ghost') {
@@ -52,7 +62,7 @@ export async function handle(req, store) {
       let b; try { b = JSON.parse(text); } catch (e) { return json({ error: 'bad json' }, 400); }
       const bad = checkLap(b); if (bad) return json({ error: bad }, 400);
       const tid = trackId(b.sig), name = cleanName(b.name), k = nameKey(name), t = Math.round(b.t*1000)/1000;
-      const top = (await store.get('top/' + tid + '.json', { type: 'json' })) || { sig: b.sig, list: [] };
+      const top0 = await store.get('top/' + tid + '.json', { type: 'json' }), top = top0 ? await strike(store, tid, top0) : { sig: b.sig, list: [] };
       const mine = top.list.find(r => r.k === k);
       if (mine && mine.t <= t) return json({ saved: false, best: mine.t, rank: top.list.indexOf(mine) + 1, list: top.list });
       await store.setJSON('ghost/' + tid + '/' + encodeURIComponent(k) + '.json', { name, t, splits: b.splits || [], s: b.s, d: new Date().toISOString() });
