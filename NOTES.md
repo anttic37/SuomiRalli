@@ -130,6 +130,10 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       - The menu says what's going on: rivals on track, "ei haamuja vielä", or "tulokset eivät nyt saatavilla" when /api
         doesn't answer.
       - Ghost labels show the name only (no time). The name fades out when your car is within ~8 m and is gone under 2 m.
+      - Fix (a friend's lap was refused with "ghost does not cover the lap"): the game samples the ghost on its own frames once
+        50 ms have passed, so 30 fps gives one sample per 67 ms and a 144 Hz screen one per 56 ms. The server wanted ≥ 90 % of
+        20/s. It now takes anything down to 2/s, but refuses a ghost that starts late (> 1.5 s) or has a gap over 1.5 s. Real
+        driven laps at 60 and 37 fps checked.
       - Esc (`toMenu`) drops the race and goes back to the start screen, which refreshes the leaderboard. On the results screen
         it does the same; in the name box it only leaves the box. The menu says "haen ajajia…" while the leaderboard loads.
       - The mouse pointer shows on the menus (`#overlay { cursor: default }`); it is hidden only while driving.

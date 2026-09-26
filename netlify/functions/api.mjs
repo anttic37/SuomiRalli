@@ -16,17 +16,19 @@ const trackId = (sig) => { let h = 0x811c9dc5; for (const ch of String(sig)) { h
 export const cleanName = (s) => String(s || '').normalize('NFC').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 16);
 export const nameKey = (name) => name.toLowerCase().replace(/ /g, '_');
 
-// a lap that could have been driven: the samples cover the whole time, 20 per second, at believable speeds
+// a lap that could have been driven: the samples cover the whole time (one every 50 ms at best — the game records on its frames,
+// so a slow or stuttering machine gives fewer), no gap over 1.5 s, at believable speeds
 export function checkLap(b) {
   if (!b || typeof b !== 'object') return 'no body';
   if (typeof b.sig !== 'string' || !b.sig || b.sig.length > 160) return 'bad track';
   if (!cleanName(b.name)) return 'no name';
   const t = b.t; if (typeof t !== 'number' || !isFinite(t) || t < 20 || t > 1800) return 'bad time';
   const s = b.s; if (!Array.isArray(s) || s.length % 4 || s.length > 4*40000) return 'bad ghost';
-  const n = s.length/4, want = t/0.05; if (n < want*0.9 || n > want*1.1 + 10) return 'ghost does not cover the lap';
+  const n = s.length/4; if (n < t/0.5 || n > t/0.05*1.1 + 10) return 'ghost does not cover the lap';
   if (!s.every(v => Number.isInteger(v) && Math.abs(v) < 1e9)) return 'bad samples';
   if (Math.abs(s[s.length - 4] - Math.round(t*1000)) > 60) return 'ghost ends off the time';
-  for (let i = 1; i < n; i++) { const dt = (s[i*4] - s[(i-1)*4])/1000; if (dt < 0) return 'time runs back';
+  if (s[0] > 1500) return 'ghost starts late';
+  for (let i = 1; i < n; i++) { const dt = (s[i*4] - s[(i-1)*4])/1000; if (dt < 0) return 'time runs back'; if (dt > 1.5) return 'gap in the ghost';
     if (dt > 0 && Math.hypot(s[i*4+1] - s[(i-1)*4+1], s[i*4+2] - s[(i-1)*4+2])/100/dt > 100) return 'too fast'; }
   if (b.splits !== undefined && (!Array.isArray(b.splits) || b.splits.length > 32 || !b.splits.every(v => v === null || (typeof v === 'number' && isFinite(v))))) return 'bad splits';
   return null;
