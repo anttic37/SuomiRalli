@@ -31,6 +31,7 @@
   #results .label { font-size: 11px; letter-spacing: 5px; color: #555; margin-bottom: 6px; }
   #results .best-time { font-size: 16px; color: #666; margin-top: 12px; }
   #results .restart-hint { font-size: clamp(10px, 1.8vw, 12px); letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin-top: 40px; animation: pulse 2s ease-in-out infinite; }
+  #overlay { cursor: default; }   /* (the pointer is hidden while driving, not on the menus) */
   #top10 { margin-top: 26px; min-width: min(360px, 88vw); font-size: 13px; color: #cfcfc8; font-variant-numeric: tabular-nums; }
   #top10 .t10-head { font-size: 10px; letter-spacing: 0.35em; color: #666; text-align: center; margin-bottom: 6px; }
   #top10 .t10-row { display: flex; gap: 10px; padding: 2px 6px; } #top10 .t10-row.me { color: #44ff44; }
@@ -3657,7 +3658,7 @@ function placeGhost(G, P, alpha) {   // pose a ghost car at P = {x, z, a}; fades
   G.position.set(P.x, Y(P.x, P.z), P.z); G.rotation.y = P.a;
   const fx = Math.sin(P.a), fz = Math.cos(P.a), rx = Math.cos(P.a), rz = -Math.sin(P.a);
   G.rotation.x = Math.atan2(Y(P.x - fx*2.4, P.z - fz*2.4) - Y(P.x + fx*2.4, P.z + fz*2.4), 4.8); G.rotation.z = Math.atan2(Y(P.x + rx*2.4, P.z + rz*2.4) - Y(P.x - rx*2.4, P.z - rz*2.4), 4.8); }
-const ghostGroup = makeGhost(0xa8d8ff, 0x3d6f9e, 'sinä', '#bfe2ff');
+const ghostGroup = makeGhost(0xa8d8ff, 0x3d6f9e);   // your own best, offline only (online, every ghost comes from the leaderboard)
 // ════════ ONLINE (suomiralli.netlify.app): the leaderboard and everyone's best lap, from the site's own /api (netlify/functions/api.mjs) ════════
 // The ghost ladder: with no time of your own you race the 3 slowest; once you have one, the 3 just faster than you.
 // Anywhere without the API (a saved file, the editor's ▶ Pelaa rata) the game simply stays offline: your own best ghost only.
@@ -3672,6 +3673,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
     const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), myT = Math.min(bestTime, mine ? mine.t : Infinity), others = ONLINE.list.filter(r => r.k !== me);
     let pick = myT < Infinity ? others.filter(r => r.t < myT).slice(-3) : others.slice(-3);   // the next three rungs up (or the bottom three)
     if (!pick.length) pick = others.slice(0, 3);                                                 // (already on top: the chasers)
+    if (!pick.length && mine) pick = [mine];                                                     // (alone on the board: your own best, under your name)
     pick.sort((a, b) => b.t - a.t);                                                              // nearest first: the split times compare with pick[0]
     const got = await Promise.all(pick.map(r => apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(r.k)).catch(() => null)));
     ONLINE.opp.forEach(o => { scene.remove(o.G); o.G.userData.label.material.map.dispose(); });
@@ -3681,12 +3683,13 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
   ONLINE.busy = false; renderTop10();
 }
 function renderTop10() { const el = document.getElementById('top10'); if (!el) return;
-  if (!ONLINE.ok) { el.innerHTML = ''; return; }
+  if (!ONLINE.ok) { el.innerHTML = ONLINE.api ? '<div class="t10-empty">tulokset eivät nyt saatavilla — haamuna oma paras</div>' : ''; return; }
   const me = onlineKey(ONLINE.name), rows = ONLINE.list.slice(0, 10);
   el.innerHTML = '<div class="t10-head">TOP 10 · kuskit</div>' + (rows.length ? '' : '<div class="t10-empty">ei vielä aikoja — aja ensimmäinen</div>');
   rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 't10-row' + (r.k === me ? ' me' : '');
     d.innerHTML = '<span class="t10-pos"></span><span class="t10-name"></span><span class="t10-time"></span>'; d.children[0].textContent = (i + 1) + '.'; d.children[1].textContent = r.name; d.children[2].textContent = formatTime(r.t); el.appendChild(d); });
-  const rivals = ONLINE.opp.map(o => o.name).join(', '); if (rivals) { const d = document.createElement('div'); d.className = 't10-empty'; d.textContent = 'haamuina radalla: ' + rivals; el.appendChild(d); } }
+  const rivals = ONLINE.opp.map(o => o.name + ' ' + formatTime(o.t).replace(/^00:/, '')).join(' · '), d = document.createElement('div'); d.className = 't10-empty';
+  d.textContent = rivals ? 'haamuina radalla: ' + rivals : ONLINE.busy ? 'haamuja ladataan…' : 'ei haamuja vielä'; el.appendChild(d); }
 function samplePose(S, st, t) {   // a ghost's pose at t: linear between samples (angle along the short way); st.cursor walks forward
   const n = S.length/4; if (st.cursor >= n - 1 || S[st.cursor*4] > t*1000) st.cursor = 0;
   while (st.cursor < n - 2 && S[(st.cursor + 1)*4] <= t*1000) st.cursor++;
@@ -3735,11 +3738,11 @@ function ghostPoseAt(t) {   // linear interpolation between samples (angle along
 }
 function updateGhost(dt) {
   ghostRecord(); onlineGhostsUpdate(dt);
-  const show = ghost && ghostEnabled && lapStarted && gameState === State.RACING;
+  const show = ghost && ghostEnabled && lapStarted && gameState === State.RACING && !ONLINE.ok;
   if (!show) { ghostGroup.visible = false; ghostAlpha = 0; return; }
   const P = ghostPoseAt(raceTime), target = P.end ? 0 : 1;
   ghostAlpha += (target - ghostAlpha)*Math.min(1, dt*(P.end ? 1.5 : 5));
-  placeGhost(ghostGroup, P, ghostAlpha*(ONLINE.opp.length ? 0.6 : 1));   // (with online rivals on track your own best stays a fainter reference)
+  placeGhost(ghostGroup, P, ghostAlpha);
 }
 let deltaTimer = null;
 function showDelta(d, big) { const el = document.getElementById('ghost-delta'); if (!el) return; const ahead = d < 0;

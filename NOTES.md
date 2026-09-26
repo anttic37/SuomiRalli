@@ -124,6 +124,12 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       - At the finish: a name box (prefilled from localStorage `ylasto1988-nimi`). Enter saves; the key guard in the keydown
         handler means typing never drives or restarts. The reply gives the rank, or "ei parannusta".
       - No /api (file://, the editor's ▶ Pelaa rata, an artifact) → offline, exactly as before.
+    - Follow-up ("alkuruudussa ei näy muita aikoja … hiiren osoitin ei näy … ei 'sinä'"):
+      - Online, every ghost comes from the leaderboard. Alone on the board, the ghost is your own best under your name.
+      - The local "sinä" ghost is gone; offline your own best still shows, unlabelled.
+      - The menu says what's going on: rivals on track, "ei haamuja vielä", or "tulokset eivät nyt saatavilla" when /api
+        doesn't answer.
+      - The mouse pointer shows on the menus (`#overlay { cursor: default }`); it is hidden only while driving.
     - Ghost cars are now one baked geometry (`ghostGeometry`/`makeGhost`): 2 draws per ghost instead of ~60.
     - Tests: `test/serve.mjs` serves the repo plus the real function over an in-memory store; `t_online` (run with
       `node real.js http://localhost:8787/ t_online.js`) seeds 5 drivers and checks the ladder, the ghosts on track, the name
