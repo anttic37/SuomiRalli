@@ -231,7 +231,11 @@ function standOnWheels(o, yaw, hx, zf, zr) { const x = o.position.x, z = o.posit
 const _fbM = new THREE.Matrix4(), _fbP = new THREE.Vector3(), _fbBox = new THREE.Box3();
 function fitInstanceBounds(im, pad) { if (!im.count) return; _fbBox.makeEmpty();
   for (let k = 0; k < im.count; k++) { im.getMatrixAt(k, _fbM); if (Math.abs(_fbM.elements[0]) + Math.abs(_fbM.elements[5]) + Math.abs(_fbM.elements[10]) < 1e-6) continue; _fbP.setFromMatrixPosition(_fbM); _fbBox.expandByPoint(_fbP); }
-  if (_fbBox.isEmpty()) return; const g = im.geometry; if (g.userData.localR === undefined) { g.computeBoundingSphere(); g.userData.localR = g.boundingSphere ? g.boundingSphere.radius + g.boundingSphere.center.length() : 2; } const gr = g.userData.localR;   // (the model's own size, measured once: a refit must not grow on its last fit)
+  if (_fbBox.isEmpty()) return;
+  if (!im.userData.ownBounds) { im.userData.ownBounds = true; const src = im.geometry, w = new THREE.BufferGeometry();   // the bounds live on the geometry: a mesh sharing its geometry (every cabbage patch
+    for (const k in src.attributes) w.setAttribute(k, src.attributes[k]); if (src.index) w.setIndex(src.index); src.groups.forEach(q => w.addGroup(q.start, q.count, q.materialIndex));   // does) gets a wrapper over the same buffers, or the patches
+    w.userData.localR = src.userData.localR; im.geometry = w; }   // overwrite each other's sphere and all but one get culled: rows that come and go
+  const g = im.geometry; if (g.userData.localR === undefined) { g.computeBoundingSphere(); g.userData.localR = g.boundingSphere ? g.boundingSphere.radius + g.boundingSphere.center.length() : 2; } const gr = g.userData.localR;   // (the model's own size, measured once: a refit must not grow on its last fit)
   const c = _fbBox.getCenter(new THREE.Vector3()); let r = 0; for (let k = 0; k < im.count; k++) { im.getMatrixAt(k, _fbM); _fbP.setFromMatrixPosition(_fbM); r = Math.max(r, _fbP.distanceTo(c)); }
   g.boundingSphere = new THREE.Sphere(c, r + gr + (pad || 0)); }
 function footprintBase(x, z, hw, hd, yaw) { if (!(hw > 0 || hd > 0)) return H(x, z); const c = Math.cos(yaw), s = Math.sin(yaw); let m = -1e9;
@@ -3322,7 +3326,9 @@ function buildPropInstances() {
   const groups = new Map(); tires.forEach(t => { if (t.kind !== 'tire') return; const h = Math.max(2, Math.min(4, t.cols.length)), key = h + '|' + Math.floor(t.ox/80) + ',' + Math.floor(t.oz/80); let l = groups.get(key); if (!l) groups.set(key, l = { h, list: [] }); l.list.push(t); });
   const _tc = new THREE.Color();
   groups.forEach(({ h, list }) => { let cx = 0, cz = 0; list.forEach(t => { cx += t.ox; cz += t.oz; }); cx /= list.length; cz /= list.length; let r = 0; list.forEach(t => { r = Math.max(r, Math.hypot(t.ox - cx, t.oz - cz)); });
-    const g = new THREE.BufferGeometry(); const base = STACK_GEO[h]; for (const nm in base.attributes) g.setAttribute(nm, base.attributes[nm]); g.setIndex(base.index); g.boundingSphere = new THREE.Sphere(new THREE.Vector3(cx, 1, cz), r + 8);
+    const g = new THREE.BufferGeometry(); const base = STACK_GEO[h]; for (const nm in base.attributes) g.setAttribute(nm, base.attributes[nm]); g.setIndex(base.index);
+    { let y0 = 0, y1 = 0; if (worldLifted) { y0 = 1e9; y1 = -1e9; list.forEach(t => { const y = H(t.ox, t.oz); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }); }   // on the lifted ground: the sphere at the stacks' real height (it sat at y = 1 and hill stacks blinked out)
+      g.boundingSphere = new THREE.Sphere(new THREE.Vector3(cx, (y0 + y1)/2 + 1, cz), Math.hypot(r, (y1 - y0)/2 + 1.5) + 8); }
     const im = new THREE.InstancedMesh(g, STACK_MAT[h], list.length); im.frustumCulled = true;   // r128 turns culling off for instanced meshes: our bounds are real, so switch it back on
     im.castShadow = true; im.receiveShadow = true; scene.add(im); propInst.push(im);
     list.forEach((t, k) => { t.inst = [{ im, idx: k, dy: 0 }]; im.setColorAt(k, _tc.setHex(TYRE_PAINT[t.cols[t.cols.length-1]])); });
@@ -3764,6 +3770,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Korjattu: kaalirivit ja mäkien rengaspinot eivät enää vilku'],
   ['26.9.', 'Alkuruutu: juokseva latauspalkki tuloksia haettaessa'],
   ['26.9.', 'Tiet: vaihtelevampi asfaltti ja sora, pyöreät reunakivet mutkissa'],
   ['26.9.', 'Kolme kolaria tai paloa → poliisit jahtaavat'],
