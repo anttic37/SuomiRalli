@@ -39,7 +39,7 @@ export function checkLap(b) {
   if (Math.abs(s[s.length - 4] - Math.round(t*1000)) > 60) return 'ghost ends off the time';
   if (s[0] > 1500) return 'ghost starts late';
   for (let i = 1; i < n; i++) { const dt = (s[i*4] - s[(i-1)*4])/1000; if (dt < 0) return 'time runs back'; if (dt > 1.5) return 'gap in the ghost';
-    if (dt > 0 && Math.hypot(s[i*4+1] - s[(i-1)*4+1], s[i*4+2] - s[(i-1)*4+2])/100/dt > 100) return 'too fast'; }
+    if (Math.hypot(s[i*4+1] - s[(i-1)*4+1], s[i*4+2] - s[(i-1)*4+2])/100/Math.max(dt, 0.05) > 100) return 'too fast'; }   // (over at least a sample's 50 ms: two samples a few ms apart at the line are not a teleport)
   if (b.splits !== undefined && (!Array.isArray(b.splits) || b.splits.length > 32 || !b.splits.every(v => v === null || (typeof v === 'number' && isFinite(v))))) return 'bad splits';
   return null;
 }

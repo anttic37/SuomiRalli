@@ -3830,6 +3830,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Korjattu: "too fast" maalissa, aika tallentuu'],
   ['26.9.', 'ANBAn 1.26:277 poistettu (mutka oikaistu)'],
   ['26.9.', 'Alkuruudun tarina: listan kärki ja sen aika'],
   ['26.9.', 'Joelin mäkki: muutokset eivät enää peitä listaa, koko historia vieritettävänä'],
@@ -3912,7 +3913,8 @@ function ghostRecord() {
 }
 function ghostFinish(t) {
   if (!ghostRec) return;
-  ghostRec.s.push(Math.round(t*1000), Math.round(car.x*100), Math.round(car.z*100), Math.round(car.angle*1000));
+  const tm = Math.round(t*1000); while (ghostRec.s.length >= 8 && ghostRec.s[ghostRec.s.length - 4] > tm - 30) ghostRec.s.length -= 4;   // (a sample a few ms before the line + the car's position now read as a leap: 144 Hz screens were refused "too fast")
+  ghostRec.s.push(tm, Math.round(car.x*100), Math.round(car.z*100), Math.round(car.angle*1000));
   if (!ghost || t < ghost.time) { ghost = { time: t, splits: ghostRec.splits.slice(), s: ghostRec.s }; ghostSave(); }
   ONLINE.lastRun = { time: t, splits: ghostRec.splits.slice(), s: ghostRec.s };   // (offered to the leaderboard under a name)
   ghostRec = null;
