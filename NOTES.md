@@ -195,6 +195,36 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
     - `makeBike` (shared with the kids' bikes), `handProp` (a prop in the right hand), `roadLift` (asphalt is ROAD_Y up).
     - Test: t_mischief2 (counts, the van's stops and queue, mopeds and the postman moving, the dog chase, the faller, a knocked
       postman's letters, reset, close-ups mis2_*.png). World update still ~0.5–0.95 ms/frame.
+  - v12 start screen (after a mock-up from Antti): rally stripes + checkered flag, heavy italic Saira title, red stage stamp,
+    and a loud "HAETAAN TULOKSIA…" with a spinner and shimmering placeholder rows while the leaderboard loads (a smaller
+    "päivitetään tuloksia…" under the old list on a refresh, a red line if the fetch fails). Test: t_menu (page shots).
+  - v13 police + road textures (after "jos pelaaja kolaroi 3 kertaa … poliisit alkavat jahdata … tekstuuripäivitys"):
+    - POLICE module: `policeIncident` is called when the rally car knocks a person over (boxHitsHumans) or starts a fire
+      (a house, or a vehicle it hit). Pile-ups within 4 s count once, and incidents only count while RACING.
+      - 1/3 and 2/3 are shown on screen. The 3rd brings 2 cruisers (`makePoliceCar`, VSPEC.police with `drag`) from 90–200 m
+        back along the road graph, and every further incident adds one more (max 3).
+      - Chase: `policeAI` follows the road graph using one shared Dijkstra from the car, refreshed every second. It goes
+        straight for the car when it's within 45 m and the line is clear, slows for bends from their radius, and backs out
+        of walls.
+      - Bust: a cruiser within 8.5 m of the car stopped (< 2.5 m/s) for 1.2 s. The car is then held for 7 s
+        (`POLICE.hold` → updateCar brakes) while an officer walks to the driver's window. After that they drive off and
+        the counter resets.
+      - Escape: all cruisers > 450 m away for 10 s ("PÄÄSIT KARKUUN"). They also give up at the finish.
+      - Siren shared with the responders; HUD badge `#police-hud`.
+      - Police and the ice-cream van take no damage from their own scrapes, only from the rally car (vehicleHit), so a
+        chase doesn't end in a self-inflicted fire.
+      - No time penalty: that would break the online ghost check.
+      - Test: t_police.
+    - Roads: `roadDetail(mat, gravel)` is an onBeforeCompile pass on both road materials (strips, joint discs, corner
+      patches and asphalt decor share it, so the seams match). In world space it adds:
+      - a second texture sample at another scale and angle, cross-faded by slow noise, so the tile doesn't visibly repeat
+      - broad and mid-size light/dark variation
+      - on asphalt: warm/cool stretches and newer darker spots; on gravel: damp patches and pale loose-stone drifts
+      - Gravel texture redrawn: a sandy bed with ~14000 small pebbles (sand, granite, quartz), each with its shadow.
+    - Kerbs: the edge points are smoothed twice, and each segment is a Catmull-Rom curve, so bends are round instead of
+      faceted.
+    - Spill: the gravel grit and asphalt crumbs on the tarmac are finer.
+    - Tests: t_roadlook / t_roadlook2 (junctions, the sharpest bends' inner kerbs, a gravel mouth).
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 

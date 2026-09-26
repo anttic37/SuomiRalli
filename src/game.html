@@ -17,6 +17,9 @@
   .hud-sub { font-size: 11px; color: #555; font-variant-numeric: tabular-nums; }
   #ghost-delta { position: fixed; top: 43%; left: 50%; transform: translate(-50%, -50%); font-size: 30px; font-weight: 800; letter-spacing: 2px; opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.25s; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
   #pizza-msg { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 800; letter-spacing: 1px; color: #ffb347; text-shadow: 0 2px 6px rgba(0,0,0,0.7); opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.3s; white-space: nowrap; }
+  #police-msg { position: fixed; top: 22%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 800; letter-spacing: 1px; color: #6a9aff; text-shadow: 0 2px 6px rgba(0,0,0,0.8); opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.3s; white-space: nowrap; }
+  #police-hud { display: none; position: fixed; top: 86px; left: 50%; transform: translateX(-50%); padding: 6px 16px; font-size: 14px; font-weight: 800; letter-spacing: 0.25em; color: #fff; border-radius: 4px; pointer-events: none; z-index: 20; animation: policeFlash 0.6s steps(1) infinite; }
+  @keyframes policeFlash { 0% { background: #1a4ad8; } 50% { background: #d81a1a; } }
   #checkpoint-display { position: fixed; top: 38%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #fff; opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.1s; }
   #countdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 110px; font-weight: 800; letter-spacing: -4px; color: #fff; opacity: 0; pointer-events: none; z-index: 30; }
   #overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: #0a0a0a; transition: opacity 0.5s; }
@@ -91,7 +94,7 @@
 </div>
 <div id="checkpoint-display"></div>
 <div id="ghost-delta"></div>
-<div id="pizza-msg"></div>
+<div id="pizza-msg"></div><div id="police-msg"></div><div id="police-hud">🚨 POLIISI JAHTAA</div>
 <div id="countdown"></div>
 <canvas id="cluster"></canvas>
 <canvas id="minimap"></canvas>
@@ -816,6 +819,7 @@ function buildCurbs() {
       if (!onRoad(ip.x - dx/L*0.3, ip.y - dz/L*0.3, 0.02)) cornerPatches.push({ x: p.x, y: p.y, r: wAt(i)*0.5 + 0.5 });   // self-healing patch
       E.push([ip.x, ROAD_Y+0.06, ip.y, op.x, ROAD_Y+0.06, op.y]);
     }
+    for (let pass = 0; pass < 2; pass++) { const S = E.map(e => e.slice()); for (let i = 0; i < n; i++) { const a = S[(i-1+n)%n], b = S[i], c = S[(i+1)%n]; for (const u of [0, 2, 3, 5]) E[i][u] = b[u]*0.5 + (a[u] + c[u])*0.25; } }   // ironed: no kinks where the route's polyline bends
     const groups = new Map();   // 'common' | 'z:p' → {verts, cols, idx, tag}
     const grp = (k, tag) => { let g = groups.get(k); if (!g) groups.set(k, g = { verts: [], cols: [], idx: [], tag }); return g; };
     // kerb blocks: 1.2 m long, profile = flush inner edge → raised crest → low outer lip with a vertical face
@@ -827,10 +831,10 @@ function buildCurbs() {
       if (barrierOK[i] && barrierOK[ni]) g = grp('common', null);
       else if (curbTag && curbTag[i] && curbTag[ni] && curbTag[i].z === curbTag[ni].z && curbTag[i].p === curbTag[ni].p) g = grp(curbTag[i].z+':'+curbTag[i].p, curbTag[i]);
       else { run = 0; continue; }                             // a gap restarts the pattern cleanly
-      const a0 = E[i], a1 = E[ni];
+      const a0 = E[i], a1 = E[ni], am = E[(i-1+n)%n], a2 = E[(ni+1)%n];
       const len = Math.hypot(a1[0]-a0[0], a1[2]-a0[2]), m = Math.max(1, Math.round(len/SUB));
-      for (let k = 0; k < m; k++) {
-        const t0 = k/m, t1 = (k+1)/m, L = (u, t) => a0[u] + (a1[u]-a0[u])*t;
+      for (let k = 0; k < m; k++) {   // a Catmull-Rom curve through the kerb's edge points, so bends are round, not faceted
+        const t0 = k/m, t1 = (k+1)/m, L = (u, t) => { const t2 = t*t, t3 = t2*t; return 0.5*(2*a0[u] + (a1[u] - am[u])*t + (2*am[u] - 5*a0[u] + 4*a1[u] - a2[u])*t2 + (3*a0[u] - am[u] - 3*a1[u] + a2[u])*t3); };
         const I0 = [L(0,t0), L(2,t0)], I1 = [L(0,t1), L(2,t1)], O0 = [L(3,t0), L(5,t0)], O1 = [L(3,t1), L(5,t1)];
         const C0 = [I0[0] + (O0[0]-I0[0])*CREST_AT, I0[1] + (O0[1]-I0[1])*CREST_AT], C1 = [I1[0] + (O1[0]-I1[0])*CREST_AT, I1[1] + (O1[1]-I1[1])*CREST_AT];
         const blockIdx = Math.floor((run + len*(t0+t1)/2)/BLOCK), red = blockIdx % 2 === 0;
@@ -1878,14 +1882,57 @@ function orientUp(verts, idx) {   // flip any triangle whose XZ winding would gi
     if (cross > 0) { const t = idx[i+1]; idx[i+1] = idx[i+2]; idx[i+2] = t; }
   }
 }
-function gravelMat() {
+function gravelMat() {   // crushed-stone gravel: a sandy bed with pebbles of every size and tone, each lit from one side
   if (_gravel) return _gravel;
-  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); const id = g.createImageData(256, 256);
-  for (let i = 0; i < id.data.length; i += 4) { const v = 200 + Math.round((Math.random()-0.5)*44); id.data[i] = v+10; id.data[i+1] = v; id.data[i+2] = v-18; id.data[i+3] = 255; }
-  g.putImageData(id, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  const S = 512, c = document.createElement('canvas'); c.width = c.height = S; const g = c.getContext('2d'), id = g.createImageData(S, S);
+  let sd = 7654321; const rnd = () => (sd = (sd*16807) % 2147483647) / 2147483647;
+  const lattice = (n) => { const a = new Float32Array(n*n); for (let i = 0; i < a.length; i++) a[i] = rnd(); return (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, sx = fx*fx*(3-2*fx), sy = fy*fy*(3-2*fy), w = (q) => ((q % n) + n) % n;
+      return (a[w(yi)*n + w(xi)]*(1-sx) + a[w(yi)*n + w(xi+1)]*sx)*(1-sy) + (a[w(yi+1)*n + w(xi)]*(1-sx) + a[w(yi+1)*n + w(xi+1)]*sx)*sy; }; };
+  const n1 = lattice(5), n2 = lattice(20), n3 = lattice(80);
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) { const i = (y*S + x)*4, v = 196 + (n1(x/S*5, y/S*5) - 0.5)*22 + (n2(x/S*20, y/S*20) - 0.5)*16 + (n3(x/S*80, y/S*80) - 0.5)*12 + (rnd() - 0.5)*18;
+    id.data[i] = v + 12; id.data[i+1] = v + 2; id.data[i+2] = v - 16; id.data[i+3] = 255; }
+  g.putImageData(id, 0, 0);
+  const wrap = (f) => { for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) f(ox, oy); };   // (drawn across the edges so the tile wraps)
+  for (let k = 0; k < 14000; k++) { const x = rnd()*S, y = rnd()*S, r = rnd() < 0.9 ? 0.5 + rnd()*0.9 : 1.4 + rnd()*1.2, a = rnd()*3.14, e = 0.6 + rnd()*0.4, t = rnd();
+    const v = t < 0.5 ? 176 + rnd()*30 : t < 0.85 ? 140 + rnd()*30 : 214 + rnd()*26, w = t < 0.5 ? [10, 2, -14] : t < 0.85 ? [2, 1, -2] : [6, 3, -6];   // sandy, granite grey, pale quartz
+    wrap((ox, oy) => { if (x + ox < -6 || x + ox > S + 6 || y + oy < -6 || y + oy > S + 6) return;
+      g.save(); g.translate(x + ox, y + oy); g.rotate(a); g.scale(1, e);
+      g.fillStyle = 'rgba(60,48,30,0.22)'; g.beginPath(); g.arc(0.4, 0.5, r*1.1, 0, 6.3); g.fill();                                      // its shadow in the bed
+      g.fillStyle = `rgb(${(v + w[0])|0},${(v + w[1])|0},${(v + w[2])|0})`; g.beginPath(); g.arc(0, 0, r, 0, 6.3); g.fill();
+      if (r > 1.2) { g.fillStyle = 'rgba(255,255,245,0.18)'; g.beginPath(); g.arc(-r*0.3, -r*0.3, r*0.45, 0, 6.3); g.fill(); }             // a highlight
+      g.restore(); }); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
   _gravel = new THREE.MeshStandardMaterial({ color: 0xb8a57e, map: t, vertexColors: true, roughness: 1.0, metalness: 0, side: THREE.FrontSide, polygonOffset: true, polygonOffsetFactor: -0.5, polygonOffsetUnits: -0.5 });   // under asphalt: the paved road wins at junctions
+  roadDetail(_gravel, true);
   return _gravel;
 }
+// Both road surfaces get the same shader pass, in world space so every strip, joint disc and corner patch of a surface
+// matches across its seams: the texture sampled a second time at another scale and angle and cross-faded by slow noise
+// (no visible repeat), broad lighter/darker stretches and mid-size mottling; gravel also gets damp dark patches and pale
+// loose-stone drifts, asphalt dusty-warm and bleached-cool stretches.
+function roadDetail(m, gravel) {
+  m.customProgramCacheKey = () => gravel ? 'road-gravel' : 'road-asphalt';
+  m.onBeforeCompile = (sh) => {
+    sh.vertexShader = 'varying vec3 vRdW;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  vRdW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = `varying vec3 vRdW;
+float rdHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7)))*43758.5453); }
+float rdNoise(vec2 p) { vec2 i = floor(p), f = fract(p), u = f*f*(3.0 - 2.0*f); return mix(mix(rdHash(i), rdHash(i + vec2(1.0, 0.0)), u.x), mix(rdHash(i + vec2(0.0, 1.0)), rdHash(i + vec2(1.0, 1.0)), u.x), u.y); }
+` + sh.fragmentShader.replace('#include <map_fragment>', `
+#ifdef USE_MAP
+  vec2 rdP = vRdW.xz;
+  vec4 texelColor = mapTexelToLinear(texture2D(map, vUv));
+  vec4 rdT2 = mapTexelToLinear(texture2D(map, mat2(0.81, -0.59, 0.59, 0.81)*rdP/${gravel ? '6.7' : '7.9'}));
+  float rdN1 = rdNoise(rdP*0.021), rdN2 = rdNoise(rdP*0.09 + 17.3), rdN3 = rdNoise(rdP*0.37 + 5.1), rdN4 = rdNoise(rdP*1.7 - 3.3);
+  texelColor = mix(texelColor, rdT2, smoothstep(0.25, 0.75, rdN2));
+  float rdK = 1.0 + (rdN1 - 0.5)*${gravel ? '0.22' : '0.26'} + (rdN3 - 0.5)*${gravel ? '0.16' : '0.16'} + (rdN4 - 0.5)*0.05;
+  texelColor.rgb *= rdK;
+  ${gravel ? `texelColor.rgb *= 1.0 - 0.18*smoothstep(0.62, 0.8, rdNoise(rdP*0.06 + 41.0));          // damp patches
+  texelColor.rgb = mix(texelColor.rgb, texelColor.rgb*vec3(1.12, 1.1, 1.04), smoothstep(0.6, 0.85, rdNoise(rdP*0.15 - 9.0)));   // loose pale stone`
+           : `texelColor.rgb *= mix(vec3(1.0), vec3(1.045, 1.02, 0.975), smoothstep(0.35, 0.75, rdN2*0.5 + rdN1*0.5));   // dusty-warm ↔ bleached-cool
+  texelColor.rgb *= 1.0 - 0.1*smoothstep(0.7, 0.9, rdNoise(rdP*0.23 + 71.0))*smoothstep(0.4, 0.6, rdN3);          // odd darker (newer) spots`}
+  diffuseColor *= texelColor;
+#endif`);
+  }; }
 // planar road UVs: 11.3 m tile, rotated 23° so its repeat never lines up with a street
 const ROAD_UV_C = Math.cos(0.4)/11.3, ROAD_UV_S = Math.sin(0.4)/11.3;
 const roadUV = (x, z) => [x*ROAD_UV_C - z*ROAD_UV_S, x*ROAD_UV_S + z*ROAD_UV_C];
@@ -1910,6 +1957,7 @@ function asphaltMat() {   // unlit asphalt with a faint grain (shared by the net
       id.data[i] = Math.max(0, Math.min(255, id.data[i] + dv)); id.data[i+1] = Math.max(0, Math.min(255, id.data[i+1] + dv)); id.data[i+2] = Math.max(0, Math.min(255, id.data[i+2] + dv*0.9)); } }
   g.putImageData(id, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
   _asphalt = new THREE.MeshStandardMaterial({ color: 0x9c9fa6, map: t, vertexColors: true, roughness: 0.95, metalness: 0, side: THREE.FrontSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  roadDetail(_asphalt, false);
   return _asphalt;
 }
 // ── asphalt life: trench and square patches, pothole repairs, bitumen-sealed cracks, alligator cracking on old edges,
@@ -1973,7 +2021,7 @@ function buildAsphaltDecor() {
   const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geo.setIndex(idx);
   const nrm = new Float32Array(verts.length); for (let i = 1; i < nrm.length; i += 3) nrm[i] = 1; geo.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
   const base = asphaltMat();
-  const m = new THREE.MeshStandardMaterial({ color: base.color, map: base.map, vertexColors: true, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const m = new THREE.MeshStandardMaterial({ color: base.color, map: base.map, vertexColors: true, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }); roadDetail(m, false);   // (the same world-space variation as the road under it)
   m.depthWrite = false; const mesh = new THREE.Mesh(geo, m); mesh.renderOrder = 1; mesh.receiveShadow = true; mesh.userData.key = 'asphalt-decor'; trackMeshGroup.add(mesh);
 }
 function buildSurfaceSpill() {
@@ -1984,11 +2032,12 @@ function buildSurfaceSpill() {
   const segInfo = (x, z, pts) => { let m = Infinity, tx = 1, tz = 0; for (let i = 1; i < pts.length; i++) { const a = pts[i-1], b = pts[i], vx = b.x-a.x, vz = b.y-a.y, L2 = vx*vx+vz*vz||1; let t = ((x-a.x)*vx + (z-a.y)*vz)/L2; t = Math.max(0, Math.min(1, t)); const d = Math.hypot(a.x+vx*t-x, a.y+vz*t-z); if (d < m) { m = d; const L = Math.sqrt(L2); tx = vx/L; tz = vz/L; } } return { d: m, tx, tz }; };
   let seed = 12345; const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
   const blob = (x, z, r, c, y) => {   // small irregular flat polygon
+    if (y === Y_ON) r *= 0.65;   // (on the tarmac: finer grit, not confetti)
     const base = verts.length/3, n = 5 + (rnd() < 0.4 ? 1 : 0); verts.push(x, y, z); cols.push(c[0], c[1], c[2]);
     const a0 = rnd()*6.3; for (let k = 0; k < n; k++) { const a = a0 + k*Math.PI*2/n, rr = r*(0.55 + rnd()*0.55); verts.push(x + Math.cos(a)*rr, y, z + Math.sin(a)*rr); cols.push(c[0], c[1], c[2]); }
     for (let k = 0; k < n; k++) idx.push(base, base + 1 + k, base + 1 + (k+1)%n);
   };
-  const sand = () => { const v = 0.66 + rnd()*0.14; return [v+0.06, v, v-0.1]; }, stone = () => { const v = 0.5 + rnd()*0.3; return [v+0.03, v+0.01, v-0.03]; };
+  const sand = () => { const v = 0.6 + rnd()*0.12; return [v+0.06, v, v-0.1]; }, stone = () => { const v = 0.5 + rnd()*0.3; return [v+0.03, v+0.01, v-0.03]; };
   const dust = () => { const v = 0.6 + rnd()*0.05; return [v+0.05, v+0.015, v-0.04]; }, crumb = () => { const v = 0.36 + rnd()*0.08; return [v, v+0.01, v+0.03]; };
   const Y_ON = ROAD_Y + 0.012, Y_EDGE = ROAD_Y - 0.045;
   const onAsphalt = (x, z) => onRoad(x, z, -0.25) && surfaceAt(x, z) === 'asphalt';
@@ -2051,7 +2100,7 @@ function buildSurfaceSpill() {
         }
       }
       // asphalt crumbs on the gravel side of the joint
-      for (let k = 0; k < 50; k++) { const t = -Math.pow(rnd(), 1.5)*3.0, s = (rnd()*2-1)*hw; blob(bx + dx*t + nx*s, bz + dz*t + nz*s, 0.07 + rnd()*0.16, crumb(), Y_ON); }
+      for (let k = 0; k < 50; k++) { const t = -Math.pow(rnd(), 1.5)*3.0, s = (rnd()*2-1)*hw; blob(bx + dx*t + nx*s, bz + dz*t + nz*s, 0.04 + rnd()*0.08, crumb(), Y_ON); }
     });
   });
   if (!verts.length) return;
@@ -2619,10 +2668,11 @@ const car = { x:0, z:0, angle:0, vx:0, vz:0, steerSm:0, steerAngle:0, pivot:-1.3
               speed:0, maxSlip:0, drifting:false, onTrack:true, throttle:0 };
 
 function updateCar(dt, live = true) {
+  const held = POLICE.hold > 0; if (held) live = false;   // pulled over: the police have it
   const throttle = live && (keys['ArrowUp'] || keys['KeyW']) ? 1 : 0;
-  const brake = live && (keys['ArrowDown'] || keys['KeyS']) ? 1 : 0;
+  const brake = held || (live && (keys['ArrowDown'] || keys['KeyS'])) ? 1 : 0;
   const steerInput = live ? (((keys['ArrowLeft']||keys['KeyA'])?1:0) - ((keys['ArrowRight']||keys['KeyD'])?1:0)) : 0;
-  const handbrake = live && keys['Space'] ? 1 : 0;
+  const handbrake = held || (live && keys['Space']) ? 1 : 0;
   car.throttle = throttle;
   
   // basis
@@ -3707,6 +3757,8 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Tiet: vaihtelevampi asfaltti ja sora, pyöreät reunakivet mutkissa'],
+  ['26.9.', 'Kolme kolaria tai paloa → poliisit jahtaavat'],
   ['26.9.', 'Uusi alkuruutu, selvä "haetaan tuloksia" -tieto'],
   ['26.9.', 'Jäätelöauto kiertää, lapset jonoon; mopopojat, postinjakaja'],
   ['26.9.', 'Keppihevostytöt, mattojen tamppaus, sulkapallo, karkaava lakana'],
@@ -4149,6 +4201,7 @@ function boxHitsHumans(B, bvx, bvz, isPlayer) {
       const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), lf = (h.x - B.x)*fx + (h.z - B.z)*fz, la = (h.x - B.x)*fz - (h.z - B.z)*fx, vf = bvx*fx + bvz*fz;
       if (isPlayer && lf > B.hl*0.6 && vf > 5.5) knock(h, bvx, bvz, sp, { ride: { t: 0, dur: 0.45 + Math.random()*0.6, over: vf > 19, b0: 1.45, b: 1.45, a: Math.max(-0.55, Math.min(0.55, la)), vf, ang: car.angle, vx: bvx, vz: bvz, roll: 0 } });   // onto the bonnet
       else { const sd = (la >= 0 ? 1 : -1)*(0.8 + Math.random()*1.2); knock(h, bvx*0.85 + hit.nx*1.2 + fz*sd, bvz*0.85 + hit.nz*1.2 - fx*sd, sp); }   // along at about the speed of what hit them, falling off to a side
+      if (isPlayer && h.down && !h.animal) policeIncident('people');
       if (isPlayer) { car.vx *= 0.95; car.vz *= 0.95; const now = performance.now(); if (audio && now - lastThud > 110) { lastThud = now; beep(160 + Math.random()*60, 0.16, Math.min(0.3, sp*0.012), 'triangle'); } } }
     else if (h.down && sp > 3) { const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), sd = ((h.x - B.x)*fz - (h.z - B.z)*fx >= 0 ? 1 : -1)*2.8;   // caught again lying there: tossed aside, not bulldozed
       h.vx = bvx*0.8 + fz*sd; h.vz = bvz*0.8 - fx*sd; h.vy = Math.max(h.vy, 1.2); }
@@ -4350,6 +4403,7 @@ const VSPEC = {   // mass (the rally car = 1), engine m/s², brakes m/s², top s
   tractor:   { mass: 3.2,  accel: 3.0, brake: 5,   vmax: 7,  wb: 1.9,  steer: 0.7,  lat: 9.0, yawK: 7 },
   ambulance: { mass: 2.3,  accel: 5.2, brake: 7.5, vmax: 17, wb: 2.95, steer: 0.58, lat: 7.5, yawK: 6 },
   fire:      { mass: 8,    accel: 4.2, brake: 6,   vmax: 13, wb: 4.7,  steer: 0.55, lat: 6.5, yawK: 5 },
+  police:    { mass: 1.4,  accel: 12,  brake: 10,  vmax: 50, wb: 2.65, steer: 0.6,  lat: 13,  yawK: 8, drag: 0.004 },   // (a tuned V8 with the air cut: ~115 km/h through the village)
   icecream:  { mass: 2.0,  accel: 8.0, brake: 7,   vmax: 13, wb: 3.0,  steer: 0.6,  lat: 7.5, yawK: 6 },
 };
 class Vehicle {
@@ -4368,7 +4422,7 @@ function vehicleSync(v) {
 function vehicleRemove(v) { if (v.view.kind === 'mesh') lifeGroup.remove(v.view.g); if (v.stretcher) lifeGroup.remove(v.stretcher); (v.hoses || []).forEach(H => H.forEach(m => lifeGroup.remove(m)));
   v.crew.forEach(h => { if (h.inside || !h.down) humanRemove(h); }); const i = VEHICLES.indexOf(v); if (i >= 0) VEHICLES.splice(i, 1); v.gone = true; }
 // a hard hit dents it, a harder one (or enough of them) sets it burning — ambulances and fire engines included
-function vehicleHit(v, imp) { if (imp < 5) return; v.damage += imp; if (!v.fire && (imp >= 11 || v.damage >= 15)) startFire({ vehicle: v }); }
+function vehicleHit(v, imp) { if (imp < 5) return; if ((v.kind === 'police' || v.kind === 'icecream') && (v.x - car.x)**2 + (v.z - car.z)**2 > 12*12) return;   /* (their own scrapes on the way don't wreck them; the rally car can) */ v.damage += imp; if (!v.fire && (imp >= 11 || v.damage >= 15)) startFire({ vehicle: v }); }
 // the driving model, one fixed step
 function vehicleStep(v, dt) {
   const S = v.spec, C = v.ctrl, fx = Math.sin(v.yaw), fz = Math.cos(v.yaw), rx = fz, rz = -fx;
@@ -4379,7 +4433,7 @@ function vehicleStep(v, dt) {
   } else {
     if (C.thr) vF += S.accel*C.thr*Math.max(0, 1 - Math.abs(vF)/(C.thr > 0 ? S.vmax : S.vmax*0.3))*dt;
     if (C.brk) vF -= Math.sign(vF)*Math.min(Math.abs(vF), S.brake*C.brk*dt);
-    vF -= Math.sign(vF)*Math.min(Math.abs(vF), (0.3 + 0.012*vF*vF)*dt);                  // rolling and air
+    vF -= Math.sign(vF)*Math.min(Math.abs(vF), (0.3 + (S.drag || 0.012)*vF*vF)*dt);                  // rolling and air
     vL -= Math.sign(vL)*Math.min(Math.abs(vL), S.lat*dt);                                  // the tyres catch a sideways slide, up to their grip
     const slide = Math.min(1, Math.abs(vL)/3), wT = vF*Math.tan(C.steer*S.steer)/S.wb;
     v.w += (wT - v.w)*Math.min(1, dt*S.yawK*(1 - 0.8*slide));                             // sliding: a spin from a hit carries on
@@ -4392,10 +4446,10 @@ function collideCarWorld() {
   const P = { x: car.x, z: car.z, yaw: car.angle, hw: CAR_HW, hl: CAR_HL, vx: car.vx, vz: car.vz, mass: 1 };
   staticNear(P.x, P.z, 4, B => { const h = obbSat(P, B); if (!h) return; P.x -= h.nx*h.depth; P.z -= h.nz*h.depth; const into = P.vx*h.nx + P.vz*h.nz;
     if (into > 0) { P.vx -= h.nx*into*1.3; P.vz -= h.nz*into*1.3; carDamage(h.nx, h.nz, into); if (into > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + into*0.8), 4);
-      if (B.kind === 'house' && into >= 8.5) startFire({ house: B }); } });
+      if (B.kind === 'house' && into >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) policeIncident('fire'); } } });
   for (const v of VEHICLES) { if (v.gone) continue; const R = v.hl + CAR_HL + 0.6; if (Math.abs(v.x - P.x) > R || Math.abs(v.z - P.z) > R) continue;
     const h = obbSat(P, v); if (!h) continue; const imp = resolvePair(P, v, h, 0.25); v.awake = true; v.moved = true;
-    if (imp > 0.8) { carDamage(h.nx, h.nz, imp); if (imp > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + imp*0.8), 4); vehicleHit(v, imp); } }
+    if (imp > 0.8) { carDamage(h.nx, h.nz, imp); if (imp > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) policeIncident('fire'); } }
   car.x = P.x; car.z = P.z; car.vx = P.vx; car.vz = P.vz;
   boxHitsHumans(playerBox(), car.vx, car.vz, true);
 }
@@ -4718,6 +4772,99 @@ function pizzaUpdate(dt) {
   if (!PIZZA.guy) PIZZA.shop = null;
 }
 function pizzaReset() { PIZZA.k = 1; PIZZA.got = false; PIZZA.wait = 0; PIZZA.guy = null; PIZZA.shop = null; const el = document.getElementById('pizza-hud'); if (el) el.textContent = ''; }
+// ════════ POLICE: three incidents in one race (people knocked over by the rally car, a fire it started) and the police come.
+//          White-and-blue 80s cruisers from 90–200 m back down the streets, siren and beacons; they follow the road graph
+//          towards the car (one Dijkstra from the car serves them all) and go straight for it when it's close and the way is
+//          clear. Caught — the car stopped with a cruiser on it — it's held while an officer has a word, then they drive off and
+//          the slate is clean. Well clear of them for 10 s, or over the line, and they give up. ════════
+const POLICE = { n: 0, lastT: -99, cars: [], hold: 0, tree: null, treeT: -99, lostT: 0, caughtT: 0 };
+let policeMsgT = null;
+function policeMsg(t, big) { const el = document.getElementById('police-msg'); if (!el) return; el.textContent = t; el.style.opacity = 1; el.style.fontSize = big ? '38px' : '26px';
+  clearTimeout(policeMsgT); policeMsgT = setTimeout(() => { el.style.opacity = 0; }, big ? 2600 : 1800); }
+function policeIncident(kind) {
+  if (gameState !== State.RACING || POLICE.hold > 0 || worldT - POLICE.lastT < 4) return; POLICE.lastT = worldT; POLICE.n++;   // (one pile-up is one incident)
+  const on = POLICE.cars.filter(v => !v.gone && v.chase);
+  if (on.length) { if (on.length < 3) { policeSpawn(1); policeMsg('LISÄÄ POLIISEJA!'); } return; }
+  if (POLICE.n >= 3) { policeSpawn(2); policeMsg('🚨 POLIISIT TULEVAT!', true); } else policeMsg((kind === 'fire' ? '🔥 TULIPALO ' : 'KOLARI ') + POLICE.n + '/3'); }
+function nearestNode(x, z) { const { nodes } = roadGraph(); let bi = -1, bd = 1e18; for (let i = 0; i < nodes.length; i++) { const d = (nodes[i].x - x)**2 + (nodes[i].z - z)**2; if (d < bd) { bd = d; bi = i; } } return bi; }
+function policeTree(fresh) { if (!fresh && POLICE.tree && worldT - POLICE.treeT < 1) return POLICE.tree; const si = nearestNode(car.x, car.z); if (si < 0) return null;
+  POLICE.tree = rgDijkstra(si); POLICE.tree.src = si; POLICE.treeT = worldT; return POLICE.tree; }
+let _polTex = null;
+function polTex() { if (_polTex) return _polTex; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
+  g.font = 'bold 92px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#16389a'; g.fillText('POLIISI', 256, 68); return (_polTex = new THREE.CanvasTexture(c)); }
+function makePoliceCar() {   // a boxy 80s saloon: white, a blue band, POLIISI on the doors, a light bar with two blue domes
+  const G = new THREE.Group(), white = lmat(0xf2f2ee, 0.35), blue = lmat(0x16389a, 0.45), glass = lmat(0x1e2a36, 0.15), black = lmat(0x141414, 0.8), hub = lmat(0xc8c8c8, 0.35);
+  G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z, rx, sh) => { const me = lmesh(lbox(w, h, d), m, x, y, z, G, sh); if (rx) me.rotation.x = rx; return me; };
+  B(1.74, 0.56, 4.7, white, 0, 0.61, 0); B(1.76, 0.12, 4.72, blue, 0, 0.47, 0);                            // body, blue band low along it
+  B(1.6, 0.52, 2.1, glass, 0, 1.15, -0.3); B(1.64, 0.07, 1.95, white, 0, 1.44, -0.35);                     // glasshouse, roof
+  B(1.62, 0.5, 0.1, white, 0, 1.15, -0.3); B(1.62, 0.5, 0.14, white, 0, 1.15, -1.3);                      // B and C pillars
+  B(1.56, 0.62, 0.06, glass, 0, 1.13, 0.86, -0.62); B(1.56, 0.5, 0.06, glass, 0, 1.12, -1.44, 0.55);       // windscreen, rear screen
+  B(1.84, 0.15, 0.16, black, 0, 0.4, 2.36); B(1.84, 0.15, 0.16, black, 0, 0.4, -2.36); B(1.3, 0.2, 0.04, black, 0, 0.68, 2.36);   // bumpers, grille
+  const head = new THREE.MeshStandardMaterial({ color: 0xfff6d8, emissive: 0xfff0c8, emissiveIntensity: 0.9, roughness: 0.3 });
+  for (const sx of [-1, 1]) { B(0.3, 0.16, 0.05, head, sx*0.66, 0.68, 2.36, 0, false); B(0.34, 0.14, 0.04, lmat(0xa01818, 0.4), sx*0.66, 0.7, -2.36, 0, false); }
+  for (const sx of [-1, 1]) for (const zz of [1.4, -1.35]) { const w = lmesh(lcyl(0.32, 0.22, 14), black, sx*0.8, 0.32, zz, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.16, 0.23, 10), hub, sx*0.8, 0.32, zz, G, false); h.rotation.z = Math.PI/2; }
+  B(1.2, 0.1, 0.32, white, 0, 1.53, -0.15);                                                                  // light bar
+  const bm = [0, 1].map(() => new THREE.MeshStandardMaterial({ color: 0x2a4ac0, emissive: 0x3a6aff, emissiveIntensity: 0.2, roughness: 0.2, transparent: true, opacity: 0.9 }));
+  const beacons = [-0.4, 0.4].map((x, i) => lmesh(lcyl(0.12, 0.2, 12), bm[i], x, 1.67, -0.15, G, false));
+  const glows = beacons.map(b => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0x4a7bff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); sp.scale.set(2.6, 2.6, 1); sp.position.copy(b.position); G.add(sp); return sp; });
+  for (const sx of [-1, 1]) { const m = new THREE.Mesh(lgeo('polside', () => new THREE.PlaneGeometry(1.3, 0.32)), new THREE.MeshBasicMaterial({ map: polTex(), transparent: true, depthWrite: false })); m.position.set(sx*0.875, 0.72, 0.1); m.rotation.y = sx*Math.PI/2; G.add(m); }
+  return { G, bm, glows }; }
+function policeSpawn(n) { const { nodes } = roadGraph(), T = policeTree(true); if (!T) return; const fx = Math.sin(car.angle), fz = Math.cos(car.angle), cand = [];
+  for (let i = 0; i < nodes.length; i++) { const d = T.dist[i]; if (!isFinite(d) || d < 90 || d > 200 || T.prev[i] < 0) continue; const q = nodes[i]; cand.push({ i, sc: -((q.x - car.x)*fx + (q.z - car.z)*fz) + Math.random()*80 }); }   // from behind, mostly
+  cand.sort((a, b) => b.sc - a.sc);
+  for (let k = 0, made = 0; k < cand.length && made < n; k++) { const i = cand[k].i, q = nodes[i]; if (POLICE.cars.some(v => !v.gone && Math.hypot(v.x - q.x, v.z - q.z) < 30)) continue;
+    const p = nodes[T.prev[i]], M = makePoliceCar(); lifeGroup.add(M.G);
+    const v = new Vehicle({ kind: 'police', x: q.x, z: q.z, yaw: Math.atan2(p.x - q.x, p.z - q.z), hw: 0.88, hl: 2.4, view: { kind: 'mesh', g: M.G }, axle: [0.8, 1.4, -1.35], temp: true, ai: policeAI });
+    v.fx = M; v.flash = Math.random(); v.chase = true; v.ctrl.hand = false; v.pl = { tT: 0, stuck: 0, rev: 0, hold: false, officer: null, leaveT: 0 }; POLICE.cars.push(v); made++; } }
+function policeFollow(v, dt, vmax) {   // along v.path: pure pursuit, slowing in time for the bends
+  pathProject(v); const C = v.ctrl, sp = Math.abs(v.vF), [lx, lz] = pathAt(v, v.s + Math.max(5, sp*0.6 + 3)); let vT = vmax;
+  for (let d = 4; d <= 74; d += 5) { const [ax, az] = pathAt(v, v.s + d - 8), [px, pz] = pathAt(v, v.s + d), [qx, qz] = pathAt(v, v.s + d + 8);   // the bend's radius over ~16 m → the speed the tyres hold
+    const turn = Math.abs(angDiff(Math.atan2(qx - px, qz - pz) - Math.atan2(px - ax, pz - az))), vc = Math.min(vmax, Math.sqrt(v.spec.lat*0.8*12/Math.max(turn, 0.01))); vT = Math.min(vT, Math.sqrt(vc*vc + 2*v.spec.brake*0.7*Math.max(0, d - 4))); }
+  C.steer = steerToward(v, lx, lz); speedTo(v, vT); return vT; }
+function clearLine(x0, z0, x1, z1) { let hit = false; for (let k = 1; k < 6 && !hit; k++) { const x = x0 + (x1 - x0)*k/6, z = z0 + (z1 - z0)*k/6; staticNear(x, z, 2, B => { if (!hit && boxPush(B, x, z, 1.0)) hit = true; }); } return !hit; }
+function policeAI(v, dt) {
+  const P = v.pl, C = v.ctrl, lit = v.chase || P.hold; v.flash += dt;
+  v.fx.bm.forEach((m, i) => { const k = lit ? Math.pow(Math.max(0, Math.sin(v.flash*12 + i*Math.PI)), 3) : 0; m.emissiveIntensity = 0.2 + k*3.2; v.fx.glows[i].material.opacity = k; v.fx.glows[i].visible = k > 0.02; });
+  if (v.fire || v.charred) { C.hand = true; C.thr = 0; v.chase = false; return; }
+  C.hand = false;
+  if (P.hold) { C.steer = 0; speedTo(v, 0); if (!POLICE.hold && (!P.officer || P.officer.gone || P.officer.down)) { P.hold = false; v.chase = false; } return; }   // parked while the officer talks
+  if (P.rev > 0) { P.rev -= dt; C.brk = 0; C.thr = -0.8; C.steer = -P.revSteer; return; }   // backing out of a wall
+  let vT;
+  if (v.chase) { const dx = car.x - v.x, dz = car.z - v.z, d = Math.hypot(dx, dz), csp = Math.hypot(car.vx, car.vz);
+    if (d < 45 && clearLine(v.x, v.z, car.x, car.z)) {   // straight for it, aiming a little ahead; ease off right on its bumper
+      const lead = Math.min(1.0, d/Math.max(8, csp + 4)), tx = car.x + car.vx*lead, tz = car.z + car.vz*lead;
+      vT = d < 10 ? Math.max(0, csp - 1 + (d - 5)*0.9) : Math.min(v.spec.vmax, csp + 6 + d*0.35); C.steer = steerToward(v, tx, tz); speedTo(v, vT); }
+    else { if ((P.tT -= dt) <= 0 || !v.path) { P.tT = 0.8; const T = policeTree(), { nodes } = roadGraph();
+        if (T) { const pts = [[v.x, v.z]], fx = Math.sin(v.yaw), fz = Math.cos(v.yaw); let j = nearestNode(v.x, v.z);
+          for (let k = 0; j >= 0 && k < 600; k++) { const q = nodes[j]; if (pts.length > 1 || Math.hypot(q.x - v.x, q.z - v.z) > 7 || (q.x - v.x)*fx + (q.z - v.z)*fz > 0) pts.push([q.x, q.z]); if (j === T.src) break; j = T.prev[j]; }   // (not back to a node just behind it)
+          pts.push([car.x, car.z]); setPath(v, pts); } }
+      vT = policeFollow(v, dt, v.spec.vmax); } }
+  else { if (!P.away) { const { nodes } = roadGraph(), si = nearestNode(v.x, v.z), T = rgDijkstra(si); let best = -1, bd = -1;   // off home: a street far from the car
+      for (let i = 0; i < nodes.length; i += 3) { const d = T.dist[i]; if (!isFinite(d) || d > 500) continue; const sc = Math.hypot(nodes[i].x - car.x, nodes[i].z - car.z) + Math.random()*30; if (sc > bd) { bd = sc; best = i; } }
+      const pts = []; for (let j = best; j >= 0; j = T.prev[j]) { pts.unshift([nodes[j].x, nodes[j].z]); if (j === si) break; } P.away = pts.length > 1 ? rightSide(pts.map(p => ({ x: p[0], z: p[1], hw: 3 }))) : [[v.x, v.z], [v.x + Math.sin(v.yaw)*50, v.z + Math.cos(v.yaw)*50]]; setPath(v, P.away); }
+    vT = policeFollow(v, dt, 12); }
+  if (vT > 3 && Math.abs(v.vF) < 0.6) { if ((P.stuck += dt) > 1.5) { P.stuck = 0; P.rev = 1.2; P.revSteer = C.steer || 1; } } else P.stuck = 0;
+}
+const officerTask = (v) => ({ kind: 'officer', update(h, dt, t) {
+  if (POLICE.hold > 0.6) { const [tx, tz] = lloc(car.x, car.z, car.angle, -1.4, 0.35); if (walkTo(h, tx, tz, 2.2, dt)) { h.yaw = Math.atan2(car.x - h.x, car.z - h.z); h.pose.armR = -1.45 + Math.sin(t*8)*0.22; h.pose.armL = -0.2; } return; }   // a finger wagged at the driver's window
+  const [bx, bz] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 0.4); if (walkTo(h, bx, bz, 2.2, dt) || v.gone) humanRemove(h); } });
+function policeBust(v) { POLICE.hold = 7; POLICE.caughtT = 0; policeMsg('🚨 KIINNI! POLIISI PUHUTTELEE…', true);
+  for (const o of POLICE.cars) if (o.chase) { o.pl.hold = true; o.chase = false; }
+  const rig = makeAdult(0x1c2c5a, 0x1c2c5a, lpick(L_HAIR)); lmesh(lbox(0.3, 0.08, 0.3), lmat(0x141820, 0.6), 0, 1.83, 0, rig); lmesh(lbox(0.26, 0.02, 0.12), lmat(0x101010, 0.4), 0, 1.8, 0.18, rig, false);
+  const [x, z] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 0.4), h = new Human({ x, z, yaw: v.yaw, rig, task: officerTask(v), temp: true }); h.ao = aoAlloc(); v.pl.officer = h; }
+function policeUpdate(dt) {
+  POLICE.cars = POLICE.cars.filter(v => !v.gone); const chasing = POLICE.cars.filter(v => v.chase), hud = document.getElementById('police-hud');
+  if (hud) { const on = chasing.length > 0 || POLICE.hold > 0; if (hud.__on !== on) { hud.__on = on; hud.style.display = on ? 'block' : 'none'; } }
+  for (const v of POLICE.cars) if (!v.chase && !v.pl.hold) { v.pl.leaveT += dt; if (Math.hypot(v.x - car.x, v.z - car.z) > 220 || v.pl.leaveT > 50) vehicleRemove(v); }   // gone round the corner
+  if (POLICE.hold > 0) { POLICE.hold -= dt; if (POLICE.hold <= 0) { POLICE.hold = 0; POLICE.n = 0; policeMsg('SAAT JATKAA — AJA SIIVOSTI'); } return; }
+  if (!chasing.length) return;
+  if (gameState !== State.RACING) { chasing.forEach(v => { v.chase = false; }); POLICE.n = 0; return; }   // over the line: not their business any more
+  const csp = Math.hypot(car.vx, car.vz), on = chasing.find(v => Math.hypot(v.x - car.x, v.z - car.z) < 8.5);
+  POLICE.caughtT = on && csp < 2.5 ? POLICE.caughtT + dt : 0; if (POLICE.caughtT > 1.2) { policeBust(on); return; }
+  POLICE.lostT = chasing.every(v => Math.hypot(v.x - car.x, v.z - car.z) > 450) ? POLICE.lostT + dt : 0;
+  if (POLICE.lostT > 10) { chasing.forEach(v => { v.chase = false; }); POLICE.n = 0; POLICE.lostT = 0; policeMsg('PÄÄSIT KARKUUN!', true); } }
+function policeReset() { Object.assign(POLICE, { n: 0, lastT: -99, cars: [], hold: 0, tree: null, treeT: -99, lostT: 0, caughtT: 0 }); const hud = document.getElementById('police-hud'); if (hud) { hud.style.display = 'none'; hud.__on = false; } }
+
 // ════════ VILLAGE MISCHIEF: kids scrapping in yards, roofers up on a few roofs, broken-down cars smoking in yards, dog walkers in
 //          the woods, a crowd along the sports field, a queue at the K-shop door. All Humans with tasks (so the car can knock any of
 //          them over and the ambulance comes), placed after the terrain lift from what the world already has. ════════
@@ -5303,8 +5450,8 @@ function emittersUpdate(dt) {
 function worldUpdate(dt) {
   worldT += dt;
   carStillT = Math.hypot(car.vx, car.vz) < 1.5 && gameState === State.RACING ? carStillT + dt : 0;
-  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); queueUpdate(dt); extras2Update(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
-  let siren = 0; for (const v of VEHICLES) if (v.job && v.job.phase === 'drive') siren = Math.max(siren, Math.max(0, 1 - Math.hypot(v.x - car.x, v.z - car.z)/240));
+  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); queueUpdate(dt); extras2Update(dt); policeUpdate(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
+  let siren = 0; for (const v of VEHICLES) if ((v.job && v.job.phase === 'drive') || v.chase) siren = Math.max(siren, Math.max(0, 1 - Math.hypot(v.x - car.x, v.z - car.z)/240));
   sirenSet(siren, dt);
 }
 function worldReset() {   // a restart: everyone back on their feet and where they were, responders and fires gone, cars back in place
@@ -5314,7 +5461,7 @@ function worldReset() {   // a restart: everyone back on their feet and where th
   for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i]; if (h.temp) { humanRemove(h); continue; } if (h.seat0) { h.seat = h.seat0; h.task = h.task0; }
     h.x = h.home.x; h.z = h.home.z; h.yaw = h.home.yaw; h.vx = h.vz = h.vy = h.hop = h.tilt = h.roll = h.spin = h.sway = 0; h.down = h.hurt = h.gone = false; h.ride = null; h.pose.up = false; if (h.task && h.task.reset) h.task.reset(h); humanSync(h); }
   for (const F of FIELD_GAMES) if (F.kids) { F.ball.a = F.ball.b = 0; F.ball.va = F.ball.vb = F.ball.vy = 0; F.ball.y = 0.16; }
-  pizzaReset(); lifeExtrasReset(); lifeExtras2Reset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); waterFx.clear(); sirenSet(0, 0);
+  pizzaReset(); lifeExtrasReset(); lifeExtras2Reset(); policeReset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); waterFx.clear(); sirenSet(0, 0);
 }
 function roadPathTo(x, z) { return ambPath(x, z); }
 
