@@ -3839,6 +3839,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Kirosanasuodatin nimille (fi + en)'],
   ['26.9.', 'Kurittaja-Elli poistettu tulostaulusta'],
   ['26.9.', 'Piirileikkejä nyt kolme, reitin varrella'],
   ['26.9.', 'Haamut: aina seuraavat ajat; uudelle ~10. mutta max +10 % kärjestä'],
@@ -3922,7 +3923,7 @@ async function onlineSubmit() { const inp = document.getElementById('name-input'
     st.textContent = d.saved ? `tallennettu · sija ${d.rank}.` : `ei parannusta · ${name}: paras ${formatTime(d.best)} (sija ${d.rank}.)`;
     if (d.saved) ONLINE.lastRun = null;
     ONLINE.list = d.list || ONLINE.list; renderTop10(); onlineRefresh();   // next start: the next three rungs up
-  } catch (e) { st.textContent = 'tallennus ei onnistunut (' + e.message + ')'; } }
+  } catch (e) { st.textContent = e.message === 'bad name' ? 'nimi ei käy — valitse toinen nimi' : 'tallennus ei onnistunut (' + e.message + ')'; if (e.message === 'bad name') { const i = document.getElementById('name-input'); i.focus(); i.select(); } } }
 function ghostStartRun() { ghostRec = { s: [], splits: [], last: -1 }; ghostCursor = 0; ghostAlpha = 0; ghostGroup.visible = false; }
 function splitRef() {   // whose splits to race: the nearest rival FASTER than your best; leading (or no one faster), your own best lap
   const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), best = Math.min(ghost ? ghost.time : Infinity, mine ? mine.t : Infinity);

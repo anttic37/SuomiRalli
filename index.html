@@ -113,7 +113,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 22.35 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+  <div class="build-stamp">editorista 22.39 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
     <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
   <div id="results">
     <div class="label">maaliaika</div>
@@ -3836,6 +3836,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Kirosanasuodatin nimille (fi + en)'],
   ['26.9.', 'Kurittaja-Elli poistettu tulostaulusta'],
   ['26.9.', 'Piirileikkejä nyt kolme, reitin varrella'],
   ['26.9.', 'Haamut: aina seuraavat ajat; uudelle ~10. mutta max +10 % kärjestä'],
@@ -3919,7 +3920,7 @@ async function onlineSubmit() { const inp = document.getElementById('name-input'
     st.textContent = d.saved ? `tallennettu · sija ${d.rank}.` : `ei parannusta · ${name}: paras ${formatTime(d.best)} (sija ${d.rank}.)`;
     if (d.saved) ONLINE.lastRun = null;
     ONLINE.list = d.list || ONLINE.list; renderTop10(); onlineRefresh();   // next start: the next three rungs up
-  } catch (e) { st.textContent = 'tallennus ei onnistunut (' + e.message + ')'; } }
+  } catch (e) { st.textContent = e.message === 'bad name' ? 'nimi ei käy — valitse toinen nimi' : 'tallennus ei onnistunut (' + e.message + ')'; if (e.message === 'bad name') { const i = document.getElementById('name-input'); i.focus(); i.select(); } } }
 function ghostStartRun() { ghostRec = { s: [], splits: [], last: -1 }; ghostCursor = 0; ghostAlpha = 0; ghostGroup.visible = false; }
 function splitRef() {   // whose splits to race: the nearest rival FASTER than your best; leading (or no one faster), your own best lap
   const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), best = Math.min(ghost ? ghost.time : Infinity, mine ? mine.t : Infinity);

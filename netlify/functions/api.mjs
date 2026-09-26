@@ -5,6 +5,7 @@
 // Files: top/<track>.json (the leaderboard) and ghost/<track>/<driver>.json (one per ghost). `sig` is the game's
 // trackSignature(): a changed track is a new leaderboard, the old one stays where it was.
 import { getStore } from '@netlify/blobs';
+import { badName } from '../lib/badwords.mjs';
 
 export const config = { path: ['/api/top', '/api/ghost', '/api/lap'] };
 export default async (req) => handle(req, getStore({ name: 'suomiralli', consistency: 'strong' }));
@@ -19,9 +20,9 @@ const STRUCK = [
 ];
 const struck = (k, t, d) => STRUCK.some(s => s.k === k && (s.t !== undefined ? Math.abs(s.t - t) < 0.0015 : String(d || '').slice(0, 10) <= s.until));
 async function strike(store, tid, top) {
-  const bad = top.list.filter(r => struck(r.k, r.t, r.d)); if (!bad.length) return top;
+  const bad = top.list.filter(r => struck(r.k, r.t, r.d) || badName(r.name)); if (!bad.length) return top;   // (and any name the word filter would refuse today)
   top.list = top.list.filter(r => !bad.includes(r)); await store.setJSON('top/' + tid + '.json', top);
-  for (const r of bad) { const key = 'ghost/' + tid + '/' + encodeURIComponent(r.k) + '.json', g = await store.get(key, { type: 'json' }); if (g && struck(r.k, g.t, g.d)) await store.delete(key); }
+  for (const r of bad) { const key = 'ghost/' + tid + '/' + encodeURIComponent(r.k) + '.json', g = await store.get(key, { type: 'json' }); if (g && (struck(r.k, g.t, g.d) || badName(r.name))) await store.delete(key); }
   return top; }
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 // FNV-1a: a short, file-name-safe id for a track signature
@@ -35,6 +36,7 @@ export function checkLap(b) {
   if (!b || typeof b !== 'object') return 'no body';
   if (typeof b.sig !== 'string' || !b.sig || b.sig.length > 160) return 'bad track';
   if (!cleanName(b.name)) return 'no name';
+  if (badName(cleanName(b.name))) return 'bad name';
   const t = b.t; if (typeof t !== 'number' || !isFinite(t) || t < 20 || t > 1800) return 'bad time';
   const s = b.s; if (!Array.isArray(s) || s.length % 4 || s.length > 4*40000) return 'bad ghost';
   const n = s.length/4; if (n < t/0.5 || n > t/0.05*1.1 + 10) return 'ghost does not cover the lap';

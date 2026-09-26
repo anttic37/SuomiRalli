@@ -277,3 +277,12 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - Needed area TM35FIN: E 383 500 – 385 550, N 6 683 550 – 6 685 700 (download neighbouring sheet too if split).
 - Georef fitted from OSM streets: editor px → TM35 affine [[0.7885, -0.02506, 383660.2], [-0.02494, -0.7926, 6685276.3]], median residual 0.3 m → 1 editor px ≈ 0.79 m real, 1 game unit ≈ 1.75 m real.
 - Importer dem/import.py: samples to 4-unit grid (≈7 m real, area-averaged), heights relative to median as Int16 cm → `HEIGHT_RAW`. `--scale` = vertical factor. Antti wants strong relief — pick --scale so relief is comparable to the 8× placeholder (~50 m) unless told otherwise.
+- Name filter (26.9.): netlify/lib/badwords.mjs uses the LDNOOBW word lists (CC BY 4.0), Finnish (minus harmless entries) and
+  English. `badName(name)`:
+  - Normalises case, ä/ö/å, look-alike digits and signs, spaces and punctuation.
+  - Matches list words as whole words.
+  - Matches a short list of the worst stems anywhere in the name; a letter may be drawn out, but a double letter stays
+    double, so Kulikov and Kustaa pass.
+  - checkLap refuses such a name ("bad name" → "nimi ei käy — valitse toinen nimi" in the game).
+  - strike() also removes any such name already on a board, with its ghost, on the next read.
+  - Known false positive: Scunthorpe.
