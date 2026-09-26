@@ -31,6 +31,54 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
     - Ambulance heads for where the patient ended up, not where they were hit. Medics kneel (legs behind) and slide along walls to get round houses.
     - Perf: vehicle physics ≈ 0.004 ms per step; humansUpdate ≈ 0.45–0.6 ms (cheap change-key before the height lookup, reused grid lists).
     - Tests: t_soft (throws), t_rideshot (bonnet/roof screenshots), t_drive2 (responders drive in, park, leave; `SEED=n` makes real.js runs reproducible), t_ramamb (rammed parked ambulance slides/turns), t_hose, t_physperf/t_prof2.
+  - v7 (repo main, after "tee optimointikierros"): rendering and per-frame work. The look is unchanged. Batching and the bus
+    merge were checked pixel for pixel in the same page; the fused scenery was checked against the old build.
+    - Measured on the same seeded lap (640×360), old → new:
+      - GL draw calls per frame 866–1155 → 438–609.
+      - Shadow pass 472–622 → 165–256.
+      - Vertices 5.4–6.1 M → 3.9–4.8 M.
+      - Logic (loop without render) 0.97 → 0.79 ms/frame.
+    - **Draw batching** (`BATCH`, runs as `scene.onBeforeRender`). These meshes are batched:
+      - plain-coloured meshes under lifeGroup, the buses and the responders: MeshStandardMaterial with no map, no emissive,
+        not transparent, and a geometry shared by ≥ 2 meshes.
+      - Covers people's limbs and heads, grills, bikes, mowers and so on.
+      They are drawn as one InstancedMesh per geometry (+ roughness/metalness/side/shadow flags) with instance colours.
+      - The originals stay in the scene graph, posed and shown or hidden as before. They sit on layer 1, which no camera draws.
+      - After three.js updates the matrices, the shown ones are copied into the instance buffers.
+      - A batch is uploaded only when something in it changed.
+      - Any add/remove/clear anywhere triggers a rescan (the Object3D prototype is patched).
+      - Kids' rigs now use shared geometry (lbox/lgeo), so they batch too. A new prop batches automatically if it uses
+        lbox/lgeo/lmat.
+      - To keep a mesh out: `userData.noBatch`.
+    - **Merger.fuse**: scenery groups in the same 160 m chunk whose materials differ only in colour share one mesh. The colour
+      is baked into the vertex colours.
+      - Example: 6 wall colours, 6 roof colours, 5 spruce greens, 4 leaf greens → one draw each.
+      - DRAPE_ALL keys stay apart (they are re-cut and draped vertex by vertex).
+      - `geometry.userData.parts` lists [key, first vertex, count].
+    - **mergeGroupMeshes**: the same idea for one rigid model. A bus is now 13 meshes (was 47).
+    - Ground drawn as 10×10 tiles of 116 m. Normals come from the whole sheet, so the seams match. The camera now draws only the
+      tiles in view instead of 673k triangles.
+    - Skid marks fade in the vertex shader. Each segment has a birth-time attribute and runs on its own clock, `U_MARKT`. Only
+      new segments are uploaded (before, 2 × 216 kB went up whenever marks were live).
+    - Particle systems skip the loop and the upload when nothing is alive.
+    - HUD: the needle and its soft shadow are pre-rendered sprites (no per-frame shadowBlur). DOM text is written only when it
+      changes.
+    - A person's AO blob no longer follows their sway (it was recomputed every frame for every spectator near the car).
+      humanStep returns early for people standing still.
+    - **Adaptive resolution** (`adaptResolution`, `RES`):
+      - Under ~48 fps for 2 s of racing → pixel ratio −0.25 (never below 1).
+      - Back up after 6 s of headroom, but not to a ratio that was too slow in the last minute.
+      - Never triggers in tests (fixed 1/60 steps).
+    - Seeded runs don't reproduce the old build's random details (yard cars, tufts, tyre colours). three.js uuids draw on
+      Math.random, and the build creates a different number of objects. Compare builds on things that aren't random.
+    - Tests and tools:
+      - `t_gl` counts real GL calls (shadow pass included), `t_draws` gives per-object counts per pass, `t_upl` shows buffer
+        uploads per frame, `t_logic` times logic.
+      - `prof.js` is a CPU profiler (logic only: SwiftShader shades vertices on the CPU, so render timings are meaningless there).
+      - `real_noraf.js` loads the world without animation frames (deterministic static shots).
+      - `t_batch` (run with real_noraf.js) diffs batched against unbatched rendering.
+      - t_audit stitches the ground tiles, and its "m:" rows skip meshes whose world matrix isn't at the origin. t_yard reads
+        the fused parts.
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 

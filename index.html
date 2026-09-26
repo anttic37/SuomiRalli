@@ -42,7 +42,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö · Vantaa · <span id="tod-label">päivä</span> · <span id="terrain-label">mäet</span></div>
-  <div class="build-stamp">editorista 17.39 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
+  <div class="build-stamp">editorista 15.54 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
   <div id="results">
     <div class="label">maaliaika</div>
     <div class="time" id="final-time">00:00.000</div>
@@ -448,7 +448,7 @@ function addGroundDetail(mat, strength) {
 let groundMesh = null, _landTex = null, _landSig = '';
 const HS_L = (() => { const v = [-0.45, 0.72, -0.53], l = Math.hypot(...v); return v.map(c => c/l); })();   // hillshade light: from the north-west, high
 function buildGround() {
-  if (groundMesh) { groundMesh.geometry.dispose(); groundMesh.material.dispose(); scene.remove(groundMesh); }
+  if (groundMesh) { groundMesh.children.forEach(m => m.geometry.dispose()); groundMesh.userData.mat.dispose(); scene.remove(groundMesh); }
   const size = 1160, segs = 580, step = size/segs, half = size/2;   // 2 m cells = the height grid's own nodes: the drawn ground IS H()
   const verts = [], cols = [], idx = [];
   const uvs = [];
@@ -477,8 +477,20 @@ function buildGround() {
   geo.setIndex(idx); geo.computeVertexNormals();
   const sig = PLOTS.length + ':' + (PLOTS[0] ? PLOTS[0].F.x.toFixed(1) : '');
   if (!_landTex || _landSig !== sig) { if (_landTex) _landTex.dispose(); _landTex = buildLandTexture(size); _landSig = sig; }   // land use + plots, not heights: rebuilt only if the plots change
-  groundMesh = new THREE.Mesh(geo, addGroundDetail(new THREE.MeshStandardMaterial({ map: _landTex, vertexColors: true, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 }), 0.7));
-  groundMesh.receiveShadow = true; groundMesh.renderOrder = -2; scene.add(groundMesh);
+  const mat = addGroundDetail(new THREE.MeshStandardMaterial({ map: _landTex, vertexColors: true, roughness: 0.95, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 }), 0.7);
+  // cut into 116 m tiles (normals from the whole sheet, so the seams match): the camera only draws the few in view, not 670k triangles
+  const T = 58, P = geo.attributes.position.array, N = geo.attributes.normal.array, Cc = cols, UV = uvs;
+  groundMesh = new THREE.Group(); groundMesh.userData.mat = mat;
+  for (let tz = 0; tz < segs; tz += T) for (let tx = 0; tx < segs; tx += T) {
+    const nx = Math.min(T, segs - tx) + 1, nz = Math.min(T, segs - tz) + 1, pos = new Float32Array(nx*nz*3), nor = new Float32Array(nx*nz*3), col = new Float32Array(nx*nz*3), uv = new Float32Array(nx*nz*2), ti = [];
+    for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) { const s = (tz + j)*colsN + tx + i, d = j*nx + i;
+      for (let k = 0; k < 3; k++) { pos[d*3+k] = P[s*3+k]; nor[d*3+k] = N[s*3+k]; col[d*3+k] = Cc[s*3+k]; } uv[d*2] = UV[s*2]; uv[d*2+1] = UV[s*2+1]; }
+    for (let j = 0; j < nz - 1; j++) for (let i = 0; i < nx - 1; i++) { const a = j*nx + i, b = a + 1, c = a + nx, d = c + 1; ti.push(a, c, b, b, c, d); }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    g.setIndex(ti); g.computeBoundingSphere();
+    const m = new THREE.Mesh(g, mat); m.receiveShadow = true; m.renderOrder = -2; m.matrixAutoUpdate = false; groundMesh.add(m); }
+  geo.dispose(); scene.add(groundMesh);
 }
 
 // ════════════════════════════════════════
@@ -916,8 +928,31 @@ class Merger {
     geo.setAttribute('normal', new THREE.Float32BufferAttribute(g.nrm, 3));
     if (g.col.length) geo.setAttribute('color', new THREE.Float32BufferAttribute(g.col, 3));
     geo.setIndex(g.idx);
-    geo.userData.oid = g.oid; geo.userData.objs = this.objs; geo.userData.drapeAll = DRAPE_ALL.has(g.key);
+    geo.userData.oid = g.oid; geo.userData.objs = this.objs; geo.userData.drapeAll = DRAPE_ALL.has(g.key); if (g.parts) geo.userData.parts = g.parts;
     return geo;
+  }
+  // groups in the same chunk whose materials differ only in colour become one mesh: the colour goes into the vertex colours
+  // (e.g. the 6 wall colours, 6 roof colours, 5 spruce and 4 leaf greens of a tile → one draw each). `same(key)` = keys
+  // that may share a mesh (the same draping, shadow and draw-order rules).
+  fuse(same) {
+    const bins = new Map(), shared = Merger._fusedMats || (Merger._fusedMats = new Map());
+    const sig = (m) => [m.type, m.roughness, m.metalness, m.flatShading, m.side, m.transparent, m.opacity, m.depthWrite, m.polygonOffset, m.polygonOffsetFactor, m.polygonOffsetUnits,
+      m.map ? m.map.uuid : '', m.alphaTest, m.customProgramCacheKey()].join('|');
+    for (const gk in this.groups) { const g = this.groups[gk], m = g.mat, cls = same(g.key);
+      if (cls === null || !m.isMeshStandardMaterial || m.emissive.getHex() !== 0 || (g.col.length && g.col.length !== g.count*3)) continue;
+      const k = sig(m) + '#' + cls + '#' + gk.slice(g.key.length); let b = bins.get(k); if (!b) bins.set(k, b = []); b.push(gk); }
+    for (const [k, keys] of bins) { if (keys.length < 2) continue;
+      const first = this.groups[keys[0]], F = { mat: null, key: first.key, pos: [], nrm: [], idx: [], col: [], oid: [], count: 0, parts: [] };
+      let mat = shared.get(k.split('#').slice(0, 2).join('#')); if (!mat) { mat = first.mat.clone(); mat.color.setHex(0xffffff); mat.vertexColors = true; mat.onBeforeCompile = first.mat.onBeforeCompile; mat.customProgramCacheKey = first.mat.customProgramCacheKey; shared.set(k.split('#').slice(0, 2).join('#'), mat); }
+      F.mat = mat;
+      for (const gk of keys) { const g = this.groups[gk], c = g.mat.color, base = F.count; F.parts.push([g.key, base, g.count]);
+        for (let i = 0; i < g.pos.length; i++) { F.pos.push(g.pos[i]); F.nrm.push(g.nrm[i]); }
+        if (g.col.length && g.mat.vertexColors) for (let i = 0; i < g.col.length; i += 3) F.col.push(g.col[i]*c.r, g.col[i+1]*c.g, g.col[i+2]*c.b);
+        else for (let i = 0; i < g.count; i++) F.col.push(c.r, c.g, c.b);
+        for (let i = 0; i < g.idx.length; i++) F.idx.push(base + g.idx[i]);
+        for (let i = 0; i < g.oid.length; i++) F.oid.push(g.oid[i]);
+        F.count += g.count; delete this.groups[gk]; }
+      this.groups[keys[0]] = F; }
   }
   build(list) {
     for (const key in this.groups) {
@@ -1571,9 +1606,10 @@ function buildScenery() { sceneryDebug.drives = []; LIFE_PLAN.length = 0; LIFE_G
     placed.push({x:bx, z:bz, r:1.2});
   }
   
+  const NO_SHADOW = /^(gravel|cline|lm_line|lm_field|sand|woodend|flower\d|laundry\d|fmesh|fpost|fwhite|trim|door|glass|mailbox|post|sokkeli|lm_goal|lm_lichen)$/;
+  M.fuse(k => DRAPE_ALL.has(k) ? null : NO_SHADOW.test(k) ? 'n' : 's');   // (≈ 40 % fewer scenery draws; the draped keys stay apart — they are re-cut and draped vertex by vertex)
   M.build(treeMeshes);
   buildYardCars();
-  const NO_SHADOW = /^(gravel|cline|lm_line|lm_field|sand|woodend|flower\d|laundry\d|fmesh|fpost|fwhite|trim|door|glass|mailbox|post|sokkeli|lm_goal|lm_lichen)$/;
   treeMeshes.forEach(m => { const k = m.userData.key || ''; if (NO_SHADOW.test(k)) m.castShadow = false; if (k === 'cline') m.renderOrder = 1; });
 }
 
@@ -3254,6 +3290,22 @@ const _dAxis = new THREE.Vector3(), _dRot = new THREE.Quaternion();
 function numberTexture(txt, w = 256, h = 72) { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
   g.fillStyle = '#0b0c0e'; g.fillRect(0, 0, w, h); g.fillStyle = '#d6f36a'; g.font = 'bold ' + Math.round(h*0.8) + 'px "Courier New", monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, w/2, h*0.54);
   return new THREE.CanvasTexture(c); }
+// one rigid model built of many plain boxes (a bus): the parts that differ only in colour become one vertex-coloured mesh
+function mergeGroupMeshes(G) {
+  const bins = new Map(), m4 = new THREE.Matrix4(), n3 = new THREE.Matrix3(), v = new THREE.Vector3();
+  for (const o of G.children) { const m = o.material;
+    if (!o.isMesh || o.children.length || !m || !m.isMeshStandardMaterial || m.map || m.transparent || m.vertexColors || m.emissive.getHex() !== 0 || !o.geometry.index) continue;
+    const k = [m.roughness, m.metalness, m.flatShading, m.side, m.envMap ? m.envMap.uuid : '', m.envMapIntensity, o.castShadow, o.receiveShadow].join('|'); let b = bins.get(k); if (!b) bins.set(k, b = []); b.push(o); }
+  for (const list of bins.values()) { if (list.length < 2) continue;
+    const pos = [], nrm = [], col = [], idx = [];
+    for (const o of list) { o.updateMatrix(); m4.copy(o.matrix); n3.getNormalMatrix(m4); const P = o.geometry.attributes.position, N = o.geometry.attributes.normal, c = o.material.color, base = pos.length/3;
+      for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i).applyMatrix4(m4); pos.push(v.x, v.y, v.z); v.fromBufferAttribute(N, i).applyMatrix3(n3).normalize(); nrm.push(v.x, v.y, v.z); col.push(c.r, c.g, c.b); }
+      const I = o.geometry.index.array; for (let i = 0; i < I.length; i++) idx.push(base + I[i]); G.remove(o); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nrm, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); g.setIndex(idx);
+    const mat = list[0].material.clone(); mat.color.setHex(0xffffff); mat.vertexColors = true;
+    const me = new THREE.Mesh(g, mat); me.castShadow = list[0].castShadow; me.receiveShadow = list[0].receiveShadow; G.add(me); }
+  return G;
+}
 function makeBus(num) {
   const G = new THREE.Group(), L = 10.0, W = 2.5, H = 3.0;
   const orange = new THREE.MeshStandardMaterial({ color: 0xe0561f, roughness: 0.5 }), yellow = new THREE.MeshStandardMaterial({ color: 0xf2b21c, roughness: 0.5 });
@@ -3287,7 +3339,7 @@ function makeBus(num) {
     const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.36, 10), grey); hub.rotation.z = Math.PI/2; hub.position.set(s*(W/2 - 0.1), 0.5, z); G.add(hub);
     box(0.06, 0.7, 1.25, black, s*(W/2 + 0.005), 0.72, z); }));
   G.userData.key = 'bus'; G.userData.size = [W, L];
-  return G;
+  return mergeGroupMeshes(G);
 }
 const SOLID_RECTS = [];
 // contact shadows: soft dark blobs (round for props/people, rounded-rect for houses, buses, cars), drawn after the ground
@@ -3434,12 +3486,12 @@ function inSandPitch(x, z) { for (const F of FIELD_GAMES) { const dx = x - F.lx,
 function makeKid(shirt) {
   const G = new THREE.Group(), m = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.8 });
   const skin = m(0xf1c9a5), shorts = m(0x1c1c22), sock = m(0xf0f0f0);
-  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.5, 0.12), sock), legR = legL.clone();
-  legL.geometry.translate(0, -0.25, 0); legL.position.set(-0.09, 0.52, 0); legR.position.set(0.09, 0.52, 0); G.add(legL, legR);
-  const sh = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.18, 0.2), shorts); sh.position.y = 0.6; G.add(sh);
-  const body = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.36, 0.22), m(shirt)); body.position.y = 0.86; G.add(body);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), skin); head.position.y = 1.16; G.add(head);
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.135, 10, 6, 0, Math.PI*2, 0, Math.PI*0.5), m([0x5a3a1e, 0xd8b36a, 0x2a1d12, 0x9a5a2a][Math.floor(Math.random()*4)])); hair.position.y = 1.18; G.add(hair);
+  const legL = new THREE.Mesh(lbox(0.12, 0.5, 0.12, -0.25), sock), legR = legL.clone();   // (shared geometries: the kids batch with everyone else)
+  legL.position.set(-0.09, 0.52, 0); legR.position.set(0.09, 0.52, 0); G.add(legL, legR);
+  const sh = new THREE.Mesh(lbox(0.32, 0.18, 0.2), shorts); sh.position.y = 0.6; G.add(sh);
+  const body = new THREE.Mesh(lbox(0.34, 0.36, 0.22), m(shirt)); body.position.y = 0.86; G.add(body);
+  const head = new THREE.Mesh(lgeo('khead', () => new THREE.SphereGeometry(0.13, 10, 8)), skin); head.position.y = 1.16; G.add(head);
+  const hair = new THREE.Mesh(lgeo('khair', () => new THREE.SphereGeometry(0.135, 10, 6, 0, Math.PI*2, 0, Math.PI*0.5)), m([0x5a3a1e, 0xd8b36a, 0x2a1d12, 0x9a5a2a][Math.floor(Math.random()*4)])); hair.position.y = 1.18; G.add(hair);
   G.traverse(o => { if (o.isMesh) o.castShadow = true; });
   G.userData.legs = [legL, legR];
   return G;
@@ -3599,13 +3651,15 @@ function makeParticleSystem(max, additive, soft) {
     transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending });
   const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = additive ? 3 : 2; scene.add(pts);
   const P = []; for (let i = 0; i < max; i++) P.push({ life: 0, max: 1, x: 0, y: -99, z: 0, vx: 0, vy: 0, vz: 0, s0: 0, s1: 0, a0: 0, r: 0, g: 0, b: 0, r1: 0, g1: 0, b1: 0, ang: 0, spin: 0 });
-  let next = 0;
+  let next = 0, liveN = 0, dirty = false;   // (nothing alive and nothing changed: no loop, no upload)
   return {
-    emit(x, y, z, vx, vy, vz, life, s0, s1, a0, r, g, b, r1, g1, b1) { const p = P[next++ % max]; Object.assign(p, { life, max: life, x, y, z, vx, vy, vz, s0, s1, a0, r, g, b, r1: r1 === undefined ? r : r1, g1: g1 === undefined ? g : g1, b1: b1 === undefined ? b : b1, ang: Math.random()*6.3, spin: (Math.random() - 0.5)*1.6 }); },
+    emit(x, y, z, vx, vy, vz, life, s0, s1, a0, r, g, b, r1, g1, b1) { const p = P[next++ % max]; if (!(p.life > 0)) liveN++; dirty = true; Object.assign(p, { life, max: life, x, y, z, vx, vy, vz, s0, s1, a0, r, g, b, r1: r1 === undefined ? r : r1, g1: g1 === undefined ? g : g1, b1: b1 === undefined ? b : b1, ang: Math.random()*6.3, spin: (Math.random() - 0.5)*1.6 }); },
     update(dt, rise, dragK) {
+      if (!liveN && !dirty) return; dirty = false;
       for (let i = 0; i < max; i++) { const p = P[i];
-        if (p.life <= 0) { alpha[i] = 0; size[i] = 0; continue; }
-        p.life -= dt; const k = 1 - Math.max(0, p.life)/p.max;
+        if (p.life <= 0) continue;
+        p.life -= dt; if (p.life <= 0) { alpha[i] = 0; size[i] = 0; liveN--; continue; }
+        const k = 1 - p.life/p.max;
         const dr = Math.exp(-dt*dragK); p.vx *= dr; p.vz *= dr; p.vy = p.vy*dr + rise*dt;
         p.x += p.vx*dt; p.y += p.vy*dt; p.z += p.vz*dt;
         pos[i*3] = p.x; pos[i*3+1] = p.y; pos[i*3+2] = p.z;
@@ -3614,7 +3668,7 @@ function makeParticleSystem(max, additive, soft) {
         p.ang += p.spin*dt; rot[i] = p.ang; }
       geo.attributes.position.needsUpdate = geo.attributes.size.needsUpdate = geo.attributes.alpha.needsUpdate = geo.attributes.col.needsUpdate = geo.attributes.rot.needsUpdate = true;
     },
-    clear() { P.forEach(p => { p.life = 0; }); alpha.fill(0); size.fill(0); geo.attributes.alpha.needsUpdate = geo.attributes.size.needsUpdate = true; },
+    clear() { P.forEach(p => { p.life = 0; }); alpha.fill(0); size.fill(0); liveN = 0; geo.attributes.alpha.needsUpdate = geo.attributes.size.needsUpdate = true; },
     live() { let n = 0; for (const p of P) if (p.life > 0) n++; return n; },
     mat };
 }
@@ -3633,6 +3687,49 @@ const _ex = new THREE.Vector3(), _exDir = new THREE.Vector3();
 // ════════════════════════════════════════
 const LIFE_PLAN = [], LIFE_GUESTS = [];
 const lifeGroup = new THREE.Group(); scene.add(lifeGroup);
+// ── draw batching: the village's small plain-coloured meshes (people's limbs and heads, grills, bikes, mowers, buses, responders…)
+//    are drawn as one InstancedMesh per shared geometry. Each mesh keeps its place in the scene graph and is posed, shown and
+//    hidden exactly as before, but sits on layer 1, which no camera draws; every frame, after three.js has updated the matrices,
+//    the shown ones are copied into the instance buffers (scene.onBeforeRender). ≈ 150–250 fewer draw calls a frame (most in the shadow pass). ──
+const BATCH = { groups: new Map(), dirty: true, scans: 0 };
+{ const add = THREE.Object3D.prototype.add, remove = THREE.Object3D.prototype.remove, clear = THREE.Object3D.prototype.clear;   // anything added or removed anywhere: rescan
+  THREE.Object3D.prototype.add = function () { BATCH.dirty = true; return add.apply(this, arguments); };
+  THREE.Object3D.prototype.remove = function () { BATCH.dirty = true; return remove.apply(this, arguments); };
+  THREE.Object3D.prototype.clear = function () { BATCH.dirty = true; return clear.apply(this, arguments); }; }
+const _bDefCompile = THREE.Material.prototype.onBeforeCompile;
+function batchable(o) { const m = o.material;
+  return o.isMesh && !o.isInstancedMesh && !o.isSkinnedMesh && m && m.isMeshStandardMaterial && !m.map && !m.transparent && m.opacity === 1 && !m.vertexColors && !m.alphaTest && !m.wireframe && m.visible
+    && m.onBeforeCompile === _bDefCompile && m.emissive.r + m.emissive.g + m.emissive.b === 0 && !o.geometry.morphAttributes.position && !o.userData.noBatch && o.matrixWorld.determinant() > 0; }
+function batchScan() {
+  BATCH.dirty = false; BATCH.scans++;
+  for (const B of BATCH.groups.values()) B.meshes.length = 0;
+  const visit = (o) => { if (o.isInstancedMesh) return; if (batchable(o)) { const m = o.material, k = o.geometry.id + ':' + m.roughness + ':' + m.metalness + ':' + m.side + ':' + m.flatShading + ':' + o.castShadow + ':' + o.receiveShadow;
+      let B = BATCH.groups.get(k); if (!B) BATCH.groups.set(k, B = { geo: o.geometry, mat: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: m.roughness, metalness: m.metalness, side: m.side, flatShading: m.flatShading }), cast: o.castShadow, recv: o.receiveShadow, meshes: [], im: null, cap: 0 });
+      B.meshes.push(o); }
+    for (const c of o.children) visit(c); };
+  visit(lifeGroup); /* (runs inside render: the world matrices are fresh) */ for (const v of VEHICLES) if (v.view.kind === 'mesh' && v.view.g.parent !== lifeGroup) visit(v.view.g);
+  for (const [k, B] of BATCH.groups) { if (B.meshes.length) continue; if (B.im) { scene.remove(B.im); B.im.dispose(); B.mat.dispose(); } BATCH.groups.delete(k); }   // geometry of an old build: gone
+  for (const B of BATCH.groups.values()) {
+    const on = B.meshes.length >= 2;   // a one-off geometry stays an ordinary (frustum-culled) mesh
+    for (const m of B.meshes) m.layers.set(on ? 1 : 0);
+    if (on && B.cap < B.meshes.length) { if (B.im) { scene.remove(B.im); B.im.dispose(); }
+      B.cap = Math.ceil(B.meshes.length*1.25) + 4; B.im = new THREE.InstancedMesh(B.geo, B.mat, B.cap); B.im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      B.im.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(B.cap*3), 3).setUsage(THREE.DynamicDrawUsage);
+      B.im.castShadow = B.cast; B.im.receiveShadow = B.recv; B.im.frustumCulled = false; B.im.matrixAutoUpdate = false; B.im.userData.key = 'batch'; scene.add(B.im); BATCH.dirty = false; }
+    if (B.im) { B.im.count = 0; B.im.visible = false; B.on = on; } }
+  BATCH.dirty = false;
+}
+function batchShown(o) { for (; o; o = o.parent) { if (!o.visible) return false; if (o === lifeGroup) return true; } return true; }
+function batchFill() {
+  if (BATCH.dirty) batchScan();
+  for (const B of BATCH.groups.values()) { if (!B.im || !B.on) continue;
+    const A = B.im.instanceMatrix.array, C = B.im.instanceColor.array; let n = 0, ch = false;
+    for (const m of B.meshes) { if (!batchShown(m) || !m.parent) continue; const e = m.matrixWorld.elements, o = n*16; for (let k = 0; k < 16; k++) { const v = Math.fround(e[k]); if (A[o+k] !== v) { A[o+k] = v; ch = true; } }
+      const c = m.material.color, j = n*3; if (C[j] !== Math.fround(c.r) || C[j+1] !== Math.fround(c.g) || C[j+2] !== Math.fround(c.b)) { C[j] = c.r; C[j+1] = c.g; C[j+2] = c.b; ch = true; } n++; }
+    if (n !== B.im.count) ch = true; B.im.count = n; B.im.visible = n > 0;
+    if (n && ch) { /* (parked grills, bikes, poles: nothing changed, nothing uploaded) */ B.im.instanceMatrix.updateRange.count = n*16; B.im.instanceMatrix.needsUpdate = true; B.im.instanceColor.updateRange.count = n*3; B.im.instanceColor.needsUpdate = true; } }
+}
+scene.onBeforeRender = batchFill;
 const lifeFx = makeParticleSystem(900, false, true), waterFx = makeParticleSystem(700, false, true);
 const WIND_YAW = 0.95;                       // flags fly towards the north-east-ish
 let crashAt = null;                          // last hard hit: { x, z, t, onRoute }
@@ -3863,7 +3960,8 @@ function humanStep(h, dt) {   // body physics shared by everyone
     if (h.hop <= 0) { h.hop = 0; h.vy = h.vy < -4 ? -h.vy*0.22 : 0;   // a hard landing bounces a little; on the ground: sliding, tumbling friction
       const sp = Math.hypot(h.vx, h.vz), d = Math.min(sp, (5.5 + 1.2*sp)*dt); if (sp > 1e-5) { h.vx -= h.vx/sp*d; h.vz -= h.vz/sp*d; } h.spin *= Math.exp(-dt*7); }
     h.yaw += h.spin*dt; h.tilt += ((-Math.PI/2 + 0.15) - h.tilt)*Math.min(1, dt*8); h.roll *= Math.exp(-dt*8); }
-  else { const f = Math.exp(-dt*2.5); h.vx *= f; h.vz *= f; if (h.hop > 0 || h.vy > 0) { h.vy -= 22*dt; h.hop += h.vy*dt; if (h.hop <= 0) { h.hop = 0; h.vy = 0; } } }
+  else { if (!h.vx && !h.vz && !(h.hop > 0) && !(h.vy > 0)) return;   // standing still: nothing to integrate
+    const f = Math.exp(-dt*2.5); h.vx *= f; h.vz *= f; if (h.hop > 0 || h.vy > 0) { h.vy -= 22*dt; h.hop += h.vy*dt; if (h.hop <= 0) { h.hop = 0; h.vy = 0; } } }
   h.x += h.vx*dt; h.z += h.vz*dt;
 }
 function walkTo(h, tx, tz, sp, dt) { const dx = tx - h.x, dz = tz - h.z, d = Math.hypot(dx, dz); h.goal = h.goal || [0, 0]; h.goal[0] = tx; h.goal[1] = tz; h.goalT = worldT; if (d < 0.15) { h.vx = h.vz = 0; return true; }
@@ -3935,7 +4033,7 @@ function humanSync(h) {
       if (R) { R.legL.rotation.x = P.legs !== null ? P.legs : s; R.legR.rotation.x = P.legsR !== null ? P.legsR : (P.legs !== null ? P.legs : -s);
         R.armL.rotation.x = P.armL !== null ? P.armL : -s*0.8; R.armR.rotation.x = P.armR !== null ? P.armR : s*0.8; R.armL.rotation.z = P.armLz; R.armR.rotation.z = P.armRz; }
       else if (Lg) { Lg[0].rotation.x = P.legs !== null ? P.legs : s; Lg[1].rotation.x = P.legsR !== null ? P.legsR : (P.legs !== null ? P.legs : -s); } } }
-  const aoKey = V.kind === 'rig' ? x + z*1.3 + h.hop*3 + (h.far ? 7 : 0) + (hidden ? 11 : 0) + (h.down ? 5 : 0) : V.key;
+  const aoKey = h.x + h.z*1.3 + h.hop*3 + (V.kind === 'rig' && h.far ? 7 : 0) + (hidden ? 11 : 0) + (h.down ? 5 : 0) + (h.seat ? 17 : 0);   // (the blob follows where they stand, not their sway)
   if (h.ao >= 0 && CROWD.ao && V.aoKey !== aoKey) { V.aoKey = aoKey; if (hidden || h.seat || (V.kind === 'rig' && h.far)) CROWD.ao.setMatrixAt(h.ao, _hzero);
     else { const s = h.down ? 1.6 : 0.9, k = Math.max(0.35, 1 - h.hop*0.6); groundQuat(h.x, h.z, 0, _haq); _hp.set(h.x, aoGround(h.x, h.z), h.z); _hs.set(s*k, 1, s*k); _hm.compose(_hp, _haq, _hs); _hs.set(1, 1, 1); CROWD.ao.setMatrixAt(h.ao, _hm); }
     CROWD.ao.instanceMatrix.needsUpdate = true; }
@@ -4666,23 +4764,30 @@ function updateTires(dt) {
 // SKID MARKS (fading) + DUST
 // ════════════════════════════════════════
 // ── skid marks: one continuous ribbon per rear wheel. Consecutive segments share their edge points (welded),
-//    a ring buffer of segments, multiply-blended so a fresh mark darkens the road and a fading one goes back to white ──
-const MAX_MARKS = 3000, MARK_HW = 0.13, MARK_DARK = 0.5;
-const markPos = new Float32Array(MAX_MARKS*18), markCol = new Float32Array(MAX_MARKS*18).fill(1), markLife = new Float32Array(MAX_MARKS);
+//    a ring buffer of segments, multiply-blended so a fresh mark darkens the road and a fading one goes back to white.
+//    The fade runs in the vertex shader from each segment's birth time, so only new segments are uploaded (not the whole buffer) ──
+const MAX_MARKS = 3000, MARK_HW = 0.13, MARK_DARK = 0.5, MARK_LIFE = 14, MARK_FADE = 4;
+const markPos = new Float32Array(MAX_MARKS*18), markCol = new Float32Array(MAX_MARKS*18).fill(1), markBirth = new Float32Array(MAX_MARKS*6).fill(-1e6);
 const markGeo = new THREE.BufferGeometry();
 markGeo.setAttribute('position', new THREE.BufferAttribute(markPos, 3).setUsage(THREE.DynamicDrawUsage));
 markGeo.setAttribute('color', new THREE.BufferAttribute(markCol, 3).setUsage(THREE.DynamicDrawUsage));
+markGeo.setAttribute('birth', new THREE.BufferAttribute(markBirth, 1).setUsage(THREE.DynamicDrawUsage));
+const U_MARKT = { value: 0 };   // the marks' own clock (advanced by updateMarks)
 const markMesh = new THREE.Mesh(markGeo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, blending: THREE.MultiplyBlending, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 }));
+markMesh.material.onBeforeCompile = (sh) => { sh.uniforms.uMarkT = U_MARKT;
+  sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform float uMarkT; attribute float birth;')
+    .replace('#include <color_vertex>', `#include <color_vertex>
+      vColor.xyz = mix(vColor.xyz, vec3(1.0), clamp((uMarkT - birth - ${(MARK_LIFE - MARK_FADE).toFixed(1)})/${MARK_FADE.toFixed(1)}, 0.0, 1.0));`); };
+markMesh.material.customProgramCacheKey = () => 'skidfade';
 markMesh.frustumCulled = false; markMesh.userData.key = 'skid'; scene.add(markMesh);
-let markIdx = 0, liveMarks = 0, markDirty = false, markFadeT = 0;
+let markIdx = 0, markLo = Infinity, markHi = -1, markAll = false;
 const lastMark = [{ on: false, x: 0, z: 0, lx: 0, lz: 0, rx: 0, rz: 0, y: 0 }, { on: false, x: 0, z: 0, lx: 0, lz: 0, rx: 0, rz: 0, y: 0 }];
 function markSegment(L0x, L0z, R0x, R0z, L1x, L1z, R1x, R1z, y, dark, grass) {
   const i = markIdx++ % MAX_MARKS, o = i*18;
   const P = [L0x, y, L0z, R0x, y, R0z, L1x, y, L1z,  R0x, y, R0z, R1x, y, R1z, L1x, y, L1z];
   for (let k = 0; k < 18; k++) { markPos[o+k] = P[k]; markCol[o+k] = grass ? dark*[0.95, 0.9, 0.78][k % 3] : dark; }   // grass: flattened, browner
   for (let k = 0; k < 18; k += 3) markPos[o+k+1] += Y(markPos[o+k], markPos[o+k+2]);   // each corner on the ground under it
-  if (markLife[i] <= 0) liveMarks++;
-  markLife[i] = 14; markDirty = true;
+  markBirth.fill(U_MARKT.value, i*6, i*6 + 6); markLo = Math.min(markLo, i); markHi = Math.max(markHi, i);
 }
 function spawnMarks() {
   const cosA = Math.cos(car.angle), sinA = Math.sin(car.angle);
@@ -4702,21 +4807,13 @@ function spawnMarks() {
 }
 function endMarks() { lastMark[0].on = lastMark[1].on = false; }
 function updateMarks(dt) {
-  if (liveMarks) {
-    markFadeT += dt;
-    if (markFadeT > 0.1) {                                     // fade in 0.1 s steps (cheap)
-      const step = markFadeT; markFadeT = 0;
-      for (let i = 0; i < MAX_MARKS; i++) {
-        if (markLife[i] <= 0) continue;
-        markLife[i] -= step;
-        if (markLife[i] <= 0) { markLife[i] = 0; liveMarks--; markCol.fill(1, i*18, i*18+18); markDirty = true; continue; }
-        if (markLife[i] < 4) { const o = i*18, v = markCol[o] + (1 - markCol[o]) * Math.min(1, step/markLife[i]); markCol.fill(v, o, o+18); markDirty = true; }
-      }
-    }
-  }
-  if (markDirty) { markGeo.attributes.position.needsUpdate = true; markGeo.attributes.color.needsUpdate = true; markDirty = false; }
+  U_MARKT.value += dt;
+  if (markAll || markHi >= 0) {   // upload just the segments written this frame
+    const lo = markAll ? 0 : markLo, n = markAll ? MAX_MARKS : markHi - markLo + 1, A = markGeo.attributes;
+    for (const [a, w] of [[A.position, 18], [A.color, 18], [A.birth, 6]]) { a.updateRange.offset = lo*w; a.updateRange.count = n*w; a.needsUpdate = true; }
+    markLo = Infinity; markHi = -1; markAll = false; }
 }
-function clearMarks() { markLife.fill(0); liveMarks = 0; markCol.fill(1); markPos.fill(0); markDirty = true; endMarks(); }
+function clearMarks() { markBirth.fill(-1e6); markCol.fill(1); markPos.fill(0); markAll = true; endMarks(); }
 const dustParts = []; const dustGeo_ = new THREE.BoxGeometry(0.22,0.22,0.22);
 const dustBaseMat = new THREE.MeshBasicMaterial({ color: 0x555550, transparent: true, opacity: 0.3 });
 let dustIdx = 0;
@@ -5224,11 +5321,20 @@ function clusterDial(g, cx, cy, R, maxV, majorStep, minorStep, labelDiv, redFrom
   g.restore();
   return ang;
 }
+// the needle and its soft shadow are drawn once into two small sprites; per frame they're just rotated into place
+// (a live shadowBlur every frame was the dearest thing on the HUD). The shadow keeps falling straight down (offset in screen space).
+const _needleSpr = new Map();
+function needleSprites(R) { let S = _needleSpr.get(R); if (S) return S;
+  const pad = 12, x0 = pad + R*0.16, w = Math.ceil(x0 + R - 12 + pad), h = 7 + pad*2, y0 = h/2;
+  const shape = (g, dx) => { g.beginPath(); g.moveTo(x0 - R*0.16 + dx, y0 - 3.5); g.lineTo(x0 + R - 12 + dx, y0 - 1.2); g.lineTo(x0 + R - 12 + dx, y0 + 1.2); g.lineTo(x0 - R*0.16 + dx, y0 + 3.5); g.closePath(); };
+  const mk = () => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  const needle = mk(), ng = needle.getContext('2d'); shape(ng, 0); ng.fillStyle = '#ff7a1a'; ng.fill();
+  const shadow = mk(), sg = shadow.getContext('2d'); sg.shadowColor = 'rgba(0,0,0,0.6)'; sg.shadowBlur = 6; sg.shadowOffsetX = 4000; shape(sg, -4000); sg.fillStyle = '#000'; sg.fill();   // only the shadow lands on the canvas
+  _needleSpr.set(R, S = { needle, shadow, x0, y0 }); return S; }
 function clusterNeedle(g, cx, cy, R, a) {
-  g.save(); g.translate(cx, cy); g.rotate(a);
-  g.shadowColor = 'rgba(0,0,0,0.6)'; g.shadowBlur = 6; g.shadowOffsetY = 3;
-  g.beginPath(); g.moveTo(-R*0.16, -3.5); g.lineTo(R-12, -1.2); g.lineTo(R-12, 1.2); g.lineTo(-R*0.16, 3.5); g.closePath(); g.fillStyle = '#ff7a1a'; g.fill();
-  g.restore();
+  const S = needleSprites(R);
+  g.save(); g.translate(cx, cy + 3); g.rotate(a); g.drawImage(S.shadow, -S.x0, -S.y0); g.restore();
+  g.save(); g.translate(cx, cy); g.rotate(a); g.drawImage(S.needle, -S.x0, -S.y0); g.restore();
   g.beginPath(); g.arc(cx, cy, R*0.11, 0, Math.PI*2); g.fillStyle = '#1a1a1c'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#555'; g.stroke();
 }
 const CL_T = { cx: 205, cy: 196, R: 150 }, CL_S = { cx: 555, cy: 196, R: 150 };
@@ -5261,12 +5367,13 @@ function drawCluster(g) {
   clusterNeedle(g, CL_T.cx, CL_T.cy, CL_T.R, clAngT(engine.rpmDisp));
   clusterNeedle(g, CL_S.cx, CL_S.cy, CL_S.R, clAngS(engine.kmhDisp));
 }
+const setText = (el, t) => { if (el.__t !== t) { el.__t = t; el.textContent = t; } };   // touch the DOM only when the text changes
 function updateHUD(dt){
   if(gameState===State.RACING && lapStarted) raceTime+=dt;
-  elTimer.textContent=formatTime(raceTime);
-  elCpC.textContent=`${Math.min(checkpointsPassed,totalCheckpoints)} / ${totalCheckpoints}`;
-  elSpd.textContent=Math.abs(car.speed*3.6).toFixed(0);
-  elBestHud.textContent = bestTime<Infinity ? `paras ${formatTime(bestTime)}` : '';
+  setText(elTimer, formatTime(raceTime));
+  setText(elCpC, `${Math.min(checkpointsPassed,totalCheckpoints)} / ${totalCheckpoints}`);
+  setText(elSpd, Math.abs(car.speed*3.6).toFixed(0));
+  setText(elBestHud, bestTime<Infinity ? `paras ${formatTime(bestTime)}` : '');
   // instrument cluster
   updateEngine(dt);
   if (!clusterCtx) { clusterEl = document.getElementById('cluster'); if (clusterEl && clusterEl.getContext) { clusterEl.width = CL_W; clusterEl.height = CL_H; clusterCtx = clusterEl.getContext('2d'); } }
@@ -5276,10 +5383,25 @@ function updateHUD(dt){
 // ════════════════════════════════════════
 // MAIN LOOP — fixed-timestep physics
 // ════════════════════════════════════════
+// ── adaptive resolution: when the GPU can't hold ~48 fps for 2 s of racing (a retina screen at pixel ratio 2 draws 4× the
+//    pixels), draw at a lower pixel ratio, a quarter step at a time and never below 1; step back up after 6 s of clear
+//    headroom, but not to a ratio that was already too slow in the last minute ──
+const DPR_MAX = Math.min(devicePixelRatio || 1, 2), RES = { dpr: DPR_MAX, sum: 0, n: 0, good: 0, cool: 0, bad: Infinity, badT: 0 };
+function adaptResolution(raw) {
+  if (gameState !== State.RACING || !(raw > 0) || raw > 0.25) { RES.sum = RES.n = 0; return; }
+  RES.sum += raw; RES.n++; RES.cool -= raw; RES.badT -= raw; if (RES.badT <= 0) RES.bad = Infinity;
+  if (RES.sum < 2) return; const avg = RES.sum/RES.n; RES.sum = RES.n = 0; if (RES.cool > 0) return;
+  let next = RES.dpr;
+  if (avg > 1/48 && RES.dpr > 1) { RES.bad = RES.dpr; RES.badT = 60; next = Math.max(1, RES.dpr - 0.25); RES.good = 0; }
+  else if (avg < 1/57 && RES.dpr < DPR_MAX && RES.dpr + 0.25 < RES.bad) { if ((RES.good += 2) >= 6) next = Math.min(DPR_MAX, RES.dpr + 0.25); }
+  else RES.good = 0;
+  if (next !== RES.dpr) { RES.dpr = next; RES.good = 0; RES.cool = 3; renderer.setPixelRatio(next); }
+}
 const PHYS_DT = 1/120;
 let lastTime = 0, acc = 0;
 function loop(time) {
   requestAnimationFrame(loop);
+  adaptResolution((time - lastTime)/1000);
   const dt = Math.max(0, Math.min((time-lastTime)/1000, 0.05));
   lastTime = time;
   

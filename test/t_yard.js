@@ -1,6 +1,7 @@
 // yard things vs drives and cars: sample merged yard parts' object anchors
-const obj = []; treeMeshes.forEach(m => { const k = (m.userData.key || '').replace(/\d+$/, ''); if (!['swing', 'woodpile', 'laundry', 'sand', 'bush', 'mailbox'].includes(k)) return; const P = m.geometry.attributes.position.array;
-  for (let i = 0; i < P.length; i += 3*24) obj.push([k, P[i], P[i+2]]); });
+const obj = []; treeMeshes.forEach(m => { const P = m.geometry.attributes.position.array;   // (fused meshes list their parts: [key, first vertex, vertex count])
+  for (const [k0, v0, nv] of m.geometry.userData.parts || [[m.userData.key, 0, P.length/3]]) { const k = (k0 || '').replace(/\d+$/, ''); if (!['swing', 'woodpile', 'laundry', 'sand', 'bush', 'mailbox'].includes(k)) continue;
+    for (let i = v0*3; i < (v0 + nv)*3; i += 3*24) obj.push([k, P[i], P[i+2]]); } });
 const drives = sceneryDebug.drives.map(d => ({ ax: d.x + d.dx*d.startD, az: d.z + d.dz*d.startD, bx: d.x + d.dx*d.endD, bz: d.z + d.dz*d.endD }));
 let onDrive = 0, onCar = 0; const ex = [];
 for (const [k, x, z] of obj) { if (k === 'mailbox') continue;

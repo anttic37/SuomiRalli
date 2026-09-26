@@ -24,6 +24,9 @@ In test scripts: stub `renderer.render` while simulating, step with `loop(lastTi
 - Terrain: "build flat, lift once" — world built at Y=0, then buildHeightField() + liftWorld() + worldBuild(); Y()=H() after.
 - Human (every person, tasks for what they do), Vehicle (one driving model for all non-player vehicles, VSPEC per kind, AI
   sets v.ctrl), STATIC (houses/shops/pines/poles as solid boxes), FIRES, DISPATCH (hurt → ambulance, fire → fire engine).
+- Draw batching (BATCH): plain-coloured meshes under lifeGroup/buses/responders with a shared geometry are drawn instanced
+  (originals on layer 1, copied each frame in scene.onBeforeRender). New props batch for free when they use lbox/lgeo/lmat.
+  Scenery: Merger.fuse merges colour-only material variants per chunk. Perf tools: t_gl, t_draws, t_upl, t_logic, prof.js.
 - Patch edits with exact-match replacements that assert a single match; rebuild with `python3 build.py`; rerun regressions
   (t_lap, t_start, t_phases, t_ghost) plus the tests for what changed.
 

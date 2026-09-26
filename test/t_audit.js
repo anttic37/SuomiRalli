@@ -20,7 +20,8 @@ generateTrack();
 window.liftWorld = orig;
 // rendered ground height: same triangulation as buildGround (size 1160, 290 segs, tris (a,c,b),(b,c,d))
 const size = 1160, segs = 580, step = size/segs, half = size/2;
-const gp = groundMesh.geometry.attributes.position.array, cols = segs + 1;
+const cols = segs + 1, gp = new Float32Array(cols*cols*3);   // the ground is drawn as 58-cell tiles: stitch their heights back into one grid
+groundMesh.children.forEach((m, ti) => { const tz = Math.floor(ti/10)*58, tx = (ti % 10)*58, P = m.geometry.attributes.position.array; for (let j = 0; j < 59; j++) for (let i = 0; i < 59; i++) gp[((tz + j)*cols + tx + i)*3 + 1] = P[(j*59 + i)*3 + 1]; });
 function Hg(x, z) { const fx = (x + half)/step, fz = (z + half)/step; let ix = Math.floor(fx), iz = Math.floor(fz); if (ix < 0 || iz < 0 || ix >= segs || iz >= segs) return H(x, z);
   const u = fx - ix, v = fz - iz, a = iz*cols + ix, b = a + 1, c = a + cols, d = c + 1, y = i => gp[i*3 + 1];
   return (u + v <= 1) ? y(a) + (y(b) - y(a))*u + (y(c) - y(a))*v : y(d) + (y(c) - y(d))*(1 - u) + (y(b) - y(d))*(1 - v); }
@@ -58,7 +59,7 @@ for (const e of snap) { const o = e.o; if (o.geometry === e.geo || !o.isMesh) co
       const off = (y - H(x, z)), d = y - Hg(x, z); r.tris++; { const vo = P[ia*3+1] - H(P[ia*3], P[ia*3+2]); if (d - vo > 0.04) { r.over++; if (d - vo > r.omax) { r.omax = d - vo; r.oat = [x.toFixed(0), z.toFixed(0)]; } } }
       if (off > -0.5 && d < Math.min(off, 0.03) - 0.02) { r.under++; if (d < r.min) { r.min = d; r.at = [x.toFixed(0), z.toFixed(0), off.toFixed(3)]; } } } } }
 for (const e of snap) { const o = e.o; if (o.geometry !== e.geo || !o.isMesh || o.isInstancedMesh) continue; const g = o.geometry, P = g.attributes.position.array, P0 = e.pos, I = g.index ? g.index.array : null;
-  if (!(o.position.lengthSq() < 1e-8)) continue;
+  if (!(o.position.lengthSq() < 1e-8)) continue; { const W = o.matrixWorld.elements; if (Math.abs(W[12]) + Math.abs(W[13]) + Math.abs(W[14]) > 1e-6) continue; }   // (local vertices only mean world ones when the whole chain is at the origin)
   const nT = I ? I.length/3 : P.length/9; const r = drapeRows['m:' + e.key] || (drapeRows['m:' + e.key] = { tris: 0, under: 0, min: 9, at: null });
   for (let t = 0; t < nT; t++) { const ia = I ? I[t*3] : t*3, ib = I ? I[t*3+1] : t*3+1, ic = I ? I[t*3+2] : t*3+2;
     const y0a = P0[ia*3+1], y0b = P0[ib*3+1], y0c = P0[ic*3+1]; if (Math.max(y0a, y0b, y0c) > 0.12 || Math.min(y0a, y0b, y0c) < 0.005) continue;
