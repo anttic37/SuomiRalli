@@ -3827,7 +3827,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
   try { const sig = trackSignature(); try { localStorage.setItem('yl-top-sig', sig); } catch (e) {}
     let d = null; if (TOP_PREFETCH && TOP_PREFETCH.sig === sig && !TOP_PREFETCH.used) { TOP_PREFETCH.used = true; d = await TOP_PREFETCH.p.catch(() => null); }
     if (!d) d = await apiGet('/top?sig=' + encodeURIComponent(sig)); ONLINE.ok = true; ONLINE.list = d.list || []; renderTop10();
-    const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), myT = Math.min(bestTime, mine ? mine.t : Infinity), others = ONLINE.list.filter(r => r.k !== me);
+    const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), myT = ONLINE.name ? (mine ? mine.t : Infinity) : bestTime, others = ONLINE.list.filter(r => r.k !== me);   // (a known driver: the board is the truth — a local best it never took, or struck off, doesn't count)
     const pick = oppPick(others, myT, mine);
     const got = await Promise.all(pick.map(r => apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(r.k)).catch(() => null)));
     ONLINE.self = null; if (mine && !ghost) { const g = await apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(mine.k)).catch(() => null); if (g && Array.isArray(g.splits)) ONLINE.self = { t: g.t, splits: g.splits }; }   // (your own best from the board, for the splits, on a browser without it)
@@ -3839,6 +3839,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Haamut: tulostaulun aika ratkaisee, ei koneen oma (poistettu) ennätys'],
   ['26.9.', 'Kirosanasuodatin nimille (fi + en)'],
   ['26.9.', 'Kurittaja-Elli poistettu tulostaulusta'],
   ['26.9.', 'Piirileikkejä nyt kolme, reitin varrella'],
@@ -3926,7 +3927,7 @@ async function onlineSubmit() { const inp = document.getElementById('name-input'
   } catch (e) { st.textContent = e.message === 'bad name' ? 'nimi ei käy — valitse toinen nimi' : 'tallennus ei onnistunut (' + e.message + ')'; if (e.message === 'bad name') { const i = document.getElementById('name-input'); i.focus(); i.select(); } } }
 function ghostStartRun() { ghostRec = { s: [], splits: [], last: -1 }; ghostCursor = 0; ghostAlpha = 0; ghostGroup.visible = false; }
 function splitRef() {   // whose splits to race: the nearest rival FASTER than your best; leading (or no one faster), your own best lap
-  const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), best = Math.min(ghost ? ghost.time : Infinity, mine ? mine.t : Infinity);
+  const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), best = ONLINE.name && ONLINE.list.length ? (mine ? mine.t : Infinity) : (ghost ? ghost.time : Infinity);
   const ahead = ONLINE.opp.filter(o => o.t < best - 1e-6).sort((a, b) => b.t - a.t);   // (when you lead, the ghosts on the road are your chasers: slower, never a split to race)
   return ahead[0] || ghost || ONLINE.self || ONLINE.opp.find(o => onlineKey(o.name) === me) || null; }
 function ghostSplit(ci, t) { if (ghostRec) ghostRec.splits[ci] = t; const ref = splitRef();
