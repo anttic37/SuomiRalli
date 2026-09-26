@@ -24,9 +24,11 @@
   #radio { display: none; position: fixed; top: 22px; right: 28px; z-index: 15; pointer-events: none; align-items: center; gap: 8px; width: min(300px, 44vw); padding: 6px 10px;
     background: linear-gradient(#1b1508, #120d05); border: 1px solid #4a3614; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.5);
     font-size: 12px; letter-spacing: 0.08em; color: #ffb030; text-shadow: 0 0 6px rgba(255,160,40,0.7); font-variant-numeric: tabular-nums; }
-  #radio.on { display: flex; } #radio.off .r-win { opacity: 0.45; }
+  #radio.on { display: flex; } #radio.off .r-win { opacity: 0.45; } #radio { flex-direction: column; align-items: stretch; gap: 3px; }
+  #radio .r-top { display: flex; align-items: center; gap: 8px; } #radio .r-station { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; font-size: 10px; }
+  #radio .r-band b { font-weight: 800; } #radio .r-vol { display: flex; gap: 1px; align-items: flex-end; height: 10px; }
+  #radio .r-vol i { width: 3px; height: 100%; background: rgba(255,176,48,0.18); } #radio .r-vol i.lit { background: #ffb030; box-shadow: 0 0 4px rgba(255,160,40,0.7); }
   #radio .r-band { font-size: 9px; font-weight: 800; padding: 1px 4px; border: 1px solid rgba(255,176,48,0.6); border-radius: 2px; }
-  #radio .r-num { font-size: 10px; opacity: 0.8; }
   #radio .r-win { flex: 1; overflow: hidden; white-space: nowrap; }
   #radio .r-title { display: inline-block; white-space: nowrap; }
   #radio .r-title.scroll { animation: radioScroll var(--dur, 10s) ease-in-out infinite alternate; }   /* (starts readable, slides to its end and back) */
@@ -95,7 +97,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 21.25 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
+  <div class="build-stamp">editorista 21.29 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
   <div id="results">
     <div class="label">maaliaika</div>
     <div class="time" id="final-time">00:00.000</div>
@@ -116,12 +118,12 @@
 <div id="ghost-delta"></div>
 <div id="pizza-msg"></div><div id="police-msg"></div><div id="police-hud">🚨 POLIISI JAHTAA</div>
 <div id="countdown"></div>
-<div id="radio"><span class="r-band">FM</span><span class="r-num" id="radio-num">1/6</span><span class="r-win"><span class="r-title" id="radio-title"></span></span></div>
+<div id="radio"><div class="r-top"><span class="r-band">FM <b id="radio-freq">--.-</b></span><span class="r-station" id="radio-station"></span><span class="r-vol" id="radio-vol"></span></div><div class="r-win"><span class="r-title" id="radio-title"></span></div></div>
 <canvas id="cluster"></canvas>
 <canvas id="minimap"></canvas>
 <div id="controls-hint">
   <span class="key-hint">↑ kaasu</span><span class="key-hint">↓ jarru / peruutus</span>
-  <span class="key-hint">← → ohjaus</span><span class="key-hint">välilyönti käsijarru</span><span class="key-hint">R uusi lähtö</span><span class="key-hint">Esc alkuruutu</span><span class="key-hint">G haamu</span><span class="key-hint">C kamera</span><span class="key-hint" id="radio-key" style="display:none">E radio</span>
+  <span class="key-hint">← → ohjaus</span><span class="key-hint">välilyönti käsijarru</span><span class="key-hint">R uusi lähtö</span><span class="key-hint">Esc alkuruutu</span><span class="key-hint">G haamu</span><span class="key-hint">C kamera</span><span class="key-hint" id="radio-key" style="display:none">E radio · 1/2 ääni</span>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -3810,6 +3812,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Radio: 20 kanavaa, biisin nimi, 1/2 hiljemmalle/lujemmalle'],
   ['26.9.', 'Radioon 6 anttiin biisiä'],
   ['26.9.', 'Autoradio: E vaihtaa biisiä, nimi oikeassa yläkulmassa'],
   ['26.9.', 'Sisäkurveihin rengasmuurit ja traktorit: ei oikaisua'],
@@ -4832,25 +4835,36 @@ function pizzaUpdate(dt) {
   if (!PIZZA.guy) PIZZA.shop = null;
 }
 function pizzaReset() { PIZZA.k = 1; PIZZA.got = false; PIZZA.wait = 0; PIZZA.guy = null; PIZZA.shop = null; const el = document.getElementById('pizza-hud'); if (el) el.textContent = ''; }
-// ════════ CAR RADIO: the songs in music/ (listed in music/playlist.json: [{ file, title }]) play in turn while you drive.
-//          E: the next song — after the last one the radio goes off, then the first again. No playlist: no radio. ════════
-const RADIO = { list: [], i: 0, el: null, on: false, off: false, started: false };
+// ════════ CAR RADIO: the songs in music/ (listed in music/playlist.json: [{ file, title, artist }]) play in turn while you drive,
+//          each one on some station of the dial (20 made-up 80s stations, picked at random for every song).
+//          E: the next song — after the last one the radio goes off, then the first again. 1 / 2: quieter / louder. No playlist: no radio. ════════
+const RADIO = { list: [], i: 0, el: null, gain: null, off: false, started: false, st: null, vol: 5, volT: 0 };
+const STATIONS = ['Radio Ylästö', 'Kehä-FM', 'Radio Mäntykangas', 'Tikkurila Tänään', 'Radio Vantaanjoki', 'Pop-Kanava 88', 'Radio Kesäyö', 'Asemakylän Aallot',
+  'Radio Ralli', 'Lentokenttä-FM', 'Radio Hiidenkivi', 'Iskelmä-Vantaa', 'Radio Kasetti', 'Yöradio Pökö', 'Radio Sokeritoppa', 'Kylänraitti FM',
+  'Radio Peltomies', 'Hiekkatie-FM', 'Radio Lauantai', 'Kasari-Kanava'];
+try { const v = +localStorage.getItem('yl-radio-vol'); if (v >= 0 && v <= 10 && localStorage.getItem('yl-radio-vol') !== null) RADIO.vol = v; } catch (e) {}
 async function radioLoad() { try { const r = await fetch('music/playlist.json', { cache: 'no-store' }); if (!r.ok) return; const d = await r.json();
   RADIO.list = (Array.isArray(d) ? d : d.tracks || []).filter(t => t && t.file); if (RADIO.list.length) { const k = document.getElementById('radio-key'); if (k) k.style.display = ''; } } catch (e) {} }
-function radioShow(flash) { const box = document.getElementById('radio'), T = document.getElementById('radio-title'), N = document.getElementById('radio-num'); if (!box) return;
-  box.classList.toggle('on', RADIO.started && gameState !== State.MENU); box.classList.toggle('off', RADIO.off);
-  const t = RADIO.off ? 'RADIO POIS · E' : (RADIO.list[RADIO.i].title || RADIO.list[RADIO.i].file.replace(/\.[^.]+$/, ''));
-  N.textContent = RADIO.off ? '--' : (RADIO.i + 1) + '/' + RADIO.list.length;
+function radioTune() { let n; do n = Math.floor(Math.random()*STATIONS.length); while (RADIO.st && STATIONS[n] === RADIO.st.name && STATIONS.length > 1);
+  RADIO.st = { name: STATIONS[n], freq: (87.6 + ((n*7 + 3) % 20)*1.0 + ((n*3) % 10)/10).toFixed(1) }; }   // (every station has its own place on the dial, 87.6–107.5 MHz)
+function radioVolume() { const g = RADIO.vol/10*0.9; if (RADIO.gain) RADIO.gain.gain.setTargetAtTime(g, audio.ctx.currentTime, 0.05); else if (RADIO.el) RADIO.el.volume = Math.min(1, g); }
+function radioShow(flash) { const box = document.getElementById('radio'); if (!box || !RADIO.list.length) return; const $ = (id) => document.getElementById(id), R = RADIO;
+  box.classList.toggle('on', R.started && gameState !== State.MENU); box.classList.toggle('off', R.off);
+  const song = R.list[R.i], t = R.off ? 'RADIO POIS · E' : '♪ ' + (song.title || song.file.replace(/\.[^.]+$/, ''));
+  $('radio-freq').textContent = R.off || !R.st ? '--.-' : R.st.freq; $('radio-station').textContent = R.off || !R.st ? '' : R.st.name;
+  $('radio-vol').innerHTML = Array.from({ length: 10 }, (_, k) => '<i' + (k < R.vol ? ' class="lit"' : '') + '></i>').join('');
+  const T = $('radio-title');
   if (T.textContent !== t) { T.textContent = t; T.classList.remove('scroll'); requestAnimationFrame(() => { const over = T.scrollWidth - T.parentNode.clientWidth; if (over > 0) { T.style.setProperty('--shift', over + 6); T.style.setProperty('--dur', (3 + over/25) + 's'); T.classList.add('scroll'); } }); }
   if (flash) { box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash'); } }
-function radioPlay() { const R = RADIO; if (!R.el) { R.el = new Audio(); R.el.preload = 'auto'; R.el.addEventListener('ended', () => { R.i = (R.i + 1) % R.list.length; radioPlay(); radioShow(true); });
-    let routed = false; if (audio && audio.ctx) { try { const src = audio.ctx.createMediaElementSource(R.el), g = audio.ctx.createGain(); g.gain.value = 0.5; src.connect(g); g.connect(audio.master); routed = true; } catch (e) {} }   // (through the game's mix)
-    if (!routed) R.el.volume = 0.5; }
+function radioPlay() { const R = RADIO; if (!R.el) { R.el = new Audio(); R.el.preload = 'auto'; R.el.addEventListener('ended', () => { R.i = (R.i + 1) % R.list.length; radioTune(); radioPlay(); radioShow(true); });
+    if (audio && audio.ctx) { try { const src = audio.ctx.createMediaElementSource(R.el); R.gain = audio.ctx.createGain(); src.connect(R.gain); R.gain.connect(audio.master); } catch (e) { R.gain = null; } }   // (through the game's mix)
+    radioVolume(); }
   R.el.src = 'music/' + encodeURIComponent(R.list[R.i].file); R.el.play().catch(() => {}); }
-function radioStart() { if (!RADIO.list.length || RADIO.started) { radioShow(); return; } RADIO.started = true; RADIO.i = Math.floor(Math.random()*RADIO.list.length); radioPlay(); radioShow(true); }   // (the first race: a song from anywhere in the list)
+function radioStart() { if (!RADIO.list.length || RADIO.started) { radioShow(); return; } RADIO.started = true; RADIO.i = Math.floor(Math.random()*RADIO.list.length); radioTune(); radioPlay(); radioShow(true); }   // (the first race: a song from anywhere in the list)
 function radioNext() { const R = RADIO; if (!R.list.length) return; if (!R.started) { radioStart(); return; }
-  if (R.off) { R.off = false; R.i = 0; radioPlay(); } else if (R.i === R.list.length - 1) { R.off = true; R.el.pause(); } else { R.i++; radioPlay(); }
+  if (R.off) { R.off = false; R.i = 0; radioTune(); radioPlay(); } else if (R.i === R.list.length - 1) { R.off = true; R.el.pause(); } else { R.i++; radioTune(); radioPlay(); }
   radioShow(true); }
+function radioVol(d) { const R = RADIO; if (!R.list.length) return; R.vol = Math.max(0, Math.min(10, R.vol + d)); try { localStorage.setItem('yl-radio-vol', R.vol); } catch (e) {} radioVolume(); radioShow(); }
 
 // ════════ POLICE: three incidents in one race (people knocked over by the rally car, a fire it started) and the police come.
 //          White-and-blue 80s cruisers from 90–200 m back down the streets, siren and beacons; they follow the road graph
@@ -6000,6 +6014,8 @@ addEventListener('keydown', e => {
   if (e.code==='KeyR' && !e.repeat && gameState!==State.MENU) { initAudio(); startRace(false); }
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
   if (e.code==='KeyE' && !e.repeat && gameState !== State.MENU) { initAudio(); radioNext(); }
+  if ((e.code==='Digit1' || e.code==='Numpad1') && gameState !== State.MENU) radioVol(-1);   // radio quieter / louder
+  if ((e.code==='Digit2' || e.code==='Numpad2') && gameState !== State.MENU) radioVol(1);
   if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'; cpd.style.color='#ffe9a8'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0, 900); }
   if (e.code==='KeyG' && !e.repeat) { ghostEnabled = !ghostEnabled; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = ghost ? (ghostEnabled ? 'HAAMU PÄÄLLÄ' : 'HAAMU POIS') : 'EI HAAMUA VIELÄ'; cpd.style.color='#bfe2ff'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0,900); }   // restart any time: back to the grid, countdown again
 });
