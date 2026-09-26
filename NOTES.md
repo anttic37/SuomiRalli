@@ -225,6 +225,17 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       faceted.
     - Spill: the gravel grit and asphalt crumbs on the tarmac are finer.
     - Tests: t_roadlook / t_roadlook2 (junctions, the sharpest bends' inner kerbs, a gravel mouth).
+  - v14 fixes and blocked corners:
+    - Cabbage rows and hill tyre stacks blinking: fitInstanceBounds stored the bounds on a geometry that all four cabbage
+      patches share, so three of them were frustum-culled. Every fitted InstancedMesh now gets its own geometry wrapper over
+      the same buffers. Stack chunks also get their sphere at the lifted height. Test: t_cabbage (every instanced mesh's
+      sphere holds its instances).
+    - Inside corners (after "sisäkurveihin traktoreita ja renkaita ettei voi oikaista"): in buildTrackTires, for every bend
+      with curvature > 0.28, every straight cut from just inside the kerb 3–14 points before the apex to 3–14 after that
+      saves ≥ 6 m and has nothing solid across it gets a wall of stacks along it. A street through the corner stays open.
+      Sharp bends (> 0.36, ≥ 50 m apart, up to 8) also get a parked tractor (`CORNER_TRACTORS` → Vehicle kind 'tractor',
+      no ai, mass 40) on the bisector. Open cuts: 13 of 24 corners before, 3 after. Test: t_cuts (+ t_corners views).
+    - Police hold: handbrake only (the brake at a standstill is reverse; the held car used to back away).
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 

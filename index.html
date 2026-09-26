@@ -83,7 +83,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 20.58 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
+  <div class="build-stamp">editorista 21.15 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
   <div id="results">
     <div class="label">maaliaika</div>
     <div class="time" id="final-time">00:00.000</div>
@@ -2683,7 +2683,7 @@ const car = { x:0, z:0, angle:0, vx:0, vz:0, steerSm:0, steerAngle:0, pivot:-1.3
 function updateCar(dt, live = true) {
   const held = POLICE.hold > 0; if (held) live = false;   // pulled over: the police have it
   const throttle = live && (keys['ArrowUp'] || keys['KeyW']) ? 1 : 0;
-  const brake = held || (live && (keys['ArrowDown'] || keys['KeyS'])) ? 1 : 0;
+  const brake = live && (keys['ArrowDown'] || keys['KeyS']) ? 1 : 0;   /* (not while held: the brake at a standstill is reverse) */
   const steerInput = live ? (((keys['ArrowLeft']||keys['KeyA'])?1:0) - ((keys['ArrowRight']||keys['KeyD'])?1:0)) : 0;
   const handbrake = held || (live && keys['Space']) ? 1 : 0;
   car.throttle = throttle;
@@ -2965,6 +2965,7 @@ scene.add(carGroup);
 // TRACK-SIDE TIRE STACKS — dynamic physics props
 // ════════════════════════════════════════
 const tires = [];
+const CORNER_TRACTORS = [];   // tractors parked in the inside of bends (placed with the tyres, built as Vehicles by worldBuild)
 let lastThud = 0;
 // barrier stacks: one lathed shape per height (2–4 tyres): bead hole, bottom and top sidewalls, a tread band per tyre
 // with a dip between tyres — the faces hidden between stacked tyres simply don't exist. Tread chevrons in the texture.
@@ -3020,7 +3021,7 @@ const unitHead = new THREE.IcosahedronGeometry(1, 0);
 })();
 
 function buildTrackTires() {
-  tires.length = 0;
+  tires.length = 0; CORNER_TRACTORS.length = 0;
   const n = trackPoints.length;
   
   let stackH = 2, stackCol = -1;   // set by the barrier builders: height of the next stacks and their paint (−1 = pick)
@@ -3113,6 +3114,28 @@ function buildTrackTires() {
         let apex = i, am = 0; for (let k = i; k <= j; k++) { const ck = curvAt(k % n).curv; if (ck > am) { am = ck; apex = k; } }
         if (am > 0.33) {   // only where a car actually runs wide: the outside, from just before the apex to past the exit
           stackH = 3; rowAlong(apex - 5, Math.max(j, apex + 6) + 6, off1*c.side, 1.75, 0, true); rowAlong(apex - 4, Math.max(j, apex + 6) + 5, (off1 + 1.7)*c.side, 1.75, 0.87, true); stackCol = -1; stackH = 2;
+        }
+        if (am > 0.28) {   // the inside of the bend: tyre walls across the short cuts over the grass, and in a sharp one a parked tractor
+          const a = apex % n, s = -c.side, hwA = wAt(a)*0.5, inner = (k) => { const q = (k%n+n)%n, p = trackPoints[q], nm = getNormal(q), o = (wAt(q)*0.5 + 2.6)*s; return [p.x + nm.x*o, p.y + nm.y*o]; };
+          if (am > 0.36 && CORNER_TRACTORS.length < 8 && !CORNER_TRACTORS.some(T => Math.hypot(T.x - trackPoints[a].x, T.z - trackPoints[a].y) < 50)) {
+            const nm = getNormal(a), td = getDir(a);
+            for (let d = hwA + 5.5; d < hwA + 18; d += 0.75) { const x = trackPoints[a].x + nm.x*d*s, z = trackPoints[a].y + nm.y*d*s, r = roadInfo(x, z);
+              if (r.d2 < (wAt(r.idx)*0.5 + 4.2)**2 || onRoad(x, z, 3.0) || nearBuilding(x, z, 2.6) || !stackFree(x, z, 2.6)) continue;
+              CORNER_TRACTORS.push({ x, z, yaw: Math.atan2(td.x, td.y) + (Math.random() < 0.5 ? 0 : Math.PI) + (Math.random() - 0.5)*0.3 }); gridPut(x, z, 2.6);
+              BUILDINGS.push([x, z, 2.4, 4.3, Math.atan2(td.x, td.y), 'L']); break; } }   // (so the crowd and the village life keep off it)
+          { // every straight short cut from just inside the kerb before the bend to just inside it after (saving ≥ 6 m) that nothing
+            // solid stands across yet gets a wall of stacks along its middle — until no cut is left open
+            const edge = (k) => { const q = (k%n+n)%n, p = trackPoints[q], nm = getNormal(q), o = (wAt(q)*0.5 + 1.2)*s; return [p.x + nm.x*o, p.y + nm.y*o]; };
+            const solid = (x, z) => !stackFree(x, z, 0.95) || nearBuilding(x, z, 0.95);
+            const cuts = []; for (let ka = 3; ka <= 14; ka++) for (let kb = 3; kb <= 14; kb++) { const A = edge(apex - ka), B = edge(apex + kb); let route = 0;
+                for (let k = apex - ka; k < apex + kb; k++) { const p = trackPoints[(k%n+n)%n], q = trackPoints[((k+1)%n+n)%n]; route += Math.hypot(q.x - p.x, q.y - p.y); }
+                const L = Math.hypot(B[0] - A[0], B[1] - A[1]); if (route - L >= 6 && !onRoad((A[0] + B[0])/2, (A[1] + B[1])/2, 0)) cuts.push({ A, B, L, save: route - L }); }
+            cuts.sort((p, q) => q.save - p.save); stackH = 3;
+            for (const C of cuts) { let open = true; for (let t = 0; t <= C.L && open; t += 0.5) if (solid(C.A[0] + (C.B[0] - C.A[0])*t/C.L, C.A[1] + (C.B[1] - C.A[1])*t/C.L)) open = false;
+              if (!open) continue; stackCol = cuts.indexOf(C) % 2 ? 1 : 2;
+              for (let t = 0.9; t < C.L; t += 1.7) { const x = C.A[0] + (C.B[0] - C.A[0])*t/C.L, z = C.A[1] + (C.B[1] - C.A[1])*t/C.L, r = roadInfo(x, z);
+                if (r.d2 < (wAt(r.idx)*0.5 + 2.3)**2 || onRoad(x, z, 1.0)) continue; addStackChecked(x, z); } }   // (a street through the corner stays open)
+            stackH = 2; stackCol = -1; }
         }
         if (am > 0.42) {   // sharp corner: a small cluster of stacks in the inside corner
           const ap = trackPoints[apex % n], nm = getNormal(apex % n), s = -c.side;
@@ -3774,6 +3797,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Sisäkurveihin rengasmuurit ja traktorit: ei oikaisua'],
   ['26.9.', 'Alkuruutu: Kesä 1988, ajat haetaan heti sivun auetessa'],
   ['26.9.', 'Korjattu: kaalirivit ja mäkien rengaspinot eivät enää vilku'],
   ['26.9.', 'Alkuruutu: juokseva latauspalkki tuloksia haettaessa'],
@@ -5388,6 +5412,14 @@ function lifeExtras2Build() {
 }
 function extras2Update(dt) { for (const f of X2.upd) f(dt, worldT); flyingUpdate(dt); }
 function lifeExtras2Reset() { for (const f of X2.reset) f(); for (const F of X2.flying) lifeGroup.remove(F.m); X2.flying.length = 0; }
+function makeTractorMesh(paint) { const G = new THREE.Group(), red = lmat(paint || 0xc8321e, 0.55), black = lmat(0x161616, 0.8), rim = lmat(0xe8c02a, 0.5), grey = lmat(0x7a7a7a, 0.5), glass = lmat(0x2a3440, 0.25);
+      lmesh(lbox(0.75, 0.62, 1.9), red, 0, 1.0, 0.55, G); lmesh(lbox(0.8, 0.12, 1.95), lmat(0xf0f0f0, 0.5), 0, 1.3, 0.55, G); lmesh(lbox(1.25, 0.08, 1.35), lmat(0xf0f0f0, 0.5), 0, 2.45, -0.62, G); lmesh(lbox(1.15, 0.95, 1.2), glass, 0, 1.9, -0.62, G);
+      for (const [a, b] of [[-0.58, -0.02], [0.58, -0.02], [-0.58, -1.22], [0.58, -1.22]]) lmesh(lbox(0.07, 1.3, 0.07), red, a, 1.78, b, G);
+      lmesh(lbox(1.0, 0.25, 1.2), red, 0, 1.35, -0.62, G); lmesh(lcyl(0.045, 1.1, 6), black, 0.25, 1.85, 1.1, G);
+      const wheels = []; for (const s of [-1, 1]) { const w = lmesh(lcyl(0.75, 0.42, 14), black, s*0.82, 0.75, -0.6, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.4, 0.44, 10), rim, s*0.82, 0.75, -0.6, G); h.rotation.z = Math.PI/2; wheels.push([w, 0.75], [h, 0.75]);
+        const f = lmesh(lcyl(0.42, 0.24, 12), black, s*0.62, 0.42, 1.15, G); f.rotation.z = Math.PI/2; const fh = lmesh(lcyl(0.22, 0.26, 8), rim, s*0.62, 0.42, 1.15, G); fh.rotation.z = Math.PI/2; wheels.push([f, 0.42], [fh, 0.42]); }
+      lmesh(lbox(2.4, 0.14, 0.3), grey, 0, 0.55, -1.95, G); lmesh(lbox(0.12, 0.12, 0.8), grey, 0, 0.62, -1.5, G); for (let k = -3; k <= 3; k++) { const tn = lmesh(lbox(0.05, 0.45, 0.05), grey, k*0.36, 0.32, -2.0, G); tn.rotation.x = 0.35; }
+  return { G, wheels }; }
 function worldBuild() {
   pizzaShops();
   // clear the last build
@@ -5427,13 +5459,7 @@ function worldBuild() {
       const geo = lgeo('cabbage', () => { const g = new THREE.IcosahedronGeometry(0.27, 0); g.scale(1, 0.72, 1); return g; }), im = new THREE.InstancedMesh(geo, lmat(0xffffff, 0.7), pts.length), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), col = new THREE.Color();
       pts.forEach(([x, z], i) => { const sc = 0.8 + Math.random()*0.45; q.setFromAxisAngle(up, Math.random()*6.3); _vp.set(x, Y(x, z) + 0.13*sc, z); _vs.set(sc, sc, sc); _vm.compose(_vp, q, _vs); im.setMatrixAt(i, _vm); im.setColorAt(i, col.setRGB(0.5 + Math.random()*0.12, 0.7 + Math.random()*0.12, 0.42 + Math.random()*0.12)); });
       _vs.set(1, 1, 1); im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; im.receiveShadow = true; im.frustumCulled = true; fitInstanceBounds(im, 0.5); lifeGroup.add(im); }
-    else if (P.kind === 'tractor') { const G = new THREE.Group(), red = lmat(0xc8321e, 0.55), black = lmat(0x161616, 0.8), rim = lmat(0xe8c02a, 0.5), grey = lmat(0x7a7a7a, 0.5), glass = lmat(0x2a3440, 0.25);
-      lmesh(lbox(0.75, 0.62, 1.9), red, 0, 1.0, 0.55, G); lmesh(lbox(0.8, 0.12, 1.95), lmat(0xf0f0f0, 0.5), 0, 1.3, 0.55, G); lmesh(lbox(1.25, 0.08, 1.35), lmat(0xf0f0f0, 0.5), 0, 2.45, -0.62, G); lmesh(lbox(1.15, 0.95, 1.2), glass, 0, 1.9, -0.62, G);
-      for (const [a, b] of [[-0.58, -0.02], [0.58, -0.02], [-0.58, -1.22], [0.58, -1.22]]) lmesh(lbox(0.07, 1.3, 0.07), red, a, 1.78, b, G);
-      lmesh(lbox(1.0, 0.25, 1.2), red, 0, 1.35, -0.62, G); lmesh(lcyl(0.045, 1.1, 6), black, 0.25, 1.85, 1.1, G);
-      const wheels = []; for (const s of [-1, 1]) { const w = lmesh(lcyl(0.75, 0.42, 14), black, s*0.82, 0.75, -0.6, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.4, 0.44, 10), rim, s*0.82, 0.75, -0.6, G); h.rotation.z = Math.PI/2; wheels.push([w, 0.75], [h, 0.75]);
-        const f = lmesh(lcyl(0.42, 0.24, 12), black, s*0.62, 0.42, 1.15, G); f.rotation.z = Math.PI/2; const fh = lmesh(lcyl(0.22, 0.26, 8), rim, s*0.62, 0.42, 1.15, G); fh.rotation.z = Math.PI/2; wheels.push([f, 0.42], [fh, 0.42]); }
-      lmesh(lbox(2.4, 0.14, 0.3), grey, 0, 0.55, -1.95, G); lmesh(lbox(0.12, 0.12, 0.8), grey, 0, 0.62, -1.5, G); for (let k = -3; k <= 3; k++) { const tn = lmesh(lbox(0.05, 0.45, 0.05), grey, k*0.36, 0.32, -2.0, G); tn.rotation.x = 0.35; }
+    else if (P.kind === 'tractor') { const { G, wheels } = makeTractorMesh();
       lifeGroup.add(G); nearVis(G, P.x, P.z);
       const ai = tractorAI(P), [tx0, tz0, ty0] = ai.start(), v = new Vehicle({ kind: 'tractor', x: tx0, z: tz0, yaw: ty0, hw: 1.2, hl: 2.1, view: { kind: 'mesh', g: G }, axle: [0.8, 1.15, -0.6], ai }); v.wheels = wheels;
       const drv = new Human({ x: P.x, z: P.z, rig: makeAdult(lpick(L_SHIRTS), lpick(L_PANTS), lpick(L_HAIR)), task: seatedTask() }); drv.seat = drv.seat0 = { v, a: 0, b: -0.7, y: 0.62, show: true }; drv.task0 = drv.task; v.crew.push(drv); }
@@ -5444,6 +5470,8 @@ function worldBuild() {
       const K = { team, keeper: k === 0, ha: ha*F.w*team, hb: hb*F.d, cool: 0 }, [x, z] = [F.lx + Math.cos(F.th)*K.ha + Math.sin(F.th)*K.hb, F.lz - Math.sin(F.th)*K.ha + Math.cos(F.th)*K.hb];
       K.h = new Human({ x, z, kid: true, rig: makeKid(k === 0 ? 0x2e8a3a : shirt), task: footballTask(F, K) }); F.kids.push(K); }); }); }
   // vehicles: every parked car (instanced), the buses (meshes)
+  CORNER_TRACTORS.forEach((T, k) => { const { G } = makeTractorMesh([0xc8321e, 0x2a5ab0, 0x3a7a2a][k % 3]); lifeGroup.add(G); nearVis(G, T.x, T.z);   // parked across a short cut: heavy enough that it isn't shoved aside
+    new Vehicle({ kind: 'tractor', x: T.x, z: T.z, yaw: T.yaw, hw: 1.2, hl: 2.1, view: { kind: 'mesh', g: G }, axle: [0.8, 1.15, -0.6], mass: 40 }); });
   YARD_CARS.forEach(c => { new Vehicle({ kind: 'car', x: c.x, z: c.z, yaw: c.yaw, hw: 0.86, hl: 1.92, view: { kind: 'inst', c }, onRoadY: true }); });
   trackMeshGroup.children.forEach(m => { if (m.userData.key !== 'bus') return; const e = new THREE.Euler().setFromQuaternion(m.quaternion, 'YXZ');
     new Vehicle({ kind: 'bus', x: m.position.x, z: m.position.z, yaw: e.y, hw: 1.3, hl: 5.1, view: { kind: 'mesh', g: m }, axle: [1.13, 2.8, -2.6] }); });
