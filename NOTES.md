@@ -69,6 +69,8 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       - Under ~48 fps for 2 s of racing → pixel ratio −0.25 (never below 1).
       - Back up after 6 s of headroom, but not to a ratio that was too slow in the last minute.
       - Never triggers in tests (fixed 1/60 steps).
+    - Burnt-out vans, buses, the tractor and fire engines now char their own paint: each material gets a darkened copy, and the
+      lamps and beacons keep theirs. This replaces the translucent black box that showed as a box over the vehicle.
     - Seeded runs don't reproduce the old build's random details (yard cars, tufts, tyre colours). three.js uuids draw on
       Math.random, and the build creates a different number of objects. Compare builds on things that aren't random.
     - Tests and tools:

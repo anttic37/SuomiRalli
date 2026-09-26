@@ -42,7 +42,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö · Vantaa · <span id="tod-label">päivä</span> · <span id="terrain-label">mäet</span></div>
-  <div class="build-stamp">editorista 15.54 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
+  <div class="build-stamp">editorista 16.04 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
   <div id="results">
     <div class="label">maaliaika</div>
     <div class="time" id="final-time">00:00.000</div>
@@ -4397,14 +4397,15 @@ function firesUpdate(dt) {
     f.glow.visible = !f.out && near; if (f.glow.visible) { f.glow.position.set(f.x, y0 + f.h + (f.kind === 'house' ? 0.6 : 0.3), f.z); f.glow.material.opacity = 0.35 + 0.4*f.level + 0.15*Math.sin(f.t*17)*Math.sin(f.t*7.3); }
     if (f.out && f.steam <= 0) { lifeGroup.remove(f.glow); FIRES.splice(i, 1); if (f.B) f.B.fire = null; if (f.v) f.v.fire = null; } }
 }
-function charVehicle(v, on) {   // burnt out: parked cars go black (their paint instance), vans and buses get a sooty coat
+function charVehicle(v, on) {   // burnt out: parked cars go black (their paint instance), vans, buses and the tractor char
   v.charred = on;
   if (v.view.kind === 'inst') { const c = v.view.c; _vcol.setHex(on ? 0x24211e : c.color); for (const P of c.inst || []) if (P.im.instanceColor) { P.im.setColorAt(P.k, _vcol); P.im.instanceColor.needsUpdate = true; } }
-  else if (on && !v.soot) { const hh = v.kind === 'bus' ? 2.6 : v.kind === 'fire' ? 2.5 : v.kind === 'tractor' ? 1.7 : 2.3; v.soot = new THREE.Mesh(lbox(v.hw*2 + 0.1, hh, v.hl*2 + 0.1), new THREE.MeshBasicMaterial({ color: 0x0c0906, transparent: true, opacity: 0.55, depthWrite: false }));
-    v.soot.position.y = 0.4 + hh/2; v.soot.renderOrder = 1; v.view.g.add(v.soot); }
-  else if (!on && v.soot) { v.view.g.remove(v.soot); v.soot = null; }
+  else v.view.g.traverse(o => {   // vans, buses, the tractor: their own paint chars (a darkened copy of each material; the lamps and beacons keep theirs)
+    const m = o.userData.charOrig || o.material; if (!o.isMesh || !m || !m.color || m.transparent || (m.emissive && m.emissive.getHex() !== 0)) return;
+    if (on && !o.userData.charOrig) { const c = m.clone(); c.color.lerp(_charCol, 0.84); o.userData.charOrig = m; o.material = c; }
+    else if (!on && o.userData.charOrig) { o.material.dispose(); o.material = o.userData.charOrig; o.userData.charOrig = null; } });
 }
-const _vcol = new THREE.Color();
+const _vcol = new THREE.Color(), _charCol = new THREE.Color(0x1a1612);
 
 // ════════ DISPATCH: hurt people → ambulance, fires → fire engine ════════
 const DISPATCH = { queue: [],
