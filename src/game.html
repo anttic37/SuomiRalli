@@ -3822,6 +3822,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
     if (!pick.length && mine) pick = [mine];                                                     // (alone on the board: your own best, under your name)
     pick.sort((a, b) => b.t - a.t);                                                              // nearest first: the split times compare with pick[0]
     const got = await Promise.all(pick.map(r => apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(r.k)).catch(() => null)));
+    ONLINE.self = null; if (mine && !ghost) { const g = await apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(mine.k)).catch(() => null); if (g && Array.isArray(g.splits)) ONLINE.self = { t: g.t, splits: g.splits }; }   // (your own best from the board, for the splits, on a browser without it)
     ONLINE.opp.forEach(o => { scene.remove(o.G); o.G.userData.label.material.map.dispose(); });
     ONLINE.opp = got.map((g, i) => g && Array.isArray(g.s) && g.s.length >= 8 ? { name: g.name, t: g.t, splits: g.splits || [], s: g.s, cursor: 0, alpha: 0,
       G: makeGhost(OPP_LOOK[i][0], OPP_LOOK[i][1], g.name, OPP_LOOK[i][2]) } : null).filter(Boolean);
@@ -3830,6 +3831,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Korjattu: väliajat kärjessä vertautuivat hitaampaan (−5 s)'],
   ['26.9.', 'Radioon 4 uutta biisiä (nyt 10)'],
   ['26.9.', 'Korjattu: "too fast" maalissa, aika tallentuu'],
   ['26.9.', 'ANBAn 1.26:277 poistettu (mutka oikaistu)'],
@@ -3905,7 +3907,11 @@ async function onlineSubmit() { const inp = document.getElementById('name-input'
     ONLINE.list = d.list || ONLINE.list; renderTop10(); onlineRefresh();   // next start: the next three rungs up
   } catch (e) { st.textContent = 'tallennus ei onnistunut (' + e.message + ')'; } }
 function ghostStartRun() { ghostRec = { s: [], splits: [], last: -1 }; ghostCursor = 0; ghostAlpha = 0; ghostGroup.visible = false; }
-function ghostSplit(ci, t) { if (ghostRec) ghostRec.splits[ci] = t; const ref = ONLINE.opp.length ? ONLINE.opp[0] : ghost;   // (online: against the nearest rival ahead)
+function splitRef() {   // whose splits to race: the nearest rival FASTER than your best; leading (or no one faster), your own best lap
+  const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), best = Math.min(ghost ? ghost.time : Infinity, mine ? mine.t : Infinity);
+  const ahead = ONLINE.opp.filter(o => o.t < best - 1e-6).sort((a, b) => b.t - a.t);   // (when you lead, the ghosts on the road are your chasers: slower, never a split to race)
+  return ahead[0] || ghost || ONLINE.self || ONLINE.opp.find(o => onlineKey(o.name) === me) || null; }
+function ghostSplit(ci, t) { if (ghostRec) ghostRec.splits[ci] = t; const ref = splitRef();
   if (ref && ref.splits[ci] !== undefined && ref.splits[ci] !== null) showDelta(t - ref.splits[ci], false); }
 function ghostRecord() {
   if (!ghostRec || !lapStarted || gameState !== State.RACING) return;
