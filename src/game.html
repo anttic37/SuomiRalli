@@ -32,6 +32,10 @@
   #results .best-time { font-size: 16px; color: #666; margin-top: 12px; }
   #results .restart-hint { font-size: clamp(10px, 1.8vw, 12px); letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin-top: 40px; animation: pulse 2s ease-in-out infinite; }
   #overlay { cursor: default; }   /* (the pointer is hidden while driving, not on the menus) */
+  #changelog { position: absolute; right: 28px; bottom: 26px; width: min(400px, 32vw); font-size: 11px; line-height: 1.55; color: #7a7a74; text-align: left; pointer-events: none; }
+  #changelog .cl-head { font-size: 10px; letter-spacing: 0.35em; color: #555; margin-bottom: 8px; }
+  #changelog .cl-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #changelog .cl-d { color: #4a4a46; margin-right: 8px; } #changelog .cl-row:first-of-type { color: #b8b8b0; }
+  @media (max-width: 1000px), (max-height: 620px) { #changelog { display: none; } }
   #top10 { margin-top: 26px; min-width: min(360px, 88vw); font-size: 13px; color: #cfcfc8; font-variant-numeric: tabular-nums; }
   #top10 .t10-head { font-size: 10px; letter-spacing: 0.35em; color: #666; text-align: center; margin-bottom: 6px; }
   #top10 .t10-row { display: flex; gap: 10px; padding: 2px 6px; } #top10 .t10-row.me { color: #44ff44; }
@@ -62,6 +66,7 @@
     <div class="restart-hint">enter — uusi lähtö</div>
   </div>
   <div id="top10"></div>
+  <div id="changelog"></div>
 </div>
 <div id="hud">
   <div class="hud-block"><span class="hud-label">Aika</span><span class="hud-value" id="timer">00:00.000</span><span class="hud-sub" id="best-hud"></span><span class="hud-sub" id="pizza-hud" style="color:#ffb347"></span></div>
@@ -3684,6 +3689,23 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
   } catch (e) { ONLINE.ok = false; }
   ONLINE.busy = false; renderTop10();
 }
+// ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
+const CHANGES = [
+  ['26.9.', 'Versiohistoria alkuruutuun'],
+  ['26.9.', 'Kylän sekoilu: tappelut, kattoremontit, koirat, jono'],
+  ['26.9.', 'Esc alkuruutuun, "haen ajajia…"'],
+  ['26.9.', 'Haamussa pelkkä nimi, häipyy läheltä'],
+  ['26.9.', 'Tallennus toimii 30 fps- ja 144 Hz -koneilla'],
+  ['26.9.', 'Haamut tulostaulusta, osoitin valikoissa'],
+  ['26.9.', 'Netti: top 10, haamutikkaat, nimi maalissa'],
+  ['26.9.', 'Pitseria Ylästöntien kulmaan'],
+  ['26.9.', 'Pitseria: 5 s pihassa → pizza, auto +10 %'],
+  ['26.9.', 'Palaneet autot hiiltyvät'],
+  ['26.9.', 'Optimointi: puolet vähemmän piirtokutsuja'],
+];
+function renderChangelog() { const el = document.getElementById('changelog'); if (!el) return;
+  el.innerHTML = '<div class="cl-head">MUUTOKSET</div>'; CHANGES.slice(0, 10).forEach(([d, t]) => { const r = document.createElement('div'); r.className = 'cl-row'; r.title = t;
+    r.innerHTML = '<span class="cl-d"></span><span></span>'; r.children[0].textContent = d; r.children[1].textContent = t; el.appendChild(r); }); }
 function renderTop10() { const el = document.getElementById('top10'); if (!el) return;
   if (!ONLINE.ok) { el.innerHTML = !ONLINE.api ? '' : '<div class="t10-empty">' + (ONLINE.busy ? 'haen ajajia…' : 'tulokset eivät nyt saatavilla — haamuna oma paras') + '</div>'; return; }
   const me = onlineKey(ONLINE.name), rows = ONLINE.list.slice(0, 10);
@@ -5738,7 +5760,7 @@ function loop(time) {
 // INIT
 // ════════════════════════════════════════
 addEventListener('resize', () => { camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
-generateTrack(); resetCar(); ghostLoad(); onlineRefresh();   // (the ground is built by the terrain lift inside generateTrack)
+generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); renderChangelog();   // (the ground is built by the terrain lift inside generateTrack)
 { const el = document.getElementById('terrain-label'); if (el) el.textContent = HEIGHT_RAW ? 'maanmittauslaitoksen korkeusmalli' : 'väliaikaiset mäet ' + PLACEHOLDER_AMP + '×'; }
 camPos.set(car.x-Math.sin(car.angle)*25, 45, car.z-Math.cos(car.angle)*25);
 camLookAt.set(car.x, Y(car.x,car.z), car.z);

@@ -33,5 +33,6 @@ In test scripts: stub `renderer.render` while simulating, step with `loop(lastTi
   (t_lap, t_start, t_phases, t_ghost) plus the tests for what changed.
 
 ## Working rules from Antti
+- Every change gets a one-line Finnish entry at the top of `CHANGES` in src/game.html (the start screen shows the last 10).
 - Keep earlier versions safe (he asked for new versions so the old one stays intact); the flat original game is separate.
 - He plays from the published build; deliver the built game, keep the editor in sync (editor is the source of truth).

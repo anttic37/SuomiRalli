@@ -166,6 +166,8 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       - `lifeExtrasReset` restores it on a restart.
     - Test: t_mischief (counts, the queue cycling, a knocked dog, a burning roofer, close-ups mis_*.png). The world update is
       now ~0.5–0.9 ms/frame (was 0.4–0.6).
+  - Version history on the start screen, bottom right: the last 10 of `CHANGES` in src/game.html, newest first, one line each.
+    Every change adds a line (the rule is in CLAUDE.md). Hidden on screens under 1000 × 620.
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
