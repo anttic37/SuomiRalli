@@ -142,6 +142,30 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       `node real.js http://localhost:8787/ t_online.js`) seeds 5 drivers and checks the ladder, the ghosts on track, the name
       box, the rank, a slower lap not kept and a cheat refused. real.js takes http URLs and has `__pageshot` (the whole page,
       menus included).
+  - v10 (after "lisätään sekoilua … lapset tappelee, katolla korjaushommia, pihalla auto savuttaa, metsässä koiran kanssa, kentän
+    laidalla katsojia, K-kaupan pihalla jono … meidän perusmalleilla"): `lifeExtrasBuild()`, run in worldBuild after staticBuild.
+    Everything below is a Human with a task (knock-over, the ambulance and restart come for free). `clearSpot`/`plotSpot`/
+    `spreadPick` pick free places near the route.
+    - Kids scrapping (`fightTask` with kid rigs) in 3 yards, each with a ring of 3–5 kids bouncing and waving (`kidCheerTask`).
+      Kids now have arms: `makeKid` has a full rig, so fists, handlebar hands and arm swing when running.
+    - Roofers on 4 pitched roofs (`rooferTask`): kneeling on the slope near the eaves and hammering in bursts, with a ladder at
+      the eaves below them and a stack of roofing on the ground. Sometimes a mate holds the ladder and shouts up
+      (`ladderTask`). If the house catches fire the roofer jumps (knock from roof height → ambulance).
+    - Smoking cars in 4 yards: an EMITTER riding on the Vehicle (`E.v`, `E.end`), from whichever end has room to stand at. The
+      owner is bent over it and straightens up now and then to scratch his head (`fixTask`).
+    - 4 dog walkers in the woods (landClassAt === 1): out and back along a 4–10-point path, stopping when the dog finds
+      something (`walkerTask`).
+      - The dog (`makeDog`, a rig whose "arms" are its back legs) trots round the owner on a red leash (a stretched lbox) —
+        `dogTask`.
+      - `Human({ animal: true, r })`: a knocked dog lies down but gets no ambulance.
+    - Fans along both touchlines of the sports field (`fanTask`, crowd instances): they follow the ball, stand up for a goal
+      and jump.
+    - The K-shop queue (`EXTRA.queue`, `queueTask`, `queueUpdate`): 6–8 people along the shop front.
+      - Every 5–10 s the one at the front goes in (inside) and comes out 6–14 s later.
+      - They wander off, then rejoin at the back.
+      - `lifeExtrasReset` restores it on a restart.
+    - Test: t_mischief (counts, the queue cycling, a knocked dog, a burning roofer, close-ups mis_*.png). The world update is
+      now ~0.5–0.9 ms/frame (was 0.4–0.6).
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 

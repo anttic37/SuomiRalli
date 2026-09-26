@@ -3539,8 +3539,10 @@ function makeKid(shirt) {
   const body = new THREE.Mesh(lbox(0.34, 0.36, 0.22), m(shirt)); body.position.y = 0.86; G.add(body);
   const head = new THREE.Mesh(lgeo('khead', () => new THREE.SphereGeometry(0.13, 10, 8)), skin); head.position.y = 1.16; G.add(head);
   const hair = new THREE.Mesh(lgeo('khair', () => new THREE.SphereGeometry(0.135, 10, 6, 0, Math.PI*2, 0, Math.PI*0.5)), m([0x5a3a1e, 0xd8b36a, 0x2a1d12, 0x9a5a2a][Math.floor(Math.random()*4)])); hair.position.y = 1.18; G.add(hair);
+  const arm = (sx) => { const p = new THREE.Group(); p.position.set(sx*0.21, 1.0, 0); G.add(p); p.add(new THREE.Mesh(lbox(0.08, 0.36, 0.09, -0.18), body.material)); return p; };   // arms: shoulder pivots, like the grown-ups'
+  const armL = arm(-1), armR = arm(1);
   G.traverse(o => { if (o.isMesh) o.castShadow = true; });
-  G.userData.legs = [legL, legR];
+  G.userData.legs = [legL, legR]; G.userData.rig = { legL, legR, armL, armR };
   return G;
 }
 function setupFieldGame(lx, lz, th, w, d, y0) {   // the pitch and its ball; the ten kids are Humans made by worldBuild
@@ -4062,7 +4064,7 @@ class Human {
   constructor(o) {
     this.x = o.x; this.z = o.z; this.yaw = o.yaw || 0; this.vx = 0; this.vz = 0; this.vy = 0; this.hop = 0; this.tilt = 0; this.roll = 0; this.spin = 0; this.sway = 0;
     this.down = false; this.hurt = false; this.gone = false; this.inside = false; this.seat = null; this.temp = !!o.temp;
-    this.kid = !!o.kid; this.r = this.kid ? 0.24 : 0.3; this.task = o.task || null; this.home = { x: o.x, z: o.z, yaw: this.yaw }; this.st = null;
+    this.kid = !!o.kid; this.animal = !!o.animal; this.r = o.r || (this.kid ? 0.24 : 0.3); this.task = o.task || null; this.home = { x: o.x, z: o.z, yaw: this.yaw }; this.st = null;
     this.pose = { up: false, walk: 0, ph: Math.random()*6.3, armL: null, armR: null, armLz: 0, armRz: 0, legs: null, legsR: null, dy: 0 };
     if (o.inst !== undefined) this.view = { kind: 'inst', geo: o.inst, idx: -1, up: -1 };
     else { this.view = { kind: 'rig', g: o.rig }; o.rig.rotation.order = 'YXZ'; lifeGroup.add(o.rig); }
@@ -4077,7 +4079,7 @@ function knock(h, vx, vz, power, o) {
   h.down = true; h.vx = vx; h.vz = vz; h.pose.up = false; h.roll = 0;
   if (o && o.ride) { h.ride = o.ride; h.vy = 0; h.spin = 0; } else { h.vy = Math.min(4, 1.2 + power*0.1); h.spin = (Math.random() - 0.5)*5; }
   if (h.task && h.task.knocked) h.task.knocked(h);
-  if (!h.hurt) { h.hurt = true; DISPATCH.hurt(h); }
+  if (!h.hurt) { h.hurt = true; if (!h.animal) DISPATCH.hurt(h); }   // (a knocked-over dog gets no ambulance)
   return true;
 }
 function humanStep(h, dt) {   // body physics shared by everyone
@@ -4237,7 +4239,7 @@ const mowTask = (P, mower) => { const L = 5.2, lanes = 6, ux = Math.sin(P.yaw), 
     reset() { S.lane = 0; S.dir = 1; S.s = -L/2; S.pause = 0; S.ldir = 1; } }; };
 const rideTask = (P, bike, k) => { const S = { r: 2.0 + k*0.55, th: Math.random()*6.3 + k*Math.PI, sp: 2.4 + Math.random()*0.8, dir: k % 2 ? -1 : 1, ph: 0 };
   return { kind: 'ride', update(h, dt, t, near) { S.th += S.dir*S.sp/S.r*dt; S.ph += dt*S.sp*3; const x = P.x + Math.sin(S.th)*S.r, z = P.z + Math.cos(S.th)*S.r, yaw = S.th + S.dir*Math.PI/2;
-      h.x = x; h.z = z; h.vx = h.vz = 0; h.yaw = yaw; h.roll = -S.dir*0.14; h.pose.dy = 0.22; h.pose.legs = Math.sin(S.ph)*0.7 - 0.9; h.pose.legsR = -Math.sin(S.ph)*0.7 - 0.9;
+      h.x = x; h.z = z; h.vx = h.vz = 0; h.yaw = yaw; h.roll = -S.dir*0.14; h.pose.dy = 0.22; h.pose.legs = Math.sin(S.ph)*0.7 - 0.9; h.pose.legsR = -Math.sin(S.ph)*0.7 - 0.9; h.pose.armL = h.pose.armR = -1.15;   // hands on the bars
       if (near) { placeAt(bike, x, z, yaw); bike.rotation.z = h.roll; } },
     knocked(h) { bike.rotation.z = (Math.random() < 0.5 ? 1 : -1)*1.45; bike.position.y = Y(bike.position.x, bike.position.z) + 0.05; },   // the bike falls over and stays there
     reset(h) { h.roll = 0; } }; };
@@ -4670,6 +4672,135 @@ function pizzaUpdate(dt) {
   if (!PIZZA.guy) PIZZA.shop = null;
 }
 function pizzaReset() { PIZZA.k = 1; PIZZA.got = false; PIZZA.wait = 0; PIZZA.guy = null; PIZZA.shop = null; const el = document.getElementById('pizza-hud'); if (el) el.textContent = ''; }
+// ════════ VILLAGE MISCHIEF: kids scrapping in yards, roofers up on a few roofs, broken-down cars smoking in yards, dog walkers in
+//          the woods, a crowd along the sports field, a queue at the K-shop door. All Humans with tasks (so the car can knock any of
+//          them over and the ambulance comes), placed after the terrain lift from what the world already has. ════════
+const EXTRA = { queue: null };
+const distRoute = (x, z) => Math.sqrt(roadInfo(x, z).d2);
+function clearSpot(x, z, r) {   // nothing standing here: no road, house, shop, pole, car, person or planned prop within r
+  if (onRoad(x, z, r + 0.5)) return false; const ri = roadInfo(x, z); if (Math.sqrt(ri.d2) < wAt(ri.idx)/2 + 3 + r) return false;
+  let hit = false; staticNear(x, z, r + 3, B => { if (!hit && boxPush(B, x, z, r + 0.3)) hit = true; }); if (hit) return false;
+  if (VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < r + 2.4)) return false;
+  if (HUMANS.some(h => Math.hypot(h.x - x, h.z - z) < r + 0.7)) return false;
+  return !LIFE_PLAN.some(P => Math.hypot(P.x - x, P.z - z) < r + 2.5) && !inPaved(x, z); }
+const spreadPick = (list, n, gap) => { const out = []; for (const c of list) { if (out.length >= n) break; if (out.some(o => Math.hypot(o.x - c.x, o.z - c.z) < gap)) continue; out.push(c); } return out; };
+const shuffled = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const inPolyXZ = (P, x, z) => { let c = false; for (let a = 0, b = P.length - 1; a < P.length; b = a++) if (((P[a][1] > z) !== (P[b][1] > z)) && (x < (P[b][0] - P[a][0])*(z - P[a][1])/(P[b][1] - P[a][1]) + P[a][0])) c = !c; return c; };
+function plotSpot(pl, r) { let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9; for (const q of pl.P) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); z0 = Math.min(z0, q[1]); z1 = Math.max(z1, q[1]); }
+  for (let k = 0; k < 30; k++) { const x = x0 + (x1 - x0)*Math.random(), z = z0 + (z1 - z0)*Math.random(); if (inPolyXZ(pl.P, x, z) && clearSpot(x, z, r)) return [x, z]; } return null; }
+
+// kids watching a scrap: a ring round it, bouncing and waving
+const kidCheerTask = (F, a) => ({ kind: 'cheer', update(h, dt, t) { const tx = F.x + Math.sin(a)*2.1, tz = F.z + Math.cos(a)*2.1;
+  if (Math.hypot(h.x - tx, h.z - tz) > 0.5) { walkTo(h, tx, tz, 1.8, dt); return; }
+  h.vx = h.vz = 0; h.yaw = Math.atan2(F.x - h.x, F.z - h.z); const k = Math.sin(t*6 + a*3);
+  if (k > 0.3) { h.pose.armL = -2.6; h.pose.armR = -2.2 - k*0.4; } else { h.pose.armL = h.pose.armR = -0.3; }
+  if (!(h.hop > 0) && Math.random() < dt*0.9) h.vy = 1.4 + Math.random(); } });
+// a roofer kneeling on the roof, hammering in bursts; if the house catches fire he jumps
+const rooferTask = (S) => ({ kind: 'roofer', update(h, dt, t) {
+  if (S.b.fire && !S.jumped) { S.jumped = true; h.hop = S.y - Y(h.x, h.z); knock(h, S.ox*3.6, S.oz*3.6, 4); return; }
+  h.x = S.x; h.z = S.z; h.vx = h.vz = 0; h.yaw = S.yaw; h.pose.legs = 1.35; h.tilt = 0.28; h.pose.dy = S.y - Y(S.x, S.z) - 0.5;
+  const burst = Math.sin(t*0.5 + S.ph) > -0.2; h.pose.armL = -0.9; h.pose.armR = burst ? -1.9 + Math.abs(Math.sin(t*9 + S.ph))*0.9 : -0.8; },
+  reset(h) { S.jumped = false; h.hop = 0; h.tilt = 0; } });
+// the mate at the foot of the ladder, holding it (and now and then shouting something up)
+const ladderTask = (S) => ({ kind: 'ladder', update(h, dt, t) { if (Math.hypot(h.x - S.fx, h.z - S.fz) > 0.4) { walkTo(h, S.fx, S.fz, 1.2, dt); return; }
+  h.vx = h.vz = 0; h.yaw = S.yaw; const up = Math.sin(t*0.4 + S.ph) > 0.85; h.pose.armL = up ? -0.4 : -1.7; h.pose.armR = up ? -2.8 : -1.7; } });
+// the owner of a broken-down car, bent over the engine, straightening up now and then to scratch his head
+const fixTask = (v, e) => ({ kind: 'fix', update(h, dt, t) { const [tx, tz] = lloc(v.x, v.z, v.yaw, 0.15*e, e*(v.hl + 0.55));
+  if (Math.hypot(h.x - tx, h.z - tz) > 0.5) { walkTo(h, tx, tz, 1.4, dt); return; }
+  h.vx = h.vz = 0; h.yaw = v.yaw + (e > 0 ? Math.PI : 0); const up = Math.sin(t*0.35 + v.x) > 0.7;
+  if (up) { h.tilt = 0; h.pose.armR = -2.9; h.pose.armRz = -0.4; h.pose.armL = -0.2; } else { h.tilt = 0.55; h.pose.armL = h.pose.armR = -1.2 + Math.sin(t*3)*0.15; } },
+  reset(h) { h.tilt = 0; } });
+// dog walkers: out and back along a path through the woods, stopping when the dog finds something
+const walkerTask = (W) => ({ kind: 'walk', update(h, dt, t) { const S = W.st;
+  if (S.pause > 0) { S.pause -= dt; h.vx = h.vz = 0; h.yaw = Math.atan2(W.dog.x - h.x, W.dog.z - h.z); return; }
+  const p = W.path[S.i]; if (walkTo(h, p[0], p[1], 1.15, dt)) { S.i += S.dir; if (S.i >= W.path.length || S.i < 0) { S.dir = -S.dir; S.i += 2*S.dir; } if (Math.random() < 0.35) S.pause = 2 + Math.random()*4; } },
+  reset() { W.st.i = 1; W.st.dir = 1; W.st.pause = 0; } });
+const dogTask = (W) => ({ kind: 'dog', update(h, dt, t) { const o = W.owner, S = W.dst;
+  S.re -= dt; if (S.re <= 0) { S.re = 1 + Math.random()*2.5; const a = o.yaw + (Math.random() - 0.5)*2.4, d = 1.2 + Math.random()*1.9; S.ox = Math.sin(a)*d; S.oz = Math.cos(a)*d; }
+  const tx = o.x + S.ox, tz = o.z + S.oz, d = Math.hypot(tx - h.x, tz - h.z);
+  if (d > 0.25) { const sp = Math.min(3.2, d*2.2); h.vx = (tx - h.x)/d*sp; h.vz = (tz - h.z)/d*sp; h.yaw = Math.atan2(h.vx, h.vz); h.pose.walk = Math.min(0.7, sp*0.3); h.pose.ph += dt*(6 + sp*4); }
+  else { h.vx = h.vz = 0; h.pose.walk = 0; }
+  const L = W.leash, show = !o.down && !o.gone && L.parent && Math.hypot(o.x - car.x, o.z - car.z) < 240; L.visible = show;
+  if (show) { const hx = o.x + Math.cos(o.yaw)*0.33, hz = o.z - Math.sin(o.yaw)*0.33, hy = Y(o.x, o.z) + 0.95, dy = Y(h.x, h.z) + 0.46 + h.hop, fx = h.x + Math.sin(h.yaw)*0.34, fz = h.z + Math.cos(h.yaw)*0.34;
+    const lx = fx - hx, ly = dy - hy, lz = fz - hz, ll = Math.hypot(lx, ly, lz) || 0.01; L.position.set((hx + fx)/2, (hy + dy)/2, (hz + fz)/2); L.scale.set(1, 1, ll); L.lookAt(fx, dy, fz); } } });
+function makeDog() { const G = new THREE.Group(), col = lmat(lpick([0x6a4a2a, 0x1c1a18, 0xc89a5a, 0xe8e2d8, 0x8a5a2a]), 0.9), dark = lmat(0x1a1614, 0.8);
+  lmesh(lbox(0.24, 0.24, 0.62), col, 0, 0.44, 0, G); lmesh(lbox(0.2, 0.2, 0.24), col, 0, 0.6, 0.38, G); lmesh(lbox(0.12, 0.1, 0.14), col, 0, 0.55, 0.55, G);
+  lmesh(lbox(0.05, 0.1, 0.06), dark, -0.07, 0.72, 0.36, G); lmesh(lbox(0.05, 0.1, 0.06), dark, 0.07, 0.72, 0.36, G); lmesh(lbox(0.05, 0.04, 0.04), dark, 0, 0.57, 0.62, G, false);
+  const tail = lmesh(lbox(0.05, 0.05, 0.3), col, 0, 0.56, -0.4, G); tail.rotation.x = -0.7;
+  const leg = (x, z) => { const p = new THREE.Group(); p.position.set(x, 0.34, z); G.add(p); lmesh(lbox(0.07, 0.34, 0.07, -0.17), col, 0, 0, 0, p); return p; };
+  G.userData.rig = { legL: leg(-0.08, 0.22), legR: leg(0.08, 0.22), armL: leg(-0.08, -0.22), armR: leg(0.08, -0.22) };   // (front legs as "legs", back legs as "arms": the rig swings them for a trot)
+  return G; }
+// field fans: along the touchline, following the ball, up on their feet when someone scores
+const fanTask = (F) => ({ kind: 'fan', update(h, dt, t) { const B = F.ball, bx = F.lx + Math.cos(F.th)*B.a + Math.sin(F.th)*B.b, bz = F.lz - Math.sin(F.th)*B.a + Math.cos(F.th)*B.b;
+  const want = Math.atan2(bx - h.x, bz - h.z); let d = want - h.yaw; while (d > Math.PI) d -= 2*Math.PI; while (d < -Math.PI) d += 2*Math.PI; h.yaw += d*Math.min(1, dt*3);
+  const st = h.st || (h.st = { ph: Math.random()*6.3 }); h.sway = 0.06*Math.sin(t*0.9 + st.ph);
+  h.pose.up = F.reset > 0 || Math.sin(t*0.23 + st.ph*5) > 0.97; if (F.reset > 0.9 && !(h.hop > 0) && Math.random() < dt*3) h.vy = 1.8; },
+  reset(h) { h.st = null; } });
+// the K-shop queue: shuffle up a place at a time; the one at the front goes in, comes out a while later, wanders off and queues again
+const queueTask = (Q) => ({ kind: 'queue', update(h, dt, t) { const st = h.st || (h.st = { mode: 'queue', wait: 0 });
+  if (st.mode === 'queue') { const i = Q.order.indexOf(h); if (i < 0) { Q.order.push(h); return; } const [sx, sz] = Q.slot(i);
+    if (walkTo(h, sx, sz, 0.9, dt)) { const [nx, nz] = i ? Q.slot(i - 1) : Q.door; h.yaw = Math.atan2(nx - h.x, nz - h.z); h.sway = 0.05*Math.sin(t*0.8 + i); } }
+  else if (st.mode === 'enter') { if (walkTo(h, Q.door[0], Q.door[1], 1.0, dt)) { h.inside = true; st.wait = 6 + Math.random()*8; Q.inShop.push(h); } }
+  else if (st.mode === 'leave') { if (walkTo(h, st.ax, st.az, 1.1, dt)) { st.mode = 'away'; st.wait = 4 + Math.random()*8; } }
+  else if (st.mode === 'away') { h.vx = h.vz = 0; if ((st.wait -= dt) <= 0) { st.mode = 'queue'; Q.order.push(h); } } },
+  reset(h) { h.st = null; h.inside = false; } });
+function queueUpdate(dt) { const Q = EXTRA.queue; if (!Q) return;
+  Q.order = Q.order.filter(h => !h.down && !h.gone && HUMANS.includes(h));
+  for (let i = Q.inShop.length - 1; i >= 0; i--) { const h = Q.inShop[i]; if ((h.st.wait -= dt) > 0) continue; Q.inShop.splice(i, 1);   // out again, off for a wander
+    h.inside = false; h.x = Q.door[0]; h.z = Q.door[1]; const a = Math.random()*6.3, [ax, az] = lloc(Q.L[1], Q.L[2], Q.L[3], Math.sin(a)*8, lmSize(Q.L)[1]/2 + 7 + Math.random()*5); h.st.mode = 'leave'; h.st.ax = ax; h.st.az = az; }
+  Q.timer -= dt; const f = Q.order[0];
+  if (f && Q.timer <= 0 && f.st && f.st.mode === 'queue' && Math.hypot(f.x - Q.slot(0)[0], f.z - Q.slot(0)[1]) < 0.3) { Q.order.shift(); f.st.mode = 'enter'; Q.timer = 5 + Math.random()*5; } }
+
+function lifeExtrasBuild() {
+  EXTRA.queue = null; const near = (x, z, a, b) => { const d = distRoute(x, z); return d >= a && d <= b; };
+  // kids scrapping: three yards near the route, two kids at it and a ring of kids egging them on
+  const plots = shuffled(PLOTS.filter(pl => near(pl.F.x, pl.F.z, 20, 130)));
+  let kf = 0; for (const pl of plots) { if (kf >= 3) break; const sp = plotSpot(pl, 2.8); if (!sp) continue; if (LIFE_PLAN.some(P => P.kind === 'kidfight' && Math.hypot(P.x - sp[0], P.z - sp[1]) < 120)) continue;
+    LIFE_PLAN.push({ kind: 'kidfight', x: sp[0], z: sp[1] }); kf++;
+    const F = { x: sp[0], z: sp[1], th: Math.random()*6.3, a: [], s: [0, 1].map(i => ({ pt: 0.4 + Math.random() + i*0.3, punch: 0, arm: 0, recoil: 0, fall: 0 })) };
+    for (let i = 0; i < 2; i++) F.a.push(new Human({ x: sp[0] + (i ? -0.5 : 0.5), z: sp[1], kid: true, rig: makeKid(lpick(L_SHIRTS)), task: fightTask(F, i) }));
+    const nw = 3 + Math.floor(Math.random()*3); for (let k = 0; k < nw; k++) { const a = k*6.28/nw + Math.random()*0.4; new Human({ x: sp[0] + Math.sin(a)*2.1, z: sp[1] + Math.cos(a)*2.1, kid: true, rig: makeKid(lpick(L_SHIRTS)), task: kidCheerTask(F, a) }); } }
+  // roofers: four pitched roofs near the route, a ladder at the eaves, sometimes a mate holding it
+  const houses = shuffled(STATIC_LIST.filter(b => b.kind === 'house' && b.roofH > 0.8 && Math.min(b.hw, b.hl) > 2.6 && near(b.x, b.z, 25, 140)));
+  for (const b of spreadPick(houses, 4, 110)) { const B = b.B, [x, z, w, d, th] = B, along = d >= w, rw = along ? w : d, rd = along ? d : w, sd = Math.random() < 0.5 ? 1 : -1;
+    const base = footprintBase(x, z, w/2 + 1.2, d/2 + 1.2, th), u = sd*rw*0.24, v = (Math.random() - 0.5)*rd*0.4, [a, bb] = along ? [u, v] : [v, u], [rx, rz] = lloc(x, z, th, a, bb);
+    const half = (rw + 0.8)/2, S = { b, x: rx, z: rz, y: base + b.wallTop + b.roofH*(1 - Math.abs(u)/half), ph: Math.random()*6, jumped: false };
+    const [ox, oz] = along ? [Math.cos(th)*sd, -Math.sin(th)*sd] : [Math.sin(th)*sd, Math.cos(th)*sd]; S.ox = ox; S.oz = oz; S.yaw = Math.atan2(-ox, -oz);   // facing up the slope
+    new Human({ x: rx, z: rz, yaw: S.yaw, rig: makeAdult(lpick([0x2a52be, 0xe8e2d0, 0xd83b2c, 0x3a3a3a]), 0x2b3a63, lpick(L_HAIR)), task: rooferTask(S) });
+    const e = rw/2 + 0.55, [lx, lz] = along ? lloc(x, z, th, sd*e, v) : lloc(x, z, th, v, sd*e), top = base + b.wallTop + 0.35 - Y(lx, lz), len = Math.hypot(top, 0.9);   // the ladder: foot out from the wall, top on the eaves
+    const lad = new THREE.Group(), wood = lmat(0xb89a64, 0.8); for (const sx of [-0.22, 0.22]) lmesh(lbox(0.06, len, 0.06, len/2), wood, sx, 0, 0, lad); for (let k = 0.3; k < len - 0.1; k += 0.3) lmesh(lbox(0.44, 0.04, 0.05), wood, 0, k, 0, lad, false);
+    lad.rotation.order = 'YXZ'; lad.rotation.y = Math.atan2(ox, oz); lad.rotation.x = -Math.atan2(0.9, top); const [fx, fz] = [lx + ox*0.45, lz + oz*0.45]; lad.position.set(fx, Y(fx, fz), fz); lifeGroup.add(lad); nearVis(lad, fx, fz);
+    const pile = new THREE.Group(); for (let k = 0; k < 4; k++) lmesh(lbox(1.0, 0.1, 0.6), lmat(k % 2 ? 0x6b4a35 : 0x7a5a42, 0.9), 0, 0.05 + k*0.1, 0, pile); const [px, pz] = [fx + ox*1.2 + oz*1.4, fz + oz*1.2 - ox*1.4]; placeAt(pile, px, pz, Math.random()*6.3); lifeGroup.add(pile); nearVis(pile, px, pz);
+    if (Math.random() < 0.6) { const L = { fx: fx + ox*0.55, fz: fz + oz*0.55, yaw: Math.atan2(-ox, -oz), ph: Math.random()*6 }; new Human({ x: L.fx, z: L.fz, yaw: L.yaw, rig: makeAdult(lpick(L_SHIRTS), lpick(L_PANTS), lpick(L_HAIR)), task: ladderTask(L) }); } }
+  // broken-down cars in yards: four parked cars near the route smoke from under the bonnet, the owner bent over the engine
+  const cars = shuffled(VEHICLES.filter(v => v.kind === 'car' && v.view.c && !v.view.c.street && near(v.x, v.z, 18, 140)));
+  const roomAt = (x, z) => { let hit = false; staticNear(x, z, 3, B => { if (!hit && boxPush(B, x, z, 0.9)) hit = true; }); return !hit && !onRoad(x, z, 0.4); };
+  for (const v of spreadPick(cars.filter(v => [1, -1].some(e => roomAt(...lloc(v.x, v.z, v.yaw, 0, e*(v.hl + 0.7))))), 4, 140)) {   // the "bonnet" is whichever end has room to stand at
+    const e = roomAt(...lloc(v.x, v.z, v.yaw, 0, v.hl + 0.7)) ? 1 : -1, [tx, tz] = lloc(v.x, v.z, v.yaw, 0.15*e, e*(v.hl + 0.55));
+    EMITTERS.push({ v, end: e, x: v.x, z: v.z, y: 0, kind: 'breakdown', acc: 0 }); new Human({ x: tx, z: tz, yaw: v.yaw + (e > 0 ? Math.PI : 0), rig: makeAdult(lpick(L_SHIRTS), lpick(L_PANTS), lpick(L_HAIR)), task: fixTask(v, e) }); }
+  // dog walkers: out and back along paths through the woods not far from the route
+  const starts = []; for (let k = 0; k < 1500 && starts.length < 120; k++) { const i = Math.floor(Math.random()*trackPoints.length), p = trackPoints[i], a = Math.random()*6.3, r = 40 + Math.random()*150, x = p.x + Math.sin(a)*r, z = p.y + Math.cos(a)*r;
+    if (landClassAt(x, z) === 1 && Math.abs(x) < 540 && Math.abs(z) < 540 && clearSpot(x, z, 1)) starts.push({ x, z }); }
+  let walkers = 0; for (const st of spreadPick(shuffled(starts), 14, 110)) { if (walkers >= 4) break; const path = [[st.x, st.z]]; let x = st.x, z = st.z, hd = Math.random()*6.3;
+    for (let k = 0; k < 9; k++) { let ok = false; for (let tr = 0; tr < 14 && !ok; tr++) { const a = hd + (Math.random() - 0.5)*1.6, d = 12 + Math.random()*12, nx = x + Math.sin(a)*d, nz = z + Math.cos(a)*d;
+        if (landClassAt(nx, nz) === 1 && landClassAt((x + nx)/2, (z + nz)/2) === 1 && Math.abs(nx) < 550 && Math.abs(nz) < 550 && clearSpot(nx, nz, 0.8)) { x = nx; z = nz; hd = a; path.push([x, z]); ok = true; } } if (!ok) break; }
+    if (path.length < 4) continue; walkers++;
+    const W = { path, st: { i: 1, dir: 1, pause: 0 }, dst: { re: 0, ox: 1, oz: 1 } };
+    W.owner = new Human({ x: st.x, z: st.z, rig: makeAdult(lpick([0x2f5a3a, 0x6b4a35, 0x2a3a5a, 0x8a2a2a, 0xd8b36a]), lpick(L_PANTS), lpick(L_HAIR)), task: walkerTask(W) });
+    W.leash = new THREE.Mesh(lbox(0.018, 0.018, 1), lmat(0xc8201e, 0.6)); W.leash.castShadow = false; lifeGroup.add(W.leash);
+    W.dog = new Human({ x: st.x + 1, z: st.z + 1, rig: makeDog(), task: dogTask(W), r: 0.26, animal: true }); }
+  // field fans: a dozen along each touchline of the sports field
+  for (const F of FIELD_GAMES) for (const side of [-1, 1]) { const n = 9 + Math.floor(Math.random()*5);
+    for (let k = 0; k < n; k++) { const a = (Math.random() - 0.5)*F.w*0.8, b = side*(F.d/2 + 3.2 + Math.random()*1.2), x = F.lx + Math.cos(F.th)*a + Math.sin(F.th)*b, z = F.lz - Math.sin(F.th)*a + Math.cos(F.th)*b;
+      if (!clearSpot(x, z, 0.35)) continue; new Human({ x, z, yaw: F.th + (side > 0 ? Math.PI : 0), inst: Math.floor(Math.random()*16), task: fanTask(F) }); } }
+  // the K-shop queue: along the shop front from the door
+  const K = LANDMARKS.find(L => L[0] === 'kauppa');
+  if (K) { const [, kx, kz, kth] = K, D = lmSize(K)[1], Q = { L: K, order: [], inShop: [], timer: 4, door: lloc(kx, kz, kth, 0, D/2 + 0.55) };
+    Q.slot = (i) => lloc(kx, kz, kth, 1.1 + i*0.8, D/2 + 1.15 + Math.max(0, i - 6)*0.8);   // along the wall, then out towards the street if it's long
+    const n = 6 + Math.floor(Math.random()*3); for (let i = 0; i < n; i++) { const [x, z] = Q.slot(i); const h = new Human({ x, z, inst: Math.floor(Math.random()*16), task: queueTask(Q) }); Q.order.push(h); }
+    Q.all = Q.order.slice(); EXTRA.queue = Q; }
+}
+function lifeExtrasReset() { const Q = EXTRA.queue; if (Q) { Q.order = Q.all.filter(h => HUMANS.includes(h)); Q.inShop.length = 0; Q.timer = 4; } }
 function worldBuild() {
   pizzaShops();
   // clear the last build
@@ -4733,6 +4864,7 @@ function worldBuild() {
   trackMeshGroup.children.forEach(m => { if (m.userData.key !== 'bus') return; const e = new THREE.Euler().setFromQuaternion(m.quaternion, 'YXZ');
     new Vehicle({ kind: 'bus', x: m.position.x, z: m.position.z, yaw: e.y, hw: 1.3, hl: 5.1, view: { kind: 'mesh', g: m }, axle: [1.13, 2.8, -2.6] }); });
   staticBuild();
+  lifeExtrasBuild();
   crowdBuild();
 }
 const NEAR_VIS = []; let nearVisT = 0;   // props only drawn near the car (grills, mowers, bikes, flags)
@@ -4740,14 +4872,15 @@ function nearVis(g, x, z) { NEAR_VIS.push({ g, x, z }); }
 function nearVisUpdate(dt) { if ((nearVisT -= dt) > 0) return; nearVisT = 0.25; for (const e of NEAR_VIS) { const n = (e.x - car.x)**2 + (e.z - car.z)**2 < 240*240; if (e.g.visible !== n) e.g.visible = n; } }
 const EMITTERS = [];   // grills, broken-down cars: smoke that goes on whatever the people do
 function emittersUpdate(dt) {
-  for (const E of EMITTERS) { if ((E.x - car.x)**2 + (E.z - car.z)**2 > 240*240) continue; E.acc += dt;
+  for (const E of EMITTERS) { if (E.v) { const [ex, ez] = lloc(E.v.x, E.v.z, E.v.yaw, 0, (E.end || 1)*(E.v.hl - 0.4)); E.x = ex; E.z = ez; E.y = E.v.gy + 0.95; }
+    if ((E.x - car.x)**2 + (E.z - car.z)**2 > 240*240) continue; E.acc += dt;
     if (E.kind === 'grill') while (E.acc > 0.28) { E.acc -= 0.28; lifeFx.emit(E.x + (Math.random() - 0.5)*0.3, E.y, E.z + (Math.random() - 0.5)*0.3, 0.25 + Math.random()*0.2, 0.5 + Math.random()*0.3, 0.12, 3.2 + Math.random()*1.5, 0.35, 2.4, 0.32, 0.78, 0.78, 0.8, 0.9, 0.9, 0.92); }
     else while (E.acc > 0.09) { E.acc -= 0.09; const dark = Math.random() < 0.6; lifeFx.emit(E.x + (Math.random() - 0.5)*0.6, E.y, E.z + (Math.random() - 0.5)*0.6, 0.2 + (Math.random() - 0.5)*0.4, 0.9 + Math.random()*0.6, 0.1 + (Math.random() - 0.5)*0.4, 3.5 + Math.random()*2, 0.5, 3.6, dark ? 0.75 : 0.55, dark ? 0.25 : 0.85, dark ? 0.25 : 0.85, dark ? 0.27 : 0.87, dark ? 0.55 : 0.92, dark ? 0.55 : 0.92, dark ? 0.57 : 0.93); } }
 }
 function worldUpdate(dt) {
   worldT += dt;
   carStillT = Math.hypot(car.vx, car.vz) < 1.5 && gameState === State.RACING ? carStillT + dt : 0;
-  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
+  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); queueUpdate(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
   let siren = 0; for (const v of VEHICLES) if (v.job && v.job.phase === 'drive') siren = Math.max(siren, Math.max(0, 1 - Math.hypot(v.x - car.x, v.z - car.z)/240));
   sirenSet(siren, dt);
 }
@@ -4758,7 +4891,7 @@ function worldReset() {   // a restart: everyone back on their feet and where th
   for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i]; if (h.temp) { humanRemove(h); continue; } if (h.seat0) { h.seat = h.seat0; h.task = h.task0; }
     h.x = h.home.x; h.z = h.home.z; h.yaw = h.home.yaw; h.vx = h.vz = h.vy = h.hop = h.tilt = h.roll = h.spin = h.sway = 0; h.down = h.hurt = h.gone = false; h.ride = null; h.pose.up = false; if (h.task && h.task.reset) h.task.reset(h); humanSync(h); }
   for (const F of FIELD_GAMES) if (F.kids) { F.ball.a = F.ball.b = 0; F.ball.va = F.ball.vb = F.ball.vy = 0; F.ball.y = 0.16; }
-  pizzaReset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); waterFx.clear(); sirenSet(0, 0);
+  pizzaReset(); lifeExtrasReset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); waterFx.clear(); sirenSet(0, 0);
 }
 function roadPathTo(x, z) { return ambPath(x, z); }
 
