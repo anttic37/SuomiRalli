@@ -1,0 +1,5 @@
+test/node_modules/
+test/editor.js
+test/game.js
+test/*.png
+__pycache__/
