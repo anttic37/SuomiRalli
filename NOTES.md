@@ -168,6 +168,33 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       now ~0.5–0.9 ms/frame (was 0.4–0.6).
   - Version history on the start screen, bottom right: the last 10 of `CHANGES` in src/game.html, newest first, one line each.
     Every change adds a line (the rule is in CLAUDE.md). Hidden on screens under 1000 × 620.
+  - v11 (after "mietitään 10 muuta sekoilua … kaikki muut paitsi 7"): mischief set 2, the "MORE MISCHIEF" module
+    (`lifeExtras2Build` / `extras2Update` / `lifeExtras2Reset`; set pieces with props that move on their own register an
+    updater in `X2.upd` and a restart hook in `X2.reset`; places are reserved in LIFE_PLAN with `x2: true` and a radius `r`,
+    which clearSpot now respects).
+    - Hobby horses (`horseTask`): 2 rings of 3–5 girls galloping round with two little jumps, resting to pat the horses.
+    - Carpet beating (`beatTask`): 3 racks, a dust puff through the carpet on every whack, a breather now and then.
+    - Moped boys (`mopedTask`): 2–3 on each of up to 2 side-street stretches ≥ 16 m off the route (`streetStretches`,
+      Chaikin-smoothed `polyLine`), back and forth with U-turns (`laneStep`), blue two-stroke smoke. The rally car roaring past
+      within 9 m at > 12 m/s: a wobble, or one goes over on his own and gets back on (no ambulance); hit by it → ambulance.
+    - The postman (`postTask`): Posti blue, orange panniers, stops at mailboxes placed by the houses along his street; knocked
+      over, 14 letters flutter down (`flyLetters`, `X2.flying`).
+    - The ice-cream van (`VSPEC.icecream`, `iceVanAI`): drives between streets with driveAlong (destinations 100–340 m away,
+      away from the route, not into dead ends, preferring no turn in the road), stops 24–40 s and plays a tune; 6 kids come
+      out of the yards round the stop, queue at the hatch and go off licking cones (`iceKidTask`).
+      - Steep 8× relief: accel 8 so it climbs.
+      - Blocked: it sells where it is and remembers the spot (`V.blocks`).
+      - It never parks on the route (ghosts past instead). Its own bumps don't count as damage, only the rally car's.
+    - Laundry (`laundryTask`, `laundryUpdate`): 3 lines. The sheet blows off (every 25–85 s, or when the car passes within
+      16 m at > 14 m/s) and she chases it, picks it up and pegs it back.
+    - Midsummer (`partyTask`): a kokko (EMITTER kind 'kokko' + glow sprite), a bench, a crate and 6 swaying singers. Every
+      40–90 s one staggers into a bush and lies there face down (no ambulance).
+    - 2 loose yard dogs (`yardDogTask`): they chase the rally car barking for up to 7 s; the owner runs after them waving
+      (`dogOwnerTask`) and kneels by a dog that got hit.
+    - Badminton (`badTask`, `badUpdate`): 2 courts. The shuttle flies in arcs; 15 % are missed and fetched and served again.
+    - `makeBike` (shared with the kids' bikes), `handProp` (a prop in the right hand), `roadLift` (asphalt is ROAD_Y up).
+    - Test: t_mischief2 (counts, the van's stops and queue, mopeds and the postman moving, the dog chase, the faller, a knocked
+      postman's letters, reset, close-ups mis2_*.png). World update still ~0.5–0.95 ms/frame.
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 

@@ -57,7 +57,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö · Vantaa · <span id="tod-label">päivä</span> · <span id="terrain-label">mäet</span></div>
-  <div class="build-stamp">editorista 18.00 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
+  <div class="build-stamp">editorista 18.39 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
   <div id="results">
     <div class="label">maaliaika</div>
     <div class="time" id="final-time">00:00.000</div>
@@ -3688,6 +3688,9 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Jäätelöauto kiertää, lapset jonoon; mopopojat, postinjakaja'],
+  ['26.9.', 'Keppihevostytöt, mattojen tamppaus, sulkapallo, karkaava lakana'],
+  ['26.9.', 'Juhannuskokko ja humalaiset, irtokoirat jahtaavat autoa'],
   ['26.9.', 'Versiohistoria alkuruutuun'],
   ['26.9.', 'Kylän sekoilu: tappelut, kattoremontit, koirat, jono'],
   ['26.9.', 'Esc alkuruutuun, "haen ajajia…"'],
@@ -4324,6 +4327,7 @@ const VSPEC = {   // mass (the rally car = 1), engine m/s², brakes m/s², top s
   tractor:   { mass: 3.2,  accel: 3.0, brake: 5,   vmax: 7,  wb: 1.9,  steer: 0.7,  lat: 9.0, yawK: 7 },
   ambulance: { mass: 2.3,  accel: 5.2, brake: 7.5, vmax: 17, wb: 2.95, steer: 0.58, lat: 7.5, yawK: 6 },
   fire:      { mass: 8,    accel: 4.2, brake: 6,   vmax: 13, wb: 4.7,  steer: 0.55, lat: 6.5, yawK: 5 },
+  icecream:  { mass: 2.0,  accel: 8.0, brake: 7,   vmax: 13, wb: 3.0,  steer: 0.6,  lat: 7.5, yawK: 6 },
 };
 class Vehicle {
   constructor(o) {
@@ -4701,7 +4705,7 @@ function clearSpot(x, z, r) {   // nothing standing here: no road, house, shop, 
   let hit = false; staticNear(x, z, r + 3, B => { if (!hit && boxPush(B, x, z, r + 0.3)) hit = true; }); if (hit) return false;
   if (VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < r + 2.4)) return false;
   if (HUMANS.some(h => Math.hypot(h.x - x, h.z - z) < r + 0.7)) return false;
-  return !LIFE_PLAN.some(P => Math.hypot(P.x - x, P.z - z) < r + 2.5) && !inPaved(x, z); }
+  return !LIFE_PLAN.some(P => Math.hypot(P.x - x, P.z - z) < r + 2.5 + (P.r || 0)) && !inPaved(x, z); }
 const spreadPick = (list, n, gap) => { const out = []; for (const c of list) { if (out.length >= n) break; if (out.some(o => Math.hypot(o.x - c.x, o.z - c.z) < gap)) continue; out.push(c); } return out; };
 const shuffled = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const inPolyXZ = (P, x, z) => { let c = false; for (let a = 0, b = P.length - 1; a < P.length; b = a++) if (((P[a][1] > z) !== (P[b][1] > z)) && (x < (P[b][0] - P[a][0])*(z - P[a][1])/(P[b][1] - P[a][1]) + P[a][0])) c = !c; return c; };
@@ -4820,6 +4824,379 @@ function lifeExtrasBuild() {
     Q.all = Q.order.slice(); EXTRA.queue = Q; }
 }
 function lifeExtrasReset() { const Q = EXTRA.queue; if (Q) { Q.order = Q.all.filter(h => HUMANS.includes(h)); Q.inShop.length = 0; Q.timer = 4; } }
+// ════════ MORE MISCHIEF: girls on hobby horses, carpet beating, moped boys, the postman on his bike, the ice-cream van, a sheet
+//          blowing off the washing line, a midsummer party round a bonfire, a loose yard dog, badminton. The same parts as above:
+//          Humans with tasks (knocked over → ambulance), props on lifeGroup, one updater per set piece in X2.upd. ════════
+const X2 = { upd: [], reset: [], flying: [] };
+const reserve = (kind, p, r) => LIFE_PLAN.push({ kind, x: p[0], z: p[1], r, x2: true });
+const chaikin = (P, n) => { for (let k = 0; k < n; k++) { const Q = [P[0]]; for (let i = 0; i < P.length - 1; i++) { const a = P[i], b = P[i+1]; Q.push([a[0]*0.75 + b[0]*0.25, a[1]*0.75 + b[1]*0.25], [a[0]*0.25 + b[0]*0.75, a[1]*0.25 + b[1]*0.75]); } Q.push(P[P.length - 1]); P = Q; } return P; };
+function polyLine(pts) { const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i-1] + Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1])); const total = cum[cum.length - 1];
+  return { pts, total, at(s) { s = Math.max(0, Math.min(total, s)); let i = 1; while (i < cum.length - 1 && cum[i] < s) i++; const a = pts[i-1], b = pts[i], u = (s - cum[i-1])/((cum[i] - cum[i-1]) || 1); return [a[0] + (b[0] - a[0])*u, a[1] + (b[1] - a[1])*u, Math.atan2(b[0] - a[0], b[1] - a[1])]; } }; }
+function streetStretches(minL, maxL, far) {   // stretches of side street that keep ≥ far m off the route, nothing parked on them
+  const out = [];
+  for (const R of sideRoads) { let run = [];
+    const flush = () => { if (run.length > 2 && polyLine(run).total >= minL) { const need = Math.ceil(maxL/3) + 1, i0 = Math.floor(Math.random()*Math.max(1, run.length - need + 1)), P = run.slice(i0, i0 + need), m = P[P.length >> 1];
+        out.push({ P, w: R.w, mid: { x: m[0], z: m[1] } }); } run = []; };
+    for (let i = 1; i < R.pts.length; i++) { const a = R.pts[i-1], b = R.pts[i], n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y)/3));
+      for (let k = i === 1 ? 0 : 1; k <= n; k++) { const x = a.x + (b.x - a.x)*k/n, z = a.y + (b.y - a.y)*k/n;
+        if (distRoute(x, z) >= far && Math.abs(x) < 560 && Math.abs(z) < 560 && !VEHICLES.some(v => Math.abs(v.x - x) < 3.5 && Math.abs(v.z - z) < 3.5) && !LIFE_PLAN.some(P => P.x2 && Math.hypot(P.x - x, P.z - z) < (P.r || 0) + 4)) run.push([x, z]); else flush(); } }
+    flush(); }
+  return shuffled(out); }
+function openSpot(r, a, b) { for (let k = 0; k < 700; k++) { const p = trackPoints[Math.floor(Math.random()*trackPoints.length)], an = Math.random()*6.3, d = a + Math.random()*(b - a), x = p.x + Math.sin(an)*d, z = p.y + Math.cos(an)*d;
+  if (Math.abs(x) < 540 && Math.abs(z) < 540 && landClassAt(x, z) !== 1 && distRoute(x, z) >= a && clearSpot(x, z, r)) return [x, z]; } return null; }
+function yardSpot(kind, r, a, b, gap) {   // a clear patch in a yard a–b m from the route, ≥ gap from the last one of its kind
+  const far = (x, z) => !LIFE_PLAN.some(P => P.kind === kind && Math.hypot(P.x - x, P.z - z) < gap);
+  for (const pl of shuffled(PLOTS.filter(pl => { const d = distRoute(pl.F.x, pl.F.z); return d >= a && d <= b && far(pl.F.x, pl.F.z); }))) { const sp = plotSpot(pl, r); if (sp) return sp; }
+  for (let k = 0; k < 4; k++) { const sp = openSpot(r, a, b); if (sp && far(sp[0], sp[1])) return sp; } return null; }
+// along a street stretch on the right-hand side, a U-turn at each end. S = { s, dir, v, o (lane offset), phi (≥ 0: turning) } → [x, z, yaw]
+function laneStep(S, L, dt) {
+  if (S.phi >= 0) { S.phi += dt*Math.max(S.v, 1.6)/S.o; const e = S.dir > 0 ? L.total : 0, [cx, cz, py] = L.at(e), y0 = py + (S.dir > 0 ? 0 : Math.PI);
+    if (S.phi < Math.PI) { const yc = y0 - S.phi; return [cx + S.o*Math.cos(yc), cz - S.o*Math.sin(yc), yc]; } S.phi = -1; S.dir = -S.dir; S.s = e; }
+  S.s += S.dir*S.v*dt; if (S.dir > 0 ? S.s >= L.total : S.s <= 0) { S.s = S.dir > 0 ? L.total : 0; S.phi = 0; }
+  const [x, z, py] = L.at(S.s), yaw = py + (S.dir > 0 ? 0 : Math.PI); return [x + S.o*Math.cos(yaw), z - S.o*Math.sin(yaw), yaw]; }
+const roadLift = (x, z) => onRoad(x, z, 0) ? ROAD_Y : 0;   // (the asphalt sits a little above the ground)
+function carAhead(x, z, yaw, dist) { const fx = Math.sin(yaw), fz = Math.cos(yaw), cx = car.x - x, cz = car.z - z, f = cx*fx + cz*fz; return f > 0 && f < dist && Math.abs(cx*fz - cz*fx) < 2.4; }
+const handProp = (h, g) => { const R = h.view.g.userData.rig; g.position.set(0, h.kid ? -0.34 : -0.62, 0.03); R.armR.add(g); return g; };   // in the right hand: rides the arm
+function makeBike(fr, sc) { const bike = new THREE.Group(), tyre = lmat(0x151515, 0.7);
+  for (const zz of [-0.45, 0.45]) { const w = lmesh(lgeo('wheel', () => new THREE.TorusGeometry(0.28, 0.03, 5, 14)), tyre, 0, 0.3, zz, bike); w.rotation.y = Math.PI/2; }
+  lmesh(lbox(0.035, 0.035, 0.85), fr, 0, 0.55, 0, bike); const d2 = lmesh(lbox(0.035, 0.035, 0.6), fr, 0, 0.42, 0.18, bike); d2.rotation.x = 0.7;
+  lmesh(lbox(0.12, 0.04, 0.2), tyre, 0, 0.72, -0.2, bike); lmesh(lbox(0.46, 0.03, 0.03), lmat(0xb0b0b0, 0.3), 0, 0.85, 0.42, bike); bike.rotation.order = 'YXZ'; if (sc) bike.scale.setScalar(sc); return bike; }
+function flyLetters(x, y, z, vx, vz, n) { for (let k = 0; k < n; k++) { const m = lmesh(lbox(0.22, 0.004, 0.11), lmat(k % 3 ? 0xf4f2ea : 0xe8dcc0, 0.8), x, y, z, lifeGroup, false); m.rotation.order = 'YXZ'; m.rotation.y = Math.random()*6.3;
+  X2.flying.push({ m, x, y, z, vx: vx*0.4 + (Math.random() - 0.5)*4, vy: 1.5 + Math.random()*3, vz: vz*0.4 + (Math.random() - 0.5)*4, t: 0, ph: Math.random()*6.3, sx: (Math.random() - 0.5)*9, sz: (Math.random() - 0.5)*9, rest: false }); } }
+function flyingUpdate(dt) { const wx = Math.sin(WIND_YAW)*0.8, wz = Math.cos(WIND_YAW)*0.8;
+  for (const F of X2.flying) { if (F.rest) continue; F.t += dt; F.vy = Math.max(-1.3, F.vy - 5*dt); const k = Math.exp(-dt*1.8); F.vx = wx + (F.vx - wx)*k; F.vz = wz + (F.vz - wz)*k;   // paper: slows to the wind, floats down
+    F.x += (F.vx + Math.sin(F.t*6 + F.ph)*0.7)*dt; F.z += (F.vz + Math.cos(F.t*5 + F.ph)*0.7)*dt; F.y += F.vy*dt; const gy = Y(F.x, F.z) + roadLift(F.x, F.z) + 0.02;
+    if (F.y <= gy && F.vy < 0) { F.y = gy; F.rest = true; F.m.rotation.x = F.m.rotation.z = 0; } else { F.m.rotation.x += F.sx*dt; F.m.rotation.z += F.sz*dt; } F.m.position.set(F.x, F.y, F.z); } }
+
+// ── girls on hobby horses: a ring in a yard with two little jumps, galloping round and over them, now and then a rest to pat the horses ──
+function makeHobbyHorse() { const G = new THREE.Group(), stick = lmesh(lbox(0.035, 1.05, 0.035), lmat(0xc8a064, 0.8), 0, 0.66, 0.04, G); stick.rotation.x = 0.88;
+  const col = lmat(lpick([0xf0f0f0, 0x8a5a2a, 0x2a2a2a, 0xd8b36a, 0xe8a0c0]), 0.8), hd = new THREE.Group(); hd.position.set(0, 1.04, 0.48); hd.rotation.x = 0.45; G.add(hd);
+  lmesh(lbox(0.11, 0.17, 0.3), col, 0, 0, 0.06, hd); lmesh(lbox(0.13, 0.05, 0.2), lmat(lpick([0x5a2a1a, 0x1a1a1a, 0xf6e6b0]), 0.9), 0, 0.1, -0.03, hd);
+  for (const s of [-1, 1]) { lmesh(lbox(0.03, 0.08, 0.03), col, s*0.04, 0.12, -0.07, hd, false); lmesh(lbox(0.02, 0.03, 0.03), lmat(0x141414, 0.5), s*0.057, 0.03, 0.08, hd, false); }
+  lmesh(lbox(0.12, 0.03, 0.03), lmat(0xd83b2c, 0.6), 0, -0.02, 0.12, hd, false); return G; }
+const horseTask = (R, i) => ({ kind: 'horse', update(h, dt, t) {
+  if (R.lastT !== t) { R.lastT = t; if ((R.clock -= dt) <= 0) { R.rest = !R.rest; R.clock = R.rest ? 5 + Math.random()*4 : 16 + Math.random()*20; } if (!R.rest) R.th += dt*R.sp/R.r; }
+  const a = R.th + i*6.2832/R.n, tx = R.x + Math.sin(a)*R.r, tz = R.z + Math.cos(a)*R.r;
+  if (Math.hypot(h.x - tx, h.z - tz) > 0.8) { walkTo(h, tx, tz, R.sp*1.3, dt); h.pose.armL = h.pose.armR = -0.8; return; }   // shoved out of the ring: back into her place
+  h.x = tx; h.z = tz; h.vx = h.vz = 0; h.pose.armL = h.pose.armR = -0.8;
+  if (R.rest) { h.yaw = a + Math.PI; h.pose.armR = -1.3 + Math.sin(t*5 + i)*0.2; return; }   // facing in, stroking the horse's neck
+  h.yaw = a + Math.PI/2; h.pose.walk = 0.8; h.pose.ph += dt*12; h.pose.dy = Math.abs(Math.sin(h.pose.ph))*0.09;
+  for (const j of R.jumps) { const d = angDiff(a - j); if (d > -0.08 && d <= 0 && !(h.hop > 0)) h.vy = 2.4; } } });
+function buildHorses(n) { for (let k = 0; k < n; k++) { const nk = 3 + Math.floor(Math.random()*3), r = 2.9 + nk*0.25, sp = yardSpot('horse', r + 0.8, 18, 140, 150); if (!sp) break; reserve('horse', sp, r + 1);
+  const R = { x: sp[0], z: sp[1], r, n: nk, sp: 2.5 + Math.random()*0.4, th: Math.random()*6.3, rest: false, clock: 10 + Math.random()*10, jumps: [] }, j0 = Math.random()*6.3;
+  for (const j of [j0, j0 + Math.PI]) { R.jumps.push(j); const g = new THREE.Group(), x = sp[0] + Math.sin(j)*r, z = sp[1] + Math.cos(j)*r;
+    for (const s of [-1, 1]) lmesh(lbox(0.05, 0.45, 0.05, 0.225), lmat(0xf0f0f0, 0.6), 0, 0, s*0.55, g); for (let q = 0; q < 4; q++) lmesh(lbox(0.04, 0.04, 0.26), lmat(q % 2 ? 0xd83b2c : 0xf0f0f0, 0.6), 0, 0.34, -0.39 + q*0.26, g, false);
+    placeAt(g, x, z, j); lifeGroup.add(g); nearVis(g, x, z); }
+  for (let i = 0; i < nk; i++) { const a = R.th + i*6.2832/nk, rig = makeKid(lpick([0xe85a9a, 0xf4a6c8, 0x9a5ad8, 0xf0f0f0, 0xe8c02a, 0x5ab8e8])); rig.add(makeHobbyHorse());
+    new Human({ x: sp[0] + Math.sin(a)*r, z: sp[1] + Math.cos(a)*r, yaw: a + Math.PI/2, kid: true, rig, task: horseTask(R, i) }); } } }
+
+// ── carpet beating: a carpet over the rack, whack, whack, a puff of dust through it with each one, a breather now and then ──
+function dustPuff(C) { const [x, z] = lloc(C.x, C.z, C.yaw, 0.45 + (Math.random() - 0.5)*0.35, 0.05), y = Y(C.x, C.z) + 1.15 + (Math.random() - 0.5)*0.3, fx = Math.sin(C.yaw), fz = Math.cos(C.yaw);
+  for (let k = 0; k < 7; k++) lifeFx.emit(x + (Math.random() - 0.5)*0.4, y + (Math.random() - 0.5)*0.3, z + (Math.random() - 0.5)*0.4, fx*(0.5 + Math.random()*0.9) + (Math.random() - 0.5)*0.6, 0.15 + Math.random()*0.4, fz*(0.5 + Math.random()*0.9) + (Math.random() - 0.5)*0.6, 1.4 + Math.random()*1.3, 0.3, 1.6, 0.55, 0.74, 0.68, 0.58, 0.84, 0.8, 0.73); }
+const beatTask = (C) => ({ kind: 'beat', update(h, dt, t, near) { const S = C.st;
+  if (Math.hypot(h.x - C.sx, h.z - C.sz) > 0.4) { walkTo(h, C.sx, C.sz, 1.2, dt); return; }
+  h.vx = h.vz = 0; h.yaw = C.yaw; h.pose.armL = -0.35;
+  if (S.rest > 0) { S.rest -= dt; h.pose.armR = -0.25; h.tilt = 0; if (S.rest < 1.4) { h.pose.armL = -2.5; h.pose.armLz = 0.6; } return; }   // a breather, wiping the brow
+  S.t += dt; let u = S.t/S.T; if (u >= 1) { S.t = 0; u = 0; S.T = 0.5 + Math.random()*0.2; if (near) dustPuff(C); if (++S.n > 8 + Math.random()*10) { S.n = 0; S.rest = 2.5 + Math.random()*4; } }
+  h.pose.armR = u < 0.72 ? -1.2 - u/0.72*1.7 : -2.9 + (u - 0.72)/0.28*1.7; h.tilt = u > 0.72 ? 0.1 : 0.02; },
+  reset(h) { C.st.t = 0; C.st.n = 0; C.st.rest = 0; h.tilt = 0; } });
+function buildCarpets(n) { for (let k = 0; k < n; k++) { const sp = yardSpot('beat', 1.8, 16, 130, 90); if (!sp) break; reserve('beat', sp, 2);
+  const yaw = Math.random()*6.3, C = { x: sp[0], z: sp[1], yaw, st: { t: 0, T: 0.6, n: 0, rest: 0 } }, g = new THREE.Group(), steel = lmat(0x55655a, 0.5);
+  for (const s of [-1, 1]) lmesh(lbox(0.06, 1.85, 0.06, 0.925), steel, s*1.25, 0, 0, g); lmesh(lbox(2.56, 0.05, 0.05), steel, 0, 1.8, 0, g);
+  const cm = lmat(lpick([0x9a2a2a, 0x2a4a8a, 0x7a4a2a, 0x3a6a3a, 0x8a2a5a]), 0.95), cm2 = lmat(lpick([0xe8d8b0, 0x1a1a3a, 0xd8a040]), 0.95);
+  for (const s of [-1, 1]) { lmesh(lbox(1.9, 1.1, 0.025), cm, 0, 1.25, s*0.03, g); lmesh(lbox(1.5, 0.75, 0.03), cm2, 0, 1.25, s*0.03, g, false); lmesh(lbox(1.0, 0.36, 0.035), cm, 0, 1.25, s*0.03, g, false); }
+  placeAt(g, sp[0], sp[1], yaw); lifeGroup.add(g); nearVis(g, sp[0], sp[1]); [C.sx, C.sz] = lloc(sp[0], sp[1], yaw, 0.15, -1.1);
+  const h = new Human({ x: C.sx, z: C.sz, yaw, rig: makeAdult(lpick([0xe85a9a, 0x5ab8e8, 0xf0f0f0, 0xe8c02a, 0x3aa64c, 0xd83b2c]), lpick(L_PANTS), lpick(L_HAIR)), task: beatTask(C) });
+  const bt = new THREE.Group(), cane = lmat(0xc8a46a, 0.8); lmesh(lbox(0.03, 0.42, 0.03, -0.21), cane, 0, 0, 0, bt); lmesh(lgeo('beatring', () => new THREE.TorusGeometry(0.12, 0.013, 4, 12)), cane, 0, -0.54, 0, bt); handProp(h, bt); } }
+
+// ── moped boys: up and down a side street, U-turns at the ends, blue two-stroke smoke. The rally car roaring past startles them —
+//    a wobble, or one goes over on his own (no ambulance for that, he picks himself up). Hit by the car it's the ambulance. ──
+function makeMoped() { const G = new THREE.Group(), col = lmat(lpick([0xd82a2a, 0x2a5ad8, 0xe8c02a, 0x1a1a1a, 0xe86a1a, 0x2a9a4a]), 0.35), tyre = lmat(0x151515, 0.7), chrome = lmat(0xc0c0c0, 0.3);
+  for (const zz of [-0.58, 0.58]) { const w = lmesh(lgeo('mwheel', () => new THREE.TorusGeometry(0.25, 0.06, 5, 14)), tyre, 0, 0.31, zz, G); w.rotation.y = Math.PI/2; }
+  lmesh(lbox(0.2, 0.26, 0.55), col, 0, 0.5, -0.1, G); lmesh(lbox(0.22, 0.15, 0.34), col, 0, 0.8, 0.2, G); lmesh(lbox(0.24, 0.08, 0.52), lmat(0x1a1a1a, 0.7), 0, 0.74, -0.28, G);
+  const fk = lmesh(lbox(0.05, 0.68, 0.05), chrome, 0, 0.64, 0.52, G); fk.rotation.x = -0.24; lmesh(lbox(0.62, 0.03, 0.03), chrome, 0, 0.98, 0.44, G);
+  lmesh(lbox(0.14, 0.12, 0.08), lmat(0xf0f0e0, 0.3), 0, 0.88, 0.6, G, false); lmesh(lbox(0.05, 0.05, 0.5), chrome, 0.14, 0.33, -0.35, G, false); lmesh(lbox(0.2, 0.04, 0.3), col, 0, 0.6, -0.64, G);
+  G.rotation.order = 'YXZ'; return G; }
+const mopedTask = (M, k) => { const S = M.s[k]; return { kind: 'moped', update(h, dt, t, near) { const g = S.g; g.visible = near;
+  if (S.fall > 0) { S.fall -= dt; const e = S.fall0 - S.fall, lie = Math.min(1, e*3)*Math.min(1, Math.max(0, S.fall - 1.6)/0.6);   // over, lying there a while, back up and on again
+    if (near) { placeAt(g, S.fx, S.fz, S.yaw, roadLift(S.fx, S.fz)); g.rotation.z = S.sd*1.4*Math.min(1, e*3)*Math.min(1, S.fall/0.8); }
+    if (S.fall > 1.6) { const [rx, rz] = lloc(S.fx, S.fz, S.yaw, 0, 1.2); h.x = rx; h.z = rz; h.vx = h.vz = 0; h.yaw = S.yaw; h.roll = S.sd*1.4*lie; h.pose.legs = -0.4; h.pose.armL = -2.2; }
+    else { h.roll = 0; const [sx, sz] = lloc(S.fx, S.fz, S.yaw, 0, -0.22); if (walkTo(h, sx, sz, 1.2, dt)) h.yaw = S.yaw; }
+    return; }
+  let vT = S.vmax; if (S.phi >= 0) vT = 2.4; else { const rem = S.dir > 0 ? M.L.total - S.s : S.s; vT = Math.min(vT, 2.4 + Math.sqrt(2*3.5*Math.max(0, rem))); }
+  if (carAhead(h.x, h.z, S.yaw, 11)) vT = 0; S.v += Math.max(-7*dt, Math.min(2.6*dt, vT - S.v));
+  const [x, z, yaw] = laneStep(S, M.L, dt); S.yaw += angDiff(yaw - S.yaw)*Math.min(1, dt*9); S.px = x; S.pz = z;
+  const cd = Math.hypot(car.x - x, car.z - z), cs = Math.hypot(car.vx, car.vz); S.cool -= dt;
+  if (cd < 9 && cs > 12 && S.cool <= 0) { S.cool = 6; if (Math.random() < 0.4) { S.fall = S.fall0 = 5 + Math.random()*2; S.fx = x; S.fz = z; S.sd = Math.random() < 0.5 ? 1 : -1; S.v = 0; return; } S.wob = 1.2; }
+  S.wob = Math.max(0, S.wob - dt); const roll = S.wob > 0 ? Math.sin(S.wob*14)*0.2*S.wob : (S.phi >= 0 ? 0.25 : 0);
+  const [rx, rz] = lloc(x, z, S.yaw, 0, -0.22); h.x = rx; h.z = rz; h.vx = h.vz = 0; h.yaw = S.yaw; h.roll = roll; const lift = roadLift(x, z); h.pose.dy = -0.12 + lift; h.pose.legs = -1.1; h.pose.armL = h.pose.armR = -1.0;
+  if (near) { placeAt(g, x, z, S.yaw, lift); g.rotation.z = roll;
+    if (S.v > 1 && (S.ex -= dt) <= 0) { S.ex = 0.12; const [ex, ez] = lloc(x, z, S.yaw, 0.14, -0.65); lifeFx.emit(ex, Y(ex, ez) + 0.32, ez, -Math.sin(S.yaw)*0.5, 0.25, -Math.cos(S.yaw)*0.5, 1.3, 0.12, 0.9, 0.3, 0.6, 0.66, 0.78, 0.8, 0.82, 0.88); } } },
+  knocked(h) { S.fall = 0; const x = S.px === undefined ? h.x : S.px, z = S.pz === undefined ? h.z : S.pz; placeAt(S.g, x, z, S.yaw, roadLift(x, z) + 0.05); S.g.rotation.z = (Math.random() < 0.5 ? 1 : -1)*1.4; },
+  reset(h) { Object.assign(S, { s: S.s0, dir: S.dir0, v: 0, phi: -1, fall: 0, wob: 0, cool: 0, yaw: S.yaw0 }); h.roll = 0; } }; };
+function buildMopeds(st) { const L = polyLine(chaikin(st.P, 2)), n = 2 + Math.floor(Math.random()*2), M = { L, s: [] }; reserve('moped', [st.mid.x, st.mid.z], 3);
+  for (let k = 0; k < n; k++) { const s0 = L.total*(0.15 + 0.7*k/Math.max(1, n - 1)), dir0 = k % 2 ? -1 : 1, [x, z, py] = L.at(s0), yaw0 = py + (dir0 > 0 ? 0 : Math.PI);
+    const S = { s0, dir0, yaw0, s: s0, dir: dir0, v: 0, o: Math.min(1.3, Math.max(0.7, st.w/2 - 1.2)), phi: -1, vmax: 6.5 + Math.random()*2.5, fall: 0, wob: 0, cool: 0, ex: 0, yaw: yaw0, g: makeMoped() }; M.s.push(S);
+    lifeGroup.add(S.g); placeAt(S.g, x, z, yaw0); const rig = makeAdult(lpick([0x1a1a1a, 0x3a2a1a, 0x3a5a8a, 0x5a5a5a, 0x8a1a1a]), lpick([0x2a3a6a, 0x1a1a22, 0x3a4a7a]), lpick(L_HAIR)); rig.scale.setScalar(0.94);
+    new Human({ x, z, yaw: yaw0, rig, task: mopedTask(M, k) }); } }
+
+// ── the postman: along a street on his bike, off at each mailbox, a letter in, back on; knocked over, the letters go everywhere ──
+const postTask = (Pm) => { const S = Pm.s; return { kind: 'post', update(h, dt, t, near) { const g = Pm.bike, L = Pm.L; g.visible = near;
+  if (S.mode === 'ride') { let vT = 4.2, nx = null;
+    if (S.phi < 0) { for (const q of Pm.stops) { const d = (q.s - S.s)*S.dir; if (d > -0.05 && q !== S.last && (!nx || d < (nx.s - S.s)*S.dir)) nx = q; }
+      if (nx) { const d = Math.max(0, (nx.s - S.s)*S.dir); vT = Math.min(vT, 0.3 + Math.sqrt(2*1.6*d)); if (d < 0.3) { S.mode = 'off'; S.stop = S.last = nx; S.v = 0; } }
+      else { const rem = S.dir > 0 ? L.total - S.s : S.s; vT = Math.min(vT, 1.8 + Math.sqrt(2*2*rem)); } } else vT = 1.8;
+    if (carAhead(h.x, h.z, S.yaw, 9)) vT = 0; S.v += Math.max(-5*dt, Math.min(1.5*dt, vT - S.v));
+    if (S.mode === 'ride') { const [x, z, yaw] = laneStep(S, L, dt); S.yaw += angDiff(yaw - S.yaw)*Math.min(1, dt*8); S.bx = x; S.bz = z; S.ph += dt*S.v*2.4;
+      const [rx, rz] = lloc(x, z, S.yaw, 0, -0.24); h.x = rx; h.z = rz; h.vx = h.vz = 0; h.yaw = S.yaw; const lift = roadLift(x, z); h.pose.dy = 0.02 + lift; h.pose.legs = Math.sin(S.ph)*0.7 - 0.9; h.pose.legsR = -Math.sin(S.ph)*0.7 - 0.9; h.pose.armL = h.pose.armR = -1.15;
+      Pm.letter.visible = false; if (near) { placeAt(g, x, z, S.yaw, lift); g.rotation.z = 0; } return; } }
+  if (near) { placeAt(g, S.bx, S.bz, S.yaw, roadLift(S.bx, S.bz)); g.rotation.z = 0.12; }   // on its stand while he's at the box
+  if (S.mode === 'off') { Pm.letter.visible = true; if (walkTo(h, S.stop.stx, S.stop.stz, 1.3, dt)) { S.mode = 'post'; S.t = 1.5; } }
+  else if (S.mode === 'post') { h.vx = h.vz = 0; h.yaw = Math.atan2(S.stop.mx - h.x, S.stop.mz - h.z); h.pose.armR = S.t > 0.7 ? -1.5 : -1.75; if ((S.t -= dt) <= 0) { S.mode = 'back'; Pm.letter.visible = false; } }
+  else if (S.mode === 'back') { const [tx, tz] = lloc(S.bx, S.bz, S.yaw, -0.5, 0); if (walkTo(h, tx, tz, 1.3, dt)) S.mode = 'ride'; } },
+  knocked(h) { const g = Pm.bike; placeAt(g, S.bx, S.bz, S.yaw, roadLift(S.bx, S.bz) + 0.05); g.rotation.z = (Math.random() < 0.5 ? 1 : -1)*1.45; Pm.letter.visible = false;
+    flyLetters(h.x, Y(h.x, h.z) + 1.0, h.z, h.vx, h.vz, 14); },
+  reset(h) { Object.assign(S, { s: S.s0, dir: 1, v: 0, phi: -1, mode: 'ride', last: null, yaw: S.yaw0, bx: S.bx0, bz: S.bz0 }); } }; };
+function buildPostman(st) { const L = polyLine(chaikin(st.P, 2)), stops = [], mboxes = new THREE.Group(); reserve('post', [st.mid.x, st.mid.z], 3);
+  for (let s = 6; s < L.total - 6; s += 3) { if (stops.length && s - stops[stops.length - 1].s < 22) continue; const [x, z, py] = L.at(s);
+    let side = 0; staticNear(x, z, 22, B => { if (side || B.kind !== 'house') return; const l = (B.x - x)*Math.cos(py) - (B.z - z)*Math.sin(py), f = (B.x - x)*Math.sin(py) + (B.z - z)*Math.cos(py); if (Math.abs(l) > st.w/2 + 5 && Math.abs(f) < 7) side = Math.sign(l); });
+    if (!side) continue; const [mx, mz] = lloc(x, z, py, side*(st.w/2 + 0.55), 0), [stx, stz] = lloc(x, z, py, side*(st.w/2 - 0.05), 0);
+    let hit = false; staticNear(mx, mz, 2, B => { if (!hit && boxPush(B, mx, mz, 0.4)) hit = true; }); if (hit || VEHICLES.some(v => Math.hypot(v.x - mx, v.z - mz) < 3)) continue;
+    stops.push({ s, mx, mz, stx, stz }); const b = new THREE.Group(); lmesh(lbox(0.08, 1.05, 0.08, 0.525), lmat(0x6a5a44, 0.8), 0, 0, 0, b); lmesh(lbox(0.34, 0.28, 0.26), lmat(lpick([0x2f6a3a, 0x8a2a2a, 0x3a4a6a, 0x6a6a6a, 0xd8b030]), 0.5), 0, 1.18, 0, b);
+    lmesh(lbox(0.2, 0.02, 0.02), lmat(0xf0f0f0, 0.4), 0, 1.24, side*-0.14, b, false); b.position.set(mx, Y(mx, mz), mz); b.rotation.y = py; mboxes.add(b); }
+  if (stops.length < 2) return false; lifeGroup.add(mboxes); nearVis(mboxes, st.mid.x, st.mid.z);
+  const bike = makeBike(lmat(0x1c2c5a, 0.4), 1.2), orange = lmat(0xe8761a, 0.6); for (const s of [-1, 1]) lmesh(lbox(0.1, 0.26, 0.34), orange, s*0.14, 0.5, -0.42, bike); lmesh(lbox(0.3, 0.18, 0.24), orange, 0, 0.66, 0.6, bike);
+  lifeGroup.add(bike); const [x0, z0, py0] = L.at(0), o = Math.min(1.3, Math.max(0.7, st.w/2 - 1.2)), [bx0, bz0] = [x0 + o*Math.cos(py0), z0 - o*Math.sin(py0)];
+  const Pm = { L, stops, bike, s: { s0: 0, s: 0, dir: 1, v: 0, o, phi: -1, mode: 'ride', last: null, ph: 0, yaw0: py0, yaw: py0, bx0, bz0, bx: bx0, bz: bz0 } }; placeAt(bike, bx0, bz0, py0);
+  const navy = 0x1c2c5a, rig = makeAdult(navy, navy, lpick(L_HAIR)); lmesh(lbox(0.3, 0.07, 0.3), lmat(navy, 0.6), 0, 1.83, 0, rig); lmesh(lbox(0.26, 0.02, 0.12), lmat(0x141414, 0.5), 0, 1.8, 0.18, rig, false);
+  lmesh(lbox(0.1, 0.3, 0.32), lmat(0x6a4020, 0.7), 0.2, 1.0, -0.16, rig);
+  const h = new Human({ x: bx0, z: bz0, yaw: py0, rig, task: postTask(Pm) }); Pm.letter = handProp(h, lmesh(lbox(0.02, 0.12, 0.2), lmat(0xf4f2ea, 0.7), 0, 0, 0)); Pm.letter.visible = false; return true; }
+
+// ── the ice-cream van: from one street to the next (away from the route if it can), stops, plays its tune; the kids come running
+//    out of the yards and queue at the hatch, go off licking their cones. It drives like every other van (driveAlong). ──
+let _iceTex = {};
+function iceTex(txt, w) { if (_iceTex[txt]) return _iceTex[txt]; const c = document.createElement('canvas'); c.width = w || 512; c.height = 128; const g = c.getContext('2d');
+  g.font = 'bold 84px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 10; g.strokeStyle = '#ffffff'; g.strokeText(txt, c.width/2, 66); g.fillStyle = '#2a5ad8'; g.fillText(txt, c.width/2, 66);
+  return (_iceTex[txt] = new THREE.CanvasTexture(c)); }
+function makeIceVan() { const G = new THREE.Group(), white = lmat(0xf6f6f2, 0.4), blue = lmat(0x2a6ad8, 0.45), pink = lmat(0xf08ab0, 0.5), glass = lmat(0x223040, 0.15), black = lmat(0x141414, 0.8), hub = lmat(0xd8d8d8, 0.35);
+  G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z, rx, sh) => { const me = lmesh(lbox(w, h, d), m, x, y, z, G, sh); if (rx) me.rotation.x = rx; return me; };
+  B(1.8, 0.56, 4.6, white, 0, 0.63, 0); B(1.82, 0.16, 4.62, blue, 0, 0.8, 0);                              // body, blue band
+  B(1.8, 1.3, 2.9, white, 0, 1.55, -0.85); B(1.82, 0.12, 2.92, pink, 0, 2.08, -0.85);                     // the box, pink band high up
+  B(1.76, 0.95, 0.9, white, 0, 1.38, 1.05); B(1.78, 0.45, 0.7, glass, 0, 1.55, 1.08);                     // cab, its side windows
+  B(1.64, 0.8, 0.06, glass, 0, 1.42, 1.6, -0.38); B(1.74, 0.16, 0.8, white, 0, 0.98, 1.9);                // windscreen, bonnet
+  B(1.2, 0.26, 0.05, lmat(0xc8c8c8, 0.25), 0, 0.72, 2.31); B(1.84, 0.16, 0.16, black, 0, 0.42, 2.34); B(1.84, 0.16, 0.16, black, 0, 0.42, -2.34);   // grille, bumpers
+  const head = new THREE.MeshStandardMaterial({ color: 0xfff6d8, emissive: 0xfff0c8, emissiveIntensity: 0.9, roughness: 0.3 }); for (const sx of [-1, 1]) { B(0.26, 0.18, 0.05, head, sx*0.66, 0.74, 2.31, 0, false); B(0.14, 0.26, 0.04, lmat(0xa01818, 0.4), sx*0.78, 0.8, -2.32, 0, false); }
+  B(0.03, 0.6, 1.3, glass, 0.905, 1.62, -0.8); B(0.28, 0.04, 1.3, lmat(0xe8e8e0, 0.5), 1.02, 1.3, -0.8);  // the hatch, its counter
+  const aw = B(0.55, 0.03, 1.5, blue, 1.12, 2.02, -0.8); aw.rotation.z = -0.35;                            // awning over it
+  lmesh(lgeo('head', () => new THREE.SphereGeometry(0.135, 10, 8)), lmat(0xe8b795, 0.8), 0.55, 1.72, -0.8, G, false); B(0.3, 0.12, 0.3, lmat(0xffffff, 0.6), 0.55, 1.88, -0.8, 0, false);   // the vendor in his white hat
+  for (const sx of [-1, 1]) for (const zz of [1.5, -1.5]) { const w = lmesh(lcyl(0.34, 0.24, 14), black, sx*0.8, 0.34, zz, G); w.rotation.z = Math.PI/2; const hh = lmesh(lcyl(0.17, 0.25, 10), hub, sx*0.8, 0.34, zz, G, false); hh.rotation.z = Math.PI/2; }
+  const cone = lmesh(lgeo('icecone', () => new THREE.ConeGeometry(0.26, 0.7, 10)), lmat(0xd8a860, 0.8), 0, 2.62, -0.6, G); cone.rotation.x = Math.PI;   // the big cone on the roof
+  lmesh(lgeo('scoop', () => new THREE.SphereGeometry(0.3, 12, 8)), pink, 0, 3.02, -0.6, G); lmesh(lgeo('scoop2', () => new THREE.SphereGeometry(0.24, 12, 8)), lmat(0xfaf4e8, 0.6), 0, 3.3, -0.6, G);
+  const sign = (txt, w, h, x, y, z, ry) => { const m = new THREE.Mesh(lgeo('ice' + w + 'x' + h, () => new THREE.PlaneGeometry(w, h)), new THREE.MeshBasicMaterial({ map: iceTex(txt), transparent: true, depthWrite: false })); m.position.set(x, y, z); m.rotation.y = ry; G.add(m); };
+  sign('JÄÄTELÖÄ', 2.6, 0.65, -0.912, 1.5, -0.85, -Math.PI/2); sign('JÄÄTELÖÄ', 1.7, 0.42, 0, 1.6, -2.312, Math.PI); sign('JÄÄTELÖÄ', 1.5, 0.37, 0, 2.02, 0.612, 0);
+  return G; }
+function jingle(v, vol) { if (!audio || gameState === State.MENU) return; const d = Math.hypot(v.x - car.x, v.z - car.z); if (d > 120) return; const k = vol*0.08*(1 - d/120);
+  [784, 988, 1175, 988, 784, 880, 988, 784, 659, 784].forEach((f, i) => setTimeout(() => beep(f, 0.22, k, 'triangle'), i*200)); }
+function iceRoute(v, V) { const { nodes, adj } = roadGraph(); if (!nodes.length) return false;
+  let si = -1, sd = 1e9; for (let i = 0; i < nodes.length; i++) { const d = (nodes[i].x - v.x)**2 + (nodes[i].z - v.z)**2; if (d < sd) { sd = d; si = i; } }
+  const { dist, prev } = rgDijkstra(si); let best = -1, bs = -1e9;
+  for (let k = 0; k < 90; k++) { const i = Math.floor(Math.random()*nodes.length), d = dist[i], n = nodes[i]; if (!isFinite(d) || d < 100 || d > 340 || Math.abs(n.x) > 540 || Math.abs(n.z) > 540 || distRoute(n.x, n.z) < 20) continue;
+    let bad = 0; for (let j = i; j >= 0 && j !== si; j = prev[j]) { const q = nodes[j]; if (distRoute(q.x, q.z) < 9) bad++; if (V.blocks.some(b => Math.hypot(b[0] - q.x, b[1] - q.z) < 7)) bad += 6; }   // (not back the way it got stuck)
+    let j = i, back = null; while (j >= 0 && j !== si) { if (dist[j] >= 7) back = nodes[j]; j = prev[j]; }   // the way out: straight on, or a turn in the road first?
+    const turn = back && Math.abs(angDiff(Math.atan2(back.x - v.x, back.z - v.z) - v.yaw)) > 1.6, dead = adj[i].length < 2;   // (and not into a dead end: it'd have to turn there next time)
+    let homes = 0; staticNear(n.x, n.z, 30, B => { if (B.kind === 'house') homes++; }); const sc = Math.min(homes, 8)*2 - bad*8 - Math.abs(d - 200)*0.04 + Math.random()*5 - (turn ? 30 : 0) - (dead ? 25 : 0); if (sc > bs) { bs = sc; best = i; } }
+  if (best < 0) return false; const P = []; for (let j = best; j >= 0; j = prev[j]) { P.push({ x: nodes[j].x, z: nodes[j].z, hw: nodes[j].hw }); if (j === si) break; } P.reverse(); if (P.length < 3) return false;
+  setPath(v, rightSide(P)); v.blockT = v.passT = v.unstickT = 0; v.passSide = 1; v.sw = 0; v.turn = { dir: 1, legT: 0, n: 0 };
+  const [tx, tz] = pathAt(v, Math.min(v.total, 7)); V.mode = Math.abs(angDiff(Math.atan2(tx - v.x, tz - v.z) - v.yaw)) > 1.6 ? 'turn' : 'drive'; return true; }
+function iceCall(V) { const v = V.v; V.order.length = 0;   // the kids come out of the yards round the stop
+  V.kids.forEach((h, k) => { if (h.down || h.gone || h.hurt || Math.random() < 0.2) return; for (let tr = 0; tr < 30; tr++) { const a = Math.random()*6.3, d = 10 + Math.random()*14, x = v.x + Math.sin(a)*d, z = v.z + Math.cos(a)*d;
+    let house = false; staticNear(x, z, 6, B => { if (B.kind === 'house') house = true; }); if (!house || !clearSpot(x, z, 0.4)) continue;
+    h.x = x; h.z = z; h.inside = false; h.st = { mode: 'come', hx: x, hz: z }; V.cones[k].visible = false; humanSync(h); break; } }); }
+const iceKidTask = (V, k) => ({ kind: 'icekid', update(h, dt, t) { const st = h.st || (h.st = { mode: 'eat', t: 0, hx: h.x, hz: h.z }), v = V.v, cone = V.cones[k];
+  if (st.mode === 'come' || st.mode === 'queue') { let i = V.order.indexOf(h); if (i < 0) { V.order.push(h); i = V.order.length - 1; } const [sx, sz] = lloc(v.x, v.z, v.yaw, 1.5 + (i > 3 ? 0.6 : 0), -0.8 - i*0.8);
+    if (!walkTo(h, sx, sz, st.mode === 'come' ? 3.2 : 1.0, dt)) return; st.mode = 'queue'; h.yaw = i ? v.yaw : v.yaw - Math.PI/2; h.sway = 0.06*Math.sin(t*1.3 + k);
+    if (!i && V.mode === 'stop') { st.buy = (st.buy || 0) + dt; h.pose.armR = st.buy > 1.2 ? -1.55 : -0.2; if (st.buy > 2.8) { V.order.shift(); st.mode = 'leave'; cone.visible = true; h.sway = 0; } } return; }
+  if (cone.visible) h.pose.armR = Math.sin(t*1.6 + k) > 0.1 ? -2.35 : -1.4;   // licking
+  if (st.mode === 'leave') { if (walkTo(h, st.hx, st.hz, 1.1, dt)) { st.mode = 'eat'; st.t = 5 + Math.random()*7; } }
+  else if (st.mode === 'eat') { h.vx = h.vz = 0; if ((st.t -= dt) <= 0) { h.inside = true; cone.visible = false; } } },
+  reset(h) { h.st = null; h.inside = true; V.cones[k].visible = false; } });
+function iceVanAI(V) { const f = (v, dt) => { V.v = v; const C = v.ctrl;
+  if (Math.hypot(car.x - v.x, car.z - v.z) > 25) v.damage = Math.min(v.damage, V.dmg || 0); V.dmg = v.damage;   // its own bumps squeezing past parked cars don't count, only the rally car's
+  if (v.fire || v.charred) { C.hand = true; C.thr = 0; if (V.mode !== 'dead') { V.mode = 'dead'; for (const h of V.order) if (h.st) h.st.mode = 'leave'; V.order.length = 0; } return; }
+  if (V.mode === 'stop') { C.hand = true; C.thr = 0; C.brk = 0; C.steer = 0; V.t -= dt; V.order = V.order.filter(h => !h.down && !h.gone && !h.inside);
+    V.wt = 0; V.wx = v.x; V.wz = v.z;
+    if (V.t <= 0 && (!V.order.length || V.t < -25)) { for (const h of V.order) if (h.st) h.st.mode = 'leave'; V.order.length = 0; if (iceRoute(v, V)) jingle(v, 0.6); else V.t = 8; } return; }
+  if (V.mode === 'turn') { V.tt = (V.tt || 0) + dt; if (turnAround(v, dt) || V.tt > 14) { V.mode = 'drive'; V.tt = 0; V.wt = 0; V.wx = v.x; V.wz = v.z; } return; }
+  if ((V.wt = (V.wt || 0) + dt) > 20) { const moved = Math.hypot(v.x - (V.wx || 0), v.z - (V.wz || 0)); V.wt = 0; V.wx = v.x; V.wz = v.z; if (moved < 5) v.stuckT = 9; }   // getting nowhere (a wall, a hill too steep)
+  if (v.stuckT > 4 && distRoute(v.x, v.z) < 16) { v.ghostT = 6; v.stuckT = 0; }   // never parks on the rally route: squeezes past instead
+  if (V.mode === 'drive' && (driveAlong(v, dt, 8) || v.stuckT > 4)) { if (v.stuckT > 4) { V.blocks.push(lloc(v.x, v.z, v.yaw, 0, 6)); if (V.blocks.length > 4) V.blocks.shift(); }   // the way blocked: it sells right here
+    V.mode = 'stop'; V.t = 24 + Math.random()*16; v.stuckT = 0; V.wt = 0; iceCall(V); jingle(v, 1); } };
+  f.reset = () => { V.mode = 'stop'; V.t = 10 + Math.random()*8; V.order.length = 0; V.blocks.length = 0; V.wt = 0; V.dmg = 0; }; f.V = V; return f; }
+function buildIceVan() { const { nodes, adj } = roadGraph(); if (!nodes.length) return;
+  const cand = []; for (let k = 0; k < 400 && cand.length < 30; k++) { const i = Math.floor(Math.random()*nodes.length), n = nodes[i], d = distRoute(n.x, n.z); if (d < 30 || d > 130 || Math.abs(n.x) > 520 || Math.abs(n.z) > 520 || !adj[i].length) continue;
+    const b = nodes[adj[i][0][0]], yaw = Math.atan2(b.x - n.x, b.z - n.z), o = Math.min(1.4, Math.max(0.8, n.hw - 1.4)), x = n.x + Math.cos(yaw)*o, z = n.z - Math.sin(yaw)*o;
+    if (VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < 7) || LIFE_PLAN.some(P => P.x2 && Math.hypot(P.x - x, P.z - z) < (P.r || 0) + 8)) continue;
+    let homes = 0; staticNear(x, z, 30, B => { if (B.kind === 'house') homes++; }); cand.push({ x, z, yaw, homes: homes + Math.random()*3 }); }
+  if (!cand.length) return; cand.sort((a, b) => b.homes - a.homes); const c = cand[0]; reserve('ice', [c.x, c.z], 4);
+  const V = { mode: 'stop', t: 14, order: [], kids: [], cones: [], blocks: [] }, G = makeIceVan(); lifeGroup.add(G);
+  const v = new Vehicle({ kind: 'icecream', x: c.x, z: c.z, yaw: c.yaw, hw: 0.92, hl: 2.4, view: { kind: 'mesh', g: G }, axle: [0.8, 1.5, -1.5], ai: iceVanAI(V) }); V.v = v; v.blockT = v.passT = 0; v.passSide = 1; v.sw = 0;
+  for (let k = 0; k < 6; k++) { const rig = makeKid(lpick(L_SHIRTS)), cn = new THREE.Group(); lmesh(lgeo('kcone', () => new THREE.ConeGeometry(0.045, 0.14, 8)), lmat(0xd8a860, 0.8), 0, 0, 0, cn);
+    lmesh(lgeo('kscoop', () => new THREE.SphereGeometry(0.05, 8, 6)), lmat(lpick([0xf08ab0, 0xfaf4e8, 0x7a4a2a, 0xe8d060]), 0.6), 0, -0.09, 0, cn);   // (down the arm: the tip in the fist, the scoop beyond it)
+    const h = new Human({ x: c.x, z: c.z, kid: true, rig, task: iceKidTask(V, k) }); cn.position.set(0, -0.4, 0.02); rig.userData.rig.armR.add(cn); cn.visible = false; V.cones.push(cn); V.kids.push(h); h.inside = true; }
+  iceCall(V); }
+
+// ── a sheet off the washing line: now and then (or when the rally car roars past) the wind takes it; she chases it, picks it up and pegs it back ──
+const laundryTask = (W) => ({ kind: 'laundry', update(h, dt, t) { const S = W.hs;
+  if (S.m === 'hang') { const [tx, tz] = lloc(W.x, W.z, W.yaw, S.a, -0.6); if (W.st === 'fly') { S.m = 'chase'; S.t = 0.7; return; }
+    if (!walkTo(h, tx, tz, 1.1, dt)) { h.tilt = 0; return; } h.yaw = W.yaw; S.c += dt; const c = S.c % 6;
+    if (c < 1.3) { h.tilt = 0.5; h.pose.armL = h.pose.armR = -1.0; } else if (c < 5) { h.tilt = 0; h.pose.armL = -2.75 + Math.sin(t*3)*0.1; h.pose.armR = -2.8; } else { h.tilt = 0; if (S.c > 6*(1 + S.k)) { S.k++; S.a = -1.6 + Math.random()*3.2; } } return; }
+  if (S.m === 'chase') { h.tilt = 0; if ((S.t -= dt) > 0) { h.vx = h.vz = 0; h.pose.armL = h.pose.armR = -2.6; return; }   // "voi ei!"
+    walkTo(h, W.px, W.pz, W.st === 'fly' ? 3.4 : 2.6, dt); h.pose.armR = -2.4 + Math.sin(t*10)*0.4;
+    if (W.st === 'ground' && Math.hypot(h.x - W.px, h.z - W.pz) < 0.9) { S.m = 'pick'; S.t = 1.2; } return; }
+  if (S.m === 'pick') { h.vx = h.vz = 0; h.tilt = 0.75; h.pose.armL = h.pose.armR = -1.3; if ((S.t -= dt) <= 0) { W.st = 'carried'; S.m = 'return'; h.tilt = 0; } return; }
+  if (S.m === 'return') { h.pose.armL = h.pose.armR = -1.0; const [tx, tz] = lloc(W.x, W.z, W.yaw, W.sa, -0.6); if (walkTo(h, tx, tz, 1.3, dt)) { S.m = 'rehang'; S.t = 1.8; W.st = 'hung'; } return; }
+  if (S.m === 'rehang') { h.yaw = W.yaw; h.pose.armL = h.pose.armR = -2.8; if ((S.t -= dt) <= 0) { S.m = 'hang'; W.t = 45 + Math.random()*60; } } },
+  knocked(h) { if (W.st === 'carried') { W.st = 'ground'; W.px = h.x; W.pz = h.z; } }, reset(h) { h.tilt = 0; } });
+function laundryUpdate(W, dt, t) { const near = (W.x - car.x)**2 + (W.z - car.z)**2 < 240*240, sh = W.sheet; sh.visible = near || W.st !== 'hung';
+  if (W.st === 'hung') { if (!near) return; const [x, z] = lloc(W.x, W.z, W.yaw, W.sa, 0.28), cd = Math.hypot(car.x - x, car.z - z), cs = Math.hypot(car.vx, car.vz);
+    sh.position.set(x, W.y0 + 1.86, z); sh.rotation.set(0.1*Math.sin(t*1.7) + 0.06*Math.sin(t*4.1) + (cd < 20 ? cs*0.02 : 0), W.yaw, 0);
+    W.t -= dt; const wife = W.wife; if ((W.t <= 0 || (cd < 16 && cs > 14)) && W.hs.m === 'hang' && !wife.down && !wife.gone) { const gust = cd < 16 ? 1 : 0;
+      W.st = 'fly'; W.ft = 0; W.px = x; W.pz = z; W.py = W.y0 + 1.86; W.vx = Math.sin(WIND_YAW)*2.8 + gust*car.vx*0.12; W.vz = Math.cos(WIND_YAW)*2.8 + gust*car.vz*0.12; W.vy = 2.0; } return; }
+  if (W.st === 'fly') { W.ft += dt; W.vy = Math.max(-0.6, W.vy - 1.2*dt); W.px += W.vx*dt; W.pz += W.vz*dt; W.py += W.vy*dt;
+    let hit = false; staticNear(W.px, W.pz, 1, B => { if (!hit && boxPush(B, W.px, W.pz, 0.5)) hit = true; }); if (hit) { W.vx *= -0.2; W.vz *= -0.2; }
+    const gy = Y(W.px, W.pz); if ((W.py - 1.0 <= gy && W.vy < 0) || W.ft > 9) { W.st = 'ground'; W.gyaw = W.yaw + W.ft; }
+    else { sh.position.set(W.px, W.py, W.pz); sh.rotation.set(0.9*Math.sin(W.ft*3.1) - 0.6, W.yaw + W.ft*0.8, 0.5*Math.sin(W.ft*2.3)); return; } }
+  if (W.st === 'ground') { sh.position.set(W.px, Y(W.px, W.pz) + roadLift(W.px, W.pz) + 0.03, W.pz); sh.rotation.set(-Math.PI/2, W.gyaw || 0, 0); return; }
+  if (W.st === 'carried') { const h = W.wife, [x, z] = lloc(h.x, h.z, h.yaw, 0, 0.4); sh.position.set(x, Y(h.x, h.z) + 1.35, z); sh.rotation.set(0.25, h.yaw, 0); } }
+function buildLaundry(n) { for (let k = 0; k < n; k++) { const sp = yardSpot('laundry', 2.6, 16, 140, 100); if (!sp) break; reserve('laundry', sp, 2.6);
+  const yaw = Math.random()*6.3, g = new THREE.Group(), post = lmat(0x8a8a82, 0.6); for (const s of [-1, 1]) { lmesh(lbox(0.07, 1.95, 0.07, 0.975), post, s*2.3, 0, 0, g); lmesh(lbox(0.06, 0.06, 0.7), post, s*2.3, 1.92, 0, g); }
+  for (const zz of [-0.28, 0.28]) lmesh(lbox(4.6, 0.012, 0.012), lmat(0xe8e8e0, 0.6), 0, 1.9, zz, g, false);
+  for (let q = 0; q < 5; q++) { const a = -2.0 + q*0.85 + (Math.random() - 0.5)*0.2; if (a > 0.1 && a < 1.3) continue; const w = 0.35 + Math.random()*0.3, hh = 0.4 + Math.random()*0.35; lmesh(lbox(w, hh, 0.012, -hh/2), lmat(lpick([0xf0f0f0, 0x5ab8e8, 0xe85a9a, 0xe8c02a, 0x3a6ad8, 0xd83b2c]), 0.9), a, 1.9, -0.28, g); }
+  lmesh(lbox(0.55, 0.26, 0.38), lmat(0x5ab8e8, 0.6), -1.4, 0.13, -1.1, g); lmesh(lbox(0.5, 0.06, 0.34), lmat(0xf0f0f0, 0.9), -1.4, 0.28, -1.1, g, false);   // the basket
+  placeAt(g, sp[0], sp[1], yaw); lifeGroup.add(g); nearVis(g, sp[0], sp[1]);
+  const sheet = new THREE.Mesh(lbox(1.3, 1.0, 0.012, -0.5), lmat(lpick([0xf4f4f0, 0xeae4f4, 0xf4e6dc]), 0.9)); sheet.castShadow = true; sheet.rotation.order = 'YXZ'; lifeGroup.add(sheet);
+  const W = { x: sp[0], z: sp[1], yaw, y0: Y(sp[0], sp[1]), sa: 0.7, sheet, st: 'hung', t: 25 + Math.random()*60, hs: { m: 'hang', a: -1.2, c: Math.random()*6, k: 0, t: 0 } };
+  const [hx, hz] = lloc(sp[0], sp[1], yaw, -1.2, -0.6); W.wife = new Human({ x: hx, z: hz, yaw, rig: makeAdult(lpick([0xe85a9a, 0xf0f0f0, 0x5ab8e8, 0xe8c02a, 0x9a5ad8]), lpick([0x3a4a7a, 0x6a5a4a, 0x2a2a2a]), lpick(L_HAIR)), task: laundryTask(W) });
+  X2.upd.push((dt, t) => laundryUpdate(W, dt, t)); X2.reset.push(() => { Object.assign(W, { st: 'hung', t: 25 + Math.random()*60 }); Object.assign(W.hs, { m: 'hang', a: -1.2, c: 0, k: 0 }); }); } }
+
+// ── midsummer: a bonfire (kokko), a bench and a crate, half a dozen merry grown-ups swaying and singing round it; now and then
+//    one staggers off into the bushes and goes face down in them for a while — on his own, no ambulance for that ──
+const partyTask = (P, i) => { const a0 = P.a0 + i*6.2832/P.n, sit = i === 0; return { kind: 'party', update(h, dt, t) {
+  const st = h.st || (h.st = { m: 'stand', t: 4 + Math.random()*10, ph: Math.random()*6.3 }), hx = sit ? P.seat[0] : P.x + Math.sin(a0)*P.r, hz = sit ? P.seat[1] : P.z + Math.cos(a0)*P.r, sing = Math.sin(t*0.21 + P.ph) > 0;
+  if (P.faller === h && st.m !== 'bush' && st.m !== 'out') { st.m = 'bush'; st.b = P.bushes[Math.floor(Math.random()*P.bushes.length)]; }
+  if (st.m === 'bush') { h.roll = 0.14*Math.sin(t*2.3 + st.ph); if (walkTo(h, st.b[0], st.b[1], 1.0, dt)) { st.m = 'out'; st.t = st.T = 9 + Math.random()*8; h.yaw = Math.atan2(st.b[2] - h.x, st.b[3] - h.z); } else h.yaw += 0.45*Math.sin(t*2.7 + st.ph); return; }
+  if (st.m === 'out') { h.vx = h.vz = 0; h.roll = 0; st.t -= dt; h.tilt = 1.42*Math.min(1, (st.T - st.t)*2.5)*Math.min(1, st.t/1.2); h.pose.legs = 0.15*Math.sin(t*5); h.pose.armL = -2.8; h.pose.armR = -2.9;   // face down in the bush
+    if (st.t <= 0) { st.m = 'back'; h.tilt = 0; if (P.faller === h) P.faller = null; } return; }
+  h.tilt = 0; h.roll = 0.09*Math.sin(t*0.83 + st.ph*2);
+  if (st.m === 'wander') { if (walkTo(h, st.wx, st.wz, 0.9, dt)) { if ((st.t -= dt) <= 0) st.m = 'back'; h.yaw = Math.atan2(P.x - h.x, P.z - h.z); } else { h.yaw += 0.4*Math.sin(t*3 + st.ph); return; } }
+  else if (st.m === 'back' || Math.hypot(h.x - hx, h.z - hz) > 0.5) { st.m = 'back'; if (!walkTo(h, hx, hz, 1.0, dt)) { h.yaw += 0.4*Math.sin(t*3 + st.ph); return; } st.m = 'stand'; st.t = 8 + Math.random()*14; }
+  else if (!sit && (st.t -= dt) <= 0) { const a = Math.random()*6.3, r = 3.2 + Math.random()*1.8; st.m = 'wander'; st.wx = P.x + Math.sin(a)*r; st.wz = P.z + Math.cos(a)*r; st.t = 3 + Math.random()*4; }
+  h.vx = h.vz = 0; if (st.m === 'stand') h.yaw = Math.atan2(P.x - h.x, P.z - h.z); h.sway = 0.18*Math.sin(t*1.1 + st.ph);
+  if (sit) { h.pose.legs = -1.45; h.pose.dy = -0.45; h.sway = 0.08*Math.sin(t*1.1 + st.ph); }
+  if (sing) { const k = Math.sin(t*2.4 + st.ph); h.pose.armR = -2.5 + k*0.35; h.pose.armL = -2.2 - k*0.3; h.pose.armLz = -0.3; h.pose.armRz = 0.3; }
+  else { h.pose.armR = Math.sin(t*0.7 + st.ph) > 0.75 ? -2.45 : -0.9; h.pose.armL = -0.2; } },   // a swig now and then
+  reset(h) { h.st = null; h.tilt = h.roll = h.sway = 0; } }; };
+function buildMidsummer() { const sp = yardSpot('kokko', 4.2, 25, 150, 0); if (!sp) return; reserve('kokko', sp, 5); const [x, z] = sp, y0 = Y(x, z);
+  const g = new THREE.Group(), wood = [lmat(0x6a4a30, 0.9), lmat(0x8a6a44, 0.9), lmat(0x4a3424, 0.9)];
+  lmesh(lcyl(1.1, 0.03, 16), lmat(0x2a2622, 1), 0, 0.01, 0, g, false);
+  for (let k = 0; k < 11; k++) { const a = k*6.2832/11 + Math.random()*0.2, l = lmesh(lbox(0.13, 1.7, 0.13), wood[k % 3], Math.sin(a)*0.34, 0.74, Math.cos(a)*0.34, g); l.rotation.order = 'YXZ'; l.rotation.y = a; l.rotation.x = -0.4; }
+  for (let k = 0; k < 4; k++) { const a = k*1.57 + 0.4, l = lmesh(lbox(0.14, 0.14, 1.4), wood[k % 3], Math.sin(a)*0.5, 0.08, Math.cos(a)*0.5, g); l.rotation.y = a + 1.2; }
+  const ba = Math.random()*6.3, [bx, bz] = [Math.sin(ba)*3.5, Math.cos(ba)*3.5], bench = new THREE.Group(); lmesh(lbox(1.8, 0.07, 0.38), wood[1], 0, 0.45, 0, bench); for (const s of [-0.7, 0.7]) lmesh(lbox(0.08, 0.42, 0.34), wood[0], s, 0.21, 0, bench);
+  bench.position.set(bx, 0, bz); bench.rotation.y = ba; g.add(bench);
+  const crate = new THREE.Group(); lmesh(lbox(0.42, 0.28, 0.3), lmat(0xe0b020, 0.6), 0, 0.14, 0, crate); for (let q = 0; q < 6; q++) lmesh(lgeo('bottle', () => new THREE.CylinderGeometry(0.03, 0.036, 0.24, 6)), lmat(0x5a3a1a, 0.3), -0.14 + (q % 3)*0.14, 0.34, q < 3 ? -0.07 : 0.07, crate, false);
+  crate.position.set(Math.sin(ba + 0.5)*3.0, 0, Math.cos(ba + 0.5)*3.0); crate.rotation.y = ba; g.add(crate);
+  placeAt(g, x, z, 0); lifeGroup.add(g); nearVis(g, x, z);
+  const bushes = []; for (let k = 0; k < 12 && bushes.length < 3; k++) { const a = Math.random()*6.3, r = 5.5 + Math.random()*2, px = x + Math.sin(a)*r, pz = z + Math.cos(a)*r; if (!clearSpot(px, pz, 0.8) || bushes.some(b => Math.hypot(b[0] - px, b[1] - pz) < 3)) continue;
+    const b = new THREE.Group(); for (let q = 0; q < 3; q++) { const m = lmesh(lgeo('bush', () => new THREE.IcosahedronGeometry(1, 0)), lmat(lpick([0x2f5a2a, 0x3a6a30, 0x2a4a24]), 0.9), (q - 1)*0.5, 0.45, (Math.random() - 0.5)*0.4, b); m.scale.set(0.55 + Math.random()*0.2, 0.5 + Math.random()*0.2, 0.55); }
+    placeAt(b, px, pz, a); lifeGroup.add(b); nearVis(b, px, pz); bushes.push([px - Math.sin(a)*0.9, pz - Math.cos(a)*0.9, px, pz]); }   // (he aims just short of the middle and topples into it)
+  if (!bushes.length) bushes.push([x + 6, z, x + 7, z]);
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xff8a3a, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.6 })); glow.scale.set(5, 5, 1); glow.position.set(x, y0 + 1.1, z); lifeGroup.add(glow);
+  EMITTERS.push({ x, z, y: y0 + 0.3, kind: 'kokko', acc: 0, glow });
+  const n = 6, [sx, sz] = [x + bx, z + bz], P = { x, z, n, r: 2.9, a0: ba, ph: Math.random()*6.3, bushes, seat: [sx, sz], faller: null, fallT: 25 + Math.random()*30 };
+  for (let i = 0; i < n; i++) { const a = P.a0 + i*6.2832/n, rig = makeAdult(lpick([0xf0f0f0, 0x3aa64c, 0x2f7bd6, 0xd83b2c, 0xe8c02a, 0x8a5a3c]), lpick(L_PANTS), lpick(L_HAIR));
+    const h = new Human({ x: x + Math.sin(a)*P.r, z: z + Math.cos(a)*P.r, yaw: a + Math.PI, rig, task: partyTask(P, i) }); if (i % 2) handProp(h, lmesh(lgeo('bottle', () => new THREE.CylinderGeometry(0.03, 0.036, 0.24, 6)), lmat(0x5a3a1a, 0.3), 0, 0, 0)); if (i === 0) P.sitter = h; }
+  P.sitter.home.x = P.sitter.x = sx; P.sitter.home.z = P.sitter.z = sz;   // the one on the bench
+  const party = HUMANS.filter(h => h.task && h.task.kind === 'party' && h !== P.sitter && Math.hypot(h.x - x, h.z - z) < 8);
+  X2.upd.push((dt) => { if (P.faller && (P.faller.down || P.faller.gone)) P.faller = null; if (!P.faller && (P.fallT -= dt) <= 0) { const up = party.filter(h => !h.down && !h.gone); if (up.length) P.faller = lpick(up); P.fallT = 40 + Math.random()*50; } });
+  X2.reset.push(() => { P.faller = null; P.fallT = 25 + Math.random()*30; }); }
+
+// ── the loose yard dog: the rally car goes by, off it goes after it barking; the owner runs after it, waving and shouting ──
+function bark(h) { if (!audio || gameState === State.MENU) return; const d = Math.hypot(h.x - car.x, h.z - car.z); if (d > 45) return; const k = 0.05*(1 - d/45);
+  beep(520 + Math.random()*60, 0.06, k, 'square'); setTimeout(() => beep(410, 0.09, k, 'square'), 85); }
+const yardDogTask = (D) => ({ kind: 'yarddog', update(h, dt, t) { const S = D.s, cx = car.x - h.x, cz = car.z - h.z, cd = Math.hypot(cx, cz), cs = Math.hypot(car.vx, car.vz); S.cool -= dt; h.tilt = 0;
+  if (S.m === 'idle') { if (cd < 34 && cs > 8 && S.cool <= 0) { S.m = 'chase'; S.t = 0; S.side = Math.random() < 0.5 ? 1 : -1; return; }
+    if ((S.re -= dt) <= 0) { S.re = 2 + Math.random()*4; const a = Math.random()*6.3, r = Math.random()*D.R; S.tx = D.hx + Math.sin(a)*r; S.tz = D.hz + Math.cos(a)*r; S.sit = Math.random() < 0.45; }
+    if (walkTo(h, S.tx, S.tz, 1.4, dt) && S.sit) { h.pose.armL = h.pose.armR = -1.2; h.tilt = -0.3; } return; }
+  if (S.m === 'chase') { S.t += dt; const [tx, tz] = lloc(car.x, car.z, car.angle, S.side*2.4, -1.0); walkTo(h, tx, tz, 9.5, dt); h.pose.walk = 0.9; h.pose.ph += dt*8;
+    if ((S.bk -= dt) <= 0) { S.bk = 0.3 + Math.random()*0.35; S.bob = 0.12; bark(h); } if ((S.bob -= dt) > 0) h.tilt = -0.25;
+    if (S.t > 7 || cd > 32 || Math.hypot(h.x - D.hx, h.z - D.hz) > 80) S.m = 'home'; return; }
+  if (walkTo(h, D.hx, D.hz, 3.5, dt)) { S.m = 'idle'; S.cool = 10 + Math.random()*10; } },
+  reset(h) { Object.assign(D.s, { m: 'idle', cool: 4, re: 0, bk: 0, bob: 0 }); h.tilt = 0; } });
+const dogOwnerTask = (D) => ({ kind: 'dogowner', update(h, dt, t) { const dog = D.dog, S = D.s, st = h.st || (h.st = { lag: 0 }); h.tilt = 0;
+  if (dog.down && !dog.gone) { if (walkTo(h, dog.x - 0.6, dog.z, 2.4, dt)) { h.yaw = Math.atan2(dog.x - h.x, dog.z - h.z); h.pose.legs = 1.35; h.pose.dy = -0.52; h.tilt = 0.32; h.pose.armL = h.pose.armR = -1.1; } return; }   // kneeling by the dog
+  const out = Math.hypot(dog.x - D.hx, dog.z - D.hz) > 10;
+  if (S.m === 'chase' || (S.m === 'home' && out)) { st.lag += dt; if (st.lag < 0.8) { h.vx = h.vz = 0; h.yaw = Math.atan2(dog.x - h.x, dog.z - h.z); h.pose.armR = -2.8; return; }
+    if (Math.hypot(h.x - D.ox, h.z - D.oz) < 55 && Math.hypot(dog.x - h.x, dog.z - h.z) > 2) walkTo(h, dog.x, dog.z, 3.6, dt); else { h.vx = h.vz = 0; h.yaw = Math.atan2(dog.x - h.x, dog.z - h.z); }
+    h.pose.armR = -2.7 + Math.sin(t*11)*0.35; h.pose.armRz = 0.2; return; }
+  st.lag = 0; if (!walkTo(h, D.ox, D.oz, 1.3, dt)) return; h.yaw = D.oyaw; h.pose.armR = Math.sin(t*0.5 + D.hx) > 0.8 ? -2.3 : -0.1; },   // (a smoke now and then)
+  reset(h) { h.st = null; } });
+function buildYardDog() { const sp = yardSpot('yarddog', 1.5, 12, 45, 0); if (!sp) return; reserve('yarddog', sp, 3);
+  let op = null; for (let k = 0; k < 20 && !op; k++) { const a = Math.random()*6.3, x = sp[0] + Math.sin(a)*3, z = sp[1] + Math.cos(a)*3; if (clearSpot(x, z, 0.4)) op = [x, z]; } if (!op) op = [sp[0] + 1.5, sp[1]];
+  const D = { hx: sp[0], hz: sp[1], R: 4, ox: op[0], oz: op[1], oyaw: Math.random()*6.3, s: { m: 'idle', cool: 4, re: 0, bk: 0, bob: 0, tx: sp[0], tz: sp[1] } };
+  D.dog = new Human({ x: sp[0], z: sp[1], rig: makeDog(), task: yardDogTask(D), r: 0.26, animal: true });
+  new Human({ x: op[0], z: op[1], yaw: D.oyaw, rig: makeAdult(lpick([0x3a3a3a, 0x2f5a3a, 0x8a2a2a, 0x3a5a8a]), lpick(L_PANTS), lpick(L_HAIR)), task: dogOwnerTask(D) }); }
+
+// ── badminton over a string net in a yard: the shuttle flies in arcs, the other one moves under it and hits it back; now and then
+//    it's missed and lands, whoever missed goes to pick it up and serves again ──
+function makeShuttle() { const g = new THREE.Group(); const c = lmesh(lgeo('shuttle', () => new THREE.ConeGeometry(0.05, 0.1, 8, 1, true)), lmat(0xf6f6f2, 0.6), 0, 0, -0.02, g); c.rotation.x = Math.PI/2;
+  lmesh(lgeo('cork', () => new THREE.SphereGeometry(0.025, 6, 5)), lmat(0xe8e0d0, 0.6), 0, 0, 0.035, g); return g; }
+function badUpdate(B, dt) { const near = (B.x - car.x)**2 + (B.z - car.z)**2 < 240*240; B.sh.visible = near; if (!near) return; const sh = B.sh, [p0, p1] = B.p;
+  if ((p0.down || p0.gone || p1.down || p1.gone) && (B.st === 'fly' || B.st === 'held')) { B.st = 'drop'; B.vy = 0; }
+  B.hitT[0] += dt; B.hitT[1] += dt;
+  if (B.st === 'fly') { B.u += dt/B.T; const u = Math.min(1, B.u), q = (k) => B.A[k] + (B.E[k] - B.A[k])*u; sh.position.set(q(0), q(1) + B.apex*4*u*(1 - u), q(2));
+    const u2 = Math.min(1, u + 0.03); sh.lookAt(B.A[0] + (B.E[0] - B.A[0])*u2, B.A[1] + (B.E[1] - B.A[1])*u2 + B.apex*4*u2*(1 - u2) - (u > 0.97 ? 0.02 : 0), B.A[2] + (B.E[2] - B.A[2])*u2);
+    if (B.u >= 1) { if (B.miss) { B.st = 'ground'; B.gx = B.E[0]; B.gz = B.E[2]; B.fetch = 1 - B.from; } else badLaunch(B, 1 - B.from); } return; }
+  if (B.st === 'drop') { B.vy -= 6*dt; sh.position.y += B.vy*dt; const gy = Y(sh.position.x, sh.position.z) + 0.03; if (sh.position.y <= gy) { B.st = 'ground'; B.gx = sh.position.x; B.gz = sh.position.z; B.fetch = -1; } return; }
+  if (B.st === 'ground') { sh.position.set(B.gx, Y(B.gx, B.gz) + 0.03, B.gz); sh.rotation.set(0.3, 0, 0); return; }
+  if (B.st === 'held') { const h = B.p[B.fetch], [x, z] = lloc(h.x, h.z, h.yaw, 0.1, 0.35); sh.position.set(x, Y(h.x, h.z) + (h.kid ? 0.7 : 1.0), z); } }
+function badContact(B, i, x, z) { const h = B.p[i], yaw = B.yaw + (i ? Math.PI : 0), [cx, cz] = lloc(x, z, yaw, 0.35, 0.35); return [cx, Y(x, z) + (h.kid ? 1.7 : 2.35), cz]; }
+function badLaunch(B, i) { const j = 1 - i, h = B.p[i], sgn = j ? 1 : -1; B.A = badContact(B, i, h.x, h.z);
+  B.tgt[j] = lloc(B.x, B.z, B.yaw, (Math.random() - 0.5)*2.4, sgn*(3.2 + (Math.random() - 0.5)*0.9)); B.miss = Math.random() < 0.15;
+  if (B.miss) { const [gx, gz] = lloc(B.tgt[j][0], B.tgt[j][1], B.yaw, (Math.random() < 0.5 ? 1 : -1)*(1.5 + Math.random()*1.5), sgn*(Math.random()*1.5)); B.E = [gx, Y(gx, gz) + 0.03, gz]; }
+  else B.E = badContact(B, j, B.tgt[j][0], B.tgt[j][1]);
+  B.T = 1.1 + Math.random()*0.5; B.apex = 2.2 + Math.random()*1.6; B.from = i; B.u = 0; B.st = 'fly'; B.hitT[i] = 0; B.fetch = -1; }
+const badTask = (B, i) => ({ kind: 'badminton', update(h, dt, t) { const o = B.p[1 - i], face = () => { h.yaw = Math.atan2(o.x - h.x, o.z - h.z); }, st = h.st || (h.st = { t: 0 }); h.tilt = 0; h.pose.armL = -0.5;
+  if (o.down || o.gone) { h.vx = h.vz = 0; face(); h.pose.armL = h.pose.armR = -2.6; h.pose.armLz = 0.5; h.pose.armRz = -0.5; return; }
+  if (B.fetch === i && B.st === 'ground') { if (walkTo(h, B.gx, B.gz, 1.6, dt)) { h.tilt = 0.7; h.pose.armR = -1.2; if ((st.t += dt) > 0.8) { st.t = 0; B.st = 'held'; } } return; }
+  if (B.fetch === i && B.st === 'held') { const [tx, tz] = B.home[i]; if (!walkTo(h, tx, tz, 1.4, dt)) { st.t = 0; return; } face(); st.t += dt; h.pose.armR = st.t < 1.0 ? -0.3 : -0.3 - (st.t - 1)*6;
+    if (st.t > 1.25) { st.t = 0; B.tgt[i] = B.home[i]; badLaunch(B, i); } return; }   // an underhand serve
+  const [tx, tz] = B.tgt[i]; if (!walkTo(h, tx, tz, 3.0, dt)) { h.yaw = Math.atan2(o.x - h.x, o.z - h.z); h.pose.walk = 0.4; } else face();
+  if (B.st === 'fly' && B.from !== i && !B.miss) h.pose.armR = -1.0 - 1.9*Math.max(0, Math.min(1, (B.u - 0.55)/0.4));
+  else if (B.hitT[i] < 0.3) h.pose.armR = -2.9 + 1.8*(B.hitT[i]/0.3); else h.pose.armR = -1.0; },
+  knocked(h) { if (B.st === 'held' && B.p[B.fetch] === h) { B.st = 'drop'; B.vy = 0; } }, reset(h) { h.st = null; } });
+function buildBadminton(n) { for (let k = 0; k < n; k++) { const sp = yardSpot('badminton', 3.6, 16, 140, 120); if (!sp) break; reserve('badminton', sp, 4.2);
+  const yaw = Math.random()*6.3, g = new THREE.Group(), pole = lmat(0xd8d8d0, 0.5), str = lmat(0xf0f0e8, 0.6);
+  for (const s of [-1, 1]) lmesh(lbox(0.05, 1.6, 0.05, 0.8), pole, s*2.3, 0, 0, g); lmesh(lbox(4.6, 0.04, 0.02), lmat(0xffffff, 0.5), 0, 1.55, 0, g);
+  for (const yy of [0.95, 1.15, 1.35]) lmesh(lbox(4.6, 0.012, 0.012), str, 0, yy, 0, g, false); for (let q = -5; q <= 5; q++) lmesh(lbox(0.012, 0.62, 0.012), str, q*0.4, 1.24, 0, g, false);
+  placeAt(g, sp[0], sp[1], yaw); lifeGroup.add(g); nearVis(g, sp[0], sp[1]);
+  const B = { x: sp[0], z: sp[1], yaw, p: [], home: [lloc(sp[0], sp[1], yaw, 0, -3.2), lloc(sp[0], sp[1], yaw, 0, 3.2)], tgt: [], hitT: [9, 9], st: 'held', fetch: 0, u: 0, sh: makeShuttle() }; B.tgt = B.home.slice(); lifeGroup.add(B.sh);
+  const kids = Math.random() < 0.5;
+  for (let i = 0; i < 2; i++) { const kid = kids && (i === 0 || Math.random() < 0.6), rig = kid ? makeKid(lpick(L_SHIRTS)) : makeAdult(lpick(L_SHIRTS), lpick(L_PANTS), lpick(L_HAIR));
+    const h = new Human({ x: B.home[i][0], z: B.home[i][1], yaw: yaw + (i ? Math.PI : 0), kid, rig, task: badTask(B, i) }); B.p.push(h);
+    const r = new THREE.Group(); lmesh(lbox(0.025, 0.3, 0.025, -0.15), lmat(0x2a2a2a, 0.6), 0, 0, 0, r); lmesh(lgeo('racket', () => { const q = new THREE.TorusGeometry(0.11, 0.01, 4, 14); q.scale(1, 1.3, 1); return q; }), lmat(lpick([0xd82a2a, 0x2a5ad8, 0xe8e8e8]), 0.4), 0, -0.44, 0, r); handProp(h, r); }
+  X2.upd.push((dt) => badUpdate(B, dt)); X2.reset.push(() => { Object.assign(B, { st: 'held', fetch: 0, u: 0, hitT: [9, 9] }); B.tgt = B.home.slice(); }); } }
+
+function lifeExtras2Build() {
+  X2.upd.length = 0; X2.reset.length = 0; X2.flying.length = 0; for (let i = LIFE_PLAN.length - 1; i >= 0; i--) if (LIFE_PLAN[i].x2) LIFE_PLAN.splice(i, 1);
+  buildIceVan();
+  const streets = streetStretches(55, 130, 16).filter(s => distRoute(s.mid.x, s.mid.z) < 160), used = [];
+  const take = (gap) => { const s = streets.find(s => !used.some(u => Math.hypot(u.mid.x - s.mid.x, u.mid.z - s.mid.z) < gap)); if (s) used.push(s); return s; };
+  for (let k = 0; k < 2; k++) { const s = take(150); if (s) buildMopeds(s); }
+  for (let k = 0; k < 4; k++) { const s = take(90); if (s && buildPostman(s)) break; }
+  buildHorses(2); buildCarpets(3); buildLaundry(3); buildMidsummer(); buildYardDog(); buildYardDog(); buildBadminton(2);
+}
+function extras2Update(dt) { for (const f of X2.upd) f(dt, worldT); flyingUpdate(dt); }
+function lifeExtras2Reset() { for (const f of X2.reset) f(); for (const F of X2.flying) lifeGroup.remove(F.m); X2.flying.length = 0; }
 function worldBuild() {
   pizzaShops();
   // clear the last build
@@ -4849,10 +5226,7 @@ function worldBuild() {
       for (const s of [-1, 1]) { const hh = lmesh(lbox(0.03, 0.03, 0.8), lmat(0x9a9a9a, 0.3), s*0.2, 0.55, -0.55, mower); hh.rotation.x = -0.75; for (const zz of [-0.22, 0.22]) { const w = lmesh(lcyl(0.08, 0.05, 8), black, s*0.27, 0.08, zz, mower); w.rotation.z = Math.PI/2; } }
       lmesh(lbox(0.44, 0.03, 0.03), lmat(0x9a9a9a, 0.3), 0, 0.84, -0.83, mower); lifeGroup.add(mower); placeAt(mower, P.x, P.z, P.yaw); nearVis(mower, P.x, P.z);
       new Human({ x: P.x, z: P.z, yaw: P.yaw, rig: makeAdult(lpick(L_SHIRTS), lpick(L_PANTS), lpick(L_HAIR)), task: mowTask(P, mower) }); }
-    else if (P.kind === 'bike') { for (let k = 0; k < P.n; k++) { const bike = new THREE.Group(), fr = lmat(lpick([0xd82a2a, 0x2a5ad8, 0xe8c02a, 0x2a9a4a, 0xe86a1a]), 0.4), tyre = lmat(0x151515, 0.7);
-        for (const zz of [-0.45, 0.45]) { const w = lmesh(lgeo('wheel', () => new THREE.TorusGeometry(0.28, 0.03, 5, 14)), tyre, 0, 0.3, zz, bike); w.rotation.y = Math.PI/2; }
-        lmesh(lbox(0.035, 0.035, 0.85), fr, 0, 0.55, 0, bike); const d2 = lmesh(lbox(0.035, 0.035, 0.6), fr, 0, 0.42, 0.18, bike); d2.rotation.x = 0.7;
-        lmesh(lbox(0.12, 0.04, 0.2), tyre, 0, 0.72, -0.2, bike); lmesh(lbox(0.46, 0.03, 0.03), lmat(0xb0b0b0, 0.3), 0, 0.85, 0.42, bike); bike.rotation.order = 'YXZ'; lifeGroup.add(bike); placeAt(bike, P.x, P.z, 0); nearVis(bike, P.x, P.z);
+    else if (P.kind === 'bike') { for (let k = 0; k < P.n; k++) { const bike = makeBike(lmat(lpick([0xd82a2a, 0x2a5ad8, 0xe8c02a, 0x2a9a4a, 0xe86a1a]), 0.4)); lifeGroup.add(bike); placeAt(bike, P.x, P.z, 0); nearVis(bike, P.x, P.z);
         new Human({ x: P.x, z: P.z, kid: true, rig: makeKid(lpick(L_SHIRTS)), task: rideTask(P, bike, k) }); } }
     else if (P.kind === 'flag') { const fl = new THREE.Mesh(flagGeo(), flagMaterial()); fl.castShadow = true; const top = 5.86, low = 1.35, y0 = Y(P.x, P.z);
       fl.position.set(P.x, y0 + (P.hoist ? low + Math.random()*(top - low) : top), P.z); fl.rotation.y = WIND_YAW - Math.PI/2 + (Math.random() - 0.5)*0.25; lifeGroup.add(fl); nearVis(fl, P.x, P.z);
@@ -4884,6 +5258,7 @@ function worldBuild() {
     new Vehicle({ kind: 'bus', x: m.position.x, z: m.position.z, yaw: e.y, hw: 1.3, hl: 5.1, view: { kind: 'mesh', g: m }, axle: [1.13, 2.8, -2.6] }); });
   staticBuild();
   lifeExtrasBuild();
+  lifeExtras2Build();
   crowdBuild();
 }
 const NEAR_VIS = []; let nearVisT = 0;   // props only drawn near the car (grills, mowers, bikes, flags)
@@ -4892,14 +5267,20 @@ function nearVisUpdate(dt) { if ((nearVisT -= dt) > 0) return; nearVisT = 0.25; 
 const EMITTERS = [];   // grills, broken-down cars: smoke that goes on whatever the people do
 function emittersUpdate(dt) {
   for (const E of EMITTERS) { if (E.v) { const [ex, ez] = lloc(E.v.x, E.v.z, E.v.yaw, 0, (E.end || 1)*(E.v.hl - 0.4)); E.x = ex; E.z = ez; E.y = E.v.gy + 0.95; }
-    if ((E.x - car.x)**2 + (E.z - car.z)**2 > 240*240) continue; E.acc += dt;
+    const far = (E.x - car.x)**2 + (E.z - car.z)**2 > 240*240; if (E.glow) E.glow.visible = !far; if (far) continue; E.acc += dt;
     if (E.kind === 'grill') while (E.acc > 0.28) { E.acc -= 0.28; lifeFx.emit(E.x + (Math.random() - 0.5)*0.3, E.y, E.z + (Math.random() - 0.5)*0.3, 0.25 + Math.random()*0.2, 0.5 + Math.random()*0.3, 0.12, 3.2 + Math.random()*1.5, 0.35, 2.4, 0.32, 0.78, 0.78, 0.8, 0.9, 0.9, 0.92); }
+    else if (E.kind === 'kokko') { E.glow.material.opacity = 0.5 + 0.2*Math.sin(worldT*13)*Math.sin(worldT*5.7);   // the midsummer bonfire: flames, sparks, a little smoke
+      while (E.acc > 0.022) { E.acc -= 0.022; const R = Math.random(), a = Math.random()*6.3, r = Math.random()*0.45, px = E.x + Math.sin(a)*r, pz = E.z + Math.cos(a)*r, py = E.y + Math.random()*0.8, s = 0.7 + Math.random()*0.5;
+        if (R < 0.5) flameFx2.emit(px, py, pz, (Math.random() - 0.5)*0.5, 1.2 + Math.random()*1.4, (Math.random() - 0.5)*0.5, 0.5 + Math.random()*0.4, s*1.2, s*0.3, 0.95, 1.0, 0.55, 0.12, 0.85, 0.18, 0.04);
+        else if (R < 0.85) fireFx.emit(px, py, pz, (Math.random() - 0.5)*0.5, 1.6 + Math.random()*1.4, (Math.random() - 0.5)*0.5, 0.4 + Math.random()*0.3, s, s*0.3, 0.95, 1.0, 0.9, 0.45, 1.0, 0.4, 0.08);
+        else if (R < 0.93) fireFx.emit(px, py + 0.8, pz, (Math.random() - 0.5)*1.2, 2.5 + Math.random()*2, (Math.random() - 0.5)*1.2, 1.4 + Math.random(), 0.12, 0.07, 1.0, 1.0, 0.75, 0.3, 1.0, 0.35, 0.05);
+        else lifeFx.emit(px, py + 1.6, pz, 0.3, 1.2 + Math.random()*0.6, 0.15, 4 + Math.random()*2, 0.8, 4.5, 0.4, 0.35, 0.33, 0.32, 0.6, 0.6, 0.62); } }
     else while (E.acc > 0.09) { E.acc -= 0.09; const dark = Math.random() < 0.6; lifeFx.emit(E.x + (Math.random() - 0.5)*0.6, E.y, E.z + (Math.random() - 0.5)*0.6, 0.2 + (Math.random() - 0.5)*0.4, 0.9 + Math.random()*0.6, 0.1 + (Math.random() - 0.5)*0.4, 3.5 + Math.random()*2, 0.5, 3.6, dark ? 0.75 : 0.55, dark ? 0.25 : 0.85, dark ? 0.25 : 0.85, dark ? 0.27 : 0.87, dark ? 0.55 : 0.92, dark ? 0.55 : 0.92, dark ? 0.57 : 0.93); } }
 }
 function worldUpdate(dt) {
   worldT += dt;
   carStillT = Math.hypot(car.vx, car.vz) < 1.5 && gameState === State.RACING ? carStillT + dt : 0;
-  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); queueUpdate(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
+  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); queueUpdate(dt); extras2Update(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
   let siren = 0; for (const v of VEHICLES) if (v.job && v.job.phase === 'drive') siren = Math.max(siren, Math.max(0, 1 - Math.hypot(v.x - car.x, v.z - car.z)/240));
   sirenSet(siren, dt);
 }
@@ -4910,7 +5291,7 @@ function worldReset() {   // a restart: everyone back on their feet and where th
   for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i]; if (h.temp) { humanRemove(h); continue; } if (h.seat0) { h.seat = h.seat0; h.task = h.task0; }
     h.x = h.home.x; h.z = h.home.z; h.yaw = h.home.yaw; h.vx = h.vz = h.vy = h.hop = h.tilt = h.roll = h.spin = h.sway = 0; h.down = h.hurt = h.gone = false; h.ride = null; h.pose.up = false; if (h.task && h.task.reset) h.task.reset(h); humanSync(h); }
   for (const F of FIELD_GAMES) if (F.kids) { F.ball.a = F.ball.b = 0; F.ball.va = F.ball.vb = F.ball.vy = 0; F.ball.y = 0.16; }
-  pizzaReset(); lifeExtrasReset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); waterFx.clear(); sirenSet(0, 0);
+  pizzaReset(); lifeExtrasReset(); lifeExtras2Reset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); waterFx.clear(); sirenSet(0, 0);
 }
 function roadPathTo(x, z) { return ambPath(x, z); }
 
