@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>YLÄSTÖ 1988 · korkeuserot</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;0,800;1,400&family=Saira:ital,wght@1,800;1,900&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #0a0a0a; overflow: hidden; font-family: 'JetBrains Mono', monospace; color: #e0e0e0; cursor: none; }
   canvas { display: block; }
@@ -21,11 +21,18 @@
   #countdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 110px; font-weight: 800; letter-spacing: -4px; color: #fff; opacity: 0; pointer-events: none; z-index: 30; }
   #overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: #0a0a0a; transition: opacity 0.5s; }
   #overlay.hidden { opacity: 0; pointer-events: none; }
-  #overlay h1 { font-size: clamp(34px, 9vw, 72px); font-weight: 800; letter-spacing: -0.04em; margin: 0 16px 8px; color: #fff; text-align: center; line-height: 1.05; }
-  #overlay .tagline { font-size: clamp(12px, 2.2vw, 16px); color: #cfcfc8; margin: 2px 16px 12px; max-width: 92vw; text-align: center; line-height: 1.5; font-style: italic; }
-  #overlay .subtitle { font-size: clamp(9px, 1.6vw, 11px); letter-spacing: 0.35em; text-transform: uppercase; color: #555; margin: 0 16px 10px; max-width: 92vw; text-align: center; line-height: 1.8; }
-  #overlay .build-stamp { font-size: clamp(9px, 1.5vw, 11px); letter-spacing: 0.2em; color: #3d6; margin: 0 16px 40px; text-align: center; max-width: 92vw; }
-  #overlay .start-hint { font-size: clamp(10px, 1.8vw, 12px); letter-spacing: 0.3em; text-align: center; margin: 0 16px; text-transform: uppercase; color: #666; animation: pulse 2s ease-in-out infinite; }
+  /* the start screen: red rally stripes, a heavy italic title, the stage in small caps, the leaderboard */
+  #overlay .deco { display: flex; align-items: center; gap: 18px; width: min(760px, 86vw); margin: 0 auto; }
+  #overlay .deco::before, #overlay .deco::after { content: ''; flex: 1; height: 2px; background: linear-gradient(90deg, transparent, #e0141e 30%, #e0141e 70%, transparent); }
+  #overlay .deco svg { display: block; flex: none; }
+  #overlay .deco.top { margin-bottom: clamp(14px, 3vh, 34px); } #overlay .deco.bottom { margin-top: clamp(18px, 4vh, 44px); width: min(520px, 86vw); }   /* (narrower: clear of the change list at the bottom right) */
+  #overlay h1 { font-family: 'Saira', 'Arial Black', sans-serif; font-style: italic; font-weight: 900; font-size: clamp(40px, 10vw, 104px); letter-spacing: 0.01em; margin: 0 16px clamp(6px, 1.5vh, 14px); color: #fff; text-align: center; line-height: 1; text-shadow: 0 4px 24px rgba(0,0,0,0.6); }
+  #overlay .tagline { font-size: clamp(12px, 2vw, 20px); color: #f2f2ee; margin: 2px 16px clamp(14px, 3vh, 30px); max-width: 94vw; text-align: center; line-height: 1.5; font-style: italic; letter-spacing: 0.04em; }
+  #overlay .subtitle { font-size: clamp(9px, 1.5vw, 14px); letter-spacing: 0.32em; text-transform: uppercase; color: #8a8a86; margin: 0 16px clamp(12px, 2.4vh, 24px); max-width: 94vw; text-align: center; line-height: 1.8; }
+  #overlay .subtitle b { font-weight: 400; color: #d8d8d4; } #overlay .subtitle .sl { color: #e0141e; font-weight: 800; margin: 0 0.9em; }
+  #overlay .build-stamp { display: flex; align-items: center; gap: 22px; font-size: clamp(10px, 1.6vw, 15px); font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #ff2a2a; margin: 0 16px clamp(18px, 4vh, 44px); text-align: center; max-width: 92vw; }
+  #overlay .build-stamp::before, #overlay .build-stamp::after { content: ''; width: clamp(24px, 6vw, 74px); height: 2px; background: #e0141e; }
+  #overlay .start-hint { font-size: clamp(11px, 1.8vw, 16px); letter-spacing: 0.4em; text-align: center; margin: 0 16px; text-transform: uppercase; color: #e8e8e4; animation: pulse 2s ease-in-out infinite; }
   #results { display: none; text-align: center; }
   #results .time { font-size: clamp(32px, 7vw, 48px); font-weight: 800; color: #ff4444; letter-spacing: -2px; }
   #results .label { font-size: 11px; letter-spacing: 5px; color: #555; margin-bottom: 6px; }
@@ -36,11 +43,18 @@
   #changelog .cl-head { font-size: 10px; letter-spacing: 0.35em; color: #555; margin-bottom: 8px; }
   #changelog .cl-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #changelog .cl-d { color: #4a4a46; margin-right: 8px; } #changelog .cl-row:first-of-type { color: #b8b8b0; }
   @media (max-width: 1000px), (max-height: 620px) { #changelog { display: none; } }
-  #top10 { margin-top: 26px; min-width: min(360px, 88vw); font-size: 13px; color: #cfcfc8; font-variant-numeric: tabular-nums; }
-  #top10 .t10-head { font-size: 10px; letter-spacing: 0.35em; color: #666; text-align: center; margin-bottom: 6px; }
-  #top10 .t10-row { display: flex; gap: 10px; padding: 2px 6px; } #top10 .t10-row.me { color: #44ff44; }
-  #top10 .t10-pos { width: 2.2em; text-align: right; color: #666; } #top10 .t10-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #top10 .t10-time { color: #fff; }
-  #top10 .t10-empty { font-size: 11px; color: #666; text-align: center; margin-top: 6px; }
+  #top10 { margin-top: clamp(16px, 3.5vh, 34px); width: min(660px, 88vw); font-size: clamp(13px, 2vw, 21px); color: #f0f0ec; font-variant-numeric: tabular-nums; }
+  #top10 .t10-head { font-size: clamp(9px, 1.3vw, 13px); letter-spacing: 0.4em; color: #8a8a86; text-align: center; margin-bottom: clamp(8px, 1.6vh, 16px); text-transform: uppercase; }
+  #top10 .t10-row { display: flex; gap: 0.9em; padding: 0.12em 6px; align-items: baseline; } #top10 .t10-row.me .t10-name { color: #44e24a; font-weight: 700; }
+  #top10 .t10-pos { width: 2.4em; text-align: right; color: #8a8a86; } #top10 .t10-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #top10 .t10-time { color: #fff; }
+  #top10 .t10-empty { font-size: clamp(10px, 1.4vw, 13px); color: #8a8a86; text-align: center; margin-top: clamp(10px, 2vh, 18px); letter-spacing: 0.04em; }
+  #top10 .t10-err { color: #ff6a5a; }
+  /* fetching the results: a loud line with a spinner and ghost rows that shimmer, so nobody thinks the list is empty */
+  #top10 .t10-loading { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: clamp(11px, 1.6vw, 15px); font-weight: 800; letter-spacing: 0.28em; text-transform: uppercase; color: #ff2a2a; margin: 4px 0 12px; }
+  #top10 .t10-loading.small { font-size: clamp(9px, 1.2vw, 12px); font-weight: 400; color: #c8c8c4; margin: clamp(10px, 2vh, 18px) 0 0; letter-spacing: 0.2em; }
+  #top10 .spin { width: 1em; height: 1em; border: 2px solid rgba(255,42,42,0.25); border-top-color: #ff2a2a; border-radius: 50%; animation: spin 0.8s linear infinite; flex: none; }
+  #top10 .t10-skel { height: 0.9em; margin: 0.35em 6px; border-radius: 3px; background: linear-gradient(90deg, #161616 0%, #262626 40%, #161616 80%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } } @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
   #name-form { margin-top: 18px; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; cursor: auto; }
   #name-form input { font: inherit; font-size: 16px; padding: 7px 10px; width: 12em; background: #111; color: #fff; border: 1px solid #555; border-radius: 4px; cursor: text; }
   #name-form button { font: inherit; font-size: 13px; padding: 8px 14px; background: #2a7a3a; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
@@ -54,10 +68,11 @@
 </head>
 <body>
 <div id="overlay">
+  <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="subtitle">Ylästö · Vantaa · <span id="tod-label">päivä</span> · <span id="terrain-label">mäet</span></div>
-  <div class="build-stamp">editorista 18.39 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
+  <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b id="tod-label">päivä</b><span class="sl">/</span><span id="terrain-label">mäet</span></div>
+  <div class="build-stamp">editorista 20.23 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
   <div id="results">
     <div class="label">maaliaika</div>
     <div class="time" id="final-time">00:00.000</div>
@@ -66,6 +81,7 @@
     <div class="restart-hint">enter — uusi lähtö</div>
   </div>
   <div id="top10"></div>
+  <div class="deco bottom"><svg width="80" height="20" viewBox="0 0 80 20" aria-hidden="true"><path d="M8 20L17 0h8L16 20zM30 20L39 0h8L38 20zM52 20L61 0h8L60 20z" fill="#e0141e"/></svg></div>
   <div id="changelog"></div>
 </div>
 <div id="hud">
@@ -3688,6 +3704,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Uusi alkuruutu, selvä "haetaan tuloksia" -tieto'],
   ['26.9.', 'Jäätelöauto kiertää, lapset jonoon; mopopojat, postinjakaja'],
   ['26.9.', 'Keppihevostytöt, mattojen tamppaus, sulkapallo, karkaava lakana'],
   ['26.9.', 'Juhannuskokko ja humalaiset, irtokoirat jahtaavat autoa'],
@@ -3707,14 +3724,17 @@ function renderChangelog() { const el = document.getElementById('changelog'); if
   el.innerHTML = '<div class="cl-head">MUUTOKSET</div>'; CHANGES.slice(0, 10).forEach(([d, t]) => { const r = document.createElement('div'); r.className = 'cl-row'; r.title = t;
     r.innerHTML = '<span class="cl-d"></span><span></span>'; r.children[0].textContent = d; r.children[1].textContent = t; el.appendChild(r); }); }
 function renderTop10() { const el = document.getElementById('top10'); if (!el) return;
-  if (!ONLINE.ok) { el.innerHTML = !ONLINE.api ? '' : '<div class="t10-empty">' + (ONLINE.busy ? 'haen ajajia…' : 'tulokset eivät nyt saatavilla — haamuna oma paras') + '</div>'; return; }
+  const head = '<div class="t10-head">Top 10 · kuskit</div>', loading = (small) => '<div class="t10-loading' + (small ? ' small' : '') + '"><span class="spin"></span>' + (small ? 'päivitetään tuloksia…' : 'haetaan tuloksia…') + '</div>';
+  if (!ONLINE.ok) { el.innerHTML = !ONLINE.api ? '' : ONLINE.busy ? head + loading() + '<div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div><div class="t10-skel" style="width:94%"></div>'
+    : head + '<div class="t10-empty t10-err">tuloksia ei saatu haettua — haamuna oma paras</div>'; return; }
   const me = onlineKey(ONLINE.name), rows = ONLINE.list.slice(0, 10);
-  if (ONLINE.busy && !rows.length) { el.innerHTML = '<div class="t10-empty">haen ajajia…</div>'; return; }
-  el.innerHTML = '<div class="t10-head">TOP 10 · kuskit</div>' + (rows.length ? '' : '<div class="t10-empty">ei vielä aikoja — aja ensimmäinen</div>');
+  if (ONLINE.busy && !rows.length) { el.innerHTML = head + loading() + '<div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div>'; return; }
+  el.innerHTML = head + (rows.length ? '' : '<div class="t10-empty">ei vielä aikoja — aja ensimmäinen</div>');
   rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 't10-row' + (r.k === me ? ' me' : '');
     d.innerHTML = '<span class="t10-pos"></span><span class="t10-name"></span><span class="t10-time"></span>'; d.children[0].textContent = (i + 1) + '.'; d.children[1].textContent = r.name; d.children[2].textContent = formatTime(r.t); el.appendChild(d); });
+  if (ONLINE.busy) { el.insertAdjacentHTML('beforeend', loading(true)); return; }   // (a refresh after a lap: the old list stays up meanwhile)
   const rivals = ONLINE.opp.map(o => o.name + ' ' + formatTime(o.t).replace(/^00:/, '')).join(' · '), d = document.createElement('div'); d.className = 't10-empty';
-  d.textContent = ONLINE.busy ? 'haen ajajia…' : rivals ? 'haamuina radalla: ' + rivals : 'ei haamuja vielä'; el.appendChild(d); }
+  d.textContent = rivals ? 'haamuina radalla: ' + rivals : 'ei haamuja vielä'; el.appendChild(d); }
 function samplePose(S, st, t) {   // a ghost's pose at t: linear between samples (angle along the short way); st.cursor walks forward
   const n = S.length/4; if (st.cursor >= n - 1 || S[st.cursor*4] > t*1000) st.cursor = 0;
   while (st.cursor < n - 2 && S[(st.cursor + 1)*4] <= t*1000) st.cursor++;
