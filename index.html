@@ -31,6 +31,15 @@
   #results .label { font-size: 11px; letter-spacing: 5px; color: #555; margin-bottom: 6px; }
   #results .best-time { font-size: 16px; color: #666; margin-top: 12px; }
   #results .restart-hint { font-size: clamp(10px, 1.8vw, 12px); letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin-top: 40px; animation: pulse 2s ease-in-out infinite; }
+  #top10 { margin-top: 26px; min-width: min(360px, 88vw); font-size: 13px; color: #cfcfc8; font-variant-numeric: tabular-nums; }
+  #top10 .t10-head { font-size: 10px; letter-spacing: 0.35em; color: #666; text-align: center; margin-bottom: 6px; }
+  #top10 .t10-row { display: flex; gap: 10px; padding: 2px 6px; } #top10 .t10-row.me { color: #44ff44; }
+  #top10 .t10-pos { width: 2.2em; text-align: right; color: #666; } #top10 .t10-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #top10 .t10-time { color: #fff; }
+  #top10 .t10-empty { font-size: 11px; color: #666; text-align: center; margin-top: 6px; }
+  #name-form { margin-top: 18px; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; cursor: auto; }
+  #name-form input { font: inherit; font-size: 16px; padding: 7px 10px; width: 12em; background: #111; color: #fff; border: 1px solid #555; border-radius: 4px; cursor: text; }
+  #name-form button { font: inherit; font-size: 13px; padding: 8px 14px; background: #2a7a3a; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+  #name-status { width: 100%; font-size: 12px; color: #aaa; min-height: 1.2em; }
   @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
   #minimap { position: fixed; bottom: 24px; right: 24px; width: 140px; height: 140px; z-index: 10; pointer-events: none; opacity: 0.5; }
   #cluster { position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: none; width: min(280px, 40vw); aspect-ratio: 2 / 1; }
@@ -43,13 +52,15 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö · Vantaa · <span id="tod-label">päivä</span> · <span id="terrain-label">mäet</span></div>
-  <div class="build-stamp">editorista 16.47 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
+  <div class="build-stamp">editorista 17.06 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
   <div id="results">
     <div class="label">maaliaika</div>
     <div class="time" id="final-time">00:00.000</div>
     <div class="best-time" id="best-time-display"></div>
+    <div id="name-form" style="display:none"><input id="name-input" maxlength="16" placeholder="nimesi" autocomplete="off" spellcheck="false"><button id="name-save" onclick="onlineSubmit()">tallenna aika</button><div id="name-status"></div></div>
     <div class="restart-hint">enter — uusi lähtö</div>
   </div>
+  <div id="top10"></div>
 </div>
 <div id="hud">
   <div class="hud-block"><span class="hud-label">Aika</span><span class="hud-value" id="timer">00:00.000</span><span class="hud-sub" id="best-hud"></span><span class="hud-sub" id="pizza-hud" style="color:#ffb347"></span></div>
@@ -3614,14 +3625,92 @@ function trackSignature() { const n = trackPoints.length, p = trackPoints[0], q 
 function ghostLoad() { try { const raw = localStorage.getItem(GHOST_KEY); if (!raw) return; const g = JSON.parse(raw); if (!g || g.v !== 1 || g.sig !== trackSignature() || !Array.isArray(g.s) || g.s.length < 8) return;
     ghost = { time: g.time, splits: g.splits || [], s: g.s }; bestTime = Math.min(bestTime, g.time); } catch (e) {} }
 function ghostSave() { if (!ghost) return; try { localStorage.setItem(GHOST_KEY, JSON.stringify({ v: 1, sig: trackSignature(), time: ghost.time, splits: ghost.splits, s: ghost.s })); } catch (e) {} }
-// the see-through model: a depth-only pass then one colour pass → only the nearest surface shows, a clean silhouette
-const ghostGroup = new THREE.Group();
-{ const depthMat = new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true, depthWrite: true }), colMat = new THREE.MeshLambertMaterial({ color: 0xa8d8ff, emissive: 0x3d6f9e, transparent: true, opacity: 0.5, depthWrite: false, depthFunc: THREE.LessEqualDepth });
-  const addCopy = (mat, order) => { const c = carGroup.clone(true); c.traverse(o => { if (o.isMesh) { if (o === carAO || o.geometry === carAO.geometry) { o.visible = false; return; } o.material = mat; o.castShadow = false; o.receiveShadow = false; o.renderOrder = order; } }); c.rotation.set(0, 0, 0); c.position.set(0, 0, 0); ghostGroup.add(c); };
-  addCopy(depthMat, 8); addCopy(colMat, 9); ghostGroup.userData.colMat = colMat; }
-ghostGroup.visible = false; scene.add(ghostGroup);
+// the see-through model: a depth-only pass then one colour pass → only the nearest surface shows, a clean silhouette.
+// The whole car is baked into one geometry once, so a ghost is two draws (not two copies of every part of the car).
+let _ghostGeo = null;
+function ghostGeometry() { if (_ghostGeo) return _ghostGeo;
+  carGroup.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(carGroup.matrixWorld).invert(), m = new THREE.Matrix4(), n3 = new THREE.Matrix3(), v = new THREE.Vector3(), pos = [], nrm = [];
+  carGroup.traverse(o => { if (!o.isMesh || !o.visible || o === carAO || o.geometry === carAO.geometry) return;
+    m.multiplyMatrices(inv, o.matrixWorld); n3.getNormalMatrix(m); const flip = m.determinant() < 0, g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry, P = g.attributes.position, N = g.attributes.normal;
+    for (let i = 0; i < P.count; i++) { const k = flip ? (i - i % 3) + [0, 2, 1][i % 3] : i;   // (a mirrored part: keep its triangles facing out)
+      v.fromBufferAttribute(P, k).applyMatrix4(m); pos.push(v.x, v.y, v.z); if (N) { v.fromBufferAttribute(N, k).applyMatrix3(n3).normalize(); nrm.push(v.x, v.y, v.z); } else nrm.push(0, 1, 0); }
+    if (g !== o.geometry) g.dispose(); });
+  _ghostGeo = new THREE.BufferGeometry(); _ghostGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); _ghostGeo.setAttribute('normal', new THREE.Float32BufferAttribute(nrm, 3)); _ghostGeo.computeBoundingSphere();
+  return _ghostGeo; }
+function nameSprite(text, col) {   // a driver's name floating over their ghost (always on top, readable from the high camera)
+  const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
+  g.font = 'bold 64px Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 12; g.strokeStyle = 'rgba(0,0,0,0.75)'; g.strokeText(text, 256, 66); g.fillStyle = col; g.fillText(text, 256, 66);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, depthWrite: false, transparent: true }));
+  sp.scale.set(10, 2.5, 1); sp.position.y = 3.4; sp.renderOrder = 10; return sp; }
+function makeGhost(col, emissive, label, labelCol) {
+  const G = new THREE.Group(), geo = ghostGeometry();
+  const depthMat = new THREE.MeshBasicMaterial({ colorWrite: false, transparent: true, depthWrite: true }), colMat = new THREE.MeshLambertMaterial({ color: col, emissive, transparent: true, opacity: 0.5, depthWrite: false, depthFunc: THREE.LessEqualDepth });
+  const a = new THREE.Mesh(geo, depthMat), b = new THREE.Mesh(geo, colMat); a.renderOrder = 8; b.renderOrder = 9; G.add(a, b); G.rotation.order = 'YXZ';
+  G.userData.colMat = colMat; if (label) { G.userData.label = nameSprite(label, labelCol || '#ffffff'); G.add(G.userData.label); }
+  G.visible = false; scene.add(G); return G; }
+function placeGhost(G, P, alpha) {   // pose a ghost car at P = {x, z, a}; fades as the player's own car gets close, so you can always see yourself
+  const near = Math.hypot(P.x - car.x, P.z - car.z), k = Math.min(1, Math.max(0.25, (near - 1.5)/5));
+  G.userData.colMat.opacity = 0.5*alpha*k; G.visible = alpha*k > 0.02; if (G.userData.label) G.userData.label.material.opacity = Math.min(1, alpha*1.2);
+  G.position.set(P.x, Y(P.x, P.z), P.z); G.rotation.y = P.a;
+  const fx = Math.sin(P.a), fz = Math.cos(P.a), rx = Math.cos(P.a), rz = -Math.sin(P.a);
+  G.rotation.x = Math.atan2(Y(P.x - fx*2.4, P.z - fz*2.4) - Y(P.x + fx*2.4, P.z + fz*2.4), 4.8); G.rotation.z = Math.atan2(Y(P.x + rx*2.4, P.z + rz*2.4) - Y(P.x - rx*2.4, P.z - rz*2.4), 4.8); }
+const ghostGroup = makeGhost(0xa8d8ff, 0x3d6f9e, 'sinä', '#bfe2ff');
+// ════════ ONLINE (suomiralli.netlify.app): the leaderboard and everyone's best lap, from the site's own /api (netlify/functions/api.mjs) ════════
+// The ghost ladder: with no time of your own you race the 3 slowest; once you have one, the 3 just faster than you.
+// Anywhere without the API (a saved file, the editor's ▶ Pelaa rata) the game simply stays offline: your own best ghost only.
+const ONLINE = { api: /^https?:$/.test(location.protocol) ? '/api' : null, ok: false, list: [], opp: [], name: '', lastRun: null, busy: false };
+try { ONLINE.name = localStorage.getItem('ylasto1988-nimi') || ''; } catch (e) {}
+const OPP_LOOK = [[0xffc27a, 0x9e5a1a, '#ffd29a'], [0x9dff9a, 0x2e7a2b, '#b8ffb5'], [0xe0a8ff, 0x6a3d9e, '#ecc8ff']];
+const onlineKey = (name) => String(name || '').normalize('NFC').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 16).toLowerCase().replace(/ /g, '_');
+async function apiGet(path) { const r = await fetch(ONLINE.api + path, { cache: 'no-store' }); if (!r.ok) throw new Error(r.status); return r.json(); }
+async function onlineRefresh() {   // the leaderboard → the top 10 on the menu, then the three rivals and their ghosts
+  if (!ONLINE.api || ONLINE.busy) return; ONLINE.busy = true;
+  try { const sig = trackSignature(), d = await apiGet('/top?sig=' + encodeURIComponent(sig)); ONLINE.ok = true; ONLINE.list = d.list || []; renderTop10();
+    const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), myT = Math.min(bestTime, mine ? mine.t : Infinity), others = ONLINE.list.filter(r => r.k !== me);
+    let pick = myT < Infinity ? others.filter(r => r.t < myT).slice(-3) : others.slice(-3);   // the next three rungs up (or the bottom three)
+    if (!pick.length) pick = others.slice(0, 3);                                                 // (already on top: the chasers)
+    pick.sort((a, b) => b.t - a.t);                                                              // nearest first: the split times compare with pick[0]
+    const got = await Promise.all(pick.map(r => apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(r.k)).catch(() => null)));
+    ONLINE.opp.forEach(o => { scene.remove(o.G); o.G.userData.label.material.map.dispose(); });
+    ONLINE.opp = got.map((g, i) => g && Array.isArray(g.s) && g.s.length >= 8 ? { name: g.name, t: g.t, splits: g.splits || [], s: g.s, cursor: 0, alpha: 0,
+      G: makeGhost(OPP_LOOK[i][0], OPP_LOOK[i][1], g.name + ' ' + formatTime(g.t).replace(/^00:/, ''), OPP_LOOK[i][2]) } : null).filter(Boolean);
+  } catch (e) { ONLINE.ok = false; }
+  ONLINE.busy = false; renderTop10();
+}
+function renderTop10() { const el = document.getElementById('top10'); if (!el) return;
+  if (!ONLINE.ok) { el.innerHTML = ''; return; }
+  const me = onlineKey(ONLINE.name), rows = ONLINE.list.slice(0, 10);
+  el.innerHTML = '<div class="t10-head">TOP 10 · kuskit</div>' + (rows.length ? '' : '<div class="t10-empty">ei vielä aikoja — aja ensimmäinen</div>');
+  rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 't10-row' + (r.k === me ? ' me' : '');
+    d.innerHTML = '<span class="t10-pos"></span><span class="t10-name"></span><span class="t10-time"></span>'; d.children[0].textContent = (i + 1) + '.'; d.children[1].textContent = r.name; d.children[2].textContent = formatTime(r.t); el.appendChild(d); });
+  const rivals = ONLINE.opp.map(o => o.name).join(', '); if (rivals) { const d = document.createElement('div'); d.className = 't10-empty'; d.textContent = 'haamuina radalla: ' + rivals; el.appendChild(d); } }
+function samplePose(S, st, t) {   // a ghost's pose at t: linear between samples (angle along the short way); st.cursor walks forward
+  const n = S.length/4; if (st.cursor >= n - 1 || S[st.cursor*4] > t*1000) st.cursor = 0;
+  while (st.cursor < n - 2 && S[(st.cursor + 1)*4] <= t*1000) st.cursor++;
+  const i = st.cursor*4, j = Math.min(n - 1, st.cursor + 1)*4, t0 = S[i], t1 = S[j], f = t1 > t0 ? Math.max(0, Math.min(1, (t*1000 - t0)/(t1 - t0))) : 0;
+  let a0 = S[i+3]/1000, a1 = S[j+3]/1000; while (a1 - a0 > Math.PI) a1 -= 2*Math.PI; while (a1 - a0 < -Math.PI) a1 += 2*Math.PI;
+  return { x: (S[i+1] + (S[j+1] - S[i+1])*f)/100, z: (S[i+2] + (S[j+2] - S[i+2])*f)/100, a: a0 + (a1 - a0)*f, end: t*1000 >= S[S.length - 4] }; }
+function onlineGhostsUpdate(dt) { const show = ghostEnabled && lapStarted && gameState === State.RACING;
+  for (const o of ONLINE.opp) { if (!show) { o.G.visible = false; o.alpha = 0; continue; }
+    const P = samplePose(o.s, o, raceTime); o.alpha += ((P.end ? 0 : 1) - o.alpha)*Math.min(1, dt*(P.end ? 1.5 : 5)); placeGhost(o.G, P, o.alpha); } }
+// at the finish: your name → the lap goes up (kept only if it beats that name's best)
+function onlineOfferName() { const box = document.getElementById('name-form'); if (!box) return;
+  if (!ONLINE.ok || !ONLINE.lastRun) { box.style.display = 'none'; return; }
+  box.style.display = 'flex'; const inp = document.getElementById('name-input'); inp.value = ONLINE.name; document.getElementById('name-status').textContent = '';
+  setTimeout(() => { inp.focus(); inp.select(); }, 60); }
+async function onlineSubmit() { const inp = document.getElementById('name-input'), st = document.getElementById('name-status'), run = ONLINE.lastRun;
+  const name = inp.value.normalize('NFC').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 16); if (!name) { st.textContent = 'anna nimi'; return; }
+  if (!run) return; ONLINE.name = name; try { localStorage.setItem('ylasto1988-nimi', name); } catch (e) {}
+  st.textContent = 'tallennetaan…'; inp.blur();
+  try { const r = await fetch(ONLINE.api + '/lap', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sig: trackSignature(), name, t: run.time, splits: run.splits, s: run.s }) });
+    const d = await r.json(); if (!r.ok) throw new Error(d.error || r.status);
+    st.textContent = d.saved ? `tallennettu · sija ${d.rank}.` : `ei parannusta · ${name}: paras ${formatTime(d.best)} (sija ${d.rank}.)`;
+    if (d.saved) ONLINE.lastRun = null;
+    ONLINE.list = d.list || ONLINE.list; renderTop10(); onlineRefresh();   // next start: the next three rungs up
+  } catch (e) { st.textContent = 'tallennus ei onnistunut (' + e.message + ')'; } }
 function ghostStartRun() { ghostRec = { s: [], splits: [], last: -1 }; ghostCursor = 0; ghostAlpha = 0; ghostGroup.visible = false; }
-function ghostSplit(ci, t) { if (ghostRec) ghostRec.splits[ci] = t; if (ghost && ghost.splits[ci] !== undefined) showDelta(t - ghost.splits[ci], false); }
+function ghostSplit(ci, t) { if (ghostRec) ghostRec.splits[ci] = t; const ref = ONLINE.opp.length ? ONLINE.opp[0] : ghost;   // (online: against the nearest rival ahead)
+  if (ref && ref.splits[ci] !== undefined && ref.splits[ci] !== null) showDelta(t - ref.splits[ci], false); }
 function ghostRecord() {
   if (!ghostRec || !lapStarted || gameState !== State.RACING) return;
   const t = Math.max(0, raceTime); if (t - ghostRec.last < GHOST_DT - 1e-6) return; ghostRec.last = t;
@@ -3631,6 +3720,7 @@ function ghostFinish(t) {
   if (!ghostRec) return;
   ghostRec.s.push(Math.round(t*1000), Math.round(car.x*100), Math.round(car.z*100), Math.round(car.angle*1000));
   if (!ghost || t < ghost.time) { ghost = { time: t, splits: ghostRec.splits.slice(), s: ghostRec.s }; ghostSave(); }
+  ONLINE.lastRun = { time: t, splits: ghostRec.splits.slice(), s: ghostRec.s };   // (offered to the leaderboard under a name)
   ghostRec = null;
 }
 function ghostPoseAt(t) {   // linear interpolation between samples (angle along the short way)
@@ -3641,16 +3731,12 @@ function ghostPoseAt(t) {   // linear interpolation between samples (angle along
   return { x: (S[i+1] + (S[j+1] - S[i+1])*f)/100, z: (S[i+2] + (S[j+2] - S[i+2])*f)/100, a: a0 + (a1 - a0)*f, end: t*1000 >= S[S.length - 4] };
 }
 function updateGhost(dt) {
-  ghostRecord();
+  ghostRecord(); onlineGhostsUpdate(dt);
   const show = ghost && ghostEnabled && lapStarted && gameState === State.RACING;
   if (!show) { ghostGroup.visible = false; ghostAlpha = 0; return; }
   const P = ghostPoseAt(raceTime), target = P.end ? 0 : 1;
   ghostAlpha += (target - ghostAlpha)*Math.min(1, dt*(P.end ? 1.5 : 5));
-  // fade out as the player's own car gets close, so you can always see yourself
-  const near = Math.hypot(P.x - car.x, P.z - car.z), k = Math.min(1, Math.max(0.25, (near - 1.5)/5));
-  ghostGroup.userData.colMat.opacity = 0.5*ghostAlpha*k; ghostGroup.visible = ghostAlpha*k > 0.02;
-  ghostGroup.position.set(P.x, Y(P.x, P.z), P.z); ghostGroup.rotation.order = 'YXZ'; ghostGroup.rotation.y = P.a;
-  { const fx = Math.sin(P.a), fz = Math.cos(P.a), rx = Math.cos(P.a), rz = -Math.sin(P.a); ghostGroup.rotation.x = Math.atan2(Y(P.x - fx*2.4, P.z - fz*2.4) - Y(P.x + fx*2.4, P.z + fz*2.4), 4.8); ghostGroup.rotation.z = Math.atan2(Y(P.x + rx*2.4, P.z + rz*2.4) - Y(P.x - rx*2.4, P.z - rz*2.4), 4.8); }
+  placeGhost(ghostGroup, P, ghostAlpha*(ONLINE.opp.length ? 0.6 : 1));   // (with online rivals on track your own best stays a fainter reference)
 }
 let deltaTimer = null;
 function showDelta(d, big) { const el = document.getElementById('ghost-delta'); if (!el) return; const ahead = d < 0;
@@ -5108,6 +5194,9 @@ function updateAudio(dt) {
 // ════════════════════════════════════════
 const keys = {};
 addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'INPUT') {   // typing a name: no driving, no restart
+    if (e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); onlineSubmit(); } else if (e.code === 'Escape') e.target.blur();
+    return; }
   keys[e.code] = true;
   if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
   if (e.code==='Enter'||e.code==='NumpadEnter') {
@@ -5184,7 +5273,7 @@ function finishRace() {
   document.getElementById('final-time').textContent=formatTime(raceTime);
   document.getElementById('final-time').style.color=raceTime<bestTime?'#44ff44':'#ff4444';
   const prevBest = bestTime;
-  ghostFinish(raceTime);
+  ghostFinish(raceTime); onlineOfferName();
   if(raceTime<bestTime)bestTime=raceTime;
   if (prevBest < Infinity) showDelta(raceTime - prevBest, true);
   if(bestTime<Infinity) document.getElementById('best-time-display').textContent = (raceTime <= bestTime && prevBest > raceTime ? 'uusi ennätys — haamu tallennettu · ' : '') + `paras: ${formatTime(bestTime)}` + (prevBest < Infinity && prevBest !== raceTime ? `  (${raceTime - prevBest < 0 ? '−' : '+'}${Math.abs(raceTime - prevBest).toFixed(3)})` : '');
@@ -5501,7 +5590,7 @@ function loop(time) {
 // INIT
 // ════════════════════════════════════════
 addEventListener('resize', () => { camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
-generateTrack(); resetCar(); ghostLoad();   // (the ground is built by the terrain lift inside generateTrack)
+generateTrack(); resetCar(); ghostLoad(); onlineRefresh();   // (the ground is built by the terrain lift inside generateTrack)
 { const el = document.getElementById('terrain-label'); if (el) el.textContent = HEIGHT_RAW ? 'maanmittauslaitoksen korkeusmalli' : 'väliaikaiset mäet ' + PLACEHOLDER_AMP + '×'; }
 camPos.set(car.x-Math.sin(car.angle)*25, 45, car.z-Math.cos(car.angle)*25);
 camLookAt.set(car.x, Y(car.x,car.z), car.z);

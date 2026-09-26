@@ -106,6 +106,29 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       skip it), no trees, and no garden items from the neighbouring plots (`freeSpot`).
     - t_yard shows onCar 1 (a sandbox at 449,−42) with SEED 1. The previous build gives the same, so it is random and not the
       pizzeria.
+  - v9 (after "tulokset ja haamut nettiin … 3 hitainta, sitten 3 seuraavaa … nimi … top 10 alkuruutuun"): an online leaderboard and
+    online ghosts on https://suomiralli.netlify.app/. Netlify auto-deploys from this repo's main.
+    - Server: `netlify/functions/api.mjs`, a Netlify Function (v2, routes /api/top, /api/ghost, /api/lap) storing data in
+      Netlify Blobs (store `suomiralli`).
+      - Files: `top/<track id>.json` (the leaderboard, one row per driver) and `ghost/<track id>/<driver>.json` (one file per
+        ghost).
+      - The track id is an FNV hash of the game's trackSignature(). A changed track starts a new leaderboard; the old one stays.
+      - A lap is kept only if it beats that name's best.
+      - Sanity checks: the samples cover the whole time at 20/s, end on the time, and never exceed 100 m/s.
+      - The root `package.json` pulls in @netlify/blobs (node_modules is ignored).
+    - Game (`ONLINE`, `onlineRefresh`): the top 10 appears on the menu and under the result.
+      - Ghost ladder: with no time of your own you race the 3 slowest. With one (your local best or your name's best) you race
+        the 3 just faster; already first, you race the chasers. Nearest first: the split deltas compare with `ONLINE.opp[0]`.
+      - Rivals are drawn orange, green and violet with their name and time floating above (`nameSprite`, always on top).
+        Your own best stays as a fainter blue "sinä".
+      - At the finish: a name box (prefilled from localStorage `ylasto1988-nimi`). Enter saves; the key guard in the keydown
+        handler means typing never drives or restarts. The reply gives the rank, or "ei parannusta".
+      - No /api (file://, the editor's ▶ Pelaa rata, an artifact) → offline, exactly as before.
+    - Ghost cars are now one baked geometry (`ghostGeometry`/`makeGhost`): 2 draws per ghost instead of ~60.
+    - Tests: `test/serve.mjs` serves the repo plus the real function over an in-memory store; `t_online` (run with
+      `node real.js http://localhost:8787/ t_online.js`) seeds 5 drivers and checks the ladder, the ghosts on track, the name
+      box, the rank, a slower lap not kept and a cheat refused. real.js takes http URLs and has `__pageshot` (the whole page,
+      menus included).
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 

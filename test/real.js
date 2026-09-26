@@ -10,8 +10,9 @@ const fs = require('fs'), path = require('path');
   const errors = []; page.on('pageerror', e => errors.push(String(e))); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.route('**/three.min.js', r => r.fulfill({ body: fs.readFileSync(require.resolve('three/build/three.min.js')), contentType: 'text/javascript' }));
   await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ body: '', contentType: 'text/css' }));
-  await page.goto('file://' + path.resolve(game));
+  await page.goto(/^https?:/.test(game) ? game : 'file://' + path.resolve(game));   // (http: the game served by serve.mjs, with its /api)
   await page.waitForFunction(() => typeof generateTrack === 'function' && typeof trackPoints !== 'undefined' && trackPoints.length > 10, null, { timeout: 90000 });
+  await page.exposeFunction('__pageshot', async (name) => { await page.screenshot({ path: name }); });   // the whole page, HUD and menus included
   await page.exposeFunction('__save', async (name, dataUrl) => fs.writeFileSync(name, Buffer.from(dataUrl.split(',')[1], 'base64')));
   const body = fs.readFileSync(scriptFile, 'utf8');
   const res = await page.evaluate(`(async () => { window.__shot = async (n) => { renderer.render(scene, camera); await __save(n, renderer.domElement.toDataURL('image/png')); }; ${body} })()`);

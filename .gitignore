@@ -3,3 +3,4 @@ test/editor.js
 test/game.js
 test/*.png
 __pycache__/
+node_modules/

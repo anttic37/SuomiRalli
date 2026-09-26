@@ -11,6 +11,8 @@ decisions yourself, and verify before delivering. Full history of decisions and 
 - `build.py` — src/game.html → embedded into editor.html → headless editor build → index.html (also `node --check`s the code)
 - `test/` — Playwright + SwiftShader harness: `node real.js ../index.html t_x.js [w h]` runs a script inside the real page;
   `SEED=n` makes runs reproducible; `runall.sh outdir t_a t_b …` runs a list two at a time (more in parallel times out)
+- `netlify/functions/api.mjs` — online leaderboard + ghosts (Netlify Functions + Blobs) for https://suomiralli.netlify.app/,
+  which auto-deploys from main; `test/serve.mjs` runs it locally over an in-memory store (t_online)
 - `tools/dem/` — importer for the real MML 2 m elevation model (pending: Antti hasn't uploaded the GeoTIFF yet)
 
 ## Setup

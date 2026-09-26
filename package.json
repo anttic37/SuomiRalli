@@ -1,0 +1,9 @@
+{
+  "name": "suomiralli",
+  "private": true,
+  "description": "YLÄSTÖ 1988 — the static game plus the Netlify function for the online leaderboard and ghosts",
+  "type": "module",
+  "dependencies": {
+    "@netlify/blobs": "^8.2.0"
+  }
+}
