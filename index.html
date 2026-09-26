@@ -113,7 +113,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 22.24 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+  <div class="build-stamp">editorista 22.26 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
     <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
   <div id="results">
     <div class="label">maaliaika</div>
@@ -3836,6 +3836,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Piirileikkejä nyt kolme, reitin varrella'],
   ['26.9.', 'Haamut: aina seuraavat ajat; uudelle ~10. mutta max +10 % kärjestä'],
   ['26.9.', 'Piirileikki juhannussalon ympärillä, Ruotsin lippuja'],
   ['26.9.', 'Ennätyslista: kaikki ajat, vieritettävä'],
@@ -5535,7 +5536,8 @@ const ringTask = (R, i) => ({ kind: 'ring', update(h, dt, t) {
   if (R.mode === 'frogs') { if (!(h.hop > 0) && Math.floor(R.clock*1.6) !== S.hop) { S.hop = Math.floor(R.clock*1.6); h.vy = 1.8 + (h.kid ? 0.4 : 0); } h.pose.armL = h.pose.armR = -2.7; h.pose.armLz = 0.5; h.pose.armRz = -0.5; h.pose.legs = 0.5; return; }   // hands at the ears, hopping
   if (R.flags[i]) { h.pose.armR = -2.8 + Math.sin(t*9 + i)*0.35; h.pose.armL = -0.3; } else { const c = Math.sin(t*10 + i) > 0; h.pose.armL = h.pose.armR = -1.3; h.pose.armLz = c ? -0.15 : -0.35; h.pose.armRz = c ? 0.15 : 0.35; } },   // flags up, the rest clap
   reset(h) { h.st = null; } });
-function buildRing() { const sp = openSpot(6, 25, 150) || yardSpot('ring', 5.2, 25, 150, 0); /* (an open field first, a big yard if there's none) */ if (!sp) return; reserve('ring', sp, 5.5); const [x, z] = sp;
+function buildRing() { let sp = null; for (let k = 0; k < 12 && !sp; k++) { const q = openSpot(6, 16, 45); if (q && !LIFE_PLAN.some(P => P.kind === 'ring' && Math.hypot(P.x - q[0], P.z - q[1]) < 180)) sp = q; }   /* (an open field in sight of the route, well apart from the other rings) */
+  if (!sp) sp = yardSpot('ring', 5.2, 16, 80, 180); if (!sp) return; reserve('ring', sp, 5.5); const [x, z] = sp;
   const pole = new THREE.Group(), wood = lmat(0x7a5a3a, 0.9), leaf = lmat(0x3f7a30, 0.9), leaf2 = lmat(0x5a9a3a, 0.9);   // the maypole: leafy, a crossbar with two wreaths, flags on top
   lmesh(lcyl(0.07, 5.2, 8), wood, 0, 2.6, 0, pole); lmesh(lbox(1.9, 0.08, 0.08), wood, 0, 4.3, 0, pole);
   for (let k = 0; k < 14; k++) { const m = lmesh(lgeo('ivy', () => new THREE.IcosahedronGeometry(0.17, 0)), k % 2 ? leaf : leaf2, Math.sin(k*2.4)*0.09, 0.4 + k*0.34, Math.cos(k*2.4)*0.09, pole); }
@@ -5558,7 +5560,7 @@ function lifeExtras2Build() {
   const take = (gap) => { const s = streets.find(s => !used.some(u => Math.hypot(u.mid.x - s.mid.x, u.mid.z - s.mid.z) < gap)); if (s) used.push(s); return s; };
   for (let k = 0; k < 2; k++) { const s = take(150); if (s) buildMopeds(s); }
   for (let k = 0; k < 4; k++) { const s = take(90); if (s && buildPostman(s)) break; }
-  buildHorses(2); buildCarpets(3); buildLaundry(3); buildMidsummer(); buildYardDog(); buildYardDog(); buildBadminton(2); buildRing();
+  buildHorses(2); buildCarpets(3); buildLaundry(3); buildMidsummer(); buildYardDog(); buildYardDog(); buildBadminton(2); buildRing(); buildRing(); buildRing();
 }
 function extras2Update(dt) { for (const f of X2.upd) f(dt, worldT); flyingUpdate(dt); }
 function lifeExtras2Reset() { for (const f of X2.reset) f(); for (const F of X2.flying) lifeGroup.remove(F.m); X2.flying.length = 0; }
