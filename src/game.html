@@ -76,6 +76,10 @@
   #top10 { margin-top: clamp(16px, 3.5vh, 34px); width: min(660px, 88vw); font-size: clamp(13px, 2vw, 21px); color: #f0f0ec; font-variant-numeric: tabular-nums; }
   #top10 .t10-head { font-size: clamp(9px, 1.3vw, 13px); letter-spacing: 0.4em; color: #8a8a86; text-align: center; margin-bottom: clamp(8px, 1.6vh, 16px); text-transform: uppercase; }
   #top10 .t10-row { display: flex; gap: 0.9em; padding: 0.12em 6px; align-items: baseline; } #top10 .t10-row.me .t10-name { color: #44e24a; font-weight: 700; }
+  #top10 .t10-list { max-height: calc(10*1.52em + 4px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: #444 transparent; position: relative; }
+  #top10 .t10-list::-webkit-scrollbar { width: 6px; } #top10 .t10-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+  #top10 .t10-row { line-height: 1.28; }
+  #top10 .t10-list.more { -webkit-mask-image: linear-gradient(#000 80%, transparent); mask-image: linear-gradient(#000 80%, transparent); }   /* (a fade at the foot: there's more below) */
   #top10 .t10-pos { width: 2.4em; text-align: right; color: #8a8a86; } #top10 .t10-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #top10 .t10-time { color: #fff; }
   #top10 .t10-empty { font-size: clamp(10px, 1.4vw, 13px); color: #8a8a86; text-align: center; margin-top: clamp(10px, 2vh, 18px); letter-spacing: 0.04em; }
   #top10 .t10-err { color: #ff6a5a; }
@@ -118,7 +122,7 @@
     <div id="name-form" style="display:none"><input id="name-input" maxlength="16" placeholder="nimesi" autocomplete="off" spellcheck="false"><button id="name-save" onclick="onlineSubmit()">tallenna aika</button><div id="name-status"></div></div>
     <div class="restart-hint">enter — uusi lähtö</div>
   </div>
-  <div id="top10"><div class="t10-head">Top 10 · kuskit</div><div class="t10-loading"><span class="spin"></span>haetaan aikoja…</div><div class="t10-bar"></div><div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div><div class="t10-skel" style="width:94%"></div></div>
+  <div id="top10"><div class="t10-head">Ennätyslista · kaikki kuskit</div><div class="t10-loading"><span class="spin"></span>haetaan aikoja…</div><div class="t10-bar"></div><div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div><div class="t10-skel" style="width:94%"></div></div>
   <div class="deco bottom"><svg width="80" height="20" viewBox="0 0 80 20" aria-hidden="true"><path d="M8 20L17 0h8L16 20zM30 20L39 0h8L38 20zM52 20L61 0h8L60 20z" fill="#e0141e"/></svg></div>
   <div id="changelog"></div>
 </div>
@@ -3831,6 +3835,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Ennätyslista: kaikki ajat, vieritettävä'],
   ['26.9.', 'Korjattu: väliajat kärjessä vertautuivat hitaampaan (−5 s)'],
   ['26.9.', 'Radioon 4 uutta biisiä (nyt 10)'],
   ['26.9.', 'Korjattu: "too fast" maalissa, aika tallentuu'],
@@ -3867,18 +3872,22 @@ function renderChangelog() { const el = document.getElementById('changelog'); if
   el.innerHTML = '<div class="cl-head">MUUTOKSET</div><div class="cl-list"></div>'; const L = el.lastChild; CHANGES.forEach(([d, t]) => { const r = document.createElement('div'); r.className = 'cl-row'; r.title = t;   // (all of them: the box scrolls)
     r.innerHTML = '<span class="cl-d"></span><span></span>'; r.children[0].textContent = d; r.children[1].textContent = t; L.appendChild(r); }); }
 function renderTop10() { const el = document.getElementById('top10'); if (!el) return;
-  const head = '<div class="t10-head">Top 10 · kuskit</div>', loading = (small) => '<div class="t10-loading' + (small ? ' small' : '') + '"><span class="spin"></span>' + (small ? 'päivitetään aikoja…' : 'haetaan aikoja…') + '</div><div class="t10-bar' + (small ? ' small' : '') + '"></div>';
+  const head = '<div class="t10-head">Ennätyslista · kaikki kuskit</div>', loading = (small) => '<div class="t10-loading' + (small ? ' small' : '') + '"><span class="spin"></span>' + (small ? 'päivitetään aikoja…' : 'haetaan aikoja…') + '</div><div class="t10-bar' + (small ? ' small' : '') + '"></div>';
   { const ov = document.getElementById('overlay'); if (ov) ov.classList.toggle('loading', !!(ONLINE.api && ONLINE.busy)); }   // (the red stripes run too while it loads)
   if (!ONLINE.ok) { el.innerHTML = !ONLINE.api ? '' : ONLINE.busy ? head + loading() + '<div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div><div class="t10-skel" style="width:94%"></div>'
     : head + '<div class="t10-empty t10-err">tuloksia ei saatu haettua — haamuna oma paras</div>'; return; }
-  const me = onlineKey(ONLINE.name), rows = ONLINE.list.slice(0, 10);
+  const me = onlineKey(ONLINE.name), rows = ONLINE.list;   // (every time on the board: the list scrolls after ten)
   { const tg = document.getElementById('tagline'), top = ONLINE.list[0];   // the tagline names whoever leads the board, in the old 1.29:000 style
     if (tg && top) { const ms = Math.round(top.t*1000), tt = Math.floor(ms/60000) + '.' + String(Math.floor(ms/1000) % 60).padStart(2, '0') + ':' + String(ms % 1000).padStart(3, '0');
       tg.textContent = 'Kesä 1988. Vanha Pökö 205, ' + (top.k === me ? 'sinä ajoit eilen ' + tt + '. Muut eivät.' : top.name + ' ajoi eilen ' + tt + '. Sinä et.'); } }
   if (ONLINE.busy && !rows.length) { el.innerHTML = head + loading() + '<div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div>'; return; }
   el.innerHTML = head + (rows.length ? '' : '<div class="t10-empty">ei vielä aikoja — aja ensimmäinen</div>');
-  rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 't10-row' + (r.k === me ? ' me' : '');
-    d.innerHTML = '<span class="t10-pos"></span><span class="t10-name"></span><span class="t10-time"></span>'; d.children[0].textContent = (i + 1) + '.'; d.children[1].textContent = r.name; d.children[2].textContent = formatTime(r.t); el.appendChild(d); });
+  const box = document.createElement('div'); box.className = 't10-list'; if (rows.length) el.appendChild(box); let myRow = null;
+  rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 't10-row' + (r.k === me ? ' me' : ''); if (r.k === me) myRow = d;
+    d.innerHTML = '<span class="t10-pos"></span><span class="t10-name"></span><span class="t10-time"></span>'; d.children[0].textContent = (i + 1) + '.'; d.children[1].textContent = r.name; d.children[2].textContent = formatTime(r.t); box.appendChild(d); });
+  if (myRow && myRow.offsetTop > box.clientHeight) box.scrollTop = myRow.offsetTop - box.clientHeight/2;   // (your own row in view)
+  const fade = () => box.classList.toggle('more', box.scrollTop + box.clientHeight < box.scrollHeight - 4); fade(); box.addEventListener('scroll', fade);
+  if (rows.length > 10) el.firstChild.textContent = 'Ennätyslista · ' + rows.length + ' kuskia · vieritä';
   if (ONLINE.busy) { el.insertAdjacentHTML('beforeend', loading(true)); return; }   // (a refresh after a lap: the old list stays up meanwhile)
   const rivals = ONLINE.opp.map(o => o.name + ' ' + formatTime(o.t).replace(/^00:/, '')).join(' · '), d = document.createElement('div'); d.className = 't10-empty';
   d.textContent = rivals ? 'haamuina radalla: ' + rivals : 'ei haamuja vielä'; el.appendChild(d); }
