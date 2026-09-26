@@ -39,7 +39,7 @@ kbd{background:#333;border:1px solid #666;border-radius:2px;padding:0 3px;font-s
   <div style="margin-top:6px"><button id="bExport">Vie JSON</button><button id="bImport">Tuo JSON</button><input id="fImport" type="file" accept=".json" style="display:none"></div>
   <div style="margin-top:6px"><button id="bShow">JSON laatikkoon</button><button id="bCopy">Kopioi</button><button id="bLoad">Lue laatikosta</button></div>
   <textarea id="jsonBox" placeholder="JSON tähän — Kopioi / liitä ja Lue laatikosta" style="width:100%;height:90px;box-sizing:border-box;background:#111;color:#ccc;border:1px solid #555;font-size:10px;margin-top:4px"></textarea>
-  <div><button id="bUndo">Kumoa (Ctrl+Z)</button><button id="bClear">Tyhjennä kaikki</button><button id="bReset">Palauta OSM-verkko</button></div>
+  <div><button id="bUndo">Kumoa (Ctrl+Z)</button><button id="bClear">Tyhjennä kaikki</button><button id="bReset">Palauta OSM-verkko</button><button id="bDefaults" title="kadut, rata ja kohteet takaisin repon versioon">Palauta oletukset</button></div>
   <div id="selBox" style="display:none;margin-top:10px;border-top:1px solid #444;padding-top:8px">
     <b>Valittu katu</b>
     <input id="name" type="text" placeholder="nimi" style="margin-top:4px">
@@ -69,15 +69,15 @@ const HOUSES = [[1247.7,676.0,14.4,14.9,1.564],[1476.8,798.0,16.0,14.2,1.566],[1
 const INITIAL_TRACK = {"waypoints":[[580.2997811400179,202.16734848391656],[775.726951409325,255.29250628572152],[992.2671590363899,360.5217713679252],[1127.8770784641397,414.14553905633466],[1287.3010395010397,447.354828954829],[1307.0716096036808,509.1853601380326],[1322.5641144466813,570.140076193457],[1378.8629157720693,571.1826465883717],[1439.9202636297232,586.0883690816124],[1436.389123928258,687.9059004883318],[1435.0707697265075,793.1150763281911],[1373.4036452689293,800.5458284604573],[1337.3154208829885,846.9832070778018],[1383.0290644847248,891.4270942469055],[1427.590809179606,974.6749324579201],[1460.9526557287768,1054.5318072274245],[1821.8620723765775,1026.6021204415795],[1960.2321372915214,897.0382586803826],[1849.7981985823005,723.3301602630033],[1467.3224645557518,493.48886223132075],[1309.87860164241,452.0666154516628],[1408.4620274092288,942.620591232384],[1204.802991899801,981.8830228875636],[862.3837251480501,1084.9953963202386],[652.7327379114034,1242.1832894186484],[394.67646031325523,1076.4356418569319],[430.5479666935699,574.6106007267169],[465.64755344780104,474.8093661002283],[503.98065746965113,368.05319195845937],[533.6682090957338,281.53173872112313]],"closed":true};
 const INITIAL_OBJECTS = [{"type":"kauppa","x":1447,"y":1140,"th":-4.4505895925855405},{"type":"liike","x":1078,"y":1070,"th":-1.5707963267948963},{"type":"manty","x":1947,"y":928,"th":0},{"type":"kentta","x":1650,"y":1166,"th":1.8325957145940457,"w":71,"d":40},{"type":"kallio","x":494,"y":1051,"th":-0.5235987755982988,"w":93,"d":55}];
 const ROUTE = [];
-let streets = JSON.parse(localStorage.getItem('yl-osm-antti-v13') || 'null') || JSON.parse(JSON.stringify(INITIAL));
-let track = JSON.parse(localStorage.getItem('yl-osm-antti-v13-track') || 'null') || JSON.parse(JSON.stringify(INITIAL_TRACK));
+let streets = JSON.parse(localStorage.getItem('yl-osm-antti-v14') || 'null') || JSON.parse(JSON.stringify(INITIAL));
+let track = JSON.parse(localStorage.getItem('yl-osm-antti-v14-track') || 'null') || JSON.parse(JSON.stringify(INITIAL_TRACK));
 let trackPath = [];
 let showTrack = true, showObjects = true, insertHint = null;
 const OBJ_SIZE_M = { kauppa: [12, 9], liike: [18, 7], manty: [2.4, 2.4], kentta: [56, 36], kallio: [10, 7], pitseria: [16, 20] };
 const OBJ_RESIZABLE = { kentta: true, kallio: true };
 const objSizePx = o => { const s = (o.w && o.d) ? [o.w, o.d] : OBJ_SIZE_M[o.type]; return [s[0]/0.45, s[1]/0.45]; };
 const OBJ_NAME = { kauppa: 'Kauppa (keltainen, vanha)', liike: 'Matala liiketalo', manty: 'Iso mänty', kentta: 'Urheilukenttä', kallio: 'Kallio', pitseria: 'Pitseria (piha edessä, kolmio = kadun puoli; pysähdy pihaan 5 s → pizza, auto +10 %)' };
-let objects = JSON.parse(localStorage.getItem('yl-osm-antti-v13-obj') || 'null') || JSON.parse(JSON.stringify(INITIAL_OBJECTS));   // {type, x, y, th} in map px
+let objects = JSON.parse(localStorage.getItem('yl-osm-antti-v14-obj') || 'null') || JSON.parse(JSON.stringify(INITIAL_OBJECTS));   // {type, x, y, th} in map px
 let selObj = null, placeType = null;
 let showHouses = true;   // derived: px polyline along the network
 let nextId = Math.max(0, ...streets.map(s => s.id)) + 1;
@@ -99,8 +99,8 @@ function recomputeHouseVis() {
     return true;
   });
 }
-function saveObj() { localStorage.setItem('yl-osm-antti-v13-obj', JSON.stringify(objects)); }
-function save() { recomputeHouseVis(); saveObj(); localStorage.setItem('yl-osm-antti-v13', JSON.stringify(streets)); localStorage.setItem('yl-osm-antti-v13-track', JSON.stringify(track)); }
+function saveObj() { localStorage.setItem('yl-osm-antti-v14-obj', JSON.stringify(objects)); }
+function save() { recomputeHouseVis(); saveObj(); localStorage.setItem('yl-osm-antti-v14', JSON.stringify(streets)); localStorage.setItem('yl-osm-antti-v14-track', JSON.stringify(track)); }
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const img = new Image(); let view = { x: 0, y: 0, s: 0.5 }; let sel = null, selPt = null, hoverPt = null, drag = null, mode = 'idle', newPts = [], snapHint = null, mouseW = null;
 img.onload = () => { fit(); draw(); };
@@ -328,6 +328,8 @@ document.getElementById('bRev').onclick = () => { if (sel) { snap(); sel.pts.rev
 document.getElementById('bNew').onclick = startNew;
 document.getElementById('bUndo').onclick = () => { if (undo.length) { { const u = JSON.parse(undo.pop()); if (Array.isArray(u)) streets = u; else { streets = u.s; objects = u.o || []; saveObj(); } } sel = null; selPt = null; save(); refreshList(); showSel(); draw(); } };
 document.getElementById('bReset').onclick = () => { if (confirm('Ladataanko koko OSM-verkko (99 katua)? Nykyiset kadut korvataan.')) { snap(); streets = JSON.parse(JSON.stringify(INITIAL_FULL)); nextId = Math.max(0, ...streets.map(s => s.id)) + 1; sel = null; save(); refreshList(); showSel(); draw(); } };
+// (saves live under the -v14 keys: the -v13 ones came from an editor with a smaller 2000 px map and don't line up with this one)
+document.getElementById('bDefaults').onclick = () => { if (confirm('Palautetaanko kadut, rata ja kohteet oletuksiin (repon versio)? Nykyiset muutokset korvataan.')) { snap(); streets = JSON.parse(JSON.stringify(INITIAL)); track = JSON.parse(JSON.stringify(INITIAL_TRACK)); objects = JSON.parse(JSON.stringify(INITIAL_OBJECTS)); nextId = Math.max(0, ...streets.map(s => s.id)) + 1; sel = null; selObj = null; save(); refreshList(); showSel(); draw(); } };
 document.getElementById('bClear').onclick = () => { if (confirm('Poistetaanko kaikki kadut?')) { snap(); streets = []; sel = null; save(); refreshList(); showSel(); draw(); } };
 document.getElementById('bExport').onclick = () => { const data = { version: 1, ...META, streets, objects, track: { waypoints: track.waypoints, closed: track.closed, path: trackPath } }; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' })); a.download = 'ylasto1990-network.json'; a.click(); };
 document.getElementById('bShow').onclick = () => { document.getElementById('jsonBox').value = JSON.stringify({ version: 1, ...META, streets, objects, track: { waypoints: track.waypoints, closed: track.closed, path: trackPath } }); };
