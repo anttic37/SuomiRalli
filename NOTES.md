@@ -236,6 +236,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       Sharp bends (> 0.36, ≥ 50 m apart, up to 8) also get a parked tractor (`CORNER_TRACTORS` → Vehicle kind 'tractor',
       no ai, mass 40) on the bisector. Open cuts: 13 of 24 corners before, 3 after. Test: t_cuts (+ t_corners views).
     - Police hold: handbrake only (the brake at a standstill is reverse; the held car used to back away).
+  - Car radio (v15): music/playlist.json lists the songs ([{ file, title }], files in music/). They play in turn through the game's
+    audio mix (gain 0.5), starting at a random one on the first race and running across restarts. E steps to the next song;
+    after the last one the radio goes off, then back to the first.
+    - The amber LCD at the top right shows the song number and title (a long title slides to its end and back); an "E radio"
+      key hint appears.
+    - No playlist, no radio (e.g. inside the editor).
+    - Test: t_radio (over test/serve.mjs, with a temporary music/ folder of wav tones).
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
