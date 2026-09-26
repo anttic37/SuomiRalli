@@ -129,6 +129,7 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       - The local "sinä" ghost is gone; offline your own best still shows, unlabelled.
       - The menu says what's going on: rivals on track, "ei haamuja vielä", or "tulokset eivät nyt saatavilla" when /api
         doesn't answer.
+      - Ghost labels show the name only (no time). The name fades out when your car is within ~8 m and is gone under 2 m.
       - The mouse pointer shows on the menus (`#overlay { cursor: default }`); it is hidden only while driving.
     - Ghost cars are now one baked geometry (`ghostGeometry`/`makeGhost`): 2 draws per ghost instead of ~60.
     - Tests: `test/serve.mjs` serves the repo plus the real function over an in-memory store; `t_online` (run with
