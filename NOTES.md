@@ -243,6 +243,20 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       key hint appears.
     - No playlist, no radio (e.g. inside the editor).
     - Test: t_radio (over test/serve.mjs, with a temporary music/ folder of wav tones).
+  - Radio v2: 20 made-up stations (`STATIONS`), each at its own frequency, and a random one for every song. The LCD shows the
+    frequency, the station, a volume bar and the song title (playlist entries have `title` and `artist`). 1 / 2 set the
+    volume (0–10, remembered in localStorage). Test: t_radio3.
+  - Bass boost (B):
+    - A kick drum at 118 bpm, and a lowshelf on the radio (+16 dB below 140 Hz).
+    - The car is held to 20 % of DRIVE.maxSpeed.
+    - Spectators within 75 m run to spots beside and behind the car (not in front of its wheels) and jump on the beat
+      (`BASS.pulse`).
+    - B again turns it off and they walk back home. A reset turns it off.
+    - People knocked over by a crowd rushing the car don't count as police incidents.
+    - The keys are listed on the start screen (`#keys`).
+    - Test: t_bass.
+  - Lesson (bit three times this session): a `//` comment added in the middle of a one-line function swallows the rest of
+    the line. Put mid-line comments in `/* */`.
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 

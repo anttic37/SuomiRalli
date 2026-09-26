@@ -1,0 +1,14 @@
+initAudio = () => {}; startRace(false); setTimeOfDay('paiva'); const RR = renderer.render.bind(renderer); renderer.render = () => {};
+let T = performance.now(); const step = (n, f) => { for (let i = 0; i < n; i++) { f && f(i); T += 1000/60; loop(T); } };
+const key = (c) => { dispatchEvent(new KeyboardEvent('keydown', { code: c })); dispatchEvent(new KeyboardEvent('keyup', { code: c })); };
+const steer = () => { const n = trackPoints.length, tp = trackPoints[(car.prog + 7) % n]; let dA = Math.atan2(tp.x - car.x, tp.y - car.z) - car.angle; while (dA > Math.PI) dA -= 2*Math.PI; while (dA < -Math.PI) dA += 2*Math.PI;
+  keys.ArrowLeft = dA > 0.05; keys.ArrowRight = dA < -0.05; keys.ArrowUp = true; keys.ArrowDown = false; };
+step(60*3.5); step(60*8, steer); const out = { v0: +Math.hypot(car.vx, car.vz).toFixed(1) };
+key('KeyB'); const near = () => HUMANS.filter(h => h.task && h.task.kind === 'spectate' && !h.down && Math.hypot(h.x - car.x, h.z - car.z) < 10).length;
+out.near0 = near(); let maxV = 0; step(60*8, (i) => { steer(); if (i > 120) maxV = Math.max(maxV, Math.hypot(car.vx, car.vz)); }); out.vCap = +maxV.toFixed(1); out.near8 = near(); out.pulses = BASS.pulse;
+keys.ArrowUp = false; keys.ArrowDown = true; step(60*2); keys.ArrowDown = false; step(60*3); out.nearStopped = near(); out.jumping = HUMANS.filter(h => h.st && h.st.rave && h.hop > 0).length; out.down = HUMANS.filter(h => h.down).length;
+const fx = Math.sin(car.angle), fz = Math.cos(car.angle); camera.position.set(car.x - fx*14 + fz*6, H(car.x, car.z) + 9, car.z - fz*14 - fx*6); camera.lookAt(car.x, H(car.x, car.z), car.z); camera.updateMatrixWorld();
+lightAnchor.x = lightAnchor.z = 1e9; dirLight.position.set(car.x + SUN.x, H(car.x, car.z) + SUN.y, car.z + SUN.z); dirLight.target.position.set(car.x, H(car.x, car.z), car.z); dirLight.target.updateMatrixWorld(); RR(scene, camera); await __pageshot('bass.png');
+key('KeyB'); step(60*25); out.afterOff = { near: near(), raving: HUMANS.filter(h => h.st && h.st.rave).length, hud: document.getElementById('bass-hud').style.display };
+keys.ArrowUp = true; step(60*4, steer); out.vAfter = +Math.hypot(car.vx, car.vz).toFixed(1);
+return out;

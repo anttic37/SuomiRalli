@@ -34,6 +34,12 @@
   #radio .r-title.scroll { animation: radioScroll var(--dur, 10s) ease-in-out infinite alternate; }   /* (starts readable, slides to its end and back) */
   @keyframes radioScroll { 0%, 15% { transform: translateX(0); } 85%, 100% { transform: translateX(calc(-1px*var(--shift, 0))); } }
   #radio.flash { animation: radioFlash 0.5s ease-out; } @keyframes radioFlash { from { background: #4a3410; } }
+  #bass-hud { display: none; position: fixed; top: 118px; left: 50%; transform: translateX(-50%); padding: 5px 14px; font-size: 14px; font-weight: 800; letter-spacing: 0.3em; color: #fff;
+    background: linear-gradient(90deg, #7a1ad8, #d81a8a); border-radius: 4px; pointer-events: none; z-index: 20; box-shadow: 0 0 18px rgba(200,40,220,0.6); }
+  #bass-hud.thump { animation: thump 0.3s ease-out; } @keyframes thump { from { transform: translateX(-50%) scale(1.25); box-shadow: 0 0 40px rgba(230,60,255,0.95); } }
+  /* the keys on the start screen */
+  #keys { margin: clamp(10px, 2vh, 18px) auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; max-width: min(760px, 92vw); font-size: clamp(9px, 1.2vw, 11px); color: #8a8a86; letter-spacing: 0.06em; }
+  #keys span { white-space: nowrap; } #keys kbd { font: inherit; font-weight: 700; color: #e8e8e4; padding: 1px 6px; margin-right: 5px; border: 1px solid #444; border-bottom-width: 2px; border-radius: 3px; background: #151515; }
   #checkpoint-display { position: fixed; top: 38%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #fff; opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.1s; }
   #countdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 110px; font-weight: 800; letter-spacing: -4px; color: #fff; opacity: 0; pointer-events: none; z-index: 30; }
   #overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: #0a0a0a; transition: opacity 0.5s; }
@@ -97,7 +103,8 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 21.29 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div></div>
+  <div class="build-stamp">editorista 21.39 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+    <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
   <div id="results">
     <div class="label">maaliaika</div>
     <div class="time" id="final-time">00:00.000</div>
@@ -118,12 +125,13 @@
 <div id="ghost-delta"></div>
 <div id="pizza-msg"></div><div id="police-msg"></div><div id="police-hud">🚨 POLIISI JAHTAA</div>
 <div id="countdown"></div>
+<div id="bass-hud">🔊 BASSOBOOST · B</div>
 <div id="radio"><div class="r-top"><span class="r-band">FM <b id="radio-freq">--.-</b></span><span class="r-station" id="radio-station"></span><span class="r-vol" id="radio-vol"></span></div><div class="r-win"><span class="r-title" id="radio-title"></span></div></div>
 <canvas id="cluster"></canvas>
 <canvas id="minimap"></canvas>
 <div id="controls-hint">
   <span class="key-hint">↑ kaasu</span><span class="key-hint">↓ jarru / peruutus</span>
-  <span class="key-hint">← → ohjaus</span><span class="key-hint">välilyönti käsijarru</span><span class="key-hint">R uusi lähtö</span><span class="key-hint">Esc alkuruutu</span><span class="key-hint">G haamu</span><span class="key-hint">C kamera</span><span class="key-hint" id="radio-key" style="display:none">E radio · 1/2 ääni</span>
+  <span class="key-hint">← → ohjaus</span><span class="key-hint">välilyönti käsijarru</span><span class="key-hint">R uusi lähtö</span><span class="key-hint">Esc alkuruutu</span><span class="key-hint">G haamu</span><span class="key-hint">C kamera</span><span class="key-hint" id="radio-key" style="display:none">E radio · 1/2 ääni</span><span class="key-hint">B bassoboost</span>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -2721,7 +2729,8 @@ function updateCar(dt, live = true) {
   
   // ── engine / brake / reverse ──
   const grassK = onTrk ? 1 : DRIVE.grassPower, brakeK = onTrk ? 1 : DRIVE.grassBrake;
-  if (throttle && !handbrake) {
+  if (BASS.on) { const cap = DRIVE.maxSpeed*0.2; if (Math.abs(vF) > cap) vF -= Math.sign(vF)*Math.min(Math.abs(vF) - cap, 14*dt); }   // bass boost: the car crawls at a fifth of its top speed
+  if (throttle && !handbrake && !(BASS.on && vF >= DRIVE.maxSpeed*0.2)) {
     vF += DRIVE.accel * PIZZA.k * grassK * Math.max(1 - Math.max(vF,0)/(DRIVE.maxSpeed*PIZZA.k), 0) * dt;   // (a pizza: ×1.1 both → 10 % more shove and a 10 % higher top speed)
   } else if (!brake && vF > 0.3) {
     vF -= DRIVE.engineBrake * dt;
@@ -3812,6 +3821,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'B = bassoboost: yleisö sekoaa, auto 20 %; näppäimet alkuruutuun'],
   ['26.9.', 'Radio: 20 kanavaa, biisin nimi, 1/2 hiljemmalle/lujemmalle'],
   ['26.9.', 'Radioon 6 anttiin biisiä'],
   ['26.9.', 'Autoradio: E vaihtaa biisiä, nimi oikeassa yläkulmassa'],
@@ -4353,6 +4363,14 @@ function humansUpdate(dt) {
 const spectateTask = () => ({ kind: 'spectate',
   update(h, dt, t) {
     const S = h.st || (h.st = { ph: Math.random()*6.3, cheer: 0, homeT: 0 }), dx = h.x - car.x, dz = h.z - car.z, d2 = dx*dx + dz*dz, crash = activeCrash();
+    if (BASS.on && (S.rave || d2 < 75*75)) {   // bass boost: the crowd goes mad — round the car at a run, jumping on the beat, arms up
+      if (!S.rave) { S.rave = true; S.ra = (((S.ph*10) % 1) < 0.5 ? 1 : -1)*(1.0 + ((S.ph*23) % 1)*2.1); S.rr = 3.4 + ((S.ph*37) % 1)*4.5; }   // (beside and behind it: not in front of the wheels)
+      const tx = car.x + Math.sin(car.angle + S.ra)*S.rr, tz = car.z + Math.cos(car.angle + S.ra)*S.rr, gx = tx - h.x, gz = tz - h.z, gl = Math.hypot(gx, gz);
+      if (gl > 0.6 && !(h.hop > 0)) { const sp = Math.min(6 + ((S.ph*13) % 1)*1.5, gl*3); h.vx = gx/gl*sp; h.vz = gz/gl*sp; h.yaw = Math.atan2(gx, gz); }
+      else { if (!(h.hop > 0)) { h.vx = h.vz = 0; } h.yaw = Math.atan2(-dx, -dz); }
+      if (S.pulse !== BASS.pulse) { S.pulse = BASS.pulse; if (!(h.hop > 0) && gl < 3 && Math.random() < 0.85) h.vy = 2.2 + Math.random()*1.6; }
+      h.pose.up = gl < 3 && Math.sin(t*12.4 + S.ph) > -0.3; h.sway = 0.25*Math.sin(t*6.2 + S.ph); return; }
+    if (S.rave) { h.pose.up = false; h.sway = 0; if (!(h.hop > 0)) { const hx = h.home.x - h.x, hz = h.home.z - h.z, hl = Math.hypot(hx, hz); if (hl < 0.4) { S.rave = false; h.vx = h.vz = 0; } else { const sp = Math.min(2.6, hl*2); h.vx = hx/hl*sp; h.vz = hz/hl*sp; h.yaw = Math.atan2(hx, hz); } } return; }   // the party's over: back to their places
     if (crash) { const cx = crash.x - h.x, cz = crash.z - h.z, cd = Math.hypot(cx, cz) || 1, stopAt = 3.2 + ((S.ph*7) % 1)*2.8;
       if (cd < 60 && Math.hypot(h.x - h.home.x, h.z - h.home.z) < 30) {
         if (cd > stopAt) { let ok = true; if (crash.onRoute) { const ri = roadInfo(h.x + cx/cd*0.8, h.z + cz/cd*0.8); if (Math.sqrt(ri.d2) < wAt(ri.idx)*0.5 + 1.6) ok = false; }   // not onto the racing line
@@ -4843,7 +4861,7 @@ const STATIONS = ['Radio Ylästö', 'Kehä-FM', 'Radio Mäntykangas', 'Tikkurila
   'Radio Ralli', 'Lentokenttä-FM', 'Radio Hiidenkivi', 'Iskelmä-Vantaa', 'Radio Kasetti', 'Yöradio Pökö', 'Radio Sokeritoppa', 'Kylänraitti FM',
   'Radio Peltomies', 'Hiekkatie-FM', 'Radio Lauantai', 'Kasari-Kanava'];
 try { const v = +localStorage.getItem('yl-radio-vol'); if (v >= 0 && v <= 10 && localStorage.getItem('yl-radio-vol') !== null) RADIO.vol = v; } catch (e) {}
-async function radioLoad() { try { const r = await fetch('music/playlist.json', { cache: 'no-store' }); if (!r.ok) return; const d = await r.json();
+async function radioLoad() { if (!/^https?:$/.test(location.protocol)) return; try { const r = await fetch('music/playlist.json', { cache: 'no-store' }); if (!r.ok) return; const d = await r.json();
   RADIO.list = (Array.isArray(d) ? d : d.tracks || []).filter(t => t && t.file); if (RADIO.list.length) { const k = document.getElementById('radio-key'); if (k) k.style.display = ''; } } catch (e) {} }
 function radioTune() { let n; do n = Math.floor(Math.random()*STATIONS.length); while (RADIO.st && STATIONS[n] === RADIO.st.name && STATIONS.length > 1);
   RADIO.st = { name: STATIONS[n], freq: (87.6 + ((n*7 + 3) % 20)*1.0 + ((n*3) % 10)/10).toFixed(1) }; }   // (every station has its own place on the dial, 87.6–107.5 MHz)
@@ -4857,7 +4875,7 @@ function radioShow(flash) { const box = document.getElementById('radio'); if (!b
   if (T.textContent !== t) { T.textContent = t; T.classList.remove('scroll'); requestAnimationFrame(() => { const over = T.scrollWidth - T.parentNode.clientWidth; if (over > 0) { T.style.setProperty('--shift', over + 6); T.style.setProperty('--dur', (3 + over/25) + 's'); T.classList.add('scroll'); } }); }
   if (flash) { box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash'); } }
 function radioPlay() { const R = RADIO; if (!R.el) { R.el = new Audio(); R.el.preload = 'auto'; R.el.addEventListener('ended', () => { R.i = (R.i + 1) % R.list.length; radioTune(); radioPlay(); radioShow(true); });
-    if (audio && audio.ctx) { try { const src = audio.ctx.createMediaElementSource(R.el); R.gain = audio.ctx.createGain(); src.connect(R.gain); R.gain.connect(audio.master); } catch (e) { R.gain = null; } }   // (through the game's mix)
+    if (audio && audio.ctx) { try { const src = audio.ctx.createMediaElementSource(R.el); R.gain = audio.ctx.createGain(); R.shelf = audio.ctx.createBiquadFilter(); R.shelf.type = 'lowshelf'; R.shelf.frequency.value = 140; R.shelf.gain.value = BASS.on ? 16 : 0; src.connect(R.gain); R.gain.connect(R.shelf); R.shelf.connect(audio.master); } catch (e) { R.gain = null; } }   // (through the game's mix)
     radioVolume(); }
   R.el.src = 'music/' + encodeURIComponent(R.list[R.i].file); R.el.play().catch(() => {}); }
 function radioStart() { if (!RADIO.list.length || RADIO.started) { radioShow(); return; } RADIO.started = true; RADIO.i = Math.floor(Math.random()*RADIO.list.length); radioTune(); radioPlay(); radioShow(true); }   // (the first race: a song from anywhere in the list)
@@ -4865,6 +4883,18 @@ function radioNext() { const R = RADIO; if (!R.list.length) return; if (!R.start
   if (R.off) { R.off = false; R.i = 0; radioTune(); radioPlay(); } else if (R.i === R.list.length - 1) { R.off = true; R.el.pause(); } else { R.i++; radioTune(); radioPlay(); }
   radioShow(true); }
 function radioVol(d) { const R = RADIO; if (!R.list.length) return; R.vol = Math.max(0, Math.min(10, R.vol + d)); try { localStorage.setItem('yl-radio-vol', R.vol); } catch (e) {} radioVolume(); radioShow(); }
+
+// ════════ BASS BOOST (B): a kick drum at 118 bpm, the radio's lows up 16 dB, the car held to a fifth of its top speed, the crowd
+//          within 75 m run to it and jump on the beat. B again: off, and they walk back to their places. ════════
+const BASS = { on: false, t: 0, pulse: 0, g: null };
+function bassToggle() { BASS.on = !BASS.on; BASS.t = 0; const el = document.getElementById('bass-hud'); if (el) el.style.display = BASS.on ? 'block' : 'none';
+  if (RADIO.shelf && audio) RADIO.shelf.gain.setTargetAtTime(BASS.on ? 16 : 0, audio.ctx.currentTime, 0.08); }
+function bassKick() { if (!audio) return; const ctx = audio.ctx, t0 = ctx.currentTime; if (!BASS.g) { BASS.g = ctx.createGain(); BASS.g.gain.value = 0.9; BASS.g.connect(audio.master); }
+  const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(130, t0); o.frequency.exponentialRampToValueAtTime(42, t0 + 0.14);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(1, t0 + 0.006); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.42);
+  o.connect(g); g.connect(BASS.g); o.start(t0); o.stop(t0 + 0.45); }
+function bassUpdate(dt) { if (!BASS.on) return; if (gameState === State.MENU) { bassToggle(); return; } const beat = 60/118; BASS.t += dt;
+  if (BASS.t >= beat || BASS.pulse === 0) { BASS.t %= beat; BASS.pulse++; bassKick(); const el = document.getElementById('bass-hud'); if (el) { el.classList.remove('thump'); void el.offsetWidth; el.classList.add('thump'); } } }
 
 // ════════ POLICE: three incidents in one race (people knocked over by the rally car, a fire it started) and the police come.
 //          White-and-blue 80s cruisers from 90–200 m back down the streets, siren and beacons; they follow the road graph
@@ -4876,7 +4906,7 @@ let policeMsgT = null;
 function policeMsg(t, big) { const el = document.getElementById('police-msg'); if (!el) return; el.textContent = t; el.style.opacity = 1; el.style.fontSize = big ? '38px' : '26px';
   clearTimeout(policeMsgT); policeMsgT = setTimeout(() => { el.style.opacity = 0; }, big ? 2600 : 1800); }
 function policeIncident(kind) {
-  if (gameState !== State.RACING || POLICE.hold > 0 || worldT - POLICE.lastT < 4) return; POLICE.lastT = worldT; POLICE.n++;   // (one pile-up is one incident)
+  if (gameState !== State.RACING || POLICE.hold > 0 || worldT - POLICE.lastT < 4 || (BASS.on && kind === 'people')) return;   /* (a crowd that throws itself at the car isn't the driver's doing) */ POLICE.lastT = worldT; POLICE.n++;   // (one pile-up is one incident)
   const on = POLICE.cars.filter(v => !v.gone && v.chase);
   if (on.length) { if (on.length < 3) { policeSpawn(1); policeMsg('LISÄÄ POLIISEJA!'); } return; }
   if (POLICE.n >= 3) { policeSpawn(2); policeMsg('🚨 POLIISIT TULEVAT!', true); } else policeMsg((kind === 'fire' ? '🔥 TULIPALO ' : 'KOLARI ') + POLICE.n + '/3'); }
@@ -5548,11 +5578,12 @@ function emittersUpdate(dt) {
 function worldUpdate(dt) {
   worldT += dt;
   carStillT = Math.hypot(car.vx, car.vz) < 1.5 && gameState === State.RACING ? carStillT + dt : 0;
-  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); queueUpdate(dt); extras2Update(dt); policeUpdate(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
+  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); queueUpdate(dt); extras2Update(dt); policeUpdate(dt); bassUpdate(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
   let siren = 0; for (const v of VEHICLES) if ((v.job && v.job.phase === 'drive') || v.chase) siren = Math.max(siren, Math.max(0, 1 - Math.hypot(v.x - car.x, v.z - car.z)/240));
   sirenSet(siren, dt);
 }
-function worldReset() {   // a restart: everyone back on their feet and where they were, responders and fires gone, cars back in place
+function worldReset() {
+  if (BASS.on) bassToggle();   // a restart: everyone back on their feet and where they were, responders and fires gone, cars back in place
   for (let i = VEHICLES.length - 1; i >= 0; i--) { const v = VEHICLES[i]; if (v.temp) { vehicleRemove(v); continue; } v.x = v.home.x; v.z = v.home.z; v.yaw = v.home.yaw; v.vx = v.vz = v.w = v.vF = 0; v.awake = false; v.damage = 0; v.fire = null; if (v.charred) charVehicle(v, false);
     Object.assign(v.ctrl, { thr: 0, brk: 0, steer: 0, hand: !v.ai }); if (v.ai && v.ai.reset) v.ai.reset(); vehicleSync(v); }
   for (const f of FIRES) lifeGroup.remove(f.glow); FIRES.length = 0; STATIC_LIST.forEach(b => { b.fire = null; if (b.soot) { lifeGroup.remove(b.soot); b.soot = null; } });
@@ -6014,6 +6045,7 @@ addEventListener('keydown', e => {
   if (e.code==='KeyR' && !e.repeat && gameState!==State.MENU) { initAudio(); startRace(false); }
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
   if (e.code==='KeyE' && !e.repeat && gameState !== State.MENU) { initAudio(); radioNext(); }
+  if (e.code==='KeyB' && !e.repeat && gameState !== State.MENU) { initAudio(); bassToggle(); }
   if ((e.code==='Digit1' || e.code==='Numpad1') && gameState !== State.MENU) radioVol(-1);   // radio quieter / louder
   if ((e.code==='Digit2' || e.code==='Numpad2') && gameState !== State.MENU) radioVol(1);
   if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'; cpd.style.color='#ffe9a8'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0, 900); }
