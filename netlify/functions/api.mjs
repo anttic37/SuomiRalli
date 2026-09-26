@@ -10,15 +10,18 @@ export const config = { path: ['/api/top', '/api/ghost', '/api/lap'] };
 export default async (req) => handle(req, getStore({ name: 'suomiralli', consistency: 'strong' }));
 
 const MAX_ROWS = 500;
-// struck-off laps: a row with this driver AND this exact time is dropped from the board (and its ghost deleted) the first time
-// the board is read or written after a deploy. A later honest lap by the same name is kept as usual.
+// struck-off laps: a row with this driver AND this exact time (or, with `until`, any time of theirs saved on or before that
+// date) is dropped from the board (and its ghost deleted) the first time the board is read or written after a deploy.
+// A later lap by the same name is kept as usual.
 const STRUCK = [
   { k: 'anba', t: 86.277, why: 'mutka oikaistu (Antti itse, 26.9.)' },
+  { k: 'kurittaja-elli', until: '2026-09-26', why: 'Antti poisti 26.9.' },
 ];
+const struck = (k, t, d) => STRUCK.some(s => s.k === k && (s.t !== undefined ? Math.abs(s.t - t) < 0.0015 : String(d || '').slice(0, 10) <= s.until));
 async function strike(store, tid, top) {
-  const bad = top.list.filter(r => STRUCK.some(s => s.k === r.k && Math.abs(s.t - r.t) < 0.0015)); if (!bad.length) return top;
+  const bad = top.list.filter(r => struck(r.k, r.t, r.d)); if (!bad.length) return top;
   top.list = top.list.filter(r => !bad.includes(r)); await store.setJSON('top/' + tid + '.json', top);
-  for (const r of bad) { const key = 'ghost/' + tid + '/' + encodeURIComponent(r.k) + '.json', g = await store.get(key, { type: 'json' }); if (g && Math.abs(g.t - r.t) < 0.0015) await store.delete(key); }
+  for (const r of bad) { const key = 'ghost/' + tid + '/' + encodeURIComponent(r.k) + '.json', g = await store.get(key, { type: 'json' }); if (g && struck(r.k, g.t, g.d)) await store.delete(key); }
   return top; }
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 // FNV-1a: a short, file-name-safe id for a track signature
