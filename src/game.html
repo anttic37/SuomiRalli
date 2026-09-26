@@ -3815,16 +3815,20 @@ try { ONLINE.name = localStorage.getItem('ylasto1988-nimi') || ''; } catch (e) {
 const OPP_LOOK = [[0xffc27a, 0x9e5a1a, '#ffd29a'], [0x9dff9a, 0x2e7a2b, '#b8ffb5'], [0xe0a8ff, 0x6a3d9e, '#ecc8ff']];
 const onlineKey = (name) => String(name || '').normalize('NFC').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 16).toLowerCase().replace(/ /g, '_');
 async function apiGet(path) { const r = await fetch(ONLINE.api + path, { cache: 'no-store' }); if (!r.ok) throw new Error(r.status); return r.json(); }
+// the ghosts to race: with a time of your own, the next three rungs up the board (never the leaders); with none yet, drivers
+// from around tenth place but never more than 10 % slower than the leader, so the first run is against a decent pace
+function oppPick(others, myT, mine) {
+  let pick = myT < Infinity ? others.filter(r => r.t < myT).slice(-3) : others.filter(r => r.t <= others[0].t*1.1).slice(0, 10).slice(-3);
+  if (!pick.length) pick = others.slice(0, 3);   // (already on top: the chasers)
+  if (!pick.length && mine) pick = [mine];       // (alone on the board: your own best, under your name)
+  return pick.sort((a, b) => b.t - a.t); }       // nearest first
 async function onlineRefresh() {   // the leaderboard → the top 10 on the menu, then the three rivals and their ghosts
   if (!ONLINE.api || ONLINE.busy) return; ONLINE.busy = true; renderTop10();   // ("haen ajajia…" while it loads)
   try { const sig = trackSignature(); try { localStorage.setItem('yl-top-sig', sig); } catch (e) {}
     let d = null; if (TOP_PREFETCH && TOP_PREFETCH.sig === sig && !TOP_PREFETCH.used) { TOP_PREFETCH.used = true; d = await TOP_PREFETCH.p.catch(() => null); }
     if (!d) d = await apiGet('/top?sig=' + encodeURIComponent(sig)); ONLINE.ok = true; ONLINE.list = d.list || []; renderTop10();
     const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), myT = Math.min(bestTime, mine ? mine.t : Infinity), others = ONLINE.list.filter(r => r.k !== me);
-    let pick = myT < Infinity ? others.filter(r => r.t < myT).slice(-3) : others.slice(-3);   // the next three rungs up (or the bottom three)
-    if (!pick.length) pick = others.slice(0, 3);                                                 // (already on top: the chasers)
-    if (!pick.length && mine) pick = [mine];                                                     // (alone on the board: your own best, under your name)
-    pick.sort((a, b) => b.t - a.t);                                                              // nearest first: the split times compare with pick[0]
+    const pick = oppPick(others, myT, mine);
     const got = await Promise.all(pick.map(r => apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(r.k)).catch(() => null)));
     ONLINE.self = null; if (mine && !ghost) { const g = await apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(mine.k)).catch(() => null); if (g && Array.isArray(g.splits)) ONLINE.self = { t: g.t, splits: g.splits }; }   // (your own best from the board, for the splits, on a browser without it)
     ONLINE.opp.forEach(o => { scene.remove(o.G); o.G.userData.label.material.map.dispose(); });
@@ -3835,6 +3839,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Haamut: aina seuraavat ajat; uudelle ~10. mutta max +10 % kärjestä'],
   ['26.9.', 'Piirileikki juhannussalon ympärillä, Ruotsin lippuja'],
   ['26.9.', 'Ennätyslista: kaikki ajat, vieritettävä'],
   ['26.9.', 'Korjattu: väliajat kärjessä vertautuivat hitaampaan (−5 s)'],
