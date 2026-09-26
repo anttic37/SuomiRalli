@@ -42,7 +42,8 @@
   #keys span { white-space: nowrap; } #keys kbd { font: inherit; font-weight: 700; color: #e8e8e4; padding: 1px 6px; margin-right: 5px; border: 1px solid #444; border-bottom-width: 2px; border-radius: 3px; background: #151515; }
   #checkpoint-display { position: fixed; top: 38%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #fff; opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.1s; }
   #countdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 110px; font-weight: 800; letter-spacing: -4px; color: #fff; opacity: 0; pointer-events: none; z-index: 30; }
-  #overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; background: #0a0a0a; transition: opacity 0.5s; }
+  #overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow-y: auto; overflow-x: hidden; padding: 16px 0; z-index: 100; background: #0a0a0a; transition: opacity 0.5s; }
+  #overlay > .deco.top { margin-top: auto; }   /* (auto margins centre it when it fits, and it scrolls from the top when it doesn't) */
   #overlay.hidden { opacity: 0; pointer-events: none; }
   /* the start screen: red rally stripes, a heavy italic title, the stage in small caps, the leaderboard */
   #overlay .deco { display: flex; align-items: center; gap: 18px; width: min(760px, 86vw); margin: 0 auto; }
@@ -63,10 +64,15 @@
   #results .best-time { font-size: 16px; color: #666; margin-top: 12px; }
   #results .restart-hint { font-size: clamp(10px, 1.8vw, 12px); letter-spacing: 0.3em; text-transform: uppercase; color: #666; margin-top: 40px; animation: pulse 2s ease-in-out infinite; }
   #overlay { cursor: default; }   /* (the pointer is hidden while driving, not on the menus) */
-  #changelog { position: absolute; right: 28px; bottom: 26px; width: min(400px, 32vw); font-size: 11px; line-height: 1.55; color: #7a7a74; text-align: left; pointer-events: none; }
+  /* the change list: in its own column at the bottom right when the screen is wide enough to keep it clear of the top 10,
+     otherwise under the rest; either way every change, in a box that scrolls */
+  #changelog { width: min(660px, 88vw); margin: clamp(16px, 3vh, 30px) 0 auto; font-size: 11px; line-height: 1.55; color: #7a7a74; text-align: left; }
+  #changelog .cl-list { max-height: 132px; overflow-y: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: #444 transparent; }
+  #changelog .cl-list::-webkit-scrollbar { width: 6px; } #changelog .cl-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
   #changelog .cl-head { font-size: 10px; letter-spacing: 0.35em; color: #555; margin-bottom: 8px; }
-  #changelog .cl-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #changelog .cl-d { color: #4a4a46; margin-right: 8px; } #changelog .cl-row:first-of-type { color: #b8b8b0; }
-  @media (max-width: 1000px), (max-height: 620px) { #changelog { display: none; } }
+  #changelog .cl-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #changelog .cl-d { color: #4a4a46; margin-right: 8px; } #changelog .cl-row:first-child { color: #b8b8b0; }
+  #overlay > .deco.bottom { margin-bottom: 0; }
+  @media (min-width: 1560px) and (min-height: 640px) { #changelog { position: absolute; right: 28px; bottom: 26px; width: 400px; margin: 0; } #changelog .cl-list { max-height: min(260px, 34vh); } #overlay > .deco.bottom { margin-bottom: auto; } }
   #top10 { margin-top: clamp(16px, 3.5vh, 34px); width: min(660px, 88vw); font-size: clamp(13px, 2vw, 21px); color: #f0f0ec; font-variant-numeric: tabular-nums; }
   #top10 .t10-head { font-size: clamp(9px, 1.3vw, 13px); letter-spacing: 0.4em; color: #8a8a86; text-align: center; margin-bottom: clamp(8px, 1.6vh, 16px); text-transform: uppercase; }
   #top10 .t10-row { display: flex; gap: 0.9em; padding: 0.12em 6px; align-items: baseline; } #top10 .t10-row.me .t10-name { color: #44e24a; font-weight: 700; }
@@ -3824,6 +3830,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Joelin mäkki: muutokset eivät enää peitä listaa, koko historia vieritettävänä'],
   ['26.9.', 'B = bassoboost: yleisö sekoaa, auto 20 %; näppäimet alkuruutuun'],
   ['26.9.', 'Radio: 20 kanavaa, biisin nimi, 1/2 hiljemmalle/lujemmalle'],
   ['26.9.', 'Radioon 6 anttiin biisiä'],
@@ -3851,8 +3858,8 @@ const CHANGES = [
   ['26.9.', 'Optimointi: puolet vähemmän piirtokutsuja'],
 ];
 function renderChangelog() { const el = document.getElementById('changelog'); if (!el) return;
-  el.innerHTML = '<div class="cl-head">MUUTOKSET</div>'; CHANGES.slice(0, 10).forEach(([d, t]) => { const r = document.createElement('div'); r.className = 'cl-row'; r.title = t;
-    r.innerHTML = '<span class="cl-d"></span><span></span>'; r.children[0].textContent = d; r.children[1].textContent = t; el.appendChild(r); }); }
+  el.innerHTML = '<div class="cl-head">MUUTOKSET</div><div class="cl-list"></div>'; const L = el.lastChild; CHANGES.forEach(([d, t]) => { const r = document.createElement('div'); r.className = 'cl-row'; r.title = t;   // (all of them: the box scrolls)
+    r.innerHTML = '<span class="cl-d"></span><span></span>'; r.children[0].textContent = d; r.children[1].textContent = t; L.appendChild(r); }); }
 function renderTop10() { const el = document.getElementById('top10'); if (!el) return;
   const head = '<div class="t10-head">Top 10 · kuskit</div>', loading = (small) => '<div class="t10-loading' + (small ? ' small' : '') + '"><span class="spin"></span>' + (small ? 'päivitetään aikoja…' : 'haetaan aikoja…') + '</div><div class="t10-bar' + (small ? ' small' : '') + '"></div>';
   { const ov = document.getElementById('overlay'); if (ov) ov.classList.toggle('loading', !!(ONLINE.api && ONLINE.busy)); }   // (the red stripes run too while it loads)
