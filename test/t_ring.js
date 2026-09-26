@@ -1,0 +1,10 @@
+initAudio = () => {}; setTimeOfDay('paiva'); const RR = renderer.render.bind(renderer); renderer.render = () => {};
+const ring = HUMANS.filter(h => h.task && h.task.kind === 'ring'); if (!ring.length) return { none: true };
+const cx = ring.reduce((a, h) => a + h.x, 0)/ring.length, cz = ring.reduce((a, h) => a + h.z, 0)/ring.length; car.x = cx + 40; car.z = cz;
+HUMANS.forEach(q => { q.far = Math.hypot(q.x - car.x, q.z - car.z) >= 240; if (q.view.kind === 'rig') humanSync(q); }); nearVisT = 0; nearVisUpdate(0.01);
+const shot = async (n, t) => { for (let i = 0; i < 60*t; i++) worldUpdate(1/60); const gy = H(cx, cz); camera.position.set(cx + 9, gy + 5.5, cz + 7); camera.lookAt(cx, gy + 1.3, cz); camera.updateMatrixWorld(); skyDome.position.copy(camera.position);
+  lightAnchor.x = lightAnchor.z = 1e9; dirLight.position.set(cx + SUN.x, gy + SUN.y, cz + SUN.z); dirLight.target.position.set(cx, gy, cz); dirLight.target.updateMatrixWorld(); U_TIME.value = 0; RR(scene, camera); await __save('ring_' + n + '.png', renderer.domElement.toDataURL('image/png')); };
+const R0 = ring[0].task; const modes = [];
+await shot('walk', 2); modes.push(ring[0].st ? 'ok' : '?');
+const clockNow = () => 0; for (let i = 0; i < 60*30; i++) { worldUpdate(1/60); } for (let i = 0; i < 60*60 && !(ring[0].pose.armR < -2.4 && !(ring[0].hop > 0)); i++) worldUpdate(1/60); await shot('later', 0);
+return { n: ring.length, at: [Math.round(cx), Math.round(cz)], dr: Math.round(distRoute(cx, cz)), spread: Math.max(...ring.map(h => Math.hypot(h.x - cx, h.z - cz))).toFixed(1) };
