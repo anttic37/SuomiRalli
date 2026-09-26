@@ -81,6 +81,22 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       - `t_batch` (run with real_noraf.js) diffs batched against unbatched rendering.
       - t_audit stitches the ground tiles, and its "m:" rows skip meshes whose world matrix isn't at the origin. t_yard reads
         the fused parts.
+  - v8 (after "uusi objekti PITSERIA … pihaan pysähtyy 5 s → tuodaan pitsaa → auto 10 % nopeammin"): a new editor object, 🍕 Pitseria.
+    Antti places it himself; the lot's front (the editor's triangle) goes to the street.
+    - Lot 16 × 20 m (`pizzeriaLayout`). An 80s red-brick building (11 × 7 m) sits at the back: green fascia, red-and-white
+      awning, a PIZZERIA sign on the fascia and PIZZERIA painted on the roof for the high camera. An asphalt yard with three
+      parking bays is in front, plus a red "P" pylon.
+    - Only the building is solid; the yard is driveable. No verge tufts or edge posts on the yard (`inPaved`).
+    - The roof plane rises with the building's own anchor (`userData.liftAnchor` in liftWorld).
+    - `PIZZA` / `pizzaUpdate` (called in worldUpdate): while racing, the car standing still (< 0.7 m/s) in a yard →
+      - the pizza guy (white shirt, red cap, pizza box) walks out of the door to the car window on his side.
+      - After 5 s of standing he hands it over: `PIZZA.k` = 1.1, "🍕 PIZZA! auto +10 %", 🍕 +10 % under the timer.
+      - Drive off early and he takes it back in; stop again and he comes back out.
+      - He is a temp Human (knock him over → ambulance, no pizza).
+      - One pizza per run. Restart clears it (`pizzaReset` in worldReset).
+    - The boost: the engine term uses accel × k and maxSpeed × k. With the linear drag this is exactly +10 % shove and +10 % top
+      speed (152 → 167 km/h; 81 → 90 km/h after 2 s from the grid).
+    - Test: t_pizza (places one beside the start straight: leave early, deliver at 5.0 s, boost, restart; pizza_yard/pizza_top.png).
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
