@@ -130,6 +130,8 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       - The menu says what's going on: rivals on track, "ei haamuja vielä", or "tulokset eivät nyt saatavilla" when /api
         doesn't answer.
       - Ghost labels show the name only (no time). The name fades out when your car is within ~8 m and is gone under 2 m.
+      - Esc (`toMenu`) drops the race and goes back to the start screen, which refreshes the leaderboard. On the results screen
+        it does the same; in the name box it only leaves the box. The menu says "haen ajajia…" while the leaderboard loads.
       - The mouse pointer shows on the menus (`#overlay { cursor: default }`); it is hidden only while driving.
     - Ghost cars are now one baked geometry (`ghostGeometry`/`makeGhost`): 2 draws per ghost instead of ~60.
     - Tests: `test/serve.mjs` serves the repo plus the real function over an in-memory store; `t_online` (run with

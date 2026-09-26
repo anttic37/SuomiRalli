@@ -76,7 +76,7 @@
 <canvas id="minimap"></canvas>
 <div id="controls-hint">
   <span class="key-hint">↑ kaasu</span><span class="key-hint">↓ jarru / peruutus</span>
-  <span class="key-hint">← → ohjaus</span><span class="key-hint">välilyönti käsijarru</span><span class="key-hint">R uusi lähtö</span><span class="key-hint">G haamu</span><span class="key-hint">C kamera</span>
+  <span class="key-hint">← → ohjaus</span><span class="key-hint">välilyönti käsijarru</span><span class="key-hint">R uusi lähtö</span><span class="key-hint">Esc alkuruutu</span><span class="key-hint">G haamu</span><span class="key-hint">C kamera</span>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -3668,7 +3668,7 @@ const OPP_LOOK = [[0xffc27a, 0x9e5a1a, '#ffd29a'], [0x9dff9a, 0x2e7a2b, '#b8ffb5
 const onlineKey = (name) => String(name || '').normalize('NFC').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 16).toLowerCase().replace(/ /g, '_');
 async function apiGet(path) { const r = await fetch(ONLINE.api + path, { cache: 'no-store' }); if (!r.ok) throw new Error(r.status); return r.json(); }
 async function onlineRefresh() {   // the leaderboard → the top 10 on the menu, then the three rivals and their ghosts
-  if (!ONLINE.api || ONLINE.busy) return; ONLINE.busy = true;
+  if (!ONLINE.api || ONLINE.busy) return; ONLINE.busy = true; renderTop10();   // ("haen ajajia…" while it loads)
   try { const sig = trackSignature(), d = await apiGet('/top?sig=' + encodeURIComponent(sig)); ONLINE.ok = true; ONLINE.list = d.list || []; renderTop10();
     const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), myT = Math.min(bestTime, mine ? mine.t : Infinity), others = ONLINE.list.filter(r => r.k !== me);
     let pick = myT < Infinity ? others.filter(r => r.t < myT).slice(-3) : others.slice(-3);   // the next three rungs up (or the bottom three)
@@ -3683,13 +3683,14 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
   ONLINE.busy = false; renderTop10();
 }
 function renderTop10() { const el = document.getElementById('top10'); if (!el) return;
-  if (!ONLINE.ok) { el.innerHTML = ONLINE.api ? '<div class="t10-empty">tulokset eivät nyt saatavilla — haamuna oma paras</div>' : ''; return; }
+  if (!ONLINE.ok) { el.innerHTML = !ONLINE.api ? '' : '<div class="t10-empty">' + (ONLINE.busy ? 'haen ajajia…' : 'tulokset eivät nyt saatavilla — haamuna oma paras') + '</div>'; return; }
   const me = onlineKey(ONLINE.name), rows = ONLINE.list.slice(0, 10);
+  if (ONLINE.busy && !rows.length) { el.innerHTML = '<div class="t10-empty">haen ajajia…</div>'; return; }
   el.innerHTML = '<div class="t10-head">TOP 10 · kuskit</div>' + (rows.length ? '' : '<div class="t10-empty">ei vielä aikoja — aja ensimmäinen</div>');
   rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 't10-row' + (r.k === me ? ' me' : '');
     d.innerHTML = '<span class="t10-pos"></span><span class="t10-name"></span><span class="t10-time"></span>'; d.children[0].textContent = (i + 1) + '.'; d.children[1].textContent = r.name; d.children[2].textContent = formatTime(r.t); el.appendChild(d); });
   const rivals = ONLINE.opp.map(o => o.name + ' ' + formatTime(o.t).replace(/^00:/, '')).join(' · '), d = document.createElement('div'); d.className = 't10-empty';
-  d.textContent = rivals ? 'haamuina radalla: ' + rivals : ONLINE.busy ? 'haamuja ladataan…' : 'ei haamuja vielä'; el.appendChild(d); }
+  d.textContent = ONLINE.busy ? 'haen ajajia…' : rivals ? 'haamuina radalla: ' + rivals : 'ei haamuja vielä'; el.appendChild(d); }
 function samplePose(S, st, t) {   // a ghost's pose at t: linear between samples (angle along the short way); st.cursor walks forward
   const n = S.length/4; if (st.cursor >= n - 1 || S[st.cursor*4] > t*1000) st.cursor = 0;
   while (st.cursor < n - 2 && S[(st.cursor + 1)*4] <= t*1000) st.cursor++;
@@ -5210,6 +5211,7 @@ addEventListener('keydown', e => {
   }
   if (e.code==='Space'&&gameState===State.FINISHED) { initAudio(); startRace(false); }
   if (e.code==='KeyR' && !e.repeat && gameState!==State.MENU) { initAudio(); startRace(false); }
+  if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
   if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'; cpd.style.color='#ffe9a8'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0, 900); }
   if (e.code==='KeyG' && !e.repeat) { ghostEnabled = !ghostEnabled; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = ghost ? (ghostEnabled ? 'HAAMU PÄÄLLÄ' : 'HAAMU POIS') : 'EI HAAMUA VIELÄ'; cpd.style.color='#bfe2ff'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0,900); }   // restart any time: back to the grid, countdown again
 });
@@ -5270,6 +5272,13 @@ function resetCar() {
   wheelMeshes[0].rotation.y = 0; wheelMeshes[1].rotation.y = 0;
 }
 
+function toMenu() {   // Esc: back to the start screen (the race is dropped; Enter starts a new one)
+  gameState = State.MENU; lapStarted = false; for (const k in keys) keys[k] = false;
+  const ov = document.getElementById('overlay'); ov.classList.remove('hidden'); ov.style.background = 'rgba(10,10,10,0.92)';
+  document.getElementById('results').style.display = 'none'; document.getElementById('menu-content').style.display = '';
+  const cd = document.getElementById('countdown'); cd.style.opacity = 0; ghostStartRun();
+  onlineRefresh();   // (a fresh leaderboard and rivals for the next start)
+}
 function finishRace() {
   gameState=State.FINISHED;
   beep(660, 0.12, 0.3); setTimeout(()=>beep(880, 0.25, 0.3), 130);
