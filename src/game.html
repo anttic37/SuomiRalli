@@ -107,7 +107,7 @@
 <div id="overlay" class="loading">
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
-  <div class="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
+  <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
   <div id="menu-content"><div class="start-hint">paina enter ja aja</div>
     <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
@@ -3830,6 +3830,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['26.9.', 'Alkuruudun tarina: listan kärki ja sen aika'],
   ['26.9.', 'Joelin mäkki: muutokset eivät enää peitä listaa, koko historia vieritettävänä'],
   ['26.9.', 'B = bassoboost: yleisö sekoaa, auto 20 %; näppäimet alkuruutuun'],
   ['26.9.', 'Radio: 20 kanavaa, biisin nimi, 1/2 hiljemmalle/lujemmalle'],
@@ -3866,6 +3867,9 @@ function renderTop10() { const el = document.getElementById('top10'); if (!el) r
   if (!ONLINE.ok) { el.innerHTML = !ONLINE.api ? '' : ONLINE.busy ? head + loading() + '<div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div><div class="t10-skel" style="width:94%"></div>'
     : head + '<div class="t10-empty t10-err">tuloksia ei saatu haettua — haamuna oma paras</div>'; return; }
   const me = onlineKey(ONLINE.name), rows = ONLINE.list.slice(0, 10);
+  { const tg = document.getElementById('tagline'), top = ONLINE.list[0];   // the tagline names whoever leads the board, in the old 1.29:000 style
+    if (tg && top) { const ms = Math.round(top.t*1000), tt = Math.floor(ms/60000) + '.' + String(Math.floor(ms/1000) % 60).padStart(2, '0') + ':' + String(ms % 1000).padStart(3, '0');
+      tg.textContent = 'Kesä 1988. Vanha Pökö 205, ' + (top.k === me ? 'sinä ajoit eilen ' + tt + '. Muut eivät.' : top.name + ' ajoi eilen ' + tt + '. Sinä et.'); } }
   if (ONLINE.busy && !rows.length) { el.innerHTML = head + loading() + '<div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div>'; return; }
   el.innerHTML = head + (rows.length ? '' : '<div class="t10-empty">ei vielä aikoja — aja ensimmäinen</div>');
   rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 't10-row' + (r.k === me ? ' me' : '');
