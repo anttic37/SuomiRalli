@@ -2,13 +2,16 @@
 //   GET  /api/top?sig=…          → { list: [{ k, name, t, d }] }  fastest first — one row per driver, per track version
 //   GET  /api/ghost?sig=…&k=…    → { name, t, splits, s }          a driver's best lap (s = [ms, x·100, z·100, yaw·1000] every 50 ms)
 //   GET  /api/struck?sig=…&k=…   → a struck-off driver's ghost, kept as evidence (where did they cut?)
+//   GET  /api/stats              → { starts, drivers }   races started and drivers (browsers) seen, all tracks
+//   POST /api/start { id }       → { starts, drivers }   one race started by browser id (a new id: one more driver)
 //   POST /api/lap  { sig, name, t, splits, s } → { saved, best, rank, list }   kept only if it beats that name's best
 // Files: top/<track>.json (the leaderboard) and ghost/<track>/<driver>.json (one per ghost). `sig` is the game's
 // trackSignature(): a changed track is a new leaderboard, the old one stays where it was.
 import { getStore } from '@netlify/blobs';
 import { badName } from '../lib/badwords.mjs';
+import { TRACKS } from '../lib/tracks.mjs';
 
-export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck'] };
+export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck', '/api/stats', '/api/start'] };
 export default async (req) => handle(req, getStore({ name: 'suomiralli', consistency: 'strong' }));
 
 const MAX_ROWS = 500;
@@ -56,6 +59,29 @@ export function checkLap(b) {
   return null;
 }
 
+// the cut check, the same rule as the game's: off the road (> 3 m past its edge) the route gained and the metres driven are summed;
+// back on the road a gain of more than CUT_M over what was driven, having been more than 8 m out, is a cut (slipping over the
+// inside of a sharp corner a few metres in is not). → the biggest saving on the lap (m), 0 for none.
+// T: the track (build.py → tracks.mjs); s: the ghost samples [ms, x·100, z·100, yaw·1000]…
+const CUT_M = 15;   // (the game flags 12: the 50 ms samples are a little coarser than its frames)
+export function routeCut(s, T) {
+  const n = T.x.length, arc = new Float64Array(n + 1); for (let k = 1; k <= n; k++) arc[k] = arc[k - 1] + Math.hypot(T.x[k % n] - T.x[k - 1], T.z[k % n] - T.z[k - 1]);
+  const L = arc[n], nearAll = (x, z) => { let bi = 0, bd = Infinity; for (let i = 0; i < n; i++) { const dx = T.x[i] - x, dz = T.z[i] - z, d = dx*dx + dz*dz; if (d < bd) { bd = d; bi = i; } } return [bi, bd]; };
+  let prog = nearAll(s[1]/100, s[2]/100)[0], pp = prog, px = s[1]/100, pz = s[2]/100, on = false, drv = 0, gain = 0, far = 0, worst = 0;
+  for (let j = 4; j < s.length; j += 4) { const x = s[j + 1]/100, z = s[j + 2]/100;
+    let best = prog, bd = Infinity; for (let k = -15; k <= 60; k++) { const i = (prog + k + n) % n, dx = T.x[i] - x, dz = T.z[i] - z, d = dx*dx + dz*dz; if (d < bd) { bd = d; best = i; } }   // (the progress, as the game follows it)
+    if (prog > n - 60 && best < 60) prog = best; else if (best >= prog - 15) prog = best;
+    const [ri, d2] = nearAll(x, z), off = Math.sqrt(d2) - T.w[ri]/2;
+    if (!on && off > 3) { on = true; drv = gain = far = 0; }
+    if (on) { far = Math.max(far, off); drv += Math.hypot(x - px, z - pz); let g = arc[prog] - arc[pp]; if (g < -L/2) g += L; if (g > L/2) g -= L; gain += g;
+      if (off < 1 || j === s.length - 4) { if (far > 8) worst = Math.max(worst, gain - drv); on = false; } }
+    px = x; pz = z; pp = prog; }
+  return worst; }
+// started races and drivers: one counter file; a driver is a browser id seen for the first time (a marker file each).
+// Before the counting began (27.9.) there were no numbers: it starts from an estimate (19 names on the board, most who drive never save a name).
+const STATS_SEED = { starts: 700, drivers: 45 };
+async function statsGet(store) { return (await store.get('stats.json', { type: 'json' })) || { ...STATS_SEED, since: new Date().toISOString().slice(0, 10), seeded: true }; }
+
 export async function handle(req, store) {
   const url = new URL(req.url), route = url.pathname.replace(/\/+$/, '').split('/').pop();
   try {
@@ -74,11 +100,20 @@ export async function handle(req, store) {
       const g = await store.get('struck/' + trackId(sig) + '/' + encodeURIComponent(k) + '.json', { type: 'json' });
       return g ? json(g) : json({ error: 'none' }, 404);
     }
+    if (req.method === 'GET' && route === 'stats') { const st = await statsGet(store); return json({ starts: st.starts, drivers: st.drivers }); }
+    if (req.method === 'POST' && route === 'start') {
+      let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: 'bad json' }, 400); }
+      const id = String(b && b.id || ''); if (!/^[a-z0-9]{8,32}$/.test(id)) return json({ error: 'id' }, 400);
+      const st = await statsGet(store); st.starts++;
+      if (!(await store.get('players/' + id + '.json', { type: 'json' }))) { await store.setJSON('players/' + id + '.json', { d: new Date().toISOString() }); st.drivers++; }
+      await store.setJSON('stats.json', st); return json({ starts: st.starts, drivers: st.drivers });
+    }
     if (req.method === 'POST' && route === 'lap') {
       const text = await req.text(); if (text.length > 1_500_000) return json({ error: 'too big' }, 413);
       let b; try { b = JSON.parse(text); } catch (e) { return json({ error: 'bad json' }, 400); }
       const bad = checkLap(b); if (bad) return json({ error: bad }, 400);
       const tid = trackId(b.sig), name = cleanName(b.name), k = nameKey(name), t = Math.round(b.t*1000)/1000;
+      if (TRACKS[tid]) { const cut = routeCut(b.s, TRACKS[tid]); if (cut > CUT_M) return json({ error: 'cut', saved: Math.round(cut) }, 400); }   // (a track the build hasn't exported: not checked)
       const top0 = await store.get('top/' + tid + '.json', { type: 'json' }), top = top0 ? await strike(store, tid, top0) : { sig: b.sig, list: [] };
       const mine = top.list.find(r => r.k === k);
       if (mine && mine.t <= t) return json({ saved: false, best: mine.t, rank: top.list.indexOf(mine) + 1, list: top.list });

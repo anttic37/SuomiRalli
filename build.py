@@ -14,3 +14,17 @@ r = subprocess.run(['node', '--check', p('test', 'game.js')], capture_output=Tru
 if r.returncode: print(r.stderr[-1500:]); sys.exit(1)
 r = subprocess.run(['node', p('test', 'edbuild.js'), p('index.html')], capture_output=True, text=True)
 print(r.stdout.strip() or r.stderr[-800:])
+# the route for the server's cut check: every track version's points + widths in netlify/lib/tracks.mjs (older tracks kept)
+import json
+def fnv(sig):
+    h = 0x811c9dc5
+    for ch in sig: h ^= ord(ch); h = (h * 0x01000193) & 0xffffffff
+    return '%08x' % h
+r = subprocess.run(['node', p('test', 'real.js'), p('index.html'), p('test', 'export_track.js')], capture_output=True, text=True, cwd=p('test'))
+try:
+    T = json.loads(r.stdout.strip().splitlines()[-1])['result']; tp = p('netlify', 'lib', 'tracks.mjs'); old = {}
+    if os.path.exists(tp): old = json.loads(open(tp, encoding='utf-8').read().split('=', 1)[1].strip().rstrip(';'))
+    old[fnv(T['sig'])] = T
+    open(tp, 'w', encoding='utf-8').write('// written by build.py: each track version (by trackId of its signature) → route points and road widths, for the cut check in api.mjs\nexport const TRACKS = ' + json.dumps(old, separators=(',', ':')) + ';\n')
+    print('track for the server:', fnv(T['sig']), len(T['x']), 'points')
+except Exception as e: print('WARNING: track export failed (the server keeps the previous tracks.mjs):', str(e)[:200], r.stderr[-300:])

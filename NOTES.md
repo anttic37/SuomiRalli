@@ -390,6 +390,15 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   checkpoints 1 and 2, 544–612 after checkpoint 4). API: STRUCK now keeps a struck ghost under struck/<track>/<k>.json
   (GET /api/struck?sig&k). Huijari-Ande 84.834 struck: his ghost cut four corners (17–21 s −72 m, 41–42 s −31 m,
   55–60 s −22 m, 72–75 s −24 m). Ande 85.373 was struck by mistake (a clean lap) and comes back via RESTORE. t_strike.mjs tests it (node).
+- Server-side cut check (27.9.): build.py also runs test/export_track.js in the headless page and writes netlify/lib/tracks.mjs
+  (per trackId: sig, route x/z, road widths; older tracks kept). api.mjs `routeCut(s, T)` replays the ghost with the game's rule
+  (off > 3 m past the edge: route gained vs metres driven; a cut = gain − driven > 15 m having been > 8 m out; the game uses 12 m / 8 m)
+  and refuses the lap (400 'cut'). All 19 laps on the board pass (0 m); Huijari-Ande's scores 72 m. A track the build didn't
+  export is not checked. The 8 m rule came from slow laps slipping 4–7 m over the inside of sharp corners (10–16 m "gains").
+- Start-screen counters: POST /api/start {id} per startRace (browser id in localStorage 'ylasto1988-id', crypto random — not
+  Math.random, which would change the seeded world; at most one per 3 s), GET /api/stats → { starts, drivers } shown as
+  'ALOITETTUJA AJOJA · KUSKEJA'. stats.json + players/<id>.json markers. No counts existed before: it starts from an estimate
+  (STATS_SEED 700 starts / 45 drivers: 19 names on the board, most drivers never save one). t_strike.mjs covers both.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
