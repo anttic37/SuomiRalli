@@ -1,13 +1,14 @@
 // YLÄSTÖ 1988 online: the leaderboard and everyone's best lap (their ghost), kept in Netlify Blobs.
 //   GET  /api/top?sig=…          → { list: [{ k, name, t, d }] }  fastest first — one row per driver, per track version
 //   GET  /api/ghost?sig=…&k=…    → { name, t, splits, s }          a driver's best lap (s = [ms, x·100, z·100, yaw·1000] every 50 ms)
+//   GET  /api/struck?sig=…&k=…   → a struck-off driver's ghost, kept as evidence (where did they cut?)
 //   POST /api/lap  { sig, name, t, splits, s } → { saved, best, rank, list }   kept only if it beats that name's best
 // Files: top/<track>.json (the leaderboard) and ghost/<track>/<driver>.json (one per ghost). `sig` is the game's
 // trackSignature(): a changed track is a new leaderboard, the old one stays where it was.
 import { getStore } from '@netlify/blobs';
 import { badName } from '../lib/badwords.mjs';
 
-export const config = { path: ['/api/top', '/api/ghost', '/api/lap'] };
+export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck'] };
 export default async (req) => handle(req, getStore({ name: 'suomiralli', consistency: 'strong' }));
 
 const MAX_ROWS = 500;
@@ -17,12 +18,13 @@ const MAX_ROWS = 500;
 const STRUCK = [
   { k: 'anba', t: 86.277, why: 'mutka oikaistu (Antti itse, 26.9.)' },
   { k: 'kurittaja-elli', until: '2026-09-26', why: 'Antti poisti 26.9.' },
+  { k: 'ande', until: '2026-09-27', why: 'huijari: mutkia oikaistu (Antti, 27.9.)' },
 ];
 const struck = (k, t, d) => STRUCK.some(s => s.k === k && (s.t !== undefined ? Math.abs(s.t - t) < 0.0015 : String(d || '').slice(0, 10) <= s.until));
 async function strike(store, tid, top) {
   const bad = top.list.filter(r => struck(r.k, r.t, r.d) || badName(r.name)); if (!bad.length) return top;   // (and any name the word filter would refuse today)
   top.list = top.list.filter(r => !bad.includes(r)); await store.setJSON('top/' + tid + '.json', top);
-  for (const r of bad) { const key = 'ghost/' + tid + '/' + encodeURIComponent(r.k) + '.json', g = await store.get(key, { type: 'json' }); if (g && (struck(r.k, g.t, g.d) || badName(r.name))) await store.delete(key); }
+  for (const r of bad) { const key = 'ghost/' + tid + '/' + encodeURIComponent(r.k) + '.json', g = await store.get(key, { type: 'json' }); if (g && (struck(r.k, g.t, g.d) || badName(r.name))) { await store.setJSON('struck/' + tid + '/' + encodeURIComponent(r.k) + '.json', g); await store.delete(key); } }   // (the ghost kept aside under struck/: the evidence)
   return top; }
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 // FNV-1a: a short, file-name-safe id for a track signature
@@ -60,6 +62,11 @@ export async function handle(req, store) {
     if (req.method === 'GET' && route === 'ghost') {
       const sig = url.searchParams.get('sig'), k = url.searchParams.get('k'); if (!sig || !k) return json({ error: 'sig, k' }, 400);
       const g = await store.get('ghost/' + trackId(sig) + '/' + encodeURIComponent(k) + '.json', { type: 'json' });
+      return g ? json(g) : json({ error: 'none' }, 404);
+    }
+    if (req.method === 'GET' && route === 'struck') {
+      const sig = url.searchParams.get('sig'), k = url.searchParams.get('k'); if (!sig || !k) return json({ error: 'sig, k' }, 400);
+      const g = await store.get('struck/' + trackId(sig) + '/' + encodeURIComponent(k) + '.json', { type: 'json' });
       return g ? json(g) : json({ error: 'none' }, 404);
     }
     if (req.method === 'POST' && route === 'lap') {

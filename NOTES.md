@@ -382,6 +382,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
     - Human fields are all created in the constructor (one hidden class): humansUpdate 1.5 → 1.1 ms.
     - Animals and aliens keep their own meshes (aliens on `makeKidOld`). The old crowd meshes (personGeos) remain only for tyre-prop people.
 - Radio: music/playlist.json also holds 10 spoken programmes (radio-ohjelma-1…10.mp3, `talk: true`, 🎙) and 6 sports broadcasts (11…16, `talk` + `sport: true`, 🏆, on SPORT_STATIONS). radioLoad puts each into its own random gap between songs (never two in a row); they play on TALK_STATIONS (YLE Radio 1 etc.).
+- Corner cutting (27.9., after "poista huijari ANDE, katso mistä hän oikaisi"): the game judges it itself. CUT (before updateCheckpoints):
+  off the road (> 3 m past the edge) the route gained (arc length by car.prog) and the metres driven are summed; back on the road, a
+  gain > 12 m over the driven distance flags the lap: finishRace keeps no best, no ghost, offers nothing to the leaderboard,
+  shows 'mutka oikaistu — aika ei kelpaa'. t_cut: honest autopilot laps (also a wild one, 3 seeds) stay valid, a straight cut is flagged.
+  t_cuts lists where the route can be cut round the obstacles (biggest ≈ 59 m: route points 220–292 and 180–248 between
+  checkpoints 1 and 2, 544–612 after checkpoint 4). API: STRUCK now keeps a struck ghost under struck/<track>/<k>.json
+  (GET /api/struck?sig&k) — ANDE struck (all laps up to 27.9.). t_strike.mjs tests it (node).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
