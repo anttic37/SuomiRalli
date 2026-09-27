@@ -68,5 +68,25 @@
   "file": "kohtalon-tanssi.mp3",
   "title": "Kohtalon tanssi",
   "artist": "anttii"
+ },
+ {
+  "file": "tastakin-alkaa-uudelleen.mp3",
+  "title": "Tästäkin alkaa uudelleen",
+  "artist": "anttii"
+ },
+ {
+  "file": "lasin-pohjalla.mp3",
+  "title": "Lasin pohjalla",
+  "artist": "anttii"
+ },
+ {
+  "file": "kesa-ei-kysy.mp3",
+  "title": "Kesä ei kysy",
+  "artist": "anttii"
+ },
+ {
+  "file": "viimeinen-bussi.mp3",
+  "title": "Viimeinen bussi",
+  "artist": "anttii"
  }
 ]
