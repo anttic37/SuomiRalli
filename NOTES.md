@@ -388,7 +388,8 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   shows 'mutka oikaistu — aika ei kelpaa'. t_cut: honest autopilot laps (also a wild one, 3 seeds) stay valid, a straight cut is flagged.
   t_cuts lists where the route can be cut round the obstacles (biggest ≈ 59 m: route points 220–292 and 180–248 between
   checkpoints 1 and 2, 544–612 after checkpoint 4). API: STRUCK now keeps a struck ghost under struck/<track>/<k>.json
-  (GET /api/struck?sig&k) — ANDE struck (all laps up to 27.9.). t_strike.mjs tests it (node).
+  (GET /api/struck?sig&k). Huijari-Ande 84.834 struck: his ghost cut four corners (17–21 s −72 m, 41–42 s −31 m,
+  55–60 s −22 m, 72–75 s −24 m). Ande 85.373 was struck by mistake (a clean lap) and comes back via RESTORE. t_strike.mjs tests it (node).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

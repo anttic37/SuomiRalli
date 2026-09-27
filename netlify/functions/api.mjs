@@ -18,10 +18,15 @@ const MAX_ROWS = 500;
 const STRUCK = [
   { k: 'anba', t: 86.277, why: 'mutka oikaistu (Antti itse, 26.9.)' },
   { k: 'kurittaja-elli', until: '2026-09-26', why: 'Antti poisti 26.9.' },
-  { k: 'ande', until: '2026-09-27', why: 'huijari: mutkia oikaistu (Antti, 27.9.)' },
+  { k: 'huijari-ande', t: 84.834, why: 'neljä mutkaa oikaistu, −149 m (ghost-analyysi 27.9.)' },
 ];
+// restored: struck by mistake, their lap is put back from the struck/ copy (once: the copy is then gone)
+const RESTORE = ['ande'];   // (27.9.: 85.373 was a clean lap — the cheat was Huijari-Ande)
 const struck = (k, t, d) => STRUCK.some(s => s.k === k && (s.t !== undefined ? Math.abs(s.t - t) < 0.0015 : String(d || '').slice(0, 10) <= s.until));
 async function strike(store, tid, top) {
+  for (const k of RESTORE) { const key = 'struck/' + tid + '/' + encodeURIComponent(k) + '.json', g = await store.get(key, { type: 'json' }); if (!g) continue;
+    if (!top.list.some(r => r.k === k)) { top.list.push({ k, name: g.name, t: g.t, d: String(g.d || '').slice(0, 10) }); top.list.sort((a, c) => a.t - c.t); await store.setJSON('ghost/' + tid + '/' + encodeURIComponent(k) + '.json', g); await store.setJSON('top/' + tid + '.json', top); }
+    await store.delete(key); }
   const bad = top.list.filter(r => struck(r.k, r.t, r.d) || badName(r.name)); if (!bad.length) return top;   // (and any name the word filter would refuse today)
   top.list = top.list.filter(r => !bad.includes(r)); await store.setJSON('top/' + tid + '.json', top);
   for (const r of bad) { const key = 'ghost/' + tid + '/' + encodeURIComponent(r.k) + '.json', g = await store.get(key, { type: 'json' }); if (g && (struck(r.k, g.t, g.d) || badName(r.name))) { await store.setJSON('struck/' + tid + '/' + encodeURIComponent(r.k) + '.json', g); await store.delete(key); } }   // (the ghost kept aside under struck/: the evidence)
