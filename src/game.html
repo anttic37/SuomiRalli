@@ -3935,6 +3935,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Kamera katsoo pidemmälle eteen ja hiukan loivemmin: auto on alempana ruudussa'],
   ['27.9.', 'GTA-moodissa tiet siistiksi: radan omat asfalttipaikat pois, kaikkiin risteyksiin pyöristetyt kulmat pientareineen'],
   ['27.9.', 'Lähdön tekstit selkeämmiksi, tie leveämpi lähdössä, katsomoissa väljempää ja niiden edessä makkarakärryt; alkuruudussa UUTUUS: GTA-MOODI'],
   ['27.9.', 'GTA-moodi: lähtö on nyt vasemmalla kaistalla. Lähtöviivan yli = kisa; oikeaa kaistaa pitkin (VAPAA AJO) rata katoaa ja koko kylän kaduilla saa ajaa vapaasti'],
@@ -7128,17 +7129,17 @@ function updateCamera(dt) {
   const speed=Math.sqrt(car.vx*car.vx+car.vz*car.vz);
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
   camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two views
-  const h=((45+speed*0.5)*(1-camLowK) + (4.2+speed*0.04)*camLowK)*camZoom;
+  const h=((43+speed*0.5)*(1-camLowK) + (4.2+speed*0.04)*camLowK)*camZoom;
   let angleDiff=car.angle-camAngle.current;
   while(angleDiff>Math.PI)angleDiff-=Math.PI*2; while(angleDiff<-Math.PI)angleDiff+=Math.PI*2;
   camAngle.current+=angleDiff*1.2*dt;
   const cfx=Math.sin(camAngle.current),cfz=Math.cos(camAngle.current);
-  const camDist=((25+speed*0.1)*(1-camLowK) + (10.5+speed*0.1)*camLowK)*camZoom;
+  const camDist=((21+speed*0.1)*(1-camLowK) + (10.5+speed*0.1)*camLowK)*camZoom;
   camTarget.set(car.x-cfx*camDist, Y(car.x,car.z)+h, car.z-cfz*camDist);
   camTarget.y = Math.max(camTarget.y, Y(camTarget.x, camTarget.z) + 2.2);   // never under a crest behind the car
   camPos.lerp(camTarget,1-Math.pow(0.15,dt));
   camPos.y = Math.max(camPos.y, Y(camPos.x, camPos.z) + 1.6);
-  const la=(8+speed*0.15)*(1-camLowK) + (13+speed*0.35)*camLowK;
+  const la=(15+speed*0.2)*(1-camLowK) + (13+speed*0.35)*camLowK;
   // look into the drift: blend look direction toward velocity direction
   let lookAng = camAngle.current;
   if (speed > 6) {
