@@ -367,8 +367,9 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       +0.18 m (kid 0.08) because the old poses were made for longer legs. Moving people walk automatically (pose.walk from speed).
     - LODs (phase 4): body2Geometry(S, lod) 0 full (568 tris shown, < 22 m), 1 square sections, no eyes/stripes/collars (260,
       < 80 m), 2 a dozen boxes (120; hat box gate 600 = any hat, slot 14 = hat colour), 3 the shadow caster (72, 0.9× slim).
-      body2Finish welds corners into an index (vertex work ÷2–3). Colour LODs have castShadow off; the two lod-3 meshes cast
-      the shadows and skip their colour draw (count 0 in onBeforeRender, which the shadow pass doesn't call). BODY.lod = [22, 80].
+      body2Finish welds corners into an index (vertex work ÷2–3). The LOD is picked by on-screen height (BODY.px = [34, 13] px:
+      f·height/distance, f from the canvas height and fov), so big screens get LOD0 from the game camera. Colour LODs have castShadow off; the two lod-3 meshes cast
+      the shadows and skip their colour draw (count 0 in onBeforeRender, which the shadow pass doesn't call).
       t_gl's kB counts whole arrays on WebGL2 (three passes array + offset/count), so it overstates partial uploads.
     - Grandstands have no roof any more (the crowd shows from the game camera).
     - Animals and aliens keep their own meshes (aliens on `makeKidOld`). The old crowd meshes (personGeos) remain only for tyre-prop people.

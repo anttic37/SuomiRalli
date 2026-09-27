@@ -116,7 +116,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 11.32 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+  <div class="build-stamp">editorista 11.35 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
     <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
   <div id="results">
     <div class="label">maaliaika</div>
@@ -3855,6 +3855,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Ihmisten tarkkuus valitaan ruudun koon mukaan: isolla näytöllä pelikamerastakin näkyy tarkin malli'],
   ['27.9.', 'Ihmisille kolme tarkkuustasoa etäisyyden mukaan ja kevyet varjot – nopeampi; katsomoista katto pois, yleisö näkyy'],
   ['27.9.', 'Uudet ihmiset: tanakka lelumalli, pehmeä varjostus ja 1988-vaatteet (permikset, mulletit, verkkarit, neuleet, lippikset) – kaikki ~1100 kävelevät, heiluttavat ja istuvat'],
   ['27.9.', 'Radioon 15 uutta biisiä (nyt 25)'],
@@ -4349,9 +4350,9 @@ function headGroup(G) { let g = G.userData.headG; if (g) return g;
   const kid = G.userData.look && G.userData.look.kid, S = kid ? BODY2_SPEC.kid : BODY2_SPEC.adult, s = kid ? 1.45 : 1.5, oc = kid ? 1.16 : 1.69;
   g = G.userData.headG = new THREE.Group(); g.position.y = S.neckY - 0.01 + S.head/2 - oc*s; g.scale.setScalar(s); G.add(g); return g; }
 // ── drawing: every frame the people in view are packed into one instanced mesh per body (adult / kid) and detail level ──
-// Detail by distance from the camera: full (< 22 m), light (< 80 m), a dozen boxes beyond. Shadows come from a separate 72-triangle
+// Detail by how tall the person is on screen: full from 34 px, light from 13 px, a dozen boxes below that. Shadows come from a separate 72-triangle
 // proxy of everyone in view (its colour draw is skipped: count 0 in onBeforeRender, which the shadow pass doesn't call).
-const BODY = { meshes: null, lod: [22, 80], cap: [600, 2400, 2400, 300, 700, 700, 2400, 700], frus: new THREE.Frustum(), pm: new THREE.Matrix4(), sph: new THREE.Sphere(new THREE.Vector3(), 3.5), n: [0, 0, 0, 0, 0, 0, 0, 0] };
+const BODY = { meshes: null, px: [34, 13], cap: [600, 2400, 2400, 300, 700, 700, 2400, 700], frus: new THREE.Frustum(), pm: new THREE.Matrix4(), sph: new THREE.Sphere(new THREE.Vector3(), 3.5), n: [0, 0, 0, 0, 0, 0, 0, 0] };
 function bodyInit() { if (BODY.meshes) return;
   BODY.meshes = [[false, 0], [false, 1], [false, 2], [true, 0], [true, 1], [true, 2], [false, 3], [true, 3]].map(([kid, lod], k) => { const im = body2Mesh(kid, BODY.cap[k], lod, true); im.count = 0; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     if (lod === 3) im.onBeforeRender = () => { im.count = 0; }; else im.castShadow = false; scene.add(im); return im; }); }
@@ -4365,10 +4366,10 @@ function bodyPut(k, h) { const n = BODY.n, i = n[k]; if (i >= BODY.cap[k]) retur
   A = G.bcol2.array; A[i4] = c[4]; A[i4 + 1] = c[5]; A[i4 + 2] = c[6]; A[i4 + 3] = c[7]; }
 function bodyFill(cam) {
   if (!BODY.meshes) return; BODY.pm.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse); BODY.frus.setFromProjectionMatrix(BODY.pm);
-  const n = BODY.n, S = BODY.sph, cx = cam.position.x, cy = cam.position.y, cz = cam.position.z, d0 = BODY.lod[0]*BODY.lod[0], d1 = BODY.lod[1]*BODY.lod[1]; n.fill(0);
+  const n = BODY.n, S = BODY.sph, cx = cam.position.x, cy = cam.position.y, cz = cam.position.z, f = renderer.domElement.height/(2*Math.tan(cam.fov*Math.PI/360)), dA = [f*1.75/BODY.px[0], f*1.75/BODY.px[1]].map(d => d*d), dK = [f*1.2/BODY.px[0], f*1.2/BODY.px[1]].map(d => d*d); n.fill(0);   // (px = f·height/distance)
   for (const h of HUMANS) { if (!h.bvis) continue; const e = h.bm.elements; S.center.set(e[12], e[13] + 0.9, e[14]); if (!BODY.frus.intersectsSphere(S)) continue;   // (the margin keeps shadows cast from just off screen)
-    const dx = e[12] - cx, dy = e[13] - cy, dz = e[14] - cz, d2 = dx*dx + dy*dy + dz*dz, kid = h.look.kid ? 3 : 0;
-    bodyPut(kid + (d2 < d0 ? 0 : d2 < d1 ? 1 : 2), h); bodyPut(kid ? 7 : 6, h); }
+    const dx = e[12] - cx, dy = e[13] - cy, dz = e[14] - cz, d2 = dx*dx + dy*dy + dz*dz, kid = h.look.kid ? 3 : 0, D = kid ? dK : dA;
+    bodyPut(kid + (d2 < D[0] ? 0 : d2 < D[1] ? 1 : 2), h); bodyPut(kid ? 7 : 6, h); }
   BODY.meshes.forEach((im, k) => { im.count = n[k]; im.visible = n[k] > 0; if (!n[k]) return; im.instanceMatrix.updateRange.count = n[k]*16; im.instanceMatrix.needsUpdate = true;
     for (const a of ['bposeA', 'bposeB', 'bposeC', 'bcol', 'bcol2']) { const A = im.geometry.attributes[a]; A.updateRange.count = n[k]*4; A.needsUpdate = true; } }); }
 function makeAdult(shirt, pants, hair, o) { return bodyRig(false, lookCivil(false, shirt, pants, hair, o)); }
