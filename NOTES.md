@@ -310,9 +310,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
         (clearLine) and otherwise follow the police's road-graph tree (`chasePath` + policeFollow). They back off walls.
       - The farmer shakes his fist (seatedTask). The chase ends after 45 s or 200 m back.
       - The reset restores the plants and the tractor.
-    - UFOs (`buildUfos`, `ufoUpdate`): two, placed beyond the route's west-most and east-most points.
-      - Each site is 60–180 m out, ≥ 55 m from the route, clear of trees within 10 m, and 18–45 m from a street so the
-        ambulance can come. Open land is tried first.
+    - UFOs (`buildUfos`, `ufoUpdate`): two, at the west and the east end of Ylästöntie (`ufoEnds`: the road's
+      west-most and east-most points; without that road, the route's own ends).
+      - First choice: 20–55 m on past the road's end, ≥ 40 m from the route, no tree within 10 m (then 7.5 m), 16–50 m
+        from a street node so the ambulance can come.
+      - Woods all round (the east end is dense forest): it comes down on the road's dead end itself, which has no trees.
+      - The two aliens are placed off roads and static boxes only. clearSpot never let them spawn, because the UFO's own
+        reservation covered their spots.
       - Each has a tilted silver disc, a dome, blinking rim lights, a crater, debris, smoke, and two aliens (animal Humans).
       - The dome charges for 0.9 s, then a green beam fires. The rally car is shot within 46 m (`wreckCar('boom')`: parts fly off).
       - Only after that (`U.woke`) does it turn on responders: ambulances and fire engines within 90 m whose job is within
@@ -342,6 +346,8 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       - Vehicles check nose, middle and tail (0.5 m); people check at 0.7 m.
       - The loose boulders at the rock's foot are now static boxes (`ROCK_BOULDERS`, kind 'rock').
       - t_s3_rock: 8 directions, never more than 0.42 m into the rock; boulders and a police car stop too.
+    - Minimap: off the course the car is held at the map's edge and drawn hollow. It used to vanish past the route's
+      bounding box.
     - Tests: t_set3 (smoke), t_s3_animals, t_s3_post, t_s3_es, t_s3_show (olympics, stands, cabbage/tractor), t_s3_ufo,
       t_s3_ufo2 (7-minute chain log), t_s3_roadies, t_s3_rock.
       - Run them with `s3run.sh outdir t_s3_…`, which puts s3_shot.inc (step + camera shot helpers) in front of each test.

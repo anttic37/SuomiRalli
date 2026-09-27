@@ -116,7 +116,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 00.31 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+  <div class="build-stamp">editorista 09.27 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
     <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
   <div id="results">
     <div class="label">maaliaika</div>
@@ -3855,6 +3855,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Ufot Ylästöntien itä- ja länsipäähän; auto näkyy kartalla myös radan ulkopuolella'],
   ['27.9.', 'Hirviä metsissä – välillä tien yli, ja jähmettyvät valoihin'],
   ['27.9.', 'Karhu joka lähdössä eri paikassa: yliajo tuo 10 poliisia perään'],
   ['27.9.', 'Postiauto jakaa postia sivukaduilla'],
@@ -5916,18 +5917,26 @@ function ufoUpdate(dt) { for (const U of UFOS) { U.t += dt; U.lights.forEach((m,
   else { U.kills++; const h = tgt.h; boom(h.x, Y(h.x, h.z), h.z, false); knock(h, (h.x - U.x)*0.2, (h.z - U.z)*0.2, 12); } }
   for (let i = UFO_REDO.length - 1; i >= 0; i--) { const R = UFO_REDO[i]; if (worldT < R.t) continue; UFO_REDO.splice(i, 1);
     if (R.h && !R.h.gone && R.h.down) DISPATCH.hurt(R.h); if (R.fire && !R.fire.out && !R.fire.engine && FIRES.includes(R.fire)) DISPATCH.fire(R.fire); } }
-function buildUfos() { UFOS.length = 0; const { nodes } = roadGraph(); let x0 = 1e9, x1 = -1e9, p0 = null, p1 = null; for (const p of trackPoints) { if (p.x < x0) { x0 = p.x; p0 = p; } if (p.x > x1) { x1 = p.x; p1 = p; } }
-  for (const [p, s] of [[p0, -1], [p1, 1]]) { if (!p) continue; let sp = null; for (let k = 0; k < 1500 && !sp; k++) { const d = 60 + Math.random()*(k < 700 ? 60 : 120), a = (Math.random() - 0.5)*(k < 700 ? 1.8 : 3), x = p.x + s*Math.cos(a)*d, z = p.y + Math.sin(a)*d;   // (open ground first, then a clearing in the woods)
-      if (Math.abs(x) > 530 || Math.abs(z) > 530 || distRoute(x, z) < 55 || rockHeightAt(x, z) > -0.5 || (k < 700 && landClassAt(x, z) === 1) || treeNear(x, z, 10)) continue;
-      let nd = 1e9; for (const n of nodes) nd = Math.min(nd, Math.hypot(n.x - x, n.z - z)); if (nd < 18 || nd > 45) continue;   // a street near enough for the ambulance to come (and be shot)
+function ufoEnds() {   // where they came down: off the west and the east end of Ylästöntie (no such road: beyond the route's own ends)
+  const pts = sideRoads.filter(R => R.name === 'YLÄSTÖNTIE').flatMap(R => R.pts); if (pts.length < 12) { let w = null, e = null; for (const p of trackPoints) { if (!w || p.x < w.x) w = p; if (!e || p.x > e.x) e = p; } return w ? [[w, -1, 0], [e, 1, 0]] : []; }
+  let wi = 0, ei = 0; pts.forEach((p, i) => { if (p.x < pts[wi].x) wi = i; if (p.x > pts[ei].x) ei = i; });
+  const out = (i) => { const st = i < pts.length/2 ? 1 : -1, p = pts[i], q = pts[Math.max(0, Math.min(pts.length - 1, i + st*8))], l = Math.hypot(p.x - q.x, p.y - q.y) || 1, back = [];
+    for (let k = 0; k < 40; k++) { const j = i + st*k; if (j < 0 || j >= pts.length) break; back.push(pts[j]); } return [p, (p.x - q.x)/l, (p.y - q.y)/l, back]; };   // (the end, the way on past it, and the road back from it)
+  return [out(wi), out(ei)]; }
+function buildUfos() { UFOS.length = 0; const { nodes } = roadGraph();
+  for (const [p, ux, uz, back] of ufoEnds()) { let sp = null; for (let k = 0; k < 2000 && !sp; k++) { const d = 20 + Math.random()*35, a = Math.atan2(ux, uz) + (Math.random() - 0.5)*(k < 700 ? 2.2 : 6.3), x = p.x + Math.sin(a)*d, z = p.y + Math.cos(a)*d;   // (on past the road's end first, then anywhere round it)
+      if (Math.abs(x) > 540 || Math.abs(z) > 540 || distRoute(x, z) < 40 || rockHeightAt(x, z) > -0.5 || treeNear(x, z, k < 700 ? 10 : 7.5)) continue;
+      let nd = 1e9; for (const n of nodes) nd = Math.min(nd, Math.hypot(n.x - x, n.z - z)); if (nd < 16 || nd > 50) continue;   // a street near enough for the ambulance to come (and be shot)
       let ok = clearSpot(x, z, 6); if (ok) staticNear(x, z, 10, B => { if (ok && boxPush(B, x, z, 6.5)) ok = false; }); if (ok) sp = [x, z]; }
+    if (!sp && back) for (const q of back || []) { if (treeNear(q.x, q.y, 6) || distRoute(q.x, q.y) < 40) continue; let ok = !VEHICLES.some(v => Math.hypot(v.x - q.x, v.z - q.y) < 9);   // woods all round: down on the dead end of the road itself (no trees there)
+      if (ok) staticNear(q.x, q.y, 10, B => { if (ok && boxPush(B, q.x, q.y, 5.5)) ok = false; }); if (ok) { sp = [q.x, q.y]; break; } }
     if (!sp) continue; const [x, z] = sp, y = Y(x, z) + 0.35, M = makeUfo(); M.G.position.set(x, y, z); M.G.rotation.set(0.32, Math.random()*6.3, 0.12, 'YXZ'); lifeGroup.add(M.G); nearVis(M.G, x, z);
     const crater = lmesh(lgeo('crater', () => new THREE.CylinderGeometry(7, 7.5, 0.05, 20)), lmat(0x3a2e24, 1), x, Y(x, z) + 0.04, z, lifeGroup, false); crater.receiveShadow = true; nearVis(crater, x, z);
     const deb = new THREE.Group(); lifeGroup.add(deb); nearVis(deb, x, z); for (let k = 0; k < 7; k++) { const a = Math.random()*6.3, r = 6 + Math.random()*6, dx = x + Math.sin(a)*r, dz = z + Math.cos(a)*r, d = lmesh(lbox(0.6 + Math.random(), 0.1, 0.4 + Math.random()*0.6), lmat(0xa8acb4, 0.3), dx, Y(dx, dz) + 0.06, dz, deb); d.rotation.set((Math.random() - 0.5)*0.4, Math.random()*6.3, (Math.random() - 0.5)*0.4); }
     const beam = new THREE.Mesh(lgeo('beam', () => new THREE.BoxGeometry(0.24, 0.24, 1)), new THREE.MeshBasicMaterial({ color: 0x60ff90, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); beam.visible = false; lifeGroup.add(beam);
     const U = { x, z, y, lights: M.lights, dome: M.dome, beam, t: Math.random()*5, cool: 0, charge: 0, beamT: 0, kills: 0, shots: 0 }; UFOS.push(U); addStaticBox({ x, z, yaw: 0, hw: 4.0, hl: 4.0, kind: 'lm' }); reserve('ufo', sp, 13);
     EMITTERS.push({ x: x + 1.5, z, y: y + 0.8, kind: 'breakdown', acc: 0 });   // still smoking
-    for (let k = 0; k < 2; k++) { const a = k*3 + Math.random(), ax = x + Math.sin(a)*7.5, az = z + Math.cos(a)*7.5; if (!clearSpot(ax, az, 0.5)) continue;
+    for (let k = 0; k < 2; k++) { const a = k*3 + Math.random(), ax = x + Math.sin(a)*7.5, az = z + Math.cos(a)*7.5; let ok = !onRoad(ax, az, 1); if (ok) staticNear(ax, az, 2, B => { if (ok && boxPush(B, ax, az, 0.5)) ok = false; }); if (!ok) continue;   // (not clearSpot: the UFO's own reservation would keep them off)
       new Human({ x: ax, z: az, yaw: a, kid: true, animal: true, rig: makeAlien(), task: { kind: 'alien', update(h, dt, t) { h.vx = h.vz = 0; h.yaw += Math.sin(t*0.7 + k)*dt*0.8; h.pose.armL = -1.5 + Math.sin(t*3 + k)*0.4; if (Math.hypot(car.x - h.x, car.z - h.z) < 60) h.pose.armR = -2.8 + Math.sin(t*9)*0.3; } } }); } } }
 function ufoReset() { UFO_REDO.length = 0; for (const U of UFOS) { U.cool = 0; U.charge = 0; U.beamT = 0; U.kills = 0; U.woke = false; U.beam.visible = false; U.dome.material.emissiveIntensity = 0.6; } }
 
@@ -6777,7 +6786,8 @@ function drawMinimap(){const ctx=mmCtx;
   ctx.clearRect(0,0,140,140);ctx.drawImage(mmBase,0,0);
   checkpoints.forEach(cp=>{ctx.fillStyle=cp.passed?'#44ff44':'#555';ctx.beginPath();ctx.arc(cp.position.x*sc+ox,cp.position.y*sc+oz,2,0,Math.PI*2);ctx.fill();});
   if(finishLine){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(finishLine.position.x*sc+ox,finishLine.position.y*sc+oz,2.5,0,Math.PI*2);ctx.fill();}
-  const cx=car.x*sc+ox,cy=car.z*sc+oz;ctx.fillStyle='#ff3333';ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fill();
+  const rx0=car.x*sc+ox,ry0=car.z*sc+oz,cx=Math.max(5,Math.min(135,rx0)),cy=Math.max(5,Math.min(135,ry0)),off=cx!==rx0||cy!==ry0;   // (off the map: held at its edge, drawn hollow)
+  ctx.fillStyle='#ff3333';ctx.strokeStyle='#ff3333';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,3.5,0,Math.PI*2);off?ctx.stroke():ctx.fill();
   ctx.strokeStyle='#ff3333';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.sin(car.angle)*5,cy+Math.cos(car.angle)*5);ctx.stroke();}
 
 const elTimer=document.getElementById('timer'), elCpC=document.getElementById('cp-counter'),
