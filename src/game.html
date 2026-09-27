@@ -3858,6 +3858,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Ihmisille kolme tarkkuustasoa etäisyyden mukaan ja kevyet varjot – nopeampi; katsomoista katto pois, yleisö näkyy'],
   ['27.9.', 'Uudet ihmiset: tanakka lelumalli, pehmeä varjostus ja 1988-vaatteet (permikset, mulletit, verkkarit, neuleet, lippikset) – kaikki ~1100 kävelevät, heiluttavat ja istuvat'],
   ['27.9.', 'Radioon 15 uutta biisiä (nyt 25)'],
   ['27.9.', 'Ufot Ylästöntien itä- ja länsipäähän; auto näkyy kartalla myös radan ulkopuolella'],
@@ -4131,15 +4132,31 @@ function body2Geometry(S, lod) {
     if (nx*nx + ny*ny + nz*nz < 1e-14) return; const ox = (a[0] + b[0] + c[0])/3 - ctr[0], oy = (a[1] + b[1] + c[1])/3 - ctr[1], oz = (a[2] + b[2] + c[2])/3 - ctr[2];
     if (nx*ox + ny*oy + nz*oz < 0) { const t = b; b = c; c = t; } pos.push(...a, ...b, ...c); for (let k = 0; k < 3; k++) info.push(...cur); };
   const ring = (y, cx, cz, rx, rz, n) => { const r = []; for (let i = 0; i < n; i++) { const a = (i + 0.5)/n*Math.PI*2; r.push([cx + Math.sin(a)*rx/Math.cos(Math.PI/n), y, cz + Math.cos(a)*rz/Math.cos(Math.PI/n)]); } return r; };   // (rx, rz: half-widths across the flats; a flat face to the front)
-  const bring = (y, cx, cz, hx, hz, bv) => { const b = Math.min(bv, hx*0.9, hz*0.9); return [[hx - b, hz], [hx, hz - b], [hx, -hz + b], [hx - b, -hz], [-hx + b, -hz], [-hx, -hz + b], [-hx, hz - b], [-hx + b, hz]].map(([x, z]) => [cx + x, y, cz + z]); };   // (a box section, its corners cut)
+  const bring = (y, cx, cz, hx, hz, bv) => { if (lod) return [[hx, hz], [hx, -hz], [-hx, -hz], [-hx, hz]].map(([x, z]) => [cx + x, y, cz + z]);   // (the lighter LODs: plain square sections)
+    const b = Math.min(bv, hx*0.9, hz*0.9); return [[hx - b, hz], [hx, hz - b], [hx, -hz + b], [hx - b, -hz], [-hx + b, -hz], [-hx, -hz + b], [-hx, hz - b], [-hx + b, hz]].map(([x, z]) => [cx + x, y, cz + z]); };   // (a box section, its corners cut)
   const stack = (rings, cx, cz, capT, capB) => { const n = rings.length;
     for (let k = 0; k < n - 1; k++) { const A = rings[k], B = rings[k + 1], m = A.length, ctr = [cx, (A[0][1] + B[0][1])/2, cz]; for (let i = 0; i < m; i++) { const j = (i + 1) % m; T(A[i], B[i], B[j], ctr); T(A[i], B[j], A[j], ctr); } }
     const mid = [cx, (rings[0][0][1] + rings[n - 1][0][1])/2, cz], fan = (R, tip) => { for (let i = 0; i < R.length; i++) T(R[i], R[(i + 1) % R.length], tip, mid); };
     if (capT !== false) fan(rings[0], [cx, rings[0][0][1] + (capT || 0), cz]); if (capB !== false) fan(rings[n - 1], [cx, rings[n - 1][0][1] - (capB || 0), cz]); };
   const box = (x0, x1, y0, y1, z0, z1, bev) => {   // a box, its top edges bevelled by bev
-    const c = [(x0 + x1)/2, (y0 + y1)/2, (z0 + z1)/2], b = bev || 0;
+    const c = [(x0 + x1)/2, (y0 + y1)/2, (z0 + z1)/2], b = lod ? 0 : bev || 0;
     stack([[[x0 + b, y1, z0 + b], [x0 + b, y1, z1 - b], [x1 - b, y1, z1 - b], [x1 - b, y1, z0 + b]], [[x0, y1 - b, z0], [x0, y1 - b, z1], [x1, y1 - b, z1], [x1, y1 - b, z0]], [[x0, y0, z0], [x0, y0, z1], [x1, y0, z1], [x1, y0, z0]]].map(r => r), c[0], c[2], 0, 0); };
-  const set = (part, slot, gate) => { cur = [part, slot, gate || 0]; }, L = S.limb, lo = lod || 0, n6 = lo ? 4 : 6, n8 = lo ? 4 : 8;
+  const set = (part, slot, gate) => { cur = [part, slot, gate || 0]; }, L = S.limb, lo = lod || 0;
+  const hy = S.hipY, sy = S.shY, tw = S.torsoW/2, ww = S.waistW/2, td = S.torsoD/2, hh = S.head, hw = hh*0.47, hd = hh*0.45, hb = S.neckY - 0.01, H = hb + hh, lw = S.legW, aw = S.armW;
+  if (lo >= 2) {   // far away (2) and the shadow caster (3): a dozen plain boxes, each on its own joint
+    const cube = (x0, x1, y0, y1, z0, z1) => { const c = [(x0 + x1)/2, (y0 + y1)/2, (z0 + z1)/2], P = (i) => [i & 1 ? x1 : x0, i & 2 ? y1 : y0, i & 4 ? z1 : z0];
+      for (const [a, b, cc, d] of [[0, 1, 3, 2], [4, 5, 7, 6], [0, 1, 5, 4], [2, 3, 7, 6], [0, 2, 6, 4], [1, 3, 7, 5]]) { T(P(a), P(b), P(cc), c); T(P(a), P(cc), P(d), c); } };
+    const k = lo === 3 ? 0.9 : 1;   // (the shadow caster a little slimmer than the body it stands in: no self-shadow speckle)
+    for (const sd of [-1, 1]) { const x = sd*S.hipX, xa = sd*S.shX, L2 = sd < 0;
+      if (lo === 2) { set(L2 ? 2 : 4, 9); cube(x - lw, x + lw, S.kneeY, hy + 0.06, -lw*1.06, lw*1.06); set(L2 ? 3 : 5, 6); cube(x - lw, x + lw, 0, S.kneeY + 0.02, -lw*1.06, lw*1.06 + 0.06); }
+      else { set(L2 ? 2 : 4, 9); cube(x - lw*k, x + lw*k, 0.02, hy, -lw*k, lw*k); }
+      set(L2 ? 6 : 8, 13); cube(xa - aw*k, xa + aw*k, S.wristY - 0.08, sy + 0.02, -aw*k, aw*k); }
+    if (lo === 2) { set(0, 2); cube(-ww, ww, hy - 0.06, hy + 0.14*L, -td*0.94, td*0.94); set(0, 1); cube(-tw, tw, hy + 0.14*L, sy + 0.03, -td, td); }
+    else { set(0, 1); cube(-tw*k, tw*k, hy - 0.04, sy + 0.02, -td*k, td*k); }
+    set(1, 0); cube(-hw*k, hw*k, hb, H, -hd*k, hd*k);
+    if (lo === 2) { set(1, 3); cube(-hw - 0.02, hw + 0.02, hb + hh*0.6, H + 0.03, -hd - 0.02, hd*0.5); set(1, 14, 600); cube(-hw - 0.035, hw + 0.035, H - 0.05, H + 0.08, -hd - 0.035, hd + 0.05); }
+    else { set(1, 0, 600); cube(-hw*k, hw*k, H - 0.02, H + 0.08, -hd*k, hd*k); }
+    return body2Finish(pos, info); }
   // legs: shoe, shin (the knee rounded), thigh
   for (const sd of [-1, 1]) { const x = sd*S.hipX, sh = S.shoe, lp = sd < 0;
     set(lp ? 3 : 5, 4); box(x - sh[0]/2, x + sh[0]/2, 0, sh[1], -sh[2]*0.32, sh[2]*0.68, lo ? 0 : 0.03);
@@ -4148,14 +4165,12 @@ function body2Geometry(S, lod) {
     set(lp ? 3 : 5, 6); stack([bring(S.kneeY + 0.035, x, 0.004, lw*0.97, lw*1.02, lb), bring(S.ankY + 0.05, x, 0, lw*0.92, lw*0.97, lb)], x, 0, 0.03, false);
     set(lp ? 2 : 4, 9); stack([bring(S.hipY + 0.06, x, 0, lw, lw*1.06, lb), bring(S.kneeY + 0.01, x, 0.004, lw*0.97, lw*1.02, lb)], x, 0, false, 0.03); }
   // hips (the trousers' colour) and the chest, tapering in at the waist, wide square shoulders
-  const hy = S.hipY, sy = S.shY, tw = S.torsoW/2, ww = S.waistW/2, td = S.torsoD/2;
   const bv = td*0.35;
   set(0, 2); stack([bring(hy + 0.14*L, 0, 0, ww, td*0.94, bv), bring(hy - 0.06, 0, 0, ww*1.01, td*0.94, bv)], 0, 0, false, 0.02);
   set(0, 1); stack([bring(S.neckY + 0.005, 0, -0.005, tw*0.42, td*0.62, bv*0.6), bring(sy + 0.02, 0, 0, tw*0.9, td*0.97, bv), bring(sy - 0.05, 0, 0, tw, td, bv), bring(hy + 0.12*L, 0, 0, ww, td*0.94, bv)], 0, 0, 0, false);   // a straight block, a little narrower at the waist; the shoulders slope down from the neck
   // head: a chamfered block, flat face to the front
-  const hh = S.head, hw = hh*0.47, hd = hh*0.45, hb = S.neckY - 0.01, H = hb + hh;
   set(1, 0, -8); stack([bring(H, 0, 0, hw*0.84, hd*0.84, hw*0.3), bring(H - hh*0.1, 0, 0, hw, hd, hw*0.34), bring(hb + hh*0.2, 0, 0.005, hw, hd, hw*0.34), bring(hb, 0, 0.01, hw*0.8, hd*0.82, hw*0.3)], 0, 0, 0, 0);
-  set(1, 8, -8); for (const sd of [-1, 1]) box(sd*hw*0.36 - 0.022, sd*hw*0.36 + 0.022, hb + hh*0.4, hb + hh*0.53, hd - 0.01, hd + 0.012);   // dot eyes
+  if (!lo) set(1, 8, -8); else set(1, 8, 999); for (const sd of [-1, 1]) if (!lo) box(sd*hw*0.36 - 0.022, sd*hw*0.36 + 0.022, hb + hh*0.4, hb + hh*0.53, hd - 0.01, hd + 0.012);   // dot eyes
   // short hair: a cap over the top and round the back, the fringe above the eyes
   const shortHair = (g) => { set(1, 3, g); stack([bring(H + 0.03, 0, -0.012, hw*0.88, hd*0.88, hw*0.3), bring(H - hh*0.1, 0, -0.012, hw + 0.022, hd + 0.02, hw*0.36), bring(hb + hh*0.62, 0, -0.03, hw + 0.024, hd + 0.005, hw*0.36)], 0, -0.02, 0, false);
   if (!lo) box(-hw*0.85, hw*0.85, hb + hh*0.66, hb + hh*0.8, hd - 0.02, hd + 0.03); }; shortHair(100);
@@ -4166,7 +4181,7 @@ function body2Geometry(S, lod) {
     set(ap ? 7 : 9, 5); stack([bring(S.elbY + 0.02, x, 0, aw*0.95, aw*0.99, ab), bring(S.wristY + 0.01, x, 0.005, aw*0.86, aw*0.9, ab)], x, 0, false, false);
     set(ap ? 7 : 9, 0); box(x - 0.058*L, x + 0.058*L, S.wristY - 0.13*L, S.wristY + 0.02, -0.05*L, 0.07*L, lo ? 0 : 0.02); }
   // ── the wardrobe: pieces that show only for the person whose hair / hat / top / bottom / extras pick them (gate: group*100 + value) ──
-  const k = S.legW/0.086, lw = S.legW, aw = S.armW, tAt = (y) => ww + (tw - ww)*Math.max(0, Math.min(1, (y - (hy + 0.12*L))/((sy - 0.05) - (hy + 0.12*L))));   // the torso's half-width at y
+  const k = S.legW/0.086, tAt = (y) => ww + (tw - ww)*Math.max(0, Math.min(1, (y - (hy + 0.12*L))/((sy - 0.05) - (hy + 0.12*L))));   // the torso's half-width at y
   const band = (y0, y1, out, g, slot) => { set(0, slot, g); const w0 = tAt(y0) + out, w1 = tAt(y1) + out; stack([bring(y1, 0, 0, w1, td*0.97 + out, bv), bring(y0, 0, 0, w0, td*0.96 + out, bv)], 0, 0, false, false); };
   const limbRing = (part, x, y0, y1, r, g, slot) => { set(part, slot, g); stack([bring(y1, x, 0, r, r*1.05, r*0.4), bring(y0, x, 0, r, r*1.05, r*0.4)], x, 0, false, false); };
   const hexa = (P, g, slot, part) => { set(part || 0, slot, g); const c = [0, 1, 2].map(i => P.reduce((a, p) => a + p[i], 0)/8); for (const [a, b, cc, d] of [[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]]) { T(P[a], P[b], P[cc], c); T(P[a], P[cc], P[d], c); } };
@@ -4196,7 +4211,7 @@ function body2Geometry(S, lod) {
     set(1, 3, 506); box(-hw*0.92, hw*0.92, hb - 0.01, hb + hh*0.3, hd*0.1, hd + 0.014); }
   // tops (group 3): 1 collared shirt, 2 tracksuit, 3 knitted sweater, 4 denim jacket open, 5 cardigan, 6 dress, 7 overalls, 8 uniform,
   //   9 long coat, 10 firefighter, 11 rally overalls, 12 tank top (bare arms), 13 post jacket and bag
-  collar(301); if (!lo) { collar(304); collar(308); collar(311); collar(313); }
+  if (!lo) { collar(301); collar(304); collar(308); collar(311); collar(313); }
   if (!lo) { armStripes(302, 7); band(yChest - 0.03, yChest + 0.04, 0.008, 302, 7); }
   band(sy - 0.13*L, sy - 0.01, 0.008, 303, 7); if (!lo) band(hy + 0.12*L, hy + 0.17*L, 0.006, 303, 7);
   front(-tw*0.28, tw*0.28, hy + 0.12*L, sy - 0.02, 304, 7);
@@ -4212,9 +4227,13 @@ function body2Geometry(S, lod) {
   skirt(hy + 0.12*L, S.kneeY + 0.06, 1.3, 401, 2);
   if (!lo) legStripes(402, 7);
   for (const sd of [-1, 1]) { const x = sd*S.hipX, lp = sd < 0; set(lp ? 3 : 5, 4, 403); stack([bring(S.kneeY - 0.02, x, 0.005, lw + 0.012, lw*1.06 + 0.012, lw*0.35), bring(S.ankY - 0.02, x, 0.01, lw + 0.016, lw*1.06 + 0.02, lw*0.35)], x, 0, 0, false);
-    limbRing(lp ? 3 : 5, x, S.ankY + 0.02, S.ankY + 0.13*k, lw*0.95, 404, 10); }
-  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('binfo', new THREE.Float32BufferAttribute(info, 3));
-  g.setAttribute('normal', new THREE.Float32BufferAttribute(body2Normals(pos, info, 50), 3));
+    if (!lo) limbRing(lp ? 3 : 5, x, S.ankY + 0.02, S.ankY + 0.13*k, lw*0.95, 404, 10); }
+  return body2Finish(pos, info); }
+function body2Finish(pos, info) {   // smooth normals, then shared corners welded into an index (a third of the vertex work)
+  const nrm = body2Normals(pos, info, 50), map = new Map(), P = [], N = [], I = [], idx = [];
+  for (let v = 0; v < pos.length/3; v++) { const a = v*3, key = [pos[a], pos[a + 1], pos[a + 2], nrm[a], nrm[a + 1], nrm[a + 2], info[a], info[a + 1], info[a + 2]].map(q => Math.round(q*1e4)).join(',');
+    let j = map.get(key); if (j === undefined) { j = P.length/3; map.set(key, j); P.push(pos[a], pos[a + 1], pos[a + 2]); N.push(nrm[a], nrm[a + 1], nrm[a + 2]); I.push(info[a], info[a + 1], info[a + 2]); } idx.push(j); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3)); g.setAttribute('binfo', new THREE.Float32BufferAttribute(I, 3)); g.setIndex(idx);
   g.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 1e5); return g; }
 function body2Normals(pos, info, crease) {   // Gouraud: each corner gets the mean of the face normals meeting there (same part), except across an edge sharper than crease°
   const nv = pos.length/3, fn = [], key = (i) => info[i*3] + ':' + Math.round(pos[i*3]*2000) + ',' + Math.round(pos[i*3 + 1]*2000) + ',' + Math.round(pos[i*3 + 2]*2000), map = new Map(), out = new Float32Array(pos.length), cc = Math.cos(crease*Math.PI/180);
@@ -4235,7 +4254,7 @@ vec3 bUnpack(float c) { return vec3(floor(c/65536.0), mod(floor(c/256.0), 256.0)
 vec3 bodyPose(vec3 p) {   // uJ1 = (hip x, hip y, knee y, neck y), uJ2 = (shoulder x, shoulder y, elbow y, -); bcol2.w = width*1000 + belly*100 (as integers)
   float part = binfo.x, gate = binfo.z, sel = bcol2.z, wd = floor(bcol2.w/1000.0)/100.0, bel = mod(bcol2.w, 1000.0)/100.0, bits = floor(sel/65536.0);
   bool show = true; if (gate < -0.5) show = bBit(bits, -gate - 1.0) < 0.5;
-  else if (gate > 99.5) { float grp = floor(gate/100.0), val = mod(gate, 100.0), pick = grp < 4.5 ? mod(floor(sel/exp2(4.0*(grp - 1.0))), 16.0) : -1.0; show = grp < 4.5 ? abs(pick - val) < 0.5 : bBit(bits, val) > 0.5; }
+  else if (gate > 99.5) { float grp = floor(gate/100.0), val = mod(gate, 100.0), pick = grp < 4.5 ? mod(floor(sel/exp2(4.0*(grp - 1.0))), 16.0) : mod(floor(sel/16.0), 16.0); show = grp < 4.5 ? abs(pick - val) < 0.5 : grp < 5.5 ? bBit(bits, val) > 0.5 : grp < 6.5 ? pick > 0.5 : false; }   // (6: any hat; 9: never)
   if (!show) return vec3(0.0, uJ1.y + 0.2, 0.0);   // (not this person's: folded away)
   float thick = mix(1.0, wd, 0.6);
   if (part < 0.5) {   // the body: wider or slimmer, and the belly out in front
@@ -4263,7 +4282,7 @@ const BODY2_GLSL_COLOUR = `
     if (slot == 1.0 || slot == 12.0) c = shirt; else if (slot == 2.0) c = pants; else if (slot == 3.0) c = hair; else if (slot == 4.0) c = bUnpack(bcol2.x);
     else if (slot == 5.0) c = ls ? shirt : skin; else if (slot == 6.0) c = (lp && !bare) ? pants : skin; else if (slot == 7.0) c = bUnpack(bcol2.y);
     else if (slot == 8.0) c = vec3(0.05); else if (slot == 9.0) c = bare ? skin : pants; else if (slot == 10.0) c = vec3(0.93);
-    else if (slot == 11.0) c = vec3(0.86, 0.86, 0.62); else if (slot == 13.0) c = tank ? skin : shirt;
+    else if (slot == 11.0) c = vec3(0.86, 0.86, 0.62); else if (slot == 13.0) c = tank ? skin : shirt; else if (slot == 14.0) c = abs(mod(floor(bcol2.z/16.0), 16.0) - 2.0) < 0.5 ? pants : bUnpack(bcol2.y);   // (14: the hat, far away: a flat cap is the trousers' tweed)
     vBodyCol = c; }
 `;
 function body2Materials(S, smooth) {
@@ -4333,21 +4352,26 @@ function headGroup(G) { let g = G.userData.headG; if (g) return g;
   const kid = G.userData.look && G.userData.look.kid, S = kid ? BODY2_SPEC.kid : BODY2_SPEC.adult, s = kid ? 1.45 : 1.5, oc = kid ? 1.16 : 1.69;
   g = G.userData.headG = new THREE.Group(); g.position.y = S.neckY - 0.01 + S.head/2 - oc*s; g.scale.setScalar(s); G.add(g); return g; }
 // ── drawing: every frame the people in view are packed into one instanced mesh per body (adult / kid) and detail level ──
-const BODY = { meshes: null, near: 30, cap: [2400, 2400, 700, 700], frus: new THREE.Frustum(), pm: new THREE.Matrix4(), sph: new THREE.Sphere(new THREE.Vector3(), 3.5), n: [0, 0, 0, 0] };
+// Detail by distance from the camera: full (< 22 m), light (< 80 m), a dozen boxes beyond. Shadows come from a separate 72-triangle
+// proxy of everyone in view (its colour draw is skipped: count 0 in onBeforeRender, which the shadow pass doesn't call).
+const BODY = { meshes: null, lod: [22, 80], cap: [600, 2400, 2400, 300, 700, 700, 2400, 700], frus: new THREE.Frustum(), pm: new THREE.Matrix4(), sph: new THREE.Sphere(new THREE.Vector3(), 3.5), n: [0, 0, 0, 0, 0, 0, 0, 0] };
 function bodyInit() { if (BODY.meshes) return;
-  BODY.meshes = [[false, 0], [false, 1], [true, 0], [true, 1]].map(([kid, lod], k) => { const im = body2Mesh(kid, BODY.cap[k], lod, true); im.count = 0; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(im); return im; }); }
+  BODY.meshes = [[false, 0], [false, 1], [false, 2], [true, 0], [true, 1], [true, 2], [false, 3], [true, 3]].map(([kid, lod], k) => { const im = body2Mesh(kid, BODY.cap[k], lod, true); im.count = 0; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    if (lod === 3) im.onBeforeRender = () => { im.count = 0; }; else im.castShadow = false; scene.add(im); return im; }); }
+function bodyPut(k, h) { const n = BODY.n, i = n[k]; if (i >= BODY.cap[k]) return; n[k]++;
+  const im = BODY.meshes[k], G = im.geometry.attributes, b = h.bp, c = h.look.c, i4 = i*4;
+  im.instanceMatrix.array.set(h.bm.elements, i*16);
+  let A = G.bposeA.array; A[i4] = b[0]; A[i4 + 1] = b[1]; A[i4 + 2] = b[2]; A[i4 + 3] = b[3];
+  A = G.bposeB.array; A[i4] = b[4]; A[i4 + 1] = b[5]; A[i4 + 2] = b[6]; A[i4 + 3] = b[7];
+  A = G.bposeC.array; A[i4] = b[8]; A[i4 + 1] = b[9]; A[i4 + 2] = b[10]; A[i4 + 3] = 0;
+  A = G.bcol.array; A[i4] = c[0]; A[i4 + 1] = c[1]; A[i4 + 2] = c[2]; A[i4 + 3] = c[3];
+  A = G.bcol2.array; A[i4] = c[4]; A[i4 + 1] = c[5]; A[i4 + 2] = c[6]; A[i4 + 3] = c[7]; }
 function bodyFill(cam) {
   if (!BODY.meshes) return; BODY.pm.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse); BODY.frus.setFromProjectionMatrix(BODY.pm);
-  const n = BODY.n, S = BODY.sph, cx = cam.position.x, cy = cam.position.y, cz = cam.position.z, near2 = BODY.near*BODY.near; n[0] = n[1] = n[2] = n[3] = 0;
+  const n = BODY.n, S = BODY.sph, cx = cam.position.x, cy = cam.position.y, cz = cam.position.z, d0 = BODY.lod[0]*BODY.lod[0], d1 = BODY.lod[1]*BODY.lod[1]; n.fill(0);
   for (const h of HUMANS) { if (!h.bvis) continue; const e = h.bm.elements; S.center.set(e[12], e[13] + 0.9, e[14]); if (!BODY.frus.intersectsSphere(S)) continue;   // (the margin keeps shadows cast from just off screen)
-    const dx = e[12] - cx, dy = e[13] - cy, dz = e[14] - cz, k = (h.look.kid ? 2 : 0) + (dx*dx + dy*dy + dz*dz < near2 ? 0 : 1), i = n[k]; if (i >= BODY.cap[k]) continue; n[k]++;
-    const im = BODY.meshes[k], G = im.geometry.attributes, b = h.bp, c = h.look.c, i4 = i*4;
-    im.instanceMatrix.array.set(e, i*16);
-    let A = G.bposeA.array; A[i4] = b[0]; A[i4 + 1] = b[1]; A[i4 + 2] = b[2]; A[i4 + 3] = b[3];
-    A = G.bposeB.array; A[i4] = b[4]; A[i4 + 1] = b[5]; A[i4 + 2] = b[6]; A[i4 + 3] = b[7];
-    A = G.bposeC.array; A[i4] = b[8]; A[i4 + 1] = b[9]; A[i4 + 2] = b[10]; A[i4 + 3] = 0;
-    A = G.bcol.array; A[i4] = c[0]; A[i4 + 1] = c[1]; A[i4 + 2] = c[2]; A[i4 + 3] = c[3];
-    A = G.bcol2.array; A[i4] = c[4]; A[i4 + 1] = c[5]; A[i4 + 2] = c[6]; A[i4 + 3] = c[7]; }
+    const dx = e[12] - cx, dy = e[13] - cy, dz = e[14] - cz, d2 = dx*dx + dy*dy + dz*dz, kid = h.look.kid ? 3 : 0;
+    bodyPut(kid + (d2 < d0 ? 0 : d2 < d1 ? 1 : 2), h); bodyPut(kid ? 7 : 6, h); }
   BODY.meshes.forEach((im, k) => { im.count = n[k]; im.visible = n[k] > 0; if (!n[k]) return; im.instanceMatrix.updateRange.count = n[k]*16; im.instanceMatrix.needsUpdate = true;
     for (const a of ['bposeA', 'bposeB', 'bposeC', 'bcol', 'bcol2']) { const A = im.geometry.attributes[a]; A.updateRange.count = n[k]*4; A.needsUpdate = true; } }); }
 function makeAdult(shirt, pants, hair, o) { return bodyRig(false, lookCivil(false, shirt, pants, hair, o)); }
@@ -6023,13 +6047,12 @@ function buildOlympics() { const F = FIELD_GAMES[0]; if (!F) return;
 
 // ── 6. grandstands: one by the finish line, one by the K-shop — four tiers, packed, on their feet when the car comes ──
 const STANDS = [];
-function makeGrandstand(L) { const G = new THREE.Group(), steel = lmat(0x6a6e74, 0.5), seat = lmat(0x2a5ab0, 0.6), wood = lmat(0x8a6a44, 0.85), roof = lmat(0xd8d8d0, 0.6), conc = lmat(0x9a9890, 0.9);
+function makeGrandstand(L) { const G = new THREE.Group(), steel = lmat(0x6a6e74, 0.5), seat = lmat(0x2a5ab0, 0.6), wood = lmat(0x8a6a44, 0.85), conc = lmat(0x9a9890, 0.9);
   lmesh(lbox(L + 0.3, 2.0, 3.5), conc, 0, -1.0, -1.4, G);   // the footing (a slope under it stays hidden)
   for (let r = 0; r < 4; r++) { const y = 0.45 + r*0.5, z = -r*0.85; lmesh(lbox(L, 0.12, 0.85), wood, 0, y, z, G); lmesh(lbox(L, y - 0.06, 0.08), steel, 0, (y - 0.06)/2, z + 0.42, G); lmesh(lbox(L - 0.2, 0.08, 0.22), seat, 0, y + 0.1, z - 0.29, G, false); }
   lmesh(lbox(L, 2.9, 0.12), steel, 0, 2.95, -3.02, G);   // the back wall
   for (const s of [-1, 1]) lmesh(lbox(0.12, 2.6, 3.2), steel, s*L/2, 1.3, -1.5, G);
-  for (let x = -L/2; x <= L/2 + 0.01; x += L/4) lmesh(lbox(0.14, 4.6, 0.14), steel, x, 2.3, -3.0, G);
-  const rf = lmesh(lbox(L + 0.6, 0.1, 4.3), roof, 0, 4.6, -1.3, G); rf.rotation.x = -0.08;
+  for (let x = -L/2; x <= L/2 + 0.01; x += L/4) lmesh(lbox(0.14, 4.5, 0.14), steel, x, 2.25, -3.0, G);   // (no roof: the crowd shows from the game camera)
   return G; }
 const standTask = (S, row) => ({ kind: 'stand', update(h, dt, t, near) { const st = h.st || (h.st = { ph: Math.random()*6.3, cheer: 0, dy: S.base + 0.51 + row*0.5 - Y(h.x, h.z) });
   h.pose.dy = st.dy; if (!near) return;   // (on their tier always; far off nobody sees them move)
