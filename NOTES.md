@@ -441,6 +441,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   fills {0} {1}…, and falls back to the Finnish. Static HTML carries data-t (applyLang keeps the Finnish in data-fi). The start-split
   road paint (KISA / GTA VAPAA AJO) repaints via userData.relang. Street names, shop signs, radio and the change log stay Finnish.
   A NEW player-visible text: write it through T() and add its line to I18N. t_lang: no Finnish left on the menu/HUD in en/no.
+- Hay bales (28.9., "paalit pellolla ei ole fysiikalla"): buildScenery only records BALES (was merged scenery); baleInit (after
+  liftWorld) makes two InstancedMeshes (14-sided body + darker ends). balesUpdate in the physics step: the car (carBoxPush vs two
+  circles on the axis) gives a 400 kg bale an impulse (car keeps ~72 %, carDamage at 0.7× the closing speed, off-centre → spin);
+  it rolls across its axis (friction 1.1/s, rolling resistance 0.7 m/s², downhill only when steeper than that) and hardly slides
+  along it; stops on trees, STATIC boxes and other bales. worldReset → balesReset. t_bales (109 bales, none drift at rest).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

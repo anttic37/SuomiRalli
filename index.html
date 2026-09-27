@@ -129,7 +129,7 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: GTA-MOODI</span><small data-t>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 19.21 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 20.06 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span></div></div>
   <div id="results">
@@ -750,7 +750,7 @@ function generateTrack() {
       if (w || hit) { if (w || moved > 0.05) { BUILDINGS.splice(i, 1); continue; } B[0] = x0; B[1] = z0; }
       B._roadOk = true; } }
   buildCheckpoints(); buildGridBox(); buildStreetLabels(); buildScenery(); buildTrackTires(); buildRoadside();
-  buildHeightField(); liftWorld(); worldBuild();
+  buildHeightField(); liftWorld(); baleInit(); worldBuild();
 }
 // Project every raw route point onto the nearest network segment, take the width of that street, resample evenly.
 function snapRouteToNetwork() {
@@ -1079,6 +1079,7 @@ const cpConeGeo = new THREE.ConeGeometry(0.28, 0.75, 8), cpConeMat = new THREE.M
 
 // Pine trees + rocks
 const sceneryDebug = { trees: [] };
+const BALES = [], BALE = { R: 0.75, HL: 0.65, im: null, ie: null, moving: new Set() };   // hay bales: filled by buildScenery, physics in HAY BALES
 // ── Geometry merger: thousands of props → one mesh per material ──
 class Merger {
   // chunk > 0: items are also grouped by a CHUNK×CHUNK m tile so camera and shadow frustum culling work
@@ -1736,7 +1737,7 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
   });
   M.end();
   // hay bales on the fields: round bales lying on their side, a few per hectare, some in pairs
-  const baleMat = mat(0xd9c27a, 0.95), baleEnd = mat(0xb9a35f, 0.95);
+  BALES.length = 0;
   for (let i = 0; i < 4000; i++) {
     const x = -WORLD_EDGE + Math.random()*WORLD_EDGE*2, z = -WORLD_EDGE + Math.random()*WORLD_EDGE*2;
     if (landClassAt(x, z) !== 4 || Math.random() > 0.35) continue;
@@ -1744,8 +1745,7 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
     const yaw = Math.random()*6.3, y0 = Y(x, z);
     for (let k = 0; k < 1 + (Math.random() < 0.3 ? 1 : 0); k++) {
       const bx = x + Math.cos(yaw)*k*2.4, bz = z + Math.sin(yaw)*k*2.4;
-      M.add(unitCyl, 'bale', baleMat, bx, y0+0.75, bz, yaw, 0.75, 1.3, 0.75, Math.PI/2, 0);
-      M.add(unitCyl, 'baleEnd', baleEnd, bx, y0+0.75, bz, yaw, 0.72, 1.34, 0.72, Math.PI/2, 0);
+      BALES.push({ x: bx, z: bz, yaw, ox: bx, oz: bz, oyaw: yaw, vx: 0, vz: 0, w: 0, roll: 0, moving: false });   // (their own instances with physics: baleInit)
     }
     placed.push({x, z, r: 3});
   }
@@ -4003,6 +4003,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Peltojen heinäpaaleilla fysiikka: auto tönäisee ne vierimään (raskaita – auto hidastuu ja kolhiintuu), ne pysähtyvät puihin, taloihin ja toisiinsa; R palauttaa'],
   ['28.9.', 'Kieli: alkuruudusta FI · EN · NO (tai L-näppäin) — englanti ja norja kaikkiin teksteihin, myös lähdön tiemaalaukseen'],
   ['27.9.', 'Tarkastuskierros: kaksi katkosta tieverkossa korjattu (poliisi ajoi 900 m kiertotietä ja jäi paloauton taakse), poliisi kiertää parkkiautot, hirvet ylittävät tien eivätkä kävele sitä pitkin, jumiin jääneet kävelijät luovuttavat, GTA-moodissa kartalla kaikki kadut'],
   ['27.9.', 'Kamera pitää auton ruudun alaosassa myös kovassa vauhdissa (ei enää valu keskelle)'],
@@ -5164,6 +5165,53 @@ function staticBuild() {
 }
 function staticNear(x, z, r, fn) { _stamp++; const c0 = Math.floor((x - r)/SC), c1 = Math.floor((x + r)/SC), d0 = Math.floor((z - r)/SC), d1 = Math.floor((z + r)/SC);
   for (let cx = c0; cx <= c1; cx++) for (let cz = d0; cz <= d1; cz++) { const l = STATIC.get(cx*73856093 ^ cz*19349663); if (l) for (const b of l) { if (b._s === _stamp) continue; b._s = _stamp; fn(b); } } }
+
+
+// ════════ HAY BALES ════════
+// Round bales on the fields (≈ 400 kg, Ø 1.5 m, 1.3 m long, lying on their side): the car knocks them — they roll across their axis and
+// barely slide along it, lose the car a good deal of speed and dent it; they stop against trees, houses and each other. R puts them back.
+const _bq = new THREE.Quaternion(), _bq2 = new THREE.Quaternion(), _bm = new THREE.Matrix4(), _bp = new THREE.Vector3(), _bs = new THREE.Vector3(1, 1, 1), _bax = new THREE.Vector3();
+function baleInit() { for (const m of [BALE.im, BALE.ie]) if (m) { scene.remove(m); m.dispose(); }
+  const n = Math.max(1, BALES.length), body = new THREE.CylinderGeometry(BALE.R, BALE.R, BALE.HL*2, 14, 1, true), ends = new THREE.CylinderGeometry(BALE.R*0.96, BALE.R*0.96, BALE.HL*2 + 0.04, 14);
+  body.rotateZ(Math.PI/2); ends.rotateZ(Math.PI/2);   // (axis along local x)
+  BALE.im = new THREE.InstancedMesh(body, new THREE.MeshStandardMaterial({ color: 0xd9c27a, roughness: 0.95, flatShading: true }), n);
+  BALE.ie = new THREE.InstancedMesh(ends, new THREE.MeshStandardMaterial({ color: 0xb9a35f, roughness: 0.95, flatShading: true }), n);
+  for (const m of [BALE.im, BALE.ie]) { m.castShadow = m.receiveShadow = true; m.count = BALES.length; m.frustumCulled = false; scene.add(m); }
+  BALE.moving.clear(); BALES.forEach(baleSync); }
+function baleSync(b, i) { if (i === undefined) i = BALES.indexOf(b);
+  _bq.setFromAxisAngle(THREE.Object3D.DefaultUp, b.yaw - Math.PI/2); _bq2.setFromAxisAngle(_bax.set(1, 0, 0), b.roll); _bq.multiply(_bq2);   // yaw, then the roll about its own axis
+  _bm.compose(_bp.set(b.x, Y(b.x, b.z) + BALE.R - 0.04, b.z), _bq, _bs); BALE.im.setMatrixAt(i, _bm); BALE.ie.setMatrixAt(i, _bm); BALE.im.instanceMatrix.needsUpdate = BALE.ie.instanceMatrix.needsUpdate = true; }
+function balesReset() { BALES.forEach((b, i) => { if (b.x === b.ox && b.z === b.oz && b.yaw === b.oyaw && !b.roll) return; Object.assign(b, { x: b.ox, z: b.oz, yaw: b.oyaw, vx: 0, vz: 0, w: 0, roll: 0, moving: false }); if (BALE.im) baleSync(b, i); }); BALE.moving.clear(); }
+// the bale as a capsule: two circles on its axis
+function balePts(b) { const ax = Math.sin(b.yaw)*0.4, az = Math.cos(b.yaw)*0.4; return [[b.x + ax, b.z + az], [b.x - ax, b.z - az]]; }
+function baleHitByCar(b) {
+  for (const [px, pz] of balePts(b)) { const hit = carBoxPush(px, pz, BALE.R*0.95); if (!hit) continue;
+    const nx = hit.nx, nz = hit.nz; b.x += nx*hit.ov*0.7; b.z += nz*hit.ov*0.7; car.x -= nx*hit.ov*0.3; car.z -= nz*hit.ov*0.3;
+    const rel = (b.vx - car.vx)*nx + (b.vz - car.vz)*nz;
+    if (rel < 0) { const imp = -rel*1.25;   // car ≈ 1000 kg, bale ≈ 400 kg (some of it lost in the straw)
+      b.vx += nx*imp*0.72; b.vz += nz*imp*0.72; car.vx -= nx*imp*0.28; car.vz -= nz*imp*0.28;
+      const lever = (px - b.x)*nz - (pz - b.z)*nx; b.w += lever*imp*0.35;   // hit off-centre: it swings round
+      carDamage(nx, nz, -rel*0.7);
+      const now = performance.now(); if (audio && now - lastThud > 110) { lastThud = now; beep(55 + Math.random()*20, 0.16, Math.min(0.32, -rel*0.03), 'triangle'); } }
+    if (!b.moving) { b.moving = true; BALE.moving.add(b); } } }
+function balesUpdate(dt) { if (!BALES.length || !BALE.im) return;
+  const cr = 4.5;   // near the car: anything it touches
+  for (let i = 0; i < BALES.length; i++) { const b = BALES[i]; if (Math.abs(b.x - car.x) < cr && Math.abs(b.z - car.z) < cr) baleHitByCar(b); }
+  for (const b of BALE.moving) { const i = BALES.indexOf(b);
+    const ax = Math.sin(b.yaw), az = Math.cos(b.yaw); let va = b.vx*ax + b.vz*az, vr = b.vx*az - b.vz*ax;   // along its axis (slides, straw on stubble) / across it (rolls)
+    va *= Math.exp(-dt*5); vr *= Math.exp(-dt*1.1);
+    { const e = 0.8, gx = (Y(b.x + e, b.z) - Y(b.x - e, b.z))/(2*e), gz = (Y(b.x, b.z + e) - Y(b.x, b.z - e))/(2*e), ga = -(gx*az - gz*ax)*9.8*0.45;   // downhill it rolls on…
+      const res = 0.7; if (Math.abs(ga) > res || Math.abs(vr) > 0.3) vr += (ga - Math.sign(vr || ga)*res)*dt; if (Math.abs(ga) <= res && Math.abs(vr) <= 0.3) vr *= Math.exp(-dt*6); }   // …but straw on stubble: a gentle slope won't start it
+    b.vx = ax*va + az*vr; b.vz = az*va - ax*vr; b.w *= Math.exp(-dt*3);
+    b.x += b.vx*dt; b.z += b.vz*dt; b.yaw += b.w*dt; b.roll -= vr/BALE.R*dt;
+    // what stops it: trees, houses/sheds/fences, parked cars, other bales
+    if (treeNear(b.x, b.z, BALE.R + 0.25)) { b.x -= b.vx*dt; b.z -= b.vz*dt; b.vx *= -0.25; b.vz *= -0.25; b.w *= 0.5; }
+    for (const [px, pz] of balePts(b)) staticNear(px, pz, BALE.R + 2, B => { const h = boxPush(B, px, pz, BALE.R); if (!h) return; b.x += h.nx*h.ov; b.z += h.nz*h.ov; const rv = b.vx*h.nx + b.vz*h.nz; if (rv < 0) { b.vx -= h.nx*rv*1.3; b.vz -= h.nz*rv*1.3; } });
+    for (const o of BALES) { if (o === b) continue; const dx = o.x - b.x, dz = o.z - b.z; if (Math.abs(dx) > 2.2 || Math.abs(dz) > 2.2) continue; const d = Math.hypot(dx, dz), R = BALE.R*1.9; if (d >= R || d < 1e-4) continue;
+      const nx = dx/d, nz = dz/d, ov = (R - d)/2; b.x -= nx*ov; b.z -= nz*ov; o.x += nx*ov; o.z += nz*ov; const rv = (o.vx - b.vx)*nx + (o.vz - b.vz)*nz;
+      if (rv < 0) { const k = rv*0.9; b.vx += nx*k*0.5; b.vz += nz*k*0.5; o.vx -= nx*k*0.5; o.vz -= nz*k*0.5; } if (!o.moving) { o.moving = true; BALE.moving.add(o); } baleSync(o); }
+    baleSync(b, i);
+    if (Math.hypot(b.vx, b.vz) < 0.05 && Math.abs(b.w) < 0.05) { b.vx = b.vz = b.w = 0; b.moving = false; BALE.moving.delete(b); } } }
 
 // ════════ FIRES ════════
 const FIRES = [];
@@ -6589,6 +6637,7 @@ function worldUpdate(dt) {
   sirenSet(siren, dt);
 }
 function worldReset() {
+  balesReset();
   if (BASS.on) bassToggle();   // a restart: everyone back on their feet and where they were, responders and fires gone, cars back in place
   for (let i = VEHICLES.length - 1; i >= 0; i--) { const v = VEHICLES[i]; if (v.temp) { vehicleRemove(v); continue; } v.x = v.home.x; v.z = v.home.z; v.yaw = v.home.yaw; v.vx = v.vz = v.w = v.vF = 0; v.awake = false; v.damage = 0; v.fire = null; if (v.charred) charVehicle(v, false);
     Object.assign(v.ctrl, { thr: 0, brk: 0, steer: 0, hand: !v.ai }); if (v.ai && v.ai.reset) v.ai.reset(); vehicleSync(v); }
@@ -7483,7 +7532,7 @@ function loop(time) {
     // hot path so there is no hitch on the first real frame at GO.
     acc += dt;
     const live = gameState === State.RACING;
-    while (acc >= PHYS_DT) { updateCar(PHYS_DT, live); updateTires(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
+    while (acc >= PHYS_DT) { updateCar(PHYS_DT, live); updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
     if (live) updateCheckpoints(dt);
   } else {
     acc = 0;
