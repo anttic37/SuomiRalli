@@ -3537,7 +3537,7 @@ function forStaticNear(x, z, fn) {
 const debris = [];
 const _dm = new THREE.Matrix4(), _dp = new THREE.Vector3(), _dq = new THREE.Quaternion(), _ds = new THREE.Vector3();
 function carDamage(nx, nz, speed) {           // (nx, nz): world direction from the car towards what it hit
-  if (ES.on && speed >= 3) wreckCar('es');   // on ES: any real hit and it goes up
+  if (ES.on && speed >= 12) wreckCar('es');   // on ES only a proper crash (≈ 45 km/h square into something) sets it off; knocks and scrapes just dent it
   if (speed >= 4) { const ri = roadInfo(car.x, car.z); crashAt = { x: car.x, z: car.z, t: worldT, onRoute: Math.sqrt(ri.d2) < wAt(ri.idx)*0.5 + 1.5 }; }   // the crowd comes running
   if (speed < 6) return;
   const a = car.angle, lx = nx*Math.cos(a) - nz*Math.sin(a), lz = nx*Math.sin(a) + nz*Math.cos(a);
@@ -3935,6 +3935,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'ES-tempaus K-kaupan pihalla: jättitölkki, kajarit soittaa, tanssijat ja ES STOP -ruutu (pysähdy siihen → tölkki). ES:llä auto ei enää hajoa pienestä kolhusta'],
   ['27.9.', 'Kamera katsoo pidemmälle eteen ja hiukan loivemmin: auto on alempana ruudussa'],
   ['27.9.', 'GTA-moodissa tiet siistiksi: radan omat asfalttipaikat pois, kaikkiin risteyksiin pyöristetyt kulmat pientareineen'],
   ['27.9.', 'Lähdön tekstit selkeämmiksi, tie leveämpi lähdössä, katsomoissa väljempää ja niiden edessä makkarakärryt; alkuruudussa UUTUUS: GTA-MOODI'],
@@ -4685,7 +4686,7 @@ function boxHitsHumans(B, bvx, bvz, isPlayer) {
       const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), lf = (h.x - B.x)*fx + (h.z - B.z)*fz, la = (h.x - B.x)*fz - (h.z - B.z)*fx, vf = bvx*fx + bvz*fz;
       if (isPlayer && lf > B.hl*0.6 && vf > 5.5 && !h.big) knock(h, bvx, bvz, sp, { ride: { t: 0, dur: 0.45 + Math.random()*0.6, over: vf > 19, b0: 1.45, b: 1.45, a: Math.max(-0.55, Math.min(0.55, la)), vf, ang: car.angle, vx: bvx, vz: bvz, roll: 0 } });   // onto the bonnet
       else { const sd = (la >= 0 ? 1 : -1)*(0.8 + Math.random()*1.2); knock(h, bvx*0.85 + hit.nx*1.2 + fz*sd, bvz*0.85 + hit.nz*1.2 - fx*sd, sp); }   // along at about the speed of what hit them, falling off to a side
-      if (isPlayer && h.down && !h.animal) policeIncident('people'); if (isPlayer && h.down && ES.on) wreckCar('es');
+      if (isPlayer && h.down && !h.animal) policeIncident('people');
       if (isPlayer) { car.vx *= 0.95; car.vz *= 0.95; const now = performance.now(); if (audio && now - lastThud > 110) { lastThud = now; beep(160 + Math.random()*60, 0.16, Math.min(0.3, sp*0.012), 'triangle'); } } }
     else if (h.down && sp > 3) { const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), sd = ((h.x - B.x)*fz - (h.z - B.z)*fx >= 0 ? 1 : -1)*2.8;   // caught again lying there: tossed aside, not bulldozed
       h.vx = bvx*0.8 + fz*sd; h.vz = bvz*0.8 - fx*sd; h.vy = Math.max(h.vy, 1.2); }
@@ -6078,7 +6079,7 @@ function esGot(h) { ES.got = true; ES.on = true; ES.t = ES.DUR; h.view.g.userDat
   beep(520, 0.08, 0.3, 'square'); setTimeout(() => beep(1040, 0.2, 0.3, 'square'), 90);
   if (!RADIO.started && RADIO.list.length) radioStart(); if (RADIO.shelf && audio) RADIO.shelf.gain.setTargetAtTime(16, audio.ctx.currentTime, 0.08); esHud(); }
 function esEnd() { if (!ES.on) return; ES.on = false; ES.t = 0; if (RADIO.shelf && audio && !BASS.on) RADIO.shelf.gain.setTargetAtTime(0, audio.ctx.currentTime, 0.1); esHud(); }
-function esUpdate(dt) {
+function esUpdate(dt) { esPromoUpdate(dt);
   if (ES.guy && ES.guy.st && ES.guy.st.done) { humanRemove(ES.guy); ES.guy = null; }
   if (ES.on) { ES.t -= dt; if (ES.t <= 0 || gameState !== State.RACING) esEnd(); else esHud(); }
   if (!ES.zone || ES.got || gameState !== State.RACING || WRECK.on) { ES.wait = 0; return; }
@@ -6087,7 +6088,52 @@ function esUpdate(dt) {
     if (ES.guy.st && ES.guy.st.mode === 'back') { ES.guy.st.mode = 'out'; ES.guy.st.done = false; }   // (stopped again while he was going back in)
     pizzaMsg('⚡ ES tulossa… ' + Math.max(1, Math.ceil(ES.WAIT - ES.wait)), false); }
   else { ES.wait = 0; if (ES.guy && ES.guy.st) ES.guy.st.mode = 'back'; } }
-function buildEs() { const K = LANDMARKS.find(L => L[0] === 'kauppa'); if (!K) { ES.zone = null; return; } const [W, D] = lmSize(K); ES.zone = [K[1], K[2], K[3], W, D]; ES.door = lloc(K[1], K[2], K[3], -1.5, D/2 + 0.55); }
+function buildEs() { const K = LANDMARKS.find(L => L[0] === 'kauppa'); if (!K) { ES.zone = null; return; } const [W, D] = lmSize(K); ES.zone = [K[1], K[2], K[3], W, D]; ES.door = lloc(K[1], K[2], K[3], -1.5, D/2 + 0.55); esPromoBuild(K, W, D); }
+// ── the ES promotion in the K-shop yard: a giant can, two speaker stacks thumping out a beat you hear from the road, a banner, two
+//    promoters dancing and a painted ES STOP box: park in it and the can comes out (esUpdate) ──
+function esPromoBuild(K, W, D) {
+  const at = (a, b) => lloc(K[1], K[2], K[3], a, b), yaw = K[3], P = ES.promo = { speakers: [], can: null, dancers: [], step: 0, nextT: 0, g: null, noise: null, x: 0, z: 0 };
+  const black = lmat(0x141414, 0.5), lime = lmat(0x9be22a, 0.45), grey = lmat(0x3a3a3e, 0.4);
+  const tex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t; };
+  const font = (px) => '900 ' + px + 'px "Arial Black", "Helvetica Neue", Arial, sans-serif';
+  // the painted box to park in
+  { const [x, z] = at(0, D/2 + 6.2); P.x = x; P.z = z; const pg = new THREE.PlaneGeometry(Math.min(7, W*0.55), 5.6, 10, 8); const m = new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,
+      map: tex(512, 640, (g, w, h) => { g.strokeStyle = '#9be22a'; g.lineWidth = 22; g.strokeRect(14, 14, w - 28, h - 28); g.fillStyle = '#9be22a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = font(210); g.fillText('ES', w/2, h*0.4); g.font = font(96); g.fillText('STOP', w/2, h*0.72); }) }));
+    m.rotation.order = 'YXZ'; m.rotation.set(-Math.PI/2, yaw, 0); m.position.set(x, 0, z); m.updateMatrix(); pg.applyMatrix4(m.matrix); m.position.set(0, 0, 0); m.rotation.set(0, 0, 0);   // (draped: each vertex on the ground)
+    const pa = pg.attributes.position; for (let i = 0; i < pa.count; i++) pa.setY(i, Y(pa.getX(i), pa.getZ(i)) + 0.06); pg.computeBoundingSphere(); m.renderOrder = 1; m.userData.noBatch = true; lifeGroup.add(m); }
+  // the giant can, turning slowly
+  { const [x, z] = at(W/2 + 4.6, D/2 + 7.5), G = new THREE.Group(); const lab = new THREE.MeshStandardMaterial({ roughness: 0.35, metalness: 0.3, map: tex(512, 256, (g, w, h) => { g.fillStyle = '#141414'; g.fillRect(0, 0, w, h); g.fillStyle = '#9be22a'; g.fillRect(0, h*0.62, w, h*0.1);
+        g.font = font(150); g.textAlign = 'center'; g.textBaseline = 'middle'; for (const cx of [w*0.25, w*0.75]) { g.fillStyle = '#9be22a'; g.fillText('ES', cx, h*0.38); } g.fillStyle = '#fff'; g.font = font(34); for (const cx of [w*0.25, w*0.75]) g.fillText('ENERGY', cx, h*0.86); }) });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 3, 24, 1, true), lab); body.position.y = 1.7; G.add(body); lmesh(lcyl(0.8, 0.2, 24), lmat(0xb8bcc2, 0.25), 0, 3.3, 0, G); lmesh(lcyl(0.8, 0.2, 24), lmat(0xb8bcc2, 0.25), 0, 0.1, 0, G);
+    placeAt(G, x, z, yaw); lifeGroup.add(G); P.can = G; addStaticBox({ x, z, yaw, hw: 0.9, hl: 0.9, kind: 'lm' }); }
+  // the speaker stacks, either side of the box, facing the road
+  for (const sd of [-1, 1]) { const [x, z] = at(sd*(W/2 + 3.6), D/2 + 3.8), G = new THREE.Group(), F = new THREE.Group(); G.add(F);
+    lmesh(lbox(1.0, 1.9, 0.8), black, 0, 0.95, 0, F); for (const [y, r] of [[0.55, 0.34], [1.2, 0.2], [1.62, 0.12]]) { const c = lmesh(lcyl(r, 0.06, 16), grey, 0, y, 0.41, F, false); c.rotation.x = Math.PI/2; }
+    lmesh(lbox(1.02, 0.08, 0.82), lime, 0, 1.92, 0, F, false); placeAt(G, x, z, yaw); lifeGroup.add(G); P.speakers.push(F); addStaticBox({ x, z, yaw, hw: 0.55, hl: 0.45, kind: 'lm' }); }
+  // the banner over the back of the box
+  { const [bx, bz] = at(0, D/2 + 2.6), bw = Math.min(7, W*0.55) + 2, G = new THREE.Group(); for (const sd of [-1, 1]) lmesh(lbox(0.1, 3.6, 0.1), lmat(0xd8d8d8, 0.4), sd*bw/2, 1.8, 0, G);
+    const ban = new THREE.Mesh(new THREE.PlaneGeometry(bw, 0.95), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.8, map: tex(1024, 240, (g, w, h) => { g.fillStyle = '#141414'; g.fillRect(0, 0, w, h); g.fillStyle = '#9be22a'; g.font = font(130); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('ES ⚡ ILMAISEKSI!', w/2, h*0.46, w - 60); g.fillRect(0, h - 22, w, 22); }) }));
+    ban.position.set(0, 3.0, 0); G.add(ban); placeAt(G, bx, bz, yaw); lifeGroup.add(G); }
+  // the promoters: black and lime, dancing either side
+  for (const sd of [-1, 1]) { const [x, z] = at(sd*(W/2 + 2.2), D/2 + 6), rig = makeAdult(0x141414, 0x141414, lpick(L_HAIR), { sel: { hair: sd < 0 ? 4 : 2, top: 12, bottom: 4, hat: sd > 0 ? 1 : 0 }, acc: 0x9be22a, shoes: 0xf2f2ee, w: 0.92 });
+    P.dancers.push(new Human({ x, z, yaw: yaw, rig, task: esDanceTask(sd) })); } }
+const esDanceTask = (sd) => ({ kind: 'esdance', update(h, dt, t) { if (Math.hypot(h.x - h.home.x, h.z - h.home.z) > 0.5) { walkTo(h, h.home.x, h.home.z, 1.5, dt); return; }
+  h.vx = h.vz = 0; const b = t*124/60*Math.PI, near = Math.hypot(car.x - h.x, car.z - h.z) < 40; h.yaw = near ? Math.atan2(car.x - h.x, car.z - h.z) : h.home.yaw + Math.sin(t*0.5)*0.6;
+  h.pose.armL = -2.6 + Math.sin(b)*0.4; h.pose.armR = near ? -2.9 : -1.2 + Math.sin(b + 1)*0.9; h.pose.armLz = -0.3*sd; h.pose.dy = Math.abs(Math.sin(b))*0.08; h.sway = Math.sin(b*0.5)*0.25; } });   // (waving you in when you're near)
+// the beat: made here (kick, off-beat hi-hat, a bass line), louder the nearer the car; the speaker cones pump with the kick
+function esPromoUpdate(dt) { const P = ES.promo; if (!P) return; const d = Math.hypot(car.x - P.x, car.z - P.z), bl = 60/124;
+  if (P.can) P.can.rotation.y += dt*0.6;
+  const ph = audio ? ((audio.ctx.currentTime - P.nextT) % bl + bl) % bl : (worldT % bl); const k = 1 + 0.07*Math.exp(-ph*14);
+  if (d < 140) P.speakers.forEach(F => F.scale.set(k, k, k));
+  if (!audio || gameState === State.MENU) { if (P.g) P.g.gain.value = 0; return; } const ctx = audio.ctx;
+  if (!P.g) { P.g = ctx.createGain(); P.g.gain.value = 0; P.g.connect(audio.master); const nb = ctx.createBuffer(1, ctx.sampleRate*0.1, ctx.sampleRate), a = nb.getChannelData(0); for (let i = 0; i < a.length; i++) a[i] = Math.random()*2 - 1; P.noise = nb; P.nextT = ctx.currentTime + 0.05; }
+  const vol = d < 120 ? 0.55*Math.pow(1 - d/120, 2) : 0; P.g.gain.setTargetAtTime(vol, ctx.currentTime, 0.1); if (vol <= 0.001) { P.nextT = ctx.currentTime + 0.05; return; }
+  const s16 = bl/4, BASSN = [55, 0, 55, 65.4, 0, 55, 82.4, 73.4];
+  while (P.nextT < ctx.currentTime + 0.12) { const t0 = P.nextT, st = P.step % 16;
+    if (st % 4 === 0) { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(150, t0); o.frequency.exponentialRampToValueAtTime(42, t0 + 0.12); g.gain.setValueAtTime(1, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.28); o.connect(g); g.connect(P.g); o.start(t0); o.stop(t0 + 0.3); }
+    if (st % 4 === 2) { const n = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(); n.buffer = P.noise; f.type = 'highpass'; f.frequency.value = 7000; g.gain.setValueAtTime(0.35, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.06); n.connect(f); f.connect(g); g.connect(P.g); n.start(t0); n.stop(t0 + 0.08); }
+    const bn = BASSN[(P.step >> 1) % 8]; if (st % 2 === 1 && bn) { const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = 'sawtooth'; o.frequency.value = bn; f.type = 'lowpass'; f.frequency.value = 420; g.gain.setValueAtTime(0.28, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + s16*1.6); o.connect(f); f.connect(g); g.connect(P.g); o.start(t0); o.stop(t0 + s16*1.7); }
+    P.nextT += s16; P.step++; } }
 function esReset() { esEnd(); ES.got = false; ES.wait = 0; ES.guy = null; esHud(); }
 
 // ── 5. costume olympics in front of the sports field: a sprint, the javelin, a sack race — and a lot of noise ──

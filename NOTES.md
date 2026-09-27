@@ -417,6 +417,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   draw front faces only: fan triangles are wound to face up.
 - Camera (27.9., "auto alemmas ruudussa ja hiukan ylöspäin, vain hiukan"): high view h 45→43, behind 25→21 m, look-ahead 8→15 m
   (+0.2·v): the car sits at ~76 % of the screen height instead of ~64 %, pitch 54° → 50°. The low (C) view unchanged.
+- ES promotion (27.9., "ES-markkinointitempaus K-kaupan pihaan, tölkki, kajarit, musaa"): esPromoBuild (from buildEs) puts a draped
+  ES STOP box in the zone (park there → the can, as before), a giant turning can, two speaker stacks that pump with the kick, a
+  banner 'ES ⚡ ILMAISEKSI!' and two dancing promoters (esDanceTask). esPromoUpdate synthesises a 124 bpm beat (kick, off-beat hat,
+  sawtooth bass) through its own gain, louder within 120 m. ES fragility: carDamage wrecks on ES only from 12 m/s into
+  something (was 3), and running someone over no longer wrecks it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
