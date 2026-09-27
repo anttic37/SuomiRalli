@@ -417,6 +417,10 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   draw front faces only: fan triangles are wound to face up.
 - Camera (27.9., "auto alemmas ruudussa ja hiukan ylöspäin, vain hiukan"): high view h 45→43, behind 25→21 m, look-ahead 8→15 m
   (+0.2·v): the car sits at ~76 % of the screen height instead of ~64 %, pitch 54° → 50°. The low (C) view unchanged.
+  Then (after "vauhdissa auto menee keskelle ruutua"): the follow lags v·0.527 (position) and v·0.434 (look point) behind, so both
+  targets lead by that much; look-ahead 17 + 0.1·v + camAdj, where camAdj slowly steers the car to 78 % of the screen height but
+  always ≥ 8 % above the gauge cluster (its top measured once a second), only while the camera has caught up (not after a restart).
+  t_camspeed: car height on screen at 0/36/72/108 km/h (1600×1200: 0.78 at all; 1000×700: 0.71, held above the cluster).
 - ES promotion (27.9., "ES-markkinointitempaus K-kaupan pihaan, tölkki, kajarit, musaa"): esPromoBuild (from buildEs) puts a draped
   ES STOP box in the zone (park there → the can, as before), a giant turning can, two speaker stacks that pump with the kick, a
   banner 'ES ⚡ ILMAISEKSI!' and two dancing promoters (esDanceTask). esPromoUpdate synthesises a 124 bpm beat (kick, off-beat hat,

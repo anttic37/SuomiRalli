@@ -125,7 +125,7 @@
   <div id="news"><span class="star">★</span>UUTUUS: GTA-MOODI<small>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 17.17 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+  <div class="build-stamp">editorista 17.29 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
   <div id="results">
@@ -3932,6 +3932,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Kamera pitää auton ruudun alaosassa myös kovassa vauhdissa (ei enää valu keskelle)'],
   ['27.9.', 'ES-tempaus K-kaupan pihalla: jättitölkki, kajarit soittaa, tanssijat ja ES STOP -ruutu (pysähdy siihen → tölkki). ES:llä auto ei enää hajoa pienestä kolhusta'],
   ['27.9.', 'Kamera katsoo pidemmälle eteen ja hiukan loivemmin: auto on alempana ruudussa'],
   ['27.9.', 'GTA-moodissa tiet siistiksi: radan omat asfalttipaikat pois, kaikkiin risteyksiin pyöristetyt kulmat pientareineen'],
@@ -7168,6 +7169,8 @@ addEventListener('wheel', e => {
   camZoomTarget = Math.min(3.2, Math.max(0.6, camZoomTarget * (e.deltaY > 0 ? 1.12 : 1/1.12)));
 }, { passive: false });
 
+// where the car sits on screen (high view): in the lower part, but always above the gauge cluster — a slow correction of the look-ahead
+let camAdj = 0, _clTopFrac = 1, _clT = 0; const _camV = new THREE.Vector3();
 function updateCamera(dt) {
   const speed=Math.sqrt(car.vx*car.vx+car.vz*car.vz);
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
@@ -7178,11 +7181,13 @@ function updateCamera(dt) {
   camAngle.current+=angleDiff*1.2*dt;
   const cfx=Math.sin(camAngle.current),cfz=Math.cos(camAngle.current);
   const camDist=((21+speed*0.1)*(1-camLowK) + (10.5+speed*0.1)*camLowK)*camZoom;
-  camTarget.set(car.x-cfx*camDist, Y(car.x,car.z)+h, car.z-cfz*camDist);
+  const lead = 0.527*(1-camLowK), lookLead = 0.434*(1-camLowK);   // the follow lags v/ln(1/0.15) and v/ln(10) behind: aimed that far ahead, the car keeps its place on screen at any speed
+  camTarget.set(car.x-cfx*camDist+car.vx*lead, Y(car.x,car.z)+h, car.z-cfz*camDist+car.vz*lead);
   camTarget.y = Math.max(camTarget.y, Y(camTarget.x, camTarget.z) + 2.2);   // never under a crest behind the car
   camPos.lerp(camTarget,1-Math.pow(0.15,dt));
   camPos.y = Math.max(camPos.y, Y(camPos.x, camPos.z) + 1.6);
-  const la=(15+speed*0.2)*(1-camLowK) + (13+speed*0.35)*camLowK;
+  if ((_clT -= dt) <= 0) { _clT = 1; const el = document.getElementById('cluster'), r = el && el.getBoundingClientRect(); _clTopFrac = r && r.height > 0 && r.top > 0 ? r.top/innerHeight : 1; }
+  const la=(17+speed*0.1+camAdj)*(1-camLowK) + (13+speed*0.35)*camLowK;
   // look into the drift: blend look direction toward velocity direction
   let lookAng = camAngle.current;
   if (speed > 6) {
@@ -7192,9 +7197,11 @@ function updateCamera(dt) {
     lookAng = camAngle.current + Math.max(-0.5, Math.min(0.5, dAng)) * 0.55;
   }
   const lfx = Math.sin(lookAng), lfz = Math.cos(lookAng);
-  const lt=new THREE.Vector3(car.x+lfx*la, Y(car.x,car.z)*(1-camLowK) + (Y(car.x+lfx*la, car.z+lfz*la) + 1.4)*camLowK, car.z+lfz*la);
+  const lt=new THREE.Vector3(car.x+lfx*la+car.vx*lookLead, Y(car.x,car.z)*(1-camLowK) + (Y(car.x+lfx*la, car.z+lfz*la) + 1.4)*camLowK, car.z+lfz*la+car.vz*lookLead);
   camLookAt.lerp(lt,1-Math.pow(0.1,dt));
   camera.position.copy(camPos); camera.lookAt(camLookAt);
+  if (camLowK < 0.5 && dt > 0 && camPos.distanceTo(camTarget) < 4 + speed*0.6) { camera.updateMatrixWorld();   /* (only once the camera has caught up: not while it swings in after a restart) */ _camV.set(car.x, Y(car.x, car.z), car.z).project(camera); const fy = (1 - _camV.y)/2, want = Math.min(0.78, _clTopFrac - 0.08);
+    camAdj = Math.max(-22, Math.min(10, camAdj - (fy - want)*40*dt)); }   // (too low on screen: look less far ahead, and the other way round)
   
   // Speed FOV: widens slightly at speed
   const targetFov = 50 + Math.min(speed, 45) * 0.22;
