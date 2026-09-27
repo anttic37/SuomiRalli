@@ -399,6 +399,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   Math.random, which would change the seeded world; at most one per 3 s), GET /api/stats → { starts, drivers } shown as
   'ALOITETTUJA AJOJA · KUSKEJA'. stats.json + players/<id>.json markers. No counts existed before: it starts from an estimate
   (STATS_SEED 700 starts / 45 drivers: 19 names on the board, most drivers never save one). t_strike.mjs covers both.
+- FREE (GTA) mode (27.9., "lähtö vasemmasta laidasta, suoraan varikkoviivan yli = kisa; oikeasta laidasta rata häviää → GTA"):
+  buildGridBox puts the grid box in the LEFT lane (gridLeft/gridLane; resetCar too), paints a dashed pit line down the middle,
+  a start line across the left lane 13 m ahead (START_SPLIT) and the words KISA / VAPAA AJO / GTA. startSplit() (before the clock)
+  judges the crossing: left of the middle → the race as before; right → freeEnter(): kerbs, checkpoints, grid, finish hidden,
+  every tyre stack off (t.freeOff), no phases, no laps; HUD 'VAPAA AJO'. startRace/toMenu → freeExit() puts it all back
+  (applyPhases(true)). Every street was already tarmac (roadGrid holds the whole network). t_free: left lane = race,
+  right lane = FREE, 900 m street legs on the road graph with nothing of the track in the way, R restores.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

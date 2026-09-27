@@ -118,7 +118,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 16.12 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+  <div class="build-stamp">editorista 16.22 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
   <div id="results">
@@ -916,13 +916,28 @@ function buildCurbs() {
 
 let finishLine = null, finishMesh = null, prevFinishS = null;
 
+// The start on Malminrajantie: the grid box in the LEFT lane; ahead of it a dashed pit line down the middle of the road and a start line
+// across the left lane. Over the start line: the race, as always. Up the right lane (VAPAA AJO): the track goes and the whole village is
+// free to drive (FREE, below). The split is judged where the start line is (START_SPLIT).
+const START_SPLIT = { x: 0, z: 0, dx: 0, dz: 1, lx: 1, lz: 0, hw: 3, prev: null, done: false, ok: false };
+function gridLeft(gi) { const d = getDir(gi); return { x: d.y, z: -d.x }; }   // the driver's left, facing along the route
+function gridLane(gi) { return Math.min(1.9, wAt(gi)*0.25); }                 // the box centre: this far left of the road's middle
 function buildGridBox() {
-  const gi = gridIndex(), p = trackPoints[gi], d = getDir(gi), nm = getNormal(gi), hw = Math.min(1.25, wAt(gi)*0.25);
+  const gi = gridIndex(), p = trackPoints[gi], d = getDir(gi), L = gridLeft(gi), hw = Math.min(1.25, wAt(gi)*0.25), lane = gridLane(gi), bx = p.x + L.x*lane, bz = p.y + L.z*lane;
   const mat = new THREE.MeshBasicMaterial({ color: 0xf2f2ea, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false });
-  const bar = (cx, cz, yaw, w, l) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, 0.02, l), mat); m.position.set(cx, ROAD_Y + 0.03, cz); m.rotation.y = yaw; m.renderOrder = 1; m.userData.key = 'grid'; trackMeshGroup.add(m); };
-  const yaw = Math.atan2(d.x, d.y), fx = p.x + d.x*2.4, fz = p.y + d.y*2.4;
+  const bar = (cx, cz, yaw, w, l, m) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w, 0.02, l), m || mat); me.position.set(cx, ROAD_Y + 0.03, cz); me.rotation.y = yaw; me.renderOrder = 1; me.userData.key = 'grid'; trackMeshGroup.add(me); return me; };
+  const yaw = Math.atan2(d.x, d.y), fx = bx + d.x*2.4, fz = bz + d.y*2.4;
   bar(fx, fz, yaw + Math.PI/2, 0.18, hw*2 + 0.4);                                   // front line of the slot
-  for (const s of [-1, 1]) bar(p.x + nm.x*(hw + 0.1)*s + d.x*0.9, p.y + nm.y*(hw + 0.1)*s + d.y*0.9, yaw, 0.14, 3.0);   // slot sides
+  for (const s of [-1, 1]) bar(bx + L.x*(hw + 0.1)*s + d.x*0.9, bz + L.z*(hw + 0.1)*s + d.y*0.9, yaw, 0.14, 3.0);   // slot sides
+  const ahead = 13, w2 = wAt(gi)/2, sx = p.x + d.x*ahead, sz = p.y + d.y*ahead;
+  for (let t = -6; t < ahead + 5; t += 3) bar(p.x + d.x*(t + 0.8), p.y + d.y*(t + 0.8), yaw, 0.16, 1.6);   // the pit line down the middle, dashed
+  const yel = new THREE.MeshBasicMaterial({ color: 0xffd23c, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false });
+  bar(sx + L.x*w2*0.5, sz + L.z*w2*0.5, yaw + Math.PI/2, 0.55, w2 - 0.2);            // the start line: the left lane only
+  const word = (text, col, side, at) => { const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d'); g.font = 'bold 110px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = col; g.fillText(text, 256, 70, 500);
+    const me = new THREE.Mesh(new THREE.PlaneGeometry(w2*0.9, 2.2), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false }));
+    me.rotation.order = 'YXZ'; me.rotation.set(-Math.PI/2, yaw + Math.PI, 0); me.position.set(p.x + d.x*at + L.x*w2*0.5*side, ROAD_Y + 0.04, p.y + d.y*at + L.z*w2*0.5*side); me.renderOrder = 1; me.userData.key = 'grid'; trackMeshGroup.add(me); };
+  word('KISA', '#f2f2ea', 1, ahead - 3.5); word('VAPAA AJO', '#ffd23c', -1, ahead - 3.5); word('GTA', '#ffd23c', -1, ahead + 0.5);   // (stretched along the road, like road markings)
+  Object.assign(START_SPLIT, { x: sx, z: sz, dx: d.x, dz: d.y, lx: L.x, lz: L.z, hw: w2, prev: null, done: false, ok: true });
 }
 function buildCheckpoints() {
   checkpoints=[]; const n=trackPoints.length, segs=20;
@@ -3868,6 +3883,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'GTA-moodi: lähtö on nyt vasemmalla kaistalla. Lähtöviivan yli = kisa; oikeaa kaistaa pitkin (VAPAA AJO) rata katoaa ja koko kylän kaduilla saa ajaa vapaasti'],
   ['27.9.', 'Alkuruudussa aloitetut ajot ja kuskien määrä; palvelin tarkistaa myös itse, ettei kierroksella ole oikaistu'],
   ['27.9.', 'Huijari-Anden 1.24:834 poistettu (neljä mutkaa oikaistu, 149 m); Anden rehti aika palautettu. Mutkan oikaisu tunnistetaan nyt pelissä: kierros ei kelpaa ennätykseksi, haamuksi eikä tulostauluun'],
   ['27.9.', 'Radioon urheilulähetykset (6 kpl, 🏆) omille urheilukanaville; puheohjelmia 10'],
@@ -6845,6 +6861,7 @@ function startRace(newTrack) {
   if (newTrack) generateTrack();
   resetCar();
   checkpoints.forEach(cp=>cp.passed=false);
+  freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
   checkpointsPassed=0; raceTime=0; prevFinishS=null; prevCpS=null; onlineStart();
   gameState = State.COUNTDOWN;
   countdownT = 3.0; radioStart(); countdownLast = -1;
@@ -6881,7 +6898,7 @@ function updateCountdown(dt) {
 }
 
 function resetCar() {
-  const gi = gridIndex(), p=trackPoints[gi], gd = getDir(gi); car.x=p.x; car.z=p.y;
+  const gi = gridIndex(), p=trackPoints[gi], gd = getDir(gi), gl = gridLeft(gi), lane = gridLane(gi); car.x=p.x + gl.x*lane; car.z=p.y + gl.z*lane;   // (the box is in the left lane)
   car.angle=Math.atan2(gd.x, gd.y);
   car.vx=car.vz=car.speed=car.steerSm=car.steerAngle=0; car.pivot=-1.3; car.hbPrev=0;
   car.tiltP=car.tiltR=0; carGroup.rotation.x=0; carGroup.rotation.z=0;
@@ -6894,7 +6911,7 @@ function resetCar() {
 }
 
 function toMenu() {   // Esc: back to the start screen (the race is dropped; Enter starts a new one)
-  gameState = State.MENU; radioShow(); lapStarted = false; for (const k in keys) keys[k] = false;
+  gameState = State.MENU; freeExit(); radioShow(); lapStarted = false; for (const k in keys) keys[k] = false;
   const ov = document.getElementById('overlay'); ov.classList.remove('hidden'); ov.style.background = 'rgba(10,10,10,0.92)';
   document.getElementById('results').style.display = 'none'; document.getElementById('menu-content').style.display = '';
   const cd = document.getElementById('countdown'); cd.style.opacity = 0; ghostStartRun();
@@ -6927,6 +6944,22 @@ function formatTime(t) {
 // CHECKPOINTS
 // ════════════════════════════════════════
 let prevCpS = null;
+// ── FREE (GTA) mode: taken by driving up the right lane at the start. The race dressing goes (kerbs, tyre walls, gates, start/finish,
+//    checkpoints, grid), no clock, no laps: every street of the village to drive. R: a new start, Esc: the start screen (both put the track back). ──
+const FREE = { on: false, hidden: [] };
+function freeEnter() {
+  if (FREE.on) return; FREE.on = true; lapStarted = false;
+  trackMeshGroup.children.forEach(m => { const k = m.userData.key; if ((k === 'curb' || k === 'checkpoint' || k === 'grid' || m === finishMesh) && m.visible) { m.visible = false; FREE.hidden.push(m); } });
+  tires.forEach(t => { if (t.kind !== 'tire' || t.off) return; t.off = true; t.freeOff = true; if (t.moving) { t.moving = false; movingProps = movingProps.filter(o => o !== t); } syncProp(t); }); staticDirty = true;
+  const cpd = document.getElementById('checkpoint-display'); cpd.textContent = 'VAPAA AJO – KOKO KYLÄ ON SINUN'; cpd.style.color = '#ffd23c'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2600);
+  beep(523, 0.1, 0.25, 'square'); setTimeout(() => beep(784, 0.2, 0.25, 'square'), 120); }
+function freeExit() {
+  if (!FREE.on) return; FREE.on = false; FREE.hidden.forEach(m => { m.visible = true; }); FREE.hidden.length = 0;
+  tires.forEach(t => { if (!t.freeOff) return; t.freeOff = false; t.off = false; t.x = t.ox; t.z = t.oz; t.vx = t.vz = 0; syncProp(t); }); staticDirty = true; applyPhases(true); }
+function startSplit() {   // before the clock runs: over the start line in the left lane → the race; up the right lane → FREE
+  const S = START_SPLIT; if (!S.ok || S.done) return; const dx = car.x - S.x, dz = car.z - S.z, s = dx*S.dx + dz*S.dz, lat = dx*S.lx + dz*S.lz;
+  if (S.prev !== null && S.prev <= 0 && s > 0 && Math.abs(lat) < S.hw + 3) { S.done = true; if (lat < 0) freeEnter(); }
+  S.prev = s; }
 // ── corner cutting: off the road (> 3 m past its edge) the route gained and the metres actually driven are summed; back on the road,
 //    a gain more than 12 m over what was driven, having been more than 8 m out, is a cut: the lap doesn't count (no best time, no ghost, no leaderboard) ──
 const CUT = { on: false, bad: false, drv: 0, gain: 0, far: 0, px: 0, pz: 0, pp: 0, at: null, arc: null, ref: null };
@@ -6942,7 +6975,8 @@ function cutUpdate() {
   CUT.px = car.x; CUT.pz = car.z; CUT.pp = p; }
 function updateCheckpoints(fdt) {
   if(gameState!==State.RACING)return;
-  updateProgress(); applyPhases(false); if (lapStarted) cutUpdate(); else cutReset();
+  if (FREE.on) { updateProgress(); return; }   // (free driving: no phases, no laps)
+  updateProgress(); applyPhases(false); if (lapStarted) cutUpdate(); else { cutReset(); startSplit(); if (FREE.on) return; }
   fdt = fdt || 1/60;
   if (!lapStarted) {   // flying start: the clock starts when the whole car has crossed the start line
     const dx=car.x-finishLine.position.x, dz=car.z-finishLine.position.y;
@@ -7185,8 +7219,8 @@ function drawCluster(g) {
 const setText = (el, t) => { if (el.__t !== t) { el.__t = t; el.textContent = t; } };   // touch the DOM only when the text changes
 function updateHUD(dt){
   if(gameState===State.RACING && lapStarted) raceTime+=dt;
-  setText(elTimer, formatTime(raceTime));
-  setText(elCpC, `${Math.min(checkpointsPassed,totalCheckpoints)} / ${totalCheckpoints}`);
+  setText(elTimer, FREE.on ? 'VAPAA AJO' : formatTime(raceTime));
+  setText(elCpC, FREE.on ? 'R uusi lähtö · Esc' : `${Math.min(checkpointsPassed,totalCheckpoints)} / ${totalCheckpoints}`);
   setText(elSpd, Math.abs(car.speed*3.6).toFixed(0));
   setText(elBestHud, bestTime<Infinity ? `paras ${formatTime(bestTime)}` : '');
   // instrument cluster
