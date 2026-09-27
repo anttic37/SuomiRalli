@@ -1145,7 +1145,8 @@ const unitCone5 = new THREE.ConeGeometry(1, 1, 5, 1, true);   // open base: neve
 const unitTrunk = new THREE.CylinderGeometry(1, 1, 1, 5, 1, true);   // tree trunks: no caps (hidden under the crown / in the ground)
 const unitCyl = new THREE.CylinderGeometry(1, 1, 1, 6);
 
-function buildScenery() { sceneryDebug.drives = []; LIFE_PLAN.length = 0; LIFE_GUESTS.length = 0;
+const YARD_SOLID = []; let YARDG = null;   // yard things people bump into: [x, z, r] circles (woodpiles, posts, swings, bushes, flower beds, flagpoles, garden trees)
+function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.drives = []; LIFE_PLAN.length = 0; LIFE_GUESTS.length = 0;
   CHIMNEYS.length = 0;
   const M = new Merger(160);
   const mat = (c, r=0.85, extra={}) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: r, flatShading: true }, extra));
@@ -1426,13 +1427,13 @@ function buildScenery() { sceneryDebug.drives = []; LIFE_PLAN.length = 0; LIFE_G
     for (let k = 0; k < nItems; k++) {
       const kind = Math.floor(hashN(bi, 20 + k)*8), yaw = hashN(bi, 30 + k)*6.3;
       if (kind === 0) { const sp = freeSpot(1.2); if (!sp) continue;           // woodpile
-        M.add(unitBox, 'woodpile', woodPile, sp[0], 0.45, sp[1], yaw, 1.8, 0.9, 0.6); M.add(unitBox, 'woodend', woodEnd, sp[0] + Math.sin(yaw)*0.31, 0.45, sp[1] + Math.cos(yaw)*0.31, yaw, 1.8, 0.9, 0.02); }
+        M.add(unitBox, 'woodpile', woodPile, sp[0], 0.45, sp[1], yaw, 1.8, 0.9, 0.6); M.add(unitBox, 'woodend', woodEnd, sp[0] + Math.sin(yaw)*0.31, 0.45, sp[1] + Math.cos(yaw)*0.31, yaw, 1.8, 0.9, 0.02); for (const t of [-0.6, 0, 0.6]) YARD_SOLID.push([sp[0] + Math.cos(yaw)*t, sp[1] - Math.sin(yaw)*t, 0.34]); }
       else if (kind === 1) { const sp = freeSpot(1.6); if (!sp) continue;      // clothesline with laundry
-        const cc = Math.cos(yaw), ss = Math.sin(yaw); for (const sg of [-1.3, 1.3]) { M.add(unitBox, 'post', postMat, sp[0] + cc*sg, 0.9, sp[1] - ss*sg, yaw, 0.06, 1.8, 0.06); M.add(unitBox, 'post', postMat, sp[0] + cc*sg, 1.78, sp[1] - ss*sg, yaw, 0.05, 0.05, 0.9); }
+        const cc = Math.cos(yaw), ss = Math.sin(yaw); for (const sg of [-1.3, 1.3]) { YARD_SOLID.push([sp[0] + cc*sg, sp[1] - ss*sg, 0.08]); M.add(unitBox, 'post', postMat, sp[0] + cc*sg, 0.9, sp[1] - ss*sg, yaw, 0.06, 1.8, 0.06); M.add(unitBox, 'post', postMat, sp[0] + cc*sg, 1.78, sp[1] - ss*sg, yaw, 0.05, 0.05, 0.9); }
         for (const lz of [-0.35, 0, 0.35]) M.add(unitBox, 'post', postMat, sp[0] + ss*lz, 1.76, sp[1] + cc*lz, yaw + Math.PI/2, 0.01, 0.01, 2.6);
         for (let q = 0; q < 4; q++) { const t = -0.9 + q*0.6, fm = flowerMats[(bi + q) % 4]; M.add(unitBox, 'laundry'+((bi+q)%4), fm, sp[0] + cc*t, 1.5, sp[1] - ss*t, yaw, 0.4, 0.5, 0.01); } }
       else if (kind === 2) { const sp = freeSpot(1.4); if (!sp) continue;      // swing set
-        const cc = Math.cos(yaw), ss = Math.sin(yaw);
+        const cc = Math.cos(yaw), ss = Math.sin(yaw); for (const sg of [-1, 1]) YARD_SOLID.push([sp[0] + cc*sg, sp[1] - ss*sg, 0.45]);
         for (const sg of [-1, 1]) for (const lean of [-1, 1]) M.add(unitBox, 'swing', swingMat, sp[0] + cc*sg*1.0 + ss*lean*0.4, 1.0, sp[1] - ss*sg*1.0 + cc*lean*0.4, yaw, 0.08, 2.05, 0.08, lean*0.38, 0);
         M.add(unitBox, 'swing', swingMat, sp[0], 1.95, sp[1], yaw + Math.PI/2, 0.09, 0.09, 2.2);
         M.add(unitBox, 'post', postMat, sp[0], 1.22, sp[1], yaw, 0.015, 1.45, 0.015); M.add(unitBox, 'woodend', woodEnd, sp[0], 0.48, sp[1], yaw, 0.45, 0.04, 0.2); }
@@ -1440,16 +1441,17 @@ function buildScenery() { sceneryDebug.drives = []; LIFE_PLAN.length = 0; LIFE_G
         M.add(unitBox, 'sand', sandMat, sp[0], 0.1, sp[1], yaw, 1.6, 0.16, 1.6);
         for (const [lx, lz, a] of [[0, 0.8, 0], [0, -0.8, 0], [0.8, 0, 1], [-0.8, 0, 1]]) { const cc = Math.cos(yaw), ss = Math.sin(yaw); M.add(unitBox, 'fbrown', fenceBrown, sp[0] + cc*lx + ss*lz, 0.13, sp[1] - ss*lx + cc*lz, yaw + a*Math.PI/2, 1.7, 0.22, 0.08); } }
       else if (kind === 4 || kind === 5) { const sp = freeSpot(1.4); if (!sp) continue;   // berry bushes
+        for (let q = 0; q < 3; q++) YARD_SOLID.push([sp[0] + (q-1)*0.9*Math.cos(yaw), sp[1] - (q-1)*0.9*Math.sin(yaw), 0.5]);
         for (let q = 0; q < 3; q++) M.add(CROWN_FOREST[(bi + q) % 3], 'bush', bushMat, sp[0] + (q-1)*0.9*Math.cos(yaw), 0.45, sp[1] - (q-1)*0.9*Math.sin(yaw), yaw + q, 0.55, 0.45, 0.55); }
       else if (kind === 6) { const sp = freeSpot(1.2); if (!sp) continue;      // flower bed
-        M.add(unitBox, 'deck', woodEnd, sp[0], 0.06, sp[1], yaw, 2.2, 0.1, 0.9);
+        M.add(unitBox, 'deck', woodEnd, sp[0], 0.06, sp[1], yaw, 2.2, 0.1, 0.9); for (const t of [-0.7, 0, 0.7]) YARD_SOLID.push([sp[0] + Math.cos(yaw)*t, sp[1] - Math.sin(yaw)*t, 0.42]);
         for (let q = 0; q < 7; q++) { const lx = -0.9 + q*0.3, cc = Math.cos(yaw), ss = Math.sin(yaw), fm = (bi + q) % 4; M.add(unitLeaf, 'flower'+fm, flowerMats[fm], sp[0] + cc*lx, 0.2, sp[1] - ss*lx, q, 0.13, 0.1, 0.13); } }
       else if (kind === 7 && flagCount < 130 && !hasFlag) { const sp = freeSpot(0.5); if (!sp) continue;   // flagpole with the Finnish flag (the flag itself is village life: it waves, some go up and down)
-        flagCount++; hasFlag = true; M.add(unitCyl, 'fwhite', fenceWhite, sp[0], 3.2, sp[1], 0, 0.06, 6.4, 0.06); LIFE_PLAN.push({ kind: 'flag', x: sp[0], z: sp[1], hoist: hashN(bi, 91) < 0.35 }); }
+        flagCount++; hasFlag = true; M.add(unitCyl, 'fwhite', fenceWhite, sp[0], 3.2, sp[1], 0, 0.06, 6.4, 0.06); YARD_SOLID.push([sp[0], sp[1], 0.06]); LIFE_PLAN.push({ kind: 'flag', x: sp[0], z: sp[1], hoist: hashN(bi, 91) < 0.35 }); }
     }
     // village life, planned here and built after the terrain lift: more flags, a barbecue, a scuffle, lawn mowing, kids cycling
     { const rl = (k) => hashN(bi, 70 + k);
-      if (!hasFlag && rl(9) < 0.32 && flagCount < 130) { const sp = freeSpot(0.5); if (sp) { flagCount++; hasFlag = true; M.add(unitCyl, 'fwhite', fenceWhite, sp[0], 3.2, sp[1], 0, 0.06, 6.4, 0.06); LIFE_PLAN.push({ kind: 'flag', x: sp[0], z: sp[1], hoist: rl(10) < 0.35 }); } }
+      if (!hasFlag && rl(9) < 0.32 && flagCount < 130) { const sp = freeSpot(0.5); if (sp) { flagCount++; hasFlag = true; M.add(unitCyl, 'fwhite', fenceWhite, sp[0], 3.2, sp[1], 0, 0.06, 6.4, 0.06); YARD_SOLID.push([sp[0], sp[1], 0.06]); LIFE_PLAN.push({ kind: 'flag', x: sp[0], z: sp[1], hoist: rl(10) < 0.35 }); } }
       if (rl(0) < 0.085) { const sp = freeSpot(2.4); if (sp) { const gy = rl(1)*6.3; LIFE_PLAN.push({ kind: 'grill', x: sp[0], z: sp[1], yaw: gy });
         const ng = 2 + Math.floor(rl(2)*3); for (let q = 0; q < ng; q++) { const a = gy + 1.3 + q*(3.8/ng) + (rl(3 + q) - 0.5)*0.4, rr = 1.7 + rl(8 + q)*0.7; LIFE_GUESTS.push([sp[0] + Math.sin(a)*rr, sp[1] + Math.cos(a)*rr, a + Math.PI]); } } }
       else if (rl(0) < 0.13 && LIFE_PLAN.filter(q => q.kind === 'fight').length < 3) { const sp = freeSpot(3.0); if (sp) { LIFE_PLAN.push({ kind: 'fight', x: sp[0], z: sp[1] });
@@ -1458,7 +1460,7 @@ function buildScenery() { sceneryDebug.drives = []; LIFE_PLAN.length = 0; LIFE_G
       if (rl(21) < 0.09) { const sp = freeSpot(2.9); if (sp) LIFE_PLAN.push({ kind: 'bike', x: sp[0], z: sp[1], n: rl(22) < 0.4 ? 2 : 1 }); } }
     // 1–3 garden trees inside the plot
     const nT = 1 + (bi % 3);
-    for (let k = 0; k < nT; k++) { const sp = freeSpot(1.4); if (!sp) continue; const [tx, tz] = sp;
+    for (let k = 0; k < nT; k++) { const sp = freeSpot(1.4); if (!sp) continue; const [tx, tz] = sp; YARD_SOLID.push([tx, tz, 0.14]);
       if ((bi + k) % 3 === 0) { const hT = 3.0 + Math.random()*1.5, r = 1.0 + Math.random()*0.5; M.begin(tx, tz, r*0.5, r*0.5, 0); M.add(unitCyl, 'btrunk', birchTrunk, tx, hT/2, tz, 0, 0.11, hT, 0.11); M.add(CROWN_BIRCH[(bi+k) % 2], 'gbcrown', birchLeafV, tx, hT+r*0.5, tz, Math.random()*6.3, r, r*1.1, r); M.end(); }
       else { const hT = 0.9 + Math.random()*0.4, r = 1.3 + Math.random()*0.6; M.begin(tx, tz, r*0.6, r*0.6, 0); M.add(unitCyl, 'atrunk', appleTrunk, tx, hT/2, tz, 0, 0.14, hT, 0.14); M.add(CROWN_VILLAGE[(bi+k) % 3], 'acrown', appleLeafV, tx, hT+r*0.5, tz, Math.random()*6.3, r*1.15, r*0.72, r*1.15); M.end(); }
       placed.push({ x: tx, z: tz, r: 1.2 }); }
@@ -3858,6 +3860,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Kaikilla ihmisillä samat törmäyssäännöt: pyöräilevät lapset ja muut eivät enää mene talojen, puiden, pensaiden, pihakalusteiden, autojen tai toistensa läpi'],
   ['27.9.', 'Ihmisten tarkkuus valitaan ruudun koon mukaan: isolla näytöllä pelikamerastakin näkyy tarkin malli'],
   ['27.9.', 'Ihmisille kolme tarkkuustasoa etäisyyden mukaan ja kevyet varjot – nopeampi; katsomoista katto pois, yleisö näkyy'],
   ['27.9.', 'Uudet ihmiset: tanakka lelumalli, pehmeä varjostus ja 1988-vaatteet (permikset, mulletit, verkkarit, neuleet, lippikset) – kaikki ~1100 kävelevät, heiluttavat ja istuvat'],
@@ -4559,7 +4562,8 @@ class Human {
     if (o.inst !== undefined) this.view = { kind: 'inst', geo: o.inst, idx: -1, up: -1 };
     else { this.view = { kind: 'rig', g: o.rig }; o.rig.rotation.order = 'YXZ'; lifeGroup.add(o.rig); }
     this.look = o.rig ? o.rig.userData.look || null : o.inst !== undefined ? { kid: false, c: lookCrowd(o.inst) } : null;   // (animals and aliens: their own meshes)
-    if (this.look) { this.bm = new THREE.Matrix4(); this.bp = new Float32Array(11); } this.bvis = false;
+    this.bm = this.look ? new THREE.Matrix4() : null; this.bp = this.look ? new Float32Array(11) : null; this.bvis = false; this.propR = false; this.px = undefined; this.pz = 0; this.far = false; this.goal = null; this.goalT = 0; this.slide = null; this.dodge = null; this.big = false; this.ride = null; this.hoseDrop = null; this.esc = null;   // (every field set here: one object shape for all, fast)
+    this.settle = 2;   // (the first frames: nudged out of anything they were put down in)
     this.ao = -1; HUMANS.push(this);
   }
 }
@@ -4648,6 +4652,19 @@ function humanSync(h) {
     else { const s = h.down ? 1.6 : 0.9, k = Math.max(0.35, 1 - h.hop*0.6); groundQuat(h.x, h.z, 0, _haq); _hp.set(h.x, aoGround(h.x, h.z), h.z); _hs.set(s*k, 1, s*k); _hm.compose(_hp, _haq, _hs); _hs.set(1, 1, 1); CROWD.ao.setMatrixAt(h.ao, _hm); }
     CROWD.ao.instanceMatrix.needsUpdate = true; }
 }
+// what everyone who moves bumps into besides houses and rocks: tree trunks, standing vehicles, other people (pushed apart, the mover gives way)
+function bumpCircles(h, G, rOf) {   // push out of the [x, z, …] circles filed in 8 m cells in G
+  for (let cx = Math.floor((h.x - 1)/8); cx <= Math.floor((h.x + 1)/8); cx++) for (let cz = Math.floor((h.z - 1)/8); cz <= Math.floor((h.z + 1)/8); cz++) { const l = G.get(cx*7919 + cz); if (l) for (const t of l) {
+    const dx = h.x - t[0], dz = h.z - t[1], R = h.r + rOf(t), d2 = dx*dx + dz*dz; if (d2 >= R*R || d2 < 1e-8) continue; const d = Math.sqrt(d2); h.x = t[0] + dx/d*R; h.z = t[1] + dz/d*R;
+    const vn = (h.vx*dx + h.vz*dz)/d; if (vn < 0) { h.vx -= dx/d*vn; h.vz -= dz/d*vn; } } } }
+function humanBump(h) {   // (within 130 m of the car, and once when put down: farther off nobody sees it)
+  if (!TREEG) treeNear(0, 0, 0); bumpCircles(h, TREEG, t => t[2] ? 0.28 : 0.22);   // tree trunks
+  if (!YARDG) { YARDG = new Map(); for (const t of YARD_SOLID) { const k = Math.floor(t[0]/8)*7919 + Math.floor(t[1]/8); let l = YARDG.get(k); if (!l) YARDG.set(k, l = []); l.push(t); } }
+  bumpCircles(h, YARDG, t => t[2]);
+  for (const v of VEHICLES) { if (v.gone || Math.abs(v.x - h.x) > 7 || Math.abs(v.z - h.z) > 7) continue; const c = boxPush(v, h.x, h.z, h.r); if (!c) continue; h.x += c.nx*c.ov; h.z += c.nz*c.ov; const vn = h.vx*c.nx + h.vz*c.nz; if (vn < 0) { h.vx -= c.nx*vn; h.vz -= c.nz*vn; } }
+  if (h.down) return;
+  forHumansNear(h.x, h.z, 1, o => { if (o === h || o.down || o.gone || o.inside || o.seat || o.ride) return; const dx = h.x - o.x, dz = h.z - o.z, R = (h.r + o.r)*0.8, d2 = dx*dx + dz*dz; if (d2 >= R*R || d2 < 1e-8) return;
+    const d = Math.sqrt(d2), k = (o.vx || o.vz) ? 0.5 : 1; h.x += dx/d*(R - d)*k; h.z += dz/d*(R - d)*k; }); }
 function humanRemove(h) { h.gone = true; humanSync(h); if (h.view.kind === 'rig') lifeGroup.remove(h.view.g); if (h.ao >= 0) { CROWD.ao.setMatrixAt(h.ao, _hzero); CROWD.aoFree.push(h.ao); h.ao = -1; } const i = HUMANS.indexOf(h); if (i >= 0) HUMANS.splice(i, 1); }
 let carStillT = 0;
 function activeCrash() { return crashAt && worldT - crashAt.t < 16 && Math.hypot(car.x - crashAt.x, car.z - crashAt.z) < 20 ? crashAt : null; }
@@ -4662,10 +4679,13 @@ function humansUpdate(dt) {
     if (h.ride) { rideStep(h, dt); humanSync(h); continue; }
     if (!h.down && !h.inside && h.task) h.task.update(h, dt, t, near);
     if (h.dodge) { if ((h.dodge.t -= dt) > 0 && !h.down && !h.inside && !h.seat) { h.vx = h.dodge.x; h.vz = h.dodge.z; h.yaw = Math.atan2(h.dodge.x, h.dodge.z); P.walk = 0.55; P.ph += dt*9; } else h.dodge = null; }   // out of a van's way
-    if (!h.inside && !h.seat) { humanStep(h, dt); if (h.vx || h.vz) staticNear(h.x, h.z, 1, B => { const c = boxPush(B, h.x, h.z, h.r); if (!c) return; h.x += c.nx*c.ov; h.z += c.nz*c.ov; const vn = h.vx*c.nx + h.vz*c.nz; if (vn < 0) { h.vx -= c.nx*vn*1.2; h.vz -= c.nz*vn*1.2; }
+    if (!h.inside && !h.seat) { humanStep(h, dt); const mv = !(h.task && h.task.through) && (h.settle || h.vx || h.vz || (h.px !== undefined && (h.x !== h.px || h.z !== h.pz))) && (h.down || !h.task || !h.task.onRoad || !h.task.onRoad());   // (a moped rider moves with the moped: the road is theirs)   // (moved by velocity or placed by its task: the same rules)
+      if (mv) staticNear(h.x, h.z, 1, B => { const c = boxPush(B, h.x, h.z, h.r); if (!c) return; h.x += c.nx*c.ov; h.z += c.nz*c.ov; const vn = h.vx*c.nx + h.vz*c.nz; if (vn < 0) { h.vx -= c.nx*vn*1.2; h.vz -= c.nz*vn*1.2; }
       if (!h.down && h.goal && worldT - h.goalT < 0.2) { let sx = -c.nz, sz = c.nx; const gx = h.goal[0] - h.x, gz = h.goal[1] - h.z, keep = h.slide && h.slide.t > -0.8;   // heading somewhere: slide along the wall towards it
         if (keep ? sx*h.slide.x + sz*h.slide.z < 0 : sx*gx + sz*gz < 0) { sx = -sx; sz = -sz; } h.slide = { x: sx, z: sz, t: 0.6 }; } }); if (!h.down && !h.temp && (Math.abs(h.vx) + Math.abs(h.vz) > 0.05)) pushOffStacks(h);   // crews step over the tyre walls
-      if ((h.vx || h.vz) && ROCK_HILLS.length && rockNear(h.x, h.z, 1)) { const o = rockOut(h.x, h.z, 0.7); if (o) { h.x -= o.nx*o.depth; h.z -= o.nz*o.depth; const vn = h.vx*o.nx + h.vz*o.nz; if (vn > 0) { h.vx -= o.nx*vn; h.vz -= o.nz*vn; } } } }   // nor walk into the rock
+      if (mv && (h.settle || dx*dx + dz*dz < 130*130)) humanBump(h); if (h.settle) { h.settle--; h.home.x = h.x; h.home.z = h.z; }
+      if (mv && ROCK_HILLS.length && rockNear(h.x, h.z, 1)) { const o = rockOut(h.x, h.z, 0.7); if (o) { h.x -= o.nx*o.depth; h.z -= o.nz*o.depth; const vn = h.vx*o.nx + h.vz*o.nz; if (vn > 0) { h.vx -= o.nx*vn; h.vz -= o.nz*vn; } } } }   // nor walk into the rock
+    h.px = h.inside || h.seat ? undefined : h.x; h.pz = h.z;
     if (!P.walk && !h.down && !h.seat && !(h.hop > 0) && (h.vx || h.vz)) { const sp = Math.hypot(h.vx, h.vz); if (sp > 0.3) { P.walk = Math.min(0.95, sp*0.3); P.ph += dt*(4 + sp*2.6); } }   // moving: the legs go (whoever moved them)
     if (near || h.down || h.vx || h.vz || h.seat) humanSync(h); }
   // people sent flying bowl over whoever they land on
@@ -4731,9 +4751,11 @@ const mowTask = (P, mower) => { const L = 5.2, lanes = 6, ux = Math.sin(P.yaw), 
     if (near) placeAt(mower, cx + ux*S.dir*0.55, cz + uz*S.dir*0.55, fy); },
     reset() { S.lane = 0; S.dir = 1; S.s = -L/2; S.pause = 0; S.ldir = 1; } }; };
 const rideTask = (P, bike, k) => { const S = { r: 2.0 + k*0.55, th: Math.random()*6.3 + k*Math.PI, sp: 2.4 + Math.random()*0.8, dir: k % 2 ? -1 : 1, ph: 0 };
-  return { kind: 'ride', update(h, dt, t, near) { S.th += S.dir*S.sp/S.r*dt; S.ph += dt*S.sp*3; const x = P.x + Math.sin(S.th)*S.r, z = P.z + Math.cos(S.th)*S.r, yaw = S.th + S.dir*Math.PI/2;
-      h.x = x; h.z = z; h.vx = h.vz = 0; h.yaw = yaw; h.roll = -S.dir*0.14; h.pose.dy = 0.22; h.pose.legs = Math.sin(S.ph)*0.7 - 0.9; h.pose.legsR = -Math.sin(S.ph)*0.7 - 0.9; h.pose.armL = h.pose.armR = -1.15;   // hands on the bars
-      if (near) { placeAt(bike, x, z, yaw); bike.rotation.z = h.roll; } },
+  return { kind: 'ride', update(h, dt, t, near) { const x = P.x + Math.sin(S.th)*S.r, z = P.z + Math.cos(S.th)*S.r, dx = x - h.x, dz = z - h.z, d = Math.hypot(dx, dz);
+      if (d < 1.2) { S.th += S.dir*S.sp/S.r*dt; S.ph += dt*S.sp*3; }   // (held up by something in the way: the round waits for them)
+      const x2 = P.x + Math.sin(S.th)*S.r, z2 = P.z + Math.cos(S.th)*S.r, gx = x2 - h.x, gz = z2 - h.z, gl = Math.hypot(gx, gz), v = Math.min(gl/Math.max(dt, 1e-3), S.sp*1.5);   // steered, not placed: bumps like everyone
+      if (gl > 1e-4) { h.vx = gx/gl*v; h.vz = gz/gl*v; h.yaw = Math.atan2(gx, gz); } else h.vx = h.vz = 0; const yaw = h.yaw; h.roll = -S.dir*0.14; h.pose.dy = 0.22; h.pose.legs = Math.sin(S.ph)*0.7 - 0.9; h.pose.legsR = -Math.sin(S.ph)*0.7 - 0.9; h.pose.armL = h.pose.armR = -1.15;   // hands on the bars
+      if (near) { placeAt(bike, h.x, h.z, yaw); bike.rotation.z = h.roll; } },
     knocked(h) { bike.rotation.z = (Math.random() < 0.5 ? 1 : -1)*1.45; bike.position.y = Y(bike.position.x, bike.position.z) + 0.05; },   // the bike falls over and stays there
     reset(h) { h.roll = 0; } }; };
 const hoistTask = (P, fl, y0) => { const top = 5.86, low = 1.35, bx = P.x - Math.sin(WIND_YAW)*0.5, bz = P.z - Math.cos(WIND_YAW)*0.5, S = { state: Math.random() < 0.6 ? 'up' : 'top', wait: 10 + Math.random()*40, ph: 0 };
@@ -5329,7 +5351,7 @@ const kidCheerTask = (F, a) => ({ kind: 'cheer', update(h, dt, t) { const tx = F
   if (k > 0.3) { h.pose.armL = -2.6; h.pose.armR = -2.2 - k*0.4; } else { h.pose.armL = h.pose.armR = -0.3; }
   if (!(h.hop > 0) && Math.random() < dt*0.9) h.vy = 1.4 + Math.random(); } });
 // a roofer kneeling on the roof, hammering in bursts; if the house catches fire he jumps
-const rooferTask = (S) => ({ kind: 'roofer', update(h, dt, t) {
+const rooferTask = (S) => ({ kind: 'roofer', through: true, update(h, dt, t) {
   if (S.b.fire && !S.jumped) { S.jumped = true; h.hop = S.y - Y(h.x, h.z); knock(h, S.ox*3.6, S.oz*3.6, 4); return; }
   h.x = S.x; h.z = S.z; h.vx = h.vz = 0; h.yaw = S.yaw; h.pose.legs = 1.35; h.tilt = 0.28; h.pose.dy = S.y - Y(S.x, S.z) - 0.5;
   const burst = Math.sin(t*0.5 + S.ph) > -0.2; h.pose.armL = -0.9; h.pose.armR = burst ? -1.9 + Math.abs(Math.sin(t*9 + S.ph))*0.9 : -0.8; },
@@ -5527,7 +5549,7 @@ function makeMoped() { const G = new THREE.Group(), col = lmat(lpick([0xd82a2a, 
   const fk = lmesh(lbox(0.05, 0.68, 0.05), chrome, 0, 0.64, 0.52, G); fk.rotation.x = -0.24; lmesh(lbox(0.62, 0.03, 0.03), chrome, 0, 0.98, 0.44, G);
   lmesh(lbox(0.14, 0.12, 0.08), lmat(0xf0f0e0, 0.3), 0, 0.88, 0.6, G, false); lmesh(lbox(0.05, 0.05, 0.5), chrome, 0.14, 0.33, -0.35, G, false); lmesh(lbox(0.2, 0.04, 0.3), col, 0, 0.6, -0.64, G);
   G.rotation.order = 'YXZ'; return G; }
-const mopedTask = (M, k) => { const S = M.s[k]; return { kind: 'moped', update(h, dt, t, near) { const g = S.g; g.visible = near;
+const mopedTask = (M, k) => { const S = M.s[k]; return { kind: 'moped', onRoad: () => true, update(h, dt, t, near) { const g = S.g; g.visible = near;
   if (S.fall > 0) { S.fall -= dt; const e = S.fall0 - S.fall, lie = Math.min(1, e*3)*Math.min(1, Math.max(0, S.fall - 1.6)/0.6);   // over, lying there a while, back up and on again
     if (near) { placeAt(g, S.fx, S.fz, S.yaw, roadLift(S.fx, S.fz)); g.rotation.z = S.sd*1.4*Math.min(1, e*3)*Math.min(1, S.fall/0.8); }
     if (S.fall > 1.6) { const [rx, rz] = lloc(S.fx, S.fz, S.yaw, 0, 1.2); h.x = rx; h.z = rz; h.vx = h.vz = 0; h.yaw = S.yaw; h.roll = S.sd*1.4*lie; h.pose.legs = -0.4; h.pose.armL = -2.2; }
@@ -5551,7 +5573,7 @@ function buildMopeds(st) { const L = polyLine(chaikin(st.P, 2)), n = 2 + Math.fl
     new Human({ x, z, yaw: yaw0, rig, task: mopedTask(M, k) }); } }
 
 // ── the postman: along a street on his bike, off at each mailbox, a letter in, back on; knocked over, the letters go everywhere ──
-const postTask = (Pm) => { const S = Pm.s; return { kind: 'post', update(h, dt, t, near) { const g = Pm.bike, L = Pm.L; g.visible = near;
+const postTask = (Pm) => { const S = Pm.s; return { kind: 'post', onRoad: () => S.mode === 'ride', update(h, dt, t, near) { const g = Pm.bike, L = Pm.L; g.visible = near;
   if (S.mode === 'ride') { let vT = 4.2, nx = null;
     if (S.phi < 0) { for (const q of Pm.stops) { const d = (q.s - S.s)*S.dir; if (d > -0.05 && q !== S.last && (!nx || d < (nx.s - S.s)*S.dir)) nx = q; }
       if (nx) { const d = Math.max(0, (nx.s - S.s)*S.dir); vT = Math.min(vT, 0.3 + Math.sqrt(2*1.6*d)); if (d < 0.3) { S.mode = 'off'; S.stop = S.last = nx; S.v = 0; } }
@@ -6055,7 +6077,7 @@ function makeGrandstand(L) { const G = new THREE.Group(), steel = lmat(0x6a6e74,
   for (const s of [-1, 1]) lmesh(lbox(0.12, 2.6, 3.2), steel, s*L/2, 1.3, -1.5, G);
   for (let x = -L/2; x <= L/2 + 0.01; x += L/4) lmesh(lbox(0.14, 4.5, 0.14), steel, x, 2.25, -3.0, G);   // (no roof: the crowd shows from the game camera)
   return G; }
-const standTask = (S, row) => ({ kind: 'stand', update(h, dt, t, near) { const st = h.st || (h.st = { ph: Math.random()*6.3, cheer: 0, dy: S.base + 0.51 + row*0.5 - Y(h.x, h.z) });
+const standTask = (S, row) => ({ kind: 'stand', through: true, update(h, dt, t, near) { const st = h.st || (h.st = { ph: Math.random()*6.3, cheer: 0, dy: S.base + 0.51 + row*0.5 - Y(h.x, h.z) });
   h.pose.dy = st.dy; if (!near) return;   // (on their tier always; far off nobody sees them move)
   h.vx = h.vz = 0; const dx = car.x - h.x, dz = car.z - h.z, d2 = dx*dx + dz*dz;
   if (d2 < 110*110) h.yaw += angDiff(Math.atan2(dx, dz) - h.yaw)*Math.min(1, dt*3); else h.yaw += angDiff(S.yaw - h.yaw)*Math.min(1, dt);

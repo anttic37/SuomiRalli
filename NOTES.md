@@ -372,6 +372,14 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       the shadows and skip their colour draw (count 0 in onBeforeRender, which the shadow pass doesn't call).
       t_gl's kB counts whole arrays on WebGL2 (three passes array + offset/count), so it overstates partial uploads.
     - Grandstands have no roof any more (the crowd shows from the game camera).
+    - One set of bump rules for everyone (after "pyöräilevät lapset menevät kaikkien asioiden läpi"): humansUpdate treats a person
+      as moving if their velocity is set OR their task moved them (x/z changed since last frame: h.px/h.pz), so teleporting tasks
+      bump too. Houses/rocks everywhere; `humanBump` (within 130 m of the car, and the first 2 frames: `settle`, nudges people
+      out of what they were put down in) adds tree trunks, YARD_SOLID (woodpiles, posts, swings, bushes, flower beds, flagpoles,
+      garden trees, filed in buildScenery), vehicles (boxPush) and other people (the mover gives way). Exempt: task.through
+      (roofer, grandstand), task.onRoad() (moped riders, the postman while riding: they move with their vehicle).
+      Bike kids are steered by velocity now; the bike follows the kid. t_bump counts overlaps per task kind (should be {}).
+    - Human fields are all created in the constructor (one hidden class): humansUpdate 1.5 → 1.1 ms.
     - Animals and aliens keep their own meshes (aliens on `makeKidOld`). The old crowd meshes (personGeos) remain only for tyre-prop people.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
