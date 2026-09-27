@@ -6,7 +6,8 @@ const grab = () => { renderer.render(scene, camera); const px = new Uint8Array(W
 const set = (tx, tz, ex, ez, up) => { car.x = tx + 20; car.z = tz + 20; HUMANS.forEach(h => { h.far = Math.hypot(h.x - car.x, h.z - car.z) >= 240; if (h.view.kind === 'rig') humanSync(h); }); nearVisT = 0; nearVisUpdate(0.01);
   camera.position.set(ex, H(ex, ez) + up, ez); camera.lookAt(tx, H(tx, tz) + 1, tz); camera.updateMatrixWorld(); skyDome.position.copy(camera.position);
   dirLight.position.set(tx + SUN.x, H(tx, tz) + SUN.y, tz + SUN.z); dirLight.target.position.set(tx, H(tx, tz), tz); dirLight.target.updateMatrixWorld(); U_TIME.value = 0; };
-const onOff = (on) => { if (on) { BATCH.dirty = true; scene.onBeforeRender = batchFill; } else { scene.onBeforeRender = () => {}; for (const B of BATCH.groups.values()) { for (const m of B.meshes) m.layers.set(0); if (B.im) B.im.visible = false; } } };
+const ORIG = scene.onBeforeRender;   // (batching + the people's instances: off, only the batching goes — the bodies are drawn either way)
+const onOff = (on) => { if (on) { BATCH.dirty = true; scene.onBeforeRender = ORIG; } else { scene.onBeforeRender = (r, sc, cam) => bodyFill(cam); for (const B of BATCH.groups.values()) { for (const m of B.meshes) m.layers.set(0); if (B.im) B.im.visible = false; } } };
 const out = {};
 for (const kind of ['cook', 'football', 'mow', 'hoist', 'ride', 'fight', 'bus']) {
   const o = kind === 'bus' ? VEHICLES.find(v => v.kind === 'bus') : HUMANS.find(h => h.task && h.task.kind === kind); if (!o) continue;

@@ -11,5 +11,5 @@ http.createServer(async (req, res) => {
     const out = await handle(new Request(url, { method: req.method, headers: req.headers, body }), store); res.writeHead(out.status, Object.fromEntries(out.headers)); res.end(await out.text()); return; }
   if (url.pathname === '/__store') { res.writeHead(200, { 'content-type': 'application/json' }); res.end(JSON.stringify([...mem.keys()])); return; }
   const f = path.join(ROOT, url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname)); if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); res.end(); return; }
-  res.writeHead(200, { 'content-type': T[path.extname(f)] || 'application/octet-stream' }); fs.createReadStream(f).pipe(res);
+  res.writeHead(200, { 'content-type': T[path.extname(f)] || 'application/octet-stream', 'content-length': fs.statSync(f).size }); fs.createReadStream(f).pipe(res);   // (a length, like Netlify: the browser can time an mp3 without a VBR header)
 }).listen(PORT, () => console.log('http://localhost:' + PORT + '/'));

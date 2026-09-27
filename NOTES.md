@@ -426,6 +426,16 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   banner 'ES ⚡ ILMAISEKSI!' and two dancing promoters (esDanceTask). esPromoUpdate synthesises a 124 bpm beat (kick, off-beat hat,
   sawtooth bass) through its own gain, louder within 120 m. ES fragility: carDamage wrecks on ES only from 12 m/s into
   something (was 3), and running someone over no longer wrecks it.
+- Feature audit (27.9., "feature tarkastuskierros, huolella"): all test groups rerun (race core, online/menu/radio, world and people,
+  events, perf, pictures). Fixed: policeFollow steers round vehicles ahead (parked cars stopped the cruisers; bustAt now ~74 s);
+  roadGraph: dead ends now join the nearest node of another stretch up to min(8, max(5, hw + 3.5)) m away (OSM stopped two streets
+  5.1/5.3 m short, at [374,55] and [-28,-186]: the police took a 936 m detour and got stuck behind the fire engine; 3 → 2 components);
+  policeTree seeds Dijkstra from every node within nearest + 30 m of the car (distance × 1.5), so an off-road stop is reached by the
+  nearest street, not only the nearest node's; rgDijkstra takes a node or [node, start] pairs.
+  mooseTask crosses the road instead of walking along it; walkTo gives up after 4 s without progress (wgx/wgz/wbest/wT in the
+  constructor); drawMinimapFree shows every street in GTA mode; onlineGhostsUpdate skips ghosts without a mesh; serve.mjs sends
+  content-length (talk programmes had duration Infinity locally). Tests updated to current rules (t_ghost gridLeft, t_mischief2 path
+  length, t_batch keeps bodyFill; its last ~10 px are instanced-vs-plain edge rounding). t_audit_shots: pictures of the new things.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

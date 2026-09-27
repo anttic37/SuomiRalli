@@ -15,9 +15,10 @@ if (van) { car.x = van.x + 300; car.z = van.z + 300; const log = { stops: 0, dro
     const m = X2vanMode(); if (m !== last) { if (m === 'stop') log.stops++; if (m === 'turn') log.turned++; last = m; } log.cones = Math.max(log.cones, HUMANS.filter(h => h.task && h.task.kind === 'icekid' && h.st && h.st.mode === 'eat').length); }
   log.drove = Math.round(Math.hypot(van.x - p0[0], van.z - p0[1])); log.mode = X2vanMode(); log.damage = van.damage; out.vanLog = log; }
 function X2vanMode() { return van.ai.V.mode; }
-// mopeds and the postman: how far along they got in 20 s
-const mp = all('moped'), pm = find('post'); { const a = mp.map(h => [h.x, h.z]), b = pm ? [pm.x, pm.z] : null; if (mp[0]) { car.x = mp[0].x + 400; car.z = mp[0].z; } step(60*20);
-  out.mopedMoved = mp.map((h, i) => Math.round(Math.hypot(h.x - a[i][0], h.z - a[i][1]))); out.postMoved = pm && Math.round(Math.hypot(pm.x - b[0], pm.z - b[1])); out.postMode = pm && pm.task && null; }
+// mopeds: metres driven in 20 s; the postman: how far along he got
+const mp = all('moped'), pm = find('post'); { const a = mp.map(h => [h.x, h.z]), b = pm ? [pm.x, pm.z] : null, path = mp.map(() => 0); if (mp[0]) { car.x = mp[0].x + 400; car.z = mp[0].z; }
+  const pm0 = b; for (let f = 0; f < 60*20; f++) { step(1); mp.forEach((h, i) => { path[i] += Math.hypot(h.x - a[i][0], h.z - a[i][1]); a[i] = [h.x, h.z]; }); }   /* (metres driven: they go back and forth along their street) */
+  out.mopedMoved = path.map(Math.round); out.postMoved = pm && Math.round(Math.hypot(pm.x - b[0], pm.z - b[1])); out.postMode = pm && pm.task && null; }
 // badminton: count hits over 40 s near the court
 { const bp = all('badminton'); if (bp[0]) { car.x = bp[0].x + 40; car.z = bp[0].z + 40; let hits = 0, misses = 0, lastU = 0; const B0 = X2.upd; for (let i = 0; i < 60*40; i++) { worldUpdate(1/60); } out.badmintonHome = bp.map(h => Math.round(Math.hypot(h.x - h.home.x, h.z - h.home.z)*10)/10); } }
 // the sheet: force a gust, watch it fly, land, get picked up and re-hung

@@ -125,7 +125,7 @@
   <div id="news"><span class="star">★</span>UUTUUS: GTA-MOODI<small>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 17.29 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+  <div class="build-stamp">editorista 18.42 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
   <div id="results">
@@ -630,7 +630,7 @@ function generateTrack() {
   checkpointMeshes.forEach(c=>scene.remove(c)); treeMeshes.forEach(t=>{ if (t.geometry) t.geometry.dispose(); scene.remove(t); });
   checkpointMeshes=[]; treeMeshes=[];
   trackMeshGroup = new THREE.Group(); scene.add(trackMeshGroup);
-  mmBase = null;
+  mmBase = null; mmFree = null;
 
   const ctrl = YLASTO_PX.map(([px,py]) => new THREE.Vector2((px-MAP_CX)*MAP_SCALE, (py-MAP_CY)*MAP_SCALE));
   trackPoints = []; trackW = [];
@@ -3932,6 +3932,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Tarkastuskierros: kaksi katkosta tieverkossa korjattu (poliisi ajoi 900 m kiertotietä ja jäi paloauton taakse), poliisi kiertää parkkiautot, hirvet ylittävät tien eivätkä kävele sitä pitkin, jumiin jääneet kävelijät luovuttavat, GTA-moodissa kartalla kaikki kadut'],
   ['27.9.', 'Kamera pitää auton ruudun alaosassa myös kovassa vauhdissa (ei enää valu keskelle)'],
   ['27.9.', 'ES-tempaus K-kaupan pihalla: jättitölkki, kajarit soittaa, tanssijat ja ES STOP -ruutu (pysähdy siihen → tölkki). ES:llä auto ei enää hajoa pienestä kolhusta'],
   ['27.9.', 'Kamera katsoo pidemmälle eteen ja hiukan loivemmin: auto on alempana ruudussa'],
@@ -4029,7 +4030,7 @@ function samplePose(S, st, t) {   // a ghost's pose at t: linear between samples
   let a0 = S[i+3]/1000, a1 = S[j+3]/1000; while (a1 - a0 > Math.PI) a1 -= 2*Math.PI; while (a1 - a0 < -Math.PI) a1 += 2*Math.PI;
   return { x: (S[i+1] + (S[j+1] - S[i+1])*f)/100, z: (S[i+2] + (S[j+2] - S[i+2])*f)/100, a: a0 + (a1 - a0)*f, end: t*1000 >= S[S.length - 4] }; }
 function onlineGhostsUpdate(dt) { const show = ghostEnabled && lapStarted && gameState === State.RACING;
-  for (const o of ONLINE.opp) { if (!show) { o.G.visible = false; o.alpha = 0; continue; }
+  for (const o of ONLINE.opp) { if (!o.G) continue; if (!show) { o.G.visible = false; o.alpha = 0; continue; }
     const P = samplePose(o.s, o, raceTime); o.alpha += ((P.end ? 0 : 1) - o.alpha)*Math.min(1, dt*(P.end ? 1.5 : 5)); placeGhost(o.G, P, o.alpha); } }
 // at the finish: your name → the lap goes up (kept only if it beats that name's best)
 function onlineOfferName() { const box = document.getElementById('name-form'); if (!box) return;
@@ -4493,10 +4494,12 @@ function roadGraph() {
       const a = R.pts[i-1], L = Math.hypot(p.x - a.x, p.y - a.y), n = Math.max(1, Math.ceil(L/6));
       for (let k = 1; k <= n; k++) { const j = nodeAt(a.x + (p.x - a.x)*k/n, a.y + (p.y - a.y)*k/n, hw); link(prev, j); prev = j; } }
     ends.push(prev); });
-  ends.forEach(e => { if (adj[e].length > 1) return; let best = -1, bd = 5; nodes.forEach((n, i) => { if (i === e || adj[e].some(q => q[0] === i)) return; const d = Math.hypot(n.x - nodes[e].x, n.z - nodes[e].z); if (d < bd) { bd = d; best = i; } }); if (best >= 0) link(e, best); });
+  ends.forEach(e => { if (adj[e].length > 1) return; const own = new Set([e]); let fr = [[e, 0]];   // a street that stops short of the one it joins (OSM ends a few m off): link it to the nearest node of ANOTHER stretch
+    while (fr.length) { const nx = []; for (const [i, d] of fr) for (const [j, w] of adj[i]) if (!own.has(j) && d + w < 16) { own.add(j); nx.push([j, d + w]); } fr = nx; }
+    let best = -1, bd = Math.min(8, Math.max(5, nodes[e].hw + 3.5)); nodes.forEach((n, i) => { if (own.has(i)) return; const d = Math.hypot(n.x - nodes[e].x, n.z - nodes[e].z); if (d < bd) { bd = d; best = i; } }); if (best >= 0) link(e, best); });
   ROADG = { nodes, adj }; return ROADG;
 }
-function rgDijkstra(src) { const { nodes, adj } = roadGraph(), n = nodes.length, dist = new Float64Array(n).fill(Infinity), prev = new Int32Array(n).fill(-1), h = [[0, src]]; dist[src] = 0;
+function rgDijkstra(src) { const { nodes, adj } = roadGraph(), n = nodes.length, dist = new Float64Array(n).fill(Infinity), prev = new Int32Array(n).fill(-1), h = Array.isArray(src) ? src.map(([i, d]) => [d, i]).sort((a, b) => a[0] - b[0]) : [[0, src]]; for (const [d, i] of h) dist[i] = Math.min(dist[i], d);   /* (src: a node, or [node, start distance] pairs) */
   const push = (d, i) => { h.push([d, i]); let c = h.length - 1; while (c > 0) { const p = (c - 1) >> 1; if (h[p][0] <= h[c][0]) break; const tmp = h[p]; h[p] = h[c]; h[c] = tmp; c = p; } };
   const pop = () => { const top = h[0], last = h.pop(); if (h.length) { h[0] = last; let c = 0; for (;;) { const l = 2*c + 1, r = l + 1; let m = c; if (l < h.length && h[l][0] < h[m][0]) m = l; if (r < h.length && h[r][0] < h[m][0]) m = r; if (m === c) break; const tmp = h[m]; h[m] = h[c]; h[c] = tmp; c = m; } } return top; };
   while (h.length) { const [d, i] = pop(); if (d > dist[i]) continue; for (const [j, w] of adj[i]) { const nd = d + w; if (nd < dist[j]) { dist[j] = nd; prev[j] = i; push(nd, j); } } }
@@ -4646,7 +4649,7 @@ class Human {
     if (o.inst !== undefined) this.view = { kind: 'inst', geo: o.inst, idx: -1, up: -1 };
     else { this.view = { kind: 'rig', g: o.rig }; o.rig.rotation.order = 'YXZ'; lifeGroup.add(o.rig); }
     this.look = o.rig ? o.rig.userData.look || null : o.inst !== undefined ? { kid: false, c: lookCrowd(o.inst) } : null;   // (animals and aliens: their own meshes)
-    this.bm = this.look ? new THREE.Matrix4() : null; this.bp = this.look ? new Float32Array(11) : null; this.bvis = false; this.propR = false; this.px = undefined; this.pz = 0; this.far = false; this.goal = null; this.goalT = 0; this.slide = null; this.dodge = null; this.big = false; this.ride = null; this.hoseDrop = null; this.esc = null;   // (every field set here: one object shape for all, fast)
+    this.bm = this.look ? new THREE.Matrix4() : null; this.bp = this.look ? new Float32Array(11) : null; this.bvis = false; this.propR = false; this.px = undefined; this.pz = 0; this.far = false; this.goal = null; this.goalT = 0; this.slide = null; this.dodge = null; this.big = false; this.ride = null; this.hoseDrop = null; this.esc = null; this.wgx = 0; this.wgz = 0; this.wbest = 0; this.wT = 0;   // (every field set here: one object shape for all, fast)
     this.settle = 2;   // (the first frames: nudged out of anything they were put down in)
     this.ao = -1; HUMANS.push(this);
   }
@@ -4672,6 +4675,7 @@ function humanStep(h, dt) {   // body physics shared by everyone
   h.x += h.vx*dt; h.z += h.vz*dt;
 }
 function walkTo(h, tx, tz, sp, dt) { const dx = tx - h.x, dz = tz - h.z, d = Math.hypot(dx, dz); h.goal = h.goal || [0, 0]; h.goal[0] = tx; h.goal[1] = tz; h.goalT = worldT; if (d < 0.15) { h.vx = h.vz = 0; return true; }
+  if (Math.abs(tx - h.wgx) + Math.abs(tz - h.wgz) > 2 || d < h.wbest - 0.3) { h.wgx = tx; h.wgz = tz; h.wbest = d; h.wT = 0; } else if ((h.wT += dt) > 4) { h.wT = 0; h.wbest = d; h.vx = h.vz = 0; return true; }   // (4 s without getting any nearer — a wall, a hedge, a tree in the way: give up, as if there)
   let ux = dx/d, uz = dz/d; if (h.slide && h.slide.t > 0) { h.slide.t -= dt; ux = h.slide.x; uz = h.slide.z; }   // a wall in the way: along it for a moment
   const v = Math.min(sp, d*3); h.vx = ux*v; h.vz = uz*v; h.yaw = Math.atan2(ux, uz); h.pose.walk = Math.min(0.6, v*0.35); h.pose.ph += dt*(4 + v*3); return false; }
 function pushOffStacks(h) { forStaticNear(h.x, h.z, t => { if (t.kind !== 'tire' || t.off) return; const dx = h.x - t.x, dz = h.z - t.z, d = Math.hypot(dx, dz), R = t.r + h.r; if (d < R && d > 1e-4) { h.x = t.x + dx/d*R; h.z = t.z + dz/d*R; } }); }
@@ -5338,7 +5342,9 @@ function policeIncident(kind) {
   if (POLICE.n >= 3) { policeSpawn(2); policeMsg('🚨 POLIISIT TULEVAT!', true); } else policeMsg((kind === 'fire' ? '🔥 TULIPALO ' : 'KOLARI ') + POLICE.n + '/3'); }
 function nearestNode(x, z) { const { nodes } = roadGraph(); let bi = -1, bd = 1e18; for (let i = 0; i < nodes.length; i++) { const d = (nodes[i].x - x)**2 + (nodes[i].z - z)**2; if (d < bd) { bd = d; bi = i; } } return bi; }
 function policeTree(fresh) { if (!fresh && POLICE.tree && worldT - POLICE.treeT < 1) return POLICE.tree; const si = nearestNode(car.x, car.z); if (si < 0) return null;
-  POLICE.tree = rgDijkstra(si); POLICE.tree.src = si; POLICE.treeT = worldT; return POLICE.tree; }
+  const { nodes } = roadGraph(), d0 = Math.hypot(nodes[si].x - car.x, nodes[si].z - car.z), seeds = [];   // every street node near the car counts (off the road the nearest one can be on a street that joins far away)
+  for (let i = 0; i < nodes.length; i++) { const d = Math.hypot(nodes[i].x - car.x, nodes[i].z - car.z); if (d < d0 + 30) seeds.push([i, d*1.5]); }
+  POLICE.tree = rgDijkstra(seeds); POLICE.tree.src = si; POLICE.treeT = worldT; return POLICE.tree; }
 let _polTex = null;
 function polTex() { if (_polTex) return _polTex; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
   g.font = 'bold 92px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#16389a'; g.fillText('POLIISI', 256, 68); return (_polTex = new THREE.CanvasTexture(c)); }
@@ -5370,7 +5376,10 @@ function policeFollow(v, dt, vmax) {   // along v.path: pure pursuit, slowing in
   pathProject(v); const C = v.ctrl, sp = Math.abs(v.vF), [lx, lz] = pathAt(v, v.s + Math.max(5, sp*0.6 + 3)); let vT = vmax;
   for (let d = 4; d <= 74; d += 5) { const [ax, az] = pathAt(v, v.s + d - 8), [px, pz] = pathAt(v, v.s + d), [qx, qz] = pathAt(v, v.s + d + 8);   // the bend's radius over ~16 m → the speed the tyres hold
     const turn = Math.abs(angDiff(Math.atan2(qx - px, qz - pz) - Math.atan2(px - ax, pz - az))), vc = Math.min(vmax, Math.sqrt(v.spec.lat*0.8*12/Math.max(turn, 0.01))); vT = Math.min(vT, Math.sqrt(vc*vc + 2*v.spec.brake*0.7*Math.max(0, d - 4))); }
-  C.steer = steerToward(v, lx, lz); speedTo(v, vT); return vT; }
+  const sy = Math.sin(v.yaw), cy = Math.cos(v.yaw); let off = 0;   // a vehicle standing in the way (a parked ambulance, a bus, a tractor): round it on the roomier side
+  for (const o of VEHICLES) { if (o === v || o.gone) continue; const dx = o.x - v.x, dz = o.z - v.z; if (Math.abs(dx) > 34 || Math.abs(dz) > 34) continue; const f = sy*dx + cy*dz; if (f < -1 || f > 20 + sp*0.6) continue;
+    const l = cy*dx - sy*dz, dy = o.yaw - v.yaw, need = v.hw + o.hw*Math.abs(Math.cos(dy)) + o.hl*Math.abs(Math.sin(dy)) + 0.9; if (Math.abs(l) >= need) continue; const o2 = (l > 0 ? -1 : 1)*(need - Math.abs(l)); if (Math.abs(o2) > Math.abs(off)) off = o2; }
+  if (off) { vT = Math.min(vT, 11); C.steer = steerToward(v, lx + cy*off, lz - sy*off); } else C.steer = steerToward(v, lx, lz); speedTo(v, vT); return vT; }
 function clearLine(x0, z0, x1, z1) { let hit = false; for (let k = 1; k < 6 && !hit; k++) { const x = x0 + (x1 - x0)*k/6, z = z0 + (z1 - z0)*k/6; staticNear(x, z, 2, B => { if (!hit && boxPush(B, x, z, 1.0)) hit = true; }); } return !hit; }
 function policeAI(v, dt) {
   const P = v.pl, C = v.ctrl, lit = v.chase || P.hold; v.flash += dt;
@@ -5989,7 +5998,7 @@ const mooseTask = (M) => ({ kind: 'moose', update(h, dt, t) { const S = M.s;
   if (S.graze > 0) { S.graze -= dt; h.vx = h.vz = 0; h.tilt = 0.16; return; } h.tilt = 0;
   if (!S.tx || walkTo(h, S.tx, S.tz, S.fast ? 1.6 : 0.9, dt)) {
     if (S.tx) S.graze = 3 + Math.random()*8; S.fast = false; S.tx = 0;
-    if (Math.random() < 0.2) { const ri = roadInfo(h.x, h.z), p = trackPoints[ri.idx], d = Math.sqrt(ri.d2); if (d < 95) { const ux = (p.x - h.x)/(d || 1), uz = (p.y - h.z)/(d || 1); S.tx = p.x + ux*14; S.tz = p.y + uz*14; S.fast = true; return; } }   // off across the road
+    if (Math.random() < 0.2) { const ri = roadInfo(h.x, h.z), p = trackPoints[ri.idx], d = Math.sqrt(ri.d2); if (d < 70) { const nm = getNormal(ri.idx), sd = (h.x - p.x)*nm.x + (h.z - p.y)*nm.y >= 0 ? -1 : 1, w = wAt(ri.idx)/2 + 12; S.tx = p.x + nm.x*sd*w; S.tz = p.y + nm.y*sd*w; S.fast = true; return; } }   /* (straight across to the far side, not along it) */   // off across the road
     for (let k = 0; k < 12; k++) { const a = Math.random()*6.3, r = 6 + Math.random()*22, x = M.hx + Math.sin(a)*r, z = M.hz + Math.cos(a)*r; if (landClassAt(x, z) === 1 && rockHeightAt(x, z) < 0) { S.tx = x; S.tz = z; break; } } }
   h.pose.walk = Math.min(0.5, h.pose.walk); },
   knocked(h) { const d = Math.hypot(car.x - h.x, car.z - h.z); h.vx *= 0.35; h.vz *= 0.35; h.vy = Math.min(h.vy, 2); M.s.freeze = 0;
@@ -7226,8 +7235,18 @@ function updateCamera(dt) {
 // ════════════════════════════════════════
 const mmCanvas=document.getElementById('minimap'),mmCtx=mmCanvas.getContext('2d');
 mmCanvas.width=mmCanvas.height=140;
-let mmBase = null, mmScale = null;
-function drawMinimap(){const ctx=mmCtx;
+let mmBase = null, mmScale = null, mmFree = null;   // (mmFree: the whole street network, for FREE mode)
+function drawMinimapFree(ctx) {   // FREE (GTA): every street of the village, gravel lighter; the ES stand; the car
+  if (!mmFree) { let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity; sideRoads.forEach(R => R.pts.forEach(p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); z0 = Math.min(z0, p.y); z1 = Math.max(z1, p.y); }));
+    const pad = 10, rx = x1 - x0 + pad*2, rz = z1 - z0 + pad*2, sc = Math.min(140/rx, 140/rz), ox = (140 - rx*sc)/2 - (x0 - pad)*sc, oz = (140 - rz*sc)/2 - (z0 - pad)*sc;
+    const c = document.createElement('canvas'); c.width = c.height = 140; const b = c.getContext('2d'); b.lineCap = b.lineJoin = 'round';
+    for (const pass of [0, 1]) sideRoads.forEach(R => { if ((pass === 1) !== !R.gravel) return; b.strokeStyle = R.gravel ? '#6a624e' : '#4a4a4e'; b.lineWidth = Math.max(1.5, R.w*sc*1.6); b.beginPath(); R.pts.forEach((p, i) => { const x = p.x*sc + ox, y = p.y*sc + oz; i ? b.lineTo(x, y) : b.moveTo(x, y); }); b.stroke(); });
+    mmFree = { c, sc, ox, oz }; }
+  const { c, sc, ox, oz } = mmFree; ctx.clearRect(0, 0, 140, 140); ctx.drawImage(c, 0, 0);
+  if (ES.promo) { ctx.fillStyle = '#9be22a'; ctx.beginPath(); ctx.arc(ES.promo.x*sc + ox, ES.promo.z*sc + oz, 3, 0, Math.PI*2); ctx.fill(); }
+  const cx = Math.max(5, Math.min(135, car.x*sc + ox)), cy = Math.max(5, Math.min(135, car.z*sc + oz));
+  ctx.fillStyle = ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.sin(car.angle)*5, cy + Math.cos(car.angle)*5); ctx.stroke(); }
+function drawMinimap(){const ctx=mmCtx; if (FREE.on) { drawMinimapFree(ctx); return; }
   if(!mmBase){
     // cache the static track drawing once
     let x0=Infinity,x1=-Infinity,z0=Infinity,z1=-Infinity;

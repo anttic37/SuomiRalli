@@ -18,7 +18,7 @@ const lap = (speed, probeAt) => {
   return { speed, time: +raceTime.toFixed(3), expected: +(L/speed).toFixed(3), clockStartedAfterS: startedAt, cps: checkpointsPassed + '/' + totalCheckpoints, ghostTime: ghost ? +ghost.time.toFixed(3) : null, samples: ghost ? ghost.s.length/4 : 0, deltas, probe };
 };
 const g0 = trackPoints[gi], line = finishLine.position;
-const grid = { idx: gi, n, metresBeforeLine: +(L - sGrid).toFixed(1), onStreet: (() => { let best = null; sideRoads.forEach(R => R.pts.forEach(p => { const d = Math.hypot(p.x - g0.x, p.y - g0.y); if (!best || d < best.d) best = { d, name: R.name }; })); return best.name; })(), carAtGrid: (() => { startRace(false); return Math.hypot(car.x - g0.x, car.z - g0.y) < 0.01; })(), timerAtGo: raceTime };
+const grid = { idx: gi, n, metresBeforeLine: +(L - sGrid).toFixed(1), onStreet: (() => { let best = null; sideRoads.forEach(R => R.pts.forEach(p => { const d = Math.hypot(p.x - g0.x, p.y - g0.y); if (!best || d < best.d) best = { d, name: R.name }; })); return best.name; })(), carAtGrid: (() => { startRace(false); const gi = gridIndex(), L = gridLeft(gi), o = gridLane(gi); return Math.hypot(car.x - (g0.x + L.x*o), car.z - (g0.y + L.z*o)) < 0.01; })()   /* (the box is in the left lane) */, timerAtGo: raceTime };
 const r1 = lap(20), r2 = lap(22, 30), r3 = lap(18, 30);
 const saved = JSON.parse(localStorage.getItem('ylasto1988-haamu-v1') || 'null');
 return { grid, r1, r2, r3, stored: saved ? { time: +saved.time.toFixed(3), samples: saved.s.length/4, kb: +(JSON.stringify(saved).length/1024).toFixed(1) } : null, bestTime: +bestTime.toFixed(3) };
