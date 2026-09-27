@@ -406,6 +406,10 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   every tyre stack off (t.freeOff), no phases, no laps; HUD 'VAPAA AJO'. startRace/toMenu → freeExit() puts it all back
   (applyPhases(true)). Every street was already tarmac (roadGrid holds the whole network). t_free: left lane = race,
   right lane = FREE, 900 m street legs on the road graph with nothing of the track in the way, R restores.
+  Then: widenStart() makes the route 4 m wider round the grid and the split (6.5 → 10.5 m, tapered; the server's tracks.mjs
+  widths follow on the next build); the lane words are canvas text in a heavy sans at true proportions (KISA / GTA + VAPAA AJO);
+  grandstands half full; sausageCart(S) in front of each stand (seller + 2–3 buyers, grill smoke); start screen badge
+  #news 'UUTUUS: GTA-MOODI' (italic, red star).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

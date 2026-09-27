@@ -60,6 +60,12 @@
   #overlay .build-stamp { display: none !important; }   /* (the editor still stamps its build into the page; not shown) */
   #overlay .build-stamp-old { display: flex; align-items: center; gap: 22px; font-size: clamp(10px, 1.6vw, 15px); font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #ff2a2a; margin: 0 16px clamp(18px, 4vh, 44px); text-align: center; max-width: 92vw; }
   #overlay .build-stamp::before, #overlay .build-stamp::after { content: ''; width: clamp(24px, 6vw, 74px); height: 2px; background: #e0141e; }
+  #news { position: relative; margin: 4px 0 18px; padding: 6px 22px 6px 2.3em; font-weight: 900; font-style: italic; font-size: clamp(18px, 3.6vw, 34px); letter-spacing: 0.04em; color: #ffd23c;
+    transform: rotate(-3deg) skewX(-8deg); text-shadow: 0 3px 0 #7a1010, 0 0 18px rgba(255,210,60,0.35); font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif; }
+  #news small { display: block; font-size: 0.38em; font-style: normal; letter-spacing: 0.25em; color: #f0f0ec; text-shadow: none; text-transform: uppercase; margin-top: 2px; }
+  #news .star { position: absolute; left: 2px; top: 50%; width: 1.6em; height: 1.6em; margin-top: -0.8em; line-height: 1.6em; text-align: center; font-size: 1em; font-style: normal; color: #fff; background: #e0141e; border-radius: 50%;
+    box-shadow: 0 0 0 3px #ffd23c; animation: newsStar 1.6s ease-in-out infinite; }
+  @keyframes newsStar { 0%, 100% { transform: rotate(-12deg) scale(1); } 50% { transform: rotate(12deg) scale(1.12); } }
   #stats { margin: 10px 16px 0; min-height: 1.3em; text-align: center; font-size: clamp(10px, 1.5vw, 14px); letter-spacing: 0.22em; color: #b8b8b0; font-variant-numeric: tabular-nums; opacity: 0; transition: opacity 0.4s; }
   #stats.on { opacity: 1; } #stats b { color: #ffd23c; font-weight: 700; } #stats .sl { color: #e0141e; margin: 0 0.8em; }
   #overlay .start-hint { font-size: clamp(11px, 1.8vw, 16px); letter-spacing: 0.4em; text-align: center; margin: 0 16px; text-transform: uppercase; color: #e8e8e4; animation: pulse 2s ease-in-out infinite; }
@@ -116,6 +122,7 @@
 <div id="overlay" class="loading">
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
+  <div id="news"><span class="star">★</span>UUTUUS: GTA-MOODI<small>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
   <div id="menu-content"><div class="start-hint">paina enter ja aja</div>
@@ -816,8 +823,11 @@ function snapRouteToNetwork() {
     for (let i = 0; i < N2; i++) { const a = out[i], b = out[(i+1)%N2]; const Ls = Math.hypot(b.x-a.x, b.y-a.y); if (Ls < 1e-6) continue; let t = 0; while (carry2 + (Ls-t) >= step) { t += step-carry2; carry2 = 0; const u = t/Ls; rs.push(new THREE.Vector2(a.x+(b.x-a.x)*u, a.y+(b.y-a.y)*u)); rw.push(ow[i]+(ow[(i+1)%N2]-ow[i])*u); } carry2 += Ls-t; }
     out.length = 0; ow.length = 0; rs.forEach(q => out.push(q)); rw.forEach(w => ow.push(w));
   }
-  trackPoints = out; trackW = ow;
+  trackPoints = out; trackW = ow; widenStart();
 }
+function widenStart() {   // the start on Malminrajantie 4 m wider round the grid and the KISA / VAPAA AJO split (tapered in and out), room for both lanes
+  const n = trackPoints.length; if (n < 40) return; const gi = gridIndex();
+  for (let k = -12; k <= 16; k++) { const t = Math.max(0, Math.min(1, k < -6 ? (k + 12)/6 : k > 10 ? (16 - k)/6 : 1)), i = (gi + k + n) % n; trackW[i] += 4*t*t*(3 - 2*t); } }
 let cornerPatches = [];   // small tarmac discs (self-healing only)
 let cornerStrips = [];    // tarmac strips under street-switch arcs
 let cornerFans = [];      // tarmac fans under filleted route corners
@@ -921,7 +931,7 @@ let finishLine = null, finishMesh = null, prevFinishS = null;
 // free to drive (FREE, below). The split is judged where the start line is (START_SPLIT).
 const START_SPLIT = { x: 0, z: 0, dx: 0, dz: 1, lx: 1, lz: 0, hw: 3, prev: null, done: false, ok: false };
 function gridLeft(gi) { const d = getDir(gi); return { x: d.y, z: -d.x }; }   // the driver's left, facing along the route
-function gridLane(gi) { return Math.min(1.9, wAt(gi)*0.25); }                 // the box centre: this far left of the road's middle
+function gridLane(gi) { return Math.min(3.2, wAt(gi)*0.25); }                 // the box centre: this far left of the road's middle
 function buildGridBox() {
   const gi = gridIndex(), p = trackPoints[gi], d = getDir(gi), L = gridLeft(gi), hw = Math.min(1.25, wAt(gi)*0.25), lane = gridLane(gi), bx = p.x + L.x*lane, bz = p.y + L.z*lane;
   const mat = new THREE.MeshBasicMaterial({ color: 0xf2f2ea, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false });
@@ -933,10 +943,13 @@ function buildGridBox() {
   for (let t = -6; t < ahead + 5; t += 3) bar(p.x + d.x*(t + 0.8), p.y + d.y*(t + 0.8), yaw, 0.16, 1.6);   // the pit line down the middle, dashed
   const yel = new THREE.MeshBasicMaterial({ color: 0xffd23c, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false });
   bar(sx + L.x*w2*0.5, sz + L.z*w2*0.5, yaw + Math.PI/2, 0.55, w2 - 0.2);            // the start line: the left lane only
-  const word = (text, col, side, at) => { const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d'); g.font = 'bold 110px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = col; g.fillText(text, 256, 70, 500);
-    const me = new THREE.Mesh(new THREE.PlaneGeometry(w2*0.9, 2.2), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false }));
-    me.rotation.order = 'YXZ'; me.rotation.set(-Math.PI/2, yaw + Math.PI, 0); me.position.set(p.x + d.x*at + L.x*w2*0.5*side, ROAD_Y + 0.04, p.y + d.y*at + L.z*w2*0.5*side); me.renderOrder = 1; me.userData.key = 'grid'; trackMeshGroup.add(me); };
-  word('KISA', '#f2f2ea', 1, ahead - 3.5); word('VAPAA AJO', '#ffd23c', -1, ahead - 3.5); word('GTA', '#ffd23c', -1, ahead + 0.5);   // (stretched along the road, like road markings)
+  const word = (lines, col, side, at) => {   // painted on the road, readable from the driver's seat: a modern heavy sans, true proportions
+    const c = document.createElement('canvas'); c.width = 640; c.height = Math.ceil(lines.reduce((a, [, fs]) => a + fs*0.95, 0) + 20); const g = c.getContext('2d'); let y = 10;   // lines: [text, px]
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = col;
+    for (const [t, fs] of lines) { g.font = '900 ' + fs + 'px "Arial Black", "Helvetica Neue", Arial, sans-serif'; g.fillText(t, 320, y + fs*0.5, 620); y += fs*0.95; }
+    const wd = w2*0.86, ht = wd*c.height/c.width, me = new THREE.Mesh(new THREE.PlaneGeometry(wd, ht), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false }));
+    me.rotation.order = 'YXZ'; me.rotation.set(-Math.PI/2, yaw + Math.PI, 0); me.position.set(p.x + d.x*(at - ht/2) + L.x*w2*0.5*side, ROAD_Y + 0.04, p.y + d.y*(at - ht/2) + L.z*w2*0.5*side); me.renderOrder = 1; me.userData.key = 'grid'; trackMeshGroup.add(me); };
+  word([['KISA', 250]], '#ffffff', 1, ahead - 1.0); word([['GTA', 300], ['VAPAA AJO', 110]], '#ffd23c', -1, ahead - 1.0);
   Object.assign(START_SPLIT, { x: sx, z: sz, dx: d.x, dz: d.y, lx: L.x, lz: L.z, hw: w2, prev: null, done: false, ok: true });
 }
 function buildCheckpoints() {
@@ -3886,6 +3899,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Lähdön tekstit selkeämmiksi, tie leveämpi lähdössä, katsomoissa väljempää ja niiden edessä makkarakärryt; alkuruudussa UUTUUS: GTA-MOODI'],
   ['27.9.', 'GTA-moodi: lähtö on nyt vasemmalla kaistalla. Lähtöviivan yli = kisa; oikeaa kaistaa pitkin (VAPAA AJO) rata katoaa ja koko kylän kaduilla saa ajaa vapaasti'],
   ['27.9.', 'Alkuruudussa aloitetut ajot ja kuskien määrä; palvelin tarkistaa myös itse, ettei kierroksella ole oikaistu'],
   ['27.9.', 'Huijari-Anden 1.24:834 poistettu (neljä mutkaa oikaistu, 149 m); Anden rehti aika palautettu. Mutkan oikaisu tunnistetaan nyt pelissä: kierros ei kelpaa ennätykseksi, haamuksi eikä tulostauluun'],
@@ -6141,7 +6155,32 @@ function buildGrandstands() { STANDS.length = 0; const spots = []; if (finishLin
     addStaticBox({ x: bx, z: bz, yaw: S.yaw, hw: L/2 + 0.1, hl: 1.75, kind: 'lm' });
     for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i], a = Math.cos(S.yaw)*(h.x - bx) - Math.sin(S.yaw)*(h.z - bz), b = Math.sin(S.yaw)*(h.x - bx) + Math.cos(S.yaw)*(h.z - bz); if (Math.abs(a) < L/2 + 0.8 && Math.abs(b) < 2.6 && !h.seat) humanRemove(h); }   // spectators standing where it went up
     S.people = []; for (let row = 0; row < 4; row++) for (let a = -L/2 + 0.55; a <= L/2 - 0.45; a += 0.6) { const [x, z] = lloc(S.x, S.z, S.yaw, a + (Math.random() - 0.5)*0.1, -row*0.85 + 0.12);
-      if (Math.random() < 0.1) continue; const h = new Human({ x, z, yaw: S.yaw, inst: Math.floor(Math.random()*16), task: standTask(S, row) }); h.pose.dy = S.base + 0.51 + row*0.5 - Y(x, z); S.people.push(h); } } }
+      if (Math.random() < 0.5) continue; const h = new Human({ x, z, yaw: S.yaw, inst: Math.floor(Math.random()*16), task: standTask(S, row) });   /* (half full: room to see the stand) */ h.pose.dy = S.base + 0.51 + row*0.5 - Y(x, z); S.people.push(h); }
+    sausageCart(S); } }
+
+// a sausage cart in front of each grandstand: the seller at the grill under a red-and-white parasol, a few people waiting, one eating
+function sausageCart(S) {
+  let spot = null; for (const [a, b] of [[S.L/2 - 1.6, 2.4], [-S.L/2 + 1.6, 2.4], [S.L/2 - 1.6, 1.8], [-S.L/2 + 1.6, 1.8]]) { const [x, z] = lloc(S.x, S.z, S.yaw, a, b);
+    if (!onRoad(x, z, 2.6) && !treeNear(x, z, 1.2)) { spot = [x, z]; break; } } if (!spot) return;
+  const [x, z] = spot, yaw = S.yaw, G = new THREE.Group(), red = lmat(0xc8201e, 0.6), white = lmat(0xf2f2ea, 0.6), steel = lmat(0x9a9ca0, 0.35), black = lmat(0x1c1c1e, 0.6);
+  lmesh(lbox(1.5, 0.75, 0.8), white, 0, 0.55, 0, G); lmesh(lbox(1.52, 0.16, 0.82), red, 0, 0.75, 0, G); lmesh(lbox(1.4, 0.05, 0.7), steel, 0, 0.95, 0, G);   // the cart, a red band
+  for (const s of [-1, 1]) { const w = lmesh(lcyl(0.2, 0.08, 10), black, s*0.55, 0.2, -0.42, G); w.rotation.x = Math.PI/2; }
+  lmesh(lbox(0.9, 0.03, 0.45), lmat(0x2a2a2a, 0.5), 0.15, 0.99, 0, G, false); for (let k = 0; k < 6; k++) { const m = lmesh(lcyl(0.028, 0.34, 6), lmat(0xa0442a, 0.6), -0.18 + k*0.1, 1.02, 0, G, false); m.rotation.x = Math.PI/2; }   // the grill and its sausages
+  lmesh(lbox(0.05, 2.3, 0.05), steel, -0.55, 1.15, 0, G);
+  for (let k = 0; k < 8; k++) { const seg = lmesh(lgeo('parasol', () => { const q = new THREE.ConeGeometry(1.25, 0.45, 2, 1, true, 0, Math.PI/4); q.translate(0, -0.22, 0); return q; }), new THREE.MeshStandardMaterial({ color: k % 2 ? 0xc8201e : 0xf2f2ea, roughness: 0.6, side: THREE.DoubleSide }), -0.55, 2.45, 0, G, false); seg.rotation.y = k*Math.PI/4; }   // the parasol, red and white
+  { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#c8201e'; g.fillRect(0, 0, 256, 64); g.fillStyle = '#fff'; g.font = '900 44px "Arial Black", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('MAKKARA', 128, 34);
+    const sg = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.28), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), roughness: 0.7 })); sg.position.set(0, 0.55, 0.41); G.add(sg); }
+  placeAt(G, x, z, yaw); lifeGroup.add(G); nearVis(G, x, z); addStaticBox({ x, z, yaw, hw: 0.8, hl: 0.45, kind: 'lm' });
+  const [gx, gz] = lloc(x, z, yaw, 0.15, 0); EMITTERS.push({ x: gx, z: gz, y: Y(gx, gz) + 1.05, kind: 'grill', acc: 0 });
+  const C = { x, z, yaw }; const [sx, sz] = lloc(x, z, yaw, 0.15, -0.85);
+  new Human({ x: sx, z: sz, yaw, rig: makeAdult(0xf2f2ee, 0x2b2b30, lpick(L_HAIR), { sel: { hat: 1, top: 1, longPants: 1, tache: Math.random() < 0.5 }, acc: 0xc8201e, w: 1.08, belly: 0.5 }), task: sausageSellerTask(C) });
+  const n = 2 + Math.floor(Math.random()*2); for (let i = 0; i < n; i++) { const [cx, cz] = lloc(x, z, yaw, -0.5 + i*0.75 + (Math.random() - 0.5)*0.2, 1.25 + (i === n - 1 ? 0.7 : 0));
+    new Human({ x: cx, z: cz, yaw: yaw + Math.PI, inst: Math.floor(Math.random()*16), task: sausageBuyerTask(C, i) }); } }
+const sausageSellerTask = (C) => ({ kind: 'sausage', update(h, dt, t) { h.vx = h.vz = 0; h.yaw = C.yaw + Math.sin(t*0.5 + C.x)*0.25; h.pose.armR = -1.1 + Math.sin(t*6 + C.z)*0.3; h.pose.armL = -0.9 + Math.sin(t*1.3)*0.15; } });   // (turning the sausages)
+const sausageBuyerTask = (C, i) => ({ kind: 'sausage', update(h, dt, t, near) { if (Math.hypot(h.x - h.home.x, h.z - h.home.z) > 0.4) { walkTo(h, h.home.x, h.home.z, 1.2, dt); return; }
+  h.vx = h.vz = 0; const eat = i % 2 === 1; h.yaw = eat ? C.yaw + Math.PI + 0.8 : Math.atan2(C.x - h.x, C.z - h.z);
+  if (eat) { const b = (t*0.6 + i) % 3; h.pose.armR = b < 0.8 ? -2.3 : -0.9; }   /* (a bite now and then) */
+  else if (near && Math.hypot(car.vx, car.vz) > 9 && Math.hypot(car.x - h.x, car.z - h.z) < 25) { h.pose.up = true; h.yaw = Math.atan2(car.x - h.x, car.z - h.z); } else h.pose.up = false; } });
 
 // ── 7. the farmer's tractor: drive over his cabbage and it comes after you (the plants you went over lie flattened) ──
 const CABBAGE = [], TRACTOR_MAD = Object.assign({}, VSPEC.tractor, { accel: 5.5, vmax: 15 });   // (the farmer floors it)
