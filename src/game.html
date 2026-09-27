@@ -3860,6 +3860,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Radioon urheilulähetykset (6 kpl, 🏆) omille urheilukanaville; puheohjelmia 10'],
   ['27.9.', 'Radioon 5 puheohjelmaa lisää (nyt 15)'],
   ['27.9.', 'Radioon 5 puheohjelmaa lisää (nyt 10) ja hauskat nimet; ne tulevat satunnaisesti biisien väliin YLEn taajuuksilla'],
   ['27.9.', 'Radioon 5 puheohjelmaa biisien väliin (🎙)'],
@@ -5206,14 +5207,14 @@ async function radioLoad() { if (!/^https?:$/.test(location.protocol)) return; t
   const all = (Array.isArray(d) ? d : d.tracks || []).filter(t => t && t.file), songs = all.filter(t => !t.talk), talks = all.filter(t => t.talk).sort(() => Math.random() - 0.5);
   const gaps = songs.map((_, k) => k + 1).sort(() => Math.random() - 0.5).slice(0, talks.length).sort((a, b) => a - b);   // the spoken programmes in among the songs at random, never two in a row
   RADIO.list = []; let g = 0; songs.forEach((t, k) => { RADIO.list.push(t); while (g < gaps.length && gaps[g] === k + 1) { RADIO.list.push(talks[g]); g++; } }); for (; g < talks.length; g++) RADIO.list.push(talks[g]); if (RADIO.list.length) { const k = document.getElementById('radio-key'); if (k) k.style.display = ''; } } catch (e) {} }
-const TALK_STATIONS = ['YLE Radio 1', 'YLE Rinnakkaisohjelma', 'Yleisradio – Ykkönen', 'Radio Ylästö'];
+const TALK_STATIONS = ['YLE Radio 1', 'YLE Rinnakkaisohjelma', 'Yleisradio – Ykkönen', 'Radio Ylästö'], SPORT_STATIONS = ['YLE Urheiluradio', 'Radio 1 – Urheilua', 'Radio Ralli – selostus'];
 function radioTune() { const R = RADIO, talk = R.list[R.i] && R.list[R.i].talk; let n; do n = Math.floor(Math.random()*STATIONS.length); while (R.st && STATIONS[n] === R.st.name && STATIONS.length > 1);
-  if (talk) { const k = Math.floor(Math.random()*TALK_STATIONS.length); R.st = { name: TALK_STATIONS[k], freq: (87.9 + k*2.3).toFixed(1) }; return; }   // (the talk is on the national broadcaster)
+  if (talk) { const sp = R.list[R.i].sport, L = sp ? SPORT_STATIONS : TALK_STATIONS, k = Math.floor(Math.random()*L.length); R.st = { name: L[k], freq: (sp ? 101.1 + k*1.7 : 87.9 + k*2.3).toFixed(1) }; return; }   // (sport: the sports channels)   // (the talk is on the national broadcaster)
   RADIO.st = { name: STATIONS[n], freq: (87.6 + ((n*7 + 3) % 20)*1.0 + ((n*3) % 10)/10).toFixed(1) }; }   // (every station has its own place on the dial, 87.6–107.5 MHz)
 function radioVolume() { const g = RADIO.vol/10*0.9; if (RADIO.gain) RADIO.gain.gain.setTargetAtTime(g, audio.ctx.currentTime, 0.05); else if (RADIO.el) RADIO.el.volume = Math.min(1, g); }
 function radioShow(flash) { const box = document.getElementById('radio'); if (!box || !RADIO.list.length) return; const $ = (id) => document.getElementById(id), R = RADIO;
   box.classList.toggle('on', R.started && gameState !== State.MENU); box.classList.toggle('off', R.off);
-  const song = R.list[R.i], t = R.off ? 'RADIO POIS · E' : (song.talk ? '🎙 ' : '♪ ') + (song.title || song.file.replace(/\.[^.]+$/, ''));
+  const song = R.list[R.i], t = R.off ? 'RADIO POIS · E' : (song.sport ? '🏆 ' : song.talk ? '🎙 ' : '♪ ') + (song.title || song.file.replace(/\.[^.]+$/, ''));
   $('radio-freq').textContent = R.off || !R.st ? '--.-' : R.st.freq; $('radio-station').textContent = R.off || !R.st ? '' : R.st.name;
   $('radio-vol').innerHTML = Array.from({ length: 10 }, (_, k) => '<i' + (k < R.vol ? ' class="lit"' : '') + '></i>').join('');
   const T = $('radio-title');

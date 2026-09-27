@@ -186,32 +186,44 @@
  },
  {
   "file": "radio-ohjelma-11.mp3",
-  "title": "Kuulutus: sininen Lada väärässä paikassa",
+  "title": "Urheiluruutu: Ylästön kierrosennätys kaatui",
   "artist": "anttii",
-  "talk": true
+  "talk": true,
+  "sport": true
  },
  {
   "file": "radio-ohjelma-12.mp3",
-  "title": "Urheiluruutu radiossa: kylän kierrosennätys",
+  "title": "Suora selostus: Tikkurilan hiihtoviesti",
   "artist": "anttii",
-  "talk": true
+  "talk": true,
+  "sport": true
  },
  {
   "file": "radio-ohjelma-13.mp3",
-  "title": "Kotiliesi-tunti: Ylästön pullapojat",
+  "title": "Jääkiekkoradio: Jokerit–Kärpät, kolmas erä",
   "artist": "anttii",
-  "talk": true
+  "talk": true,
+  "sport": true
  },
  {
   "file": "radio-ohjelma-14.mp3",
-  "title": "Aamupäivän tanssimusiikkia – puhetta vain",
+  "title": "Ravikuulutus: Vermon lähtö 5",
   "artist": "anttii",
-  "talk": true
+  "talk": true,
+  "sport": true
  },
  {
   "file": "radio-ohjelma-15.mp3",
-  "title": "Löytötavarat: kuka hukkasi tämän puskurin?",
+  "title": "Pesäpalloselostus: Vimpeli–Sotkamo",
   "artist": "anttii",
-  "talk": true
+  "talk": true,
+  "sport": true
+ },
+ {
+  "file": "radio-ohjelma-16.mp3",
+  "title": "Rallin MM: Jyväskylän suurajot, erikoiskoe 12",
+  "artist": "anttii",
+  "talk": true,
+  "sport": true
  }
 ]
