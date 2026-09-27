@@ -436,6 +436,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   constructor); drawMinimapFree shows every street in GTA mode; onlineGhostsUpdate skips ghosts without a mesh; serve.mjs sends
   content-length (talk programmes had duration Infinity locally). Tests updated to current rules (t_ghost gridLeft, t_mischief2 path
   length, t_batch keeps bodyFill; its last ~10 px are instanced-vs-plain edge rounding). t_audit_shots: pictures of the new things.
+- Languages (28.9., "englanti optioksi… JA norjan"): FI · EN · NO buttons top right on the start screen, L cycles in the menu,
+  stored in localStorage `ylasto1988-kieli`. Finnish is the source text: T('suomeksi', a, b…) looks it up in I18N (fi → [en, no]),
+  fills {0} {1}…, and falls back to the Finnish. Static HTML carries data-t (applyLang keeps the Finnish in data-fi). The start-split
+  road paint (KISA / GTA VAPAA AJO) repaints via userData.relang. Street names, shop signs, radio and the change log stay Finnish.
+  A NEW player-visible text: write it through T() and add its line to I18N. t_lang: no Finnish left on the menu/HUD in en/no.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

@@ -67,6 +67,9 @@
     box-shadow: 0 0 0 3px #ffd23c; animation: newsStar 1.6s ease-in-out infinite; }
   @keyframes newsStar { 0%, 100% { transform: rotate(-12deg) scale(1); } 50% { transform: rotate(12deg) scale(1.12); } }
   #stats { margin: 10px 16px 0; min-height: 1.3em; text-align: center; font-size: clamp(10px, 1.5vw, 14px); letter-spacing: 0.22em; color: #b8b8b0; font-variant-numeric: tabular-nums; opacity: 0; transition: opacity 0.4s; }
+  #lang { position: absolute; top: 12px; right: 14px; display: flex; gap: 4px; z-index: 2; }
+  #lang button { font: 800 12px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.12em; padding: 6px 8px; color: #8a8a84; background: transparent; border: 1px solid #333; border-radius: 3px; cursor: pointer; }
+  #lang button:hover { color: #e8e8e4; border-color: #666; } #lang button.on { color: #fff; background: #e0141e; border-color: #e0141e; }
   #stats.on { opacity: 1; } #stats b { color: #ffd23c; font-weight: 700; } #stats .sl { color: #e0141e; margin: 0 0.8em; }
   #overlay .start-hint { font-size: clamp(11px, 1.8vw, 16px); letter-spacing: 0.4em; text-align: center; margin: 0 16px; text-transform: uppercase; color: #e8e8e4; animation: pulse 2s ease-in-out infinite; }
   #results { display: none; text-align: center; }
@@ -120,45 +123,111 @@
 </head>
 <body>
 <div id="overlay" class="loading">
+  <div id="lang"><button data-l="fi">FI</button><button data-l="en">EN</button><button data-l="no">NO</button></div>
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
-  <div id="news"><span class="star">★</span>UUTUUS: GTA-MOODI<small>aja lähdössä oikeaa kaistaa</small></div>
-  <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+  <div id="news"><span class="star">★</span><span data-t>UUTUUS: GTA-MOODI</span><small data-t>aja lähdössä oikeaa kaistaa</small></div>
+  <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
+  <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
+  <div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div id="stats"></div>
-    <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
+    <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span></div></div>
   <div id="results">
-    <div class="label">maaliaika</div>
+    <div class="label" data-t>maaliaika</div>
     <div class="time" id="final-time">00:00.000</div>
     <div class="best-time" id="best-time-display"></div>
-    <div id="name-form" style="display:none"><input id="name-input" maxlength="16" placeholder="nimesi" autocomplete="off" spellcheck="false"><button id="name-save" onclick="onlineSubmit()">tallenna aika</button><div id="name-status"></div></div>
-    <div class="restart-hint">enter — uusi lähtö</div>
+    <div id="name-form" style="display:none"><input id="name-input" maxlength="16" placeholder="nimesi" autocomplete="off" spellcheck="false"><button id="name-save" onclick="onlineSubmit()" data-t>tallenna aika</button><div id="name-status"></div></div>
+    <div class="restart-hint" data-t>enter — uusi lähtö</div>
   </div>
   <div id="top10"><div class="t10-head">Ennätyslista · kaikki kuskit</div><div class="t10-loading"><span class="spin"></span>haetaan aikoja…</div><div class="t10-bar"></div><div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div><div class="t10-skel" style="width:94%"></div></div>
   <div class="deco bottom"><svg width="80" height="20" viewBox="0 0 80 20" aria-hidden="true"><path d="M8 20L17 0h8L16 20zM30 20L39 0h8L38 20zM52 20L61 0h8L60 20z" fill="#e0141e"/></svg></div>
   <div id="changelog"></div>
 </div>
 <div id="hud">
-  <div class="hud-block"><span class="hud-label">Aika</span><span class="hud-value" id="timer">00:00.000</span><span class="hud-sub" id="best-hud"></span><span class="hud-sub" id="pizza-hud" style="color:#ffb347"></span></div>
-  <div class="hud-block" style="text-align:center"><span class="hud-label">Tarkastus</span><span class="hud-value" id="cp-counter">0 / 0</span></div>
+  <div class="hud-block"><span class="hud-label" data-t>Aika</span><span class="hud-value" id="timer">00:00.000</span><span class="hud-sub" id="best-hud"></span><span class="hud-sub" id="pizza-hud" style="color:#ffb347"></span></div>
+  <div class="hud-block" style="text-align:center"><span class="hud-label" data-t>Tarkastus</span><span class="hud-value" id="cp-counter">0 / 0</span></div>
   <div class="hud-block" style="text-align:right;visibility:hidden"><span class="hud-label">Speed</span><span class="hud-value speed" id="speed-display">0</span></div>
 </div>
 <div id="checkpoint-display"></div>
 <div id="ghost-delta"></div>
-<div id="pizza-msg"></div><div id="police-msg"></div><div id="police-hud">🚨 POLIISI JAHTAA</div>
+<div id="pizza-msg"></div><div id="police-msg"></div><div id="police-hud" data-t>🚨 POLIISI JAHTAA</div>
 <div id="countdown"></div>
-<div id="bass-hud">🔊 BASSOBOOST · B</div><div id="es-hud"></div>
+<div id="bass-hud" data-t>🔊 BASSOBOOST · B</div><div id="es-hud"></div>
 <div id="radio"><div class="r-top"><span class="r-band">FM <b id="radio-freq">--.-</b></span><span class="r-station" id="radio-station"></span><span class="r-vol" id="radio-vol"></span></div><div class="r-win"><span class="r-title" id="radio-title"></span></div></div>
 <canvas id="cluster"></canvas>
 <canvas id="minimap"></canvas>
 <div id="controls-hint">
-  <span class="key-hint">↑ kaasu</span><span class="key-hint">↓ jarru / peruutus</span>
-  <span class="key-hint">← → ohjaus</span><span class="key-hint">välilyönti käsijarru</span><span class="key-hint">R uusi lähtö</span><span class="key-hint">Esc alkuruutu</span><span class="key-hint">G haamu</span><span class="key-hint">C kamera</span><span class="key-hint" id="radio-key" style="display:none">E radio · 1/2 ääni</span><span class="key-hint">B bassoboost</span>
+  <span class="key-hint" data-t>↑ kaasu</span><span class="key-hint" data-t>↓ jarru / peruutus</span>
+  <span class="key-hint" data-t>← → ohjaus</span><span class="key-hint" data-t>välilyönti käsijarru</span><span class="key-hint" data-t>R uusi lähtö</span><span class="key-hint" data-t>Esc alkuruutu</span><span class="key-hint" data-t>G haamu</span><span class="key-hint" data-t>C kamera</span><span class="key-hint" id="radio-key" style="display:none" data-t>E radio · 1/2 ääni</span><span class="key-hint" data-t>B bassoboost</span>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+// ===== LANGUAGE: Finnish is the source; English and Norwegian (bokmål) from the start screen's FI · EN · NO (remembered).
+// T('finnish text', a, b…) → the text in the chosen language, {0} {1}… filled in. A text missing here stays Finnish. HTML with data-t: applyLang.
+// Street names, shop signs, radio stations and the change log stay Finnish (it's Vantaa, 1988).
+const I18N = {
+  'UUTUUS: GTA-MOODI': ['NEW: GTA MODE', 'NYHET: GTA-MODUS'],
+  'aja lähdössä oikeaa kaistaa': ['take the right lane at the start', 'kjør høyre felt ved start'],
+  'Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.': ["Summer 1988. Peugeot 205. Wihka did 1.29:000 yesterday. You didn't.", 'Sommer 1988. Peugeot 205. Wihka kjørte 1.29:000 i går. Ikke du.'],
+  'Kesä 1988. Vanha Pökö 205, {0} ajoi eilen {1}. Sinä et.': ["Summer 1988. Peugeot 205. {0} did {1} yesterday. You didn't.", 'Sommer 1988. Peugeot 205. {0} kjørte {1} i går. Ikke du.'],
+  'Kesä 1988. Vanha Pökö 205, sinä ajoit eilen {1}. Muut eivät.': ['Summer 1988. Peugeot 205. You did {1} yesterday. Nobody else did.', 'Sommer 1988. Peugeot 205. Du kjørte {1} i går. Ingen andre.'],
+  'Kesä 1988': ['Summer 1988', 'Sommer 1988'],
+  'paina enter ja aja': ['press enter and drive', 'trykk enter og kjør'],
+  'kaasu': ['throttle', 'gass'], 'jarru / peruutus': ['brake / reverse', 'brems / revers'], 'ohjaus': ['steer', 'styring'],
+  'välilyönti': ['space', 'mellomrom'], 'käsijarru': ['handbrake', 'håndbrekk'], 'uusi lähtö': ['restart', 'ny start'], 'alkuruutu': ['menu', 'meny'],
+  'kamera': ['camera', 'kamera'], 'haamu': ['ghost', 'spøkelse'], 'radio: seuraava biisi': ['radio: next song', 'radio: neste låt'],
+  'radio hiljemmalle / lujemmalle': ['radio quieter / louder', 'radio lavere / høyere'], 'bassoboost 🔊': ['bass boost 🔊', 'bassboost 🔊'],
+  '↑ kaasu': ['↑ throttle', '↑ gass'], '↓ jarru / peruutus': ['↓ brake / reverse', '↓ brems / revers'], '← → ohjaus': ['← → steer', '← → styring'],
+  'välilyönti käsijarru': ['space handbrake', 'mellomrom håndbrekk'], 'R uusi lähtö': ['R restart', 'R ny start'], 'Esc alkuruutu': ['Esc menu', 'Esc meny'],
+  'G haamu': ['G ghost', 'G spøkelse'], 'C kamera': ['C camera', 'C kamera'], 'E radio · 1/2 ääni': ['E radio · 1/2 volume', 'E radio · 1/2 volum'], 'B bassoboost': ['B bass boost', 'B bassboost'],
+  'maaliaika': ['finish time', 'sluttid'], 'nimesi': ['your name', 'navnet ditt'], 'tallenna aika': ['save time', 'lagre tid'], 'enter — uusi lähtö': ['enter — restart', 'enter — ny start'],
+  'Aika': ['Time', 'Tid'], 'Tarkastus': ['Checkpoint', 'Sjekkpunkt'],
+  '🚨 POLIISI JAHTAA': ['🚨 POLICE CHASE', '🚨 POLITIJAKT'], '🔊 BASSOBOOST · B': ['🔊 BASS BOOST · B', '🔊 BASSBOOST · B'],
+  'ALOITETTUJA AJOJA': ['RACES STARTED', 'STARTEDE LØP'], 'KUSKEJA': ['DRIVERS', 'SJÅFØRER'], 'MUUTOKSET': ['UPDATES (IN FINNISH)', 'ENDRINGER (PÅ FINSK)'],
+  'Ennätyslista · kaikki kuskit': ['Leaderboard · all drivers', 'Rekordliste · alle sjåfører'], 'Ennätyslista · {0} kuskia · vieritä': ['Leaderboard · {0} drivers · scroll', 'Rekordliste · {0} sjåfører · rull'],
+  'haetaan aikoja…': ['fetching times…', 'henter tider…'], 'päivitetään aikoja…': ['updating times…', 'oppdaterer tider…'],
+  'tuloksia ei saatu haettua — haamuna oma paras': ["couldn't fetch the times — racing your own best", 'fikk ikke hentet tidene — du kjører mot din egen beste'],
+  'ei vielä aikoja — aja ensimmäinen': ['no times yet — set the first one', 'ingen tider ennå — sett den første'],
+  'haamuina radalla: {0}': ['ghosts on the track: {0}', 'spøkelser på banen: {0}'], 'ei haamuja vielä': ['no ghosts yet', 'ingen spøkelser ennå'],
+  'anna nimi': ['enter a name', 'skriv inn et navn'], 'tallennetaan…': ['saving…', 'lagrer…'], 'tallennettu · sija {0}.': ['saved · position {0}', 'lagret · plass {0}'],
+  'ei parannusta · {0}: paras {1} (sija {2}.)': ['no improvement · {0}: best {1} (position {2})', 'ingen forbedring · {0}: beste {1} (plass {2})'],
+  'mutka oikaistu — aikaa ei hyväksytty': ['corner cut — time not accepted', 'svingen ble kuttet — tiden godkjennes ikke'],
+  'nimi ei käy — valitse toinen nimi': ['that name is not allowed — pick another', 'navnet er ikke tillatt — velg et annet'], 'tallennus ei onnistunut ({0})': ['saving failed ({0})', 'lagring mislyktes ({0})'],
+  '🍕 PIZZA! auto +10 %': ['🍕 PIZZA! car +10 %', '🍕 PIZZA! bil +10 %'], '🍕 pizza tulossa… {0}': ['🍕 pizza coming… {0}', '🍕 pizza kommer… {0}'],
+  'RADIO POIS · E': ['RADIO OFF · E', 'RADIO AV · E'],
+  'LISÄÄ POLIISEJA!': ['MORE POLICE!', 'MER POLITI!'], '🚨 POLIISIT TULEVAT!': ['🚨 THE POLICE ARE COMING!', '🚨 POLITIET KOMMER!'],
+  '🔥 TULIPALO {0}/3': ['🔥 FIRE {0}/3', '🔥 BRANN {0}/3'], 'KOLARI {0}/3': ['CRASH {0}/3', 'KRASJ {0}/3'],
+  '🚨 KIINNI! POLIISI PUHUTTELEE…': ['🚨 BUSTED! THE OFFICER WANTS A WORD…', '🚨 TATT! POLITIET VIL HA EN PRAT…'],
+  'SAAT JATKAA — AJA SIIVOSTI': ['YOU MAY GO — DRIVE NICELY', 'DU KAN KJØRE VIDERE — KJØR PENT'], 'PÄÄSIT KARKUUN!': ['YOU GOT AWAY!', 'DU SLAPP UNNA!'],
+  '👽 UFO AMPUI AUTON!': ['👽 THE UFO SHOT YOUR CAR!', '👽 UFOEN SKJØT BILEN!'], '⚡🔥 ES + KOLARI = TULIPALO!': ['⚡🔥 ES + CRASH = FIRE!', '⚡🔥 ES + KRASJ = BRANN!'],
+  '🐻 KARHU YLIAJETTU! 10 POLIISIA PERÄÄN!': ['🐻 YOU HIT A BEAR! 10 POLICE CARS AFTER YOU!', '🐻 DU KJØRTE PÅ EN BJØRN! 10 POLITIBILER ETTER DEG!'],
+  '🔥 AUTO PALAA · R = UUSI LÄHTÖ': ['🔥 CAR ON FIRE · R = RESTART', '🔥 BILEN BRENNER · R = NY START'],
+  '⚡ ES {0} s · 2× NOPEUS · ÄLÄ KOLAROI': ["⚡ ES {0} s · 2× SPEED · DON'T CRASH", '⚡ ES {0} s · 2× FART · IKKE KRASJ'],
+  '⚡ ES! BASSO PÄÄLLE JA TUPLANOPEUS 40 s': ['⚡ ES! BASS ON AND DOUBLE SPEED 40 s', '⚡ ES! BASS PÅ OG DOBBEL FART 40 s'], '⚡ ES tulossa… {0}': ['⚡ ES coming… {0}', '⚡ ES kommer… {0}'],
+  '🚜 ISÄNTÄ SUUTTUI! TRAKTORI PERÄÄN': ['🚜 THE FARMER IS FURIOUS! TRACTOR ON YOUR TAIL', '🚜 BONDEN BLE SINT! TRAKTOREN ER ETTER DEG'],
+  'MATALA KAMERA': ['LOW CAMERA', 'LAVT KAMERA'], 'YLÄKAMERA': ['HIGH CAMERA', 'HØYT KAMERA'],
+  'HAAMU PÄÄLLÄ': ['GHOST ON', 'SPØKELSE PÅ'], 'HAAMU POIS': ['GHOST OFF', 'SPØKELSE AV'], 'EI HAAMUA VIELÄ': ['NO GHOST YET', 'INGEN SPØKELSE ENNÅ'],
+  'mutka oikaistu — aika ei kelpaa': ["corner cut — the time doesn't count", 'svingen ble kuttet — tiden teller ikke'],
+  'uusi ennätys — haamu tallennettu': ['new record — ghost saved', 'ny rekord — spøkelse lagret'], 'paras: {0}': ['best: {0}', 'beste: {0}'], 'paras {0}': ['best {0}', 'beste {0}'],
+  'VAPAA AJO – KOKO KYLÄ ON SINUN': ['FREE ROAM – THE WHOLE VILLAGE IS YOURS', 'FRI KJØRING – HELE BYGDA ER DIN'], 'VAPAA AJO': ['FREE ROAM', 'FRI KJØRING'],
+  'R uusi lähtö · Esc': ['R restart · Esc', 'R ny start · Esc'], 'OIKAISU – KIERROS EI KELPAA': ["SHORTCUT – THE LAP DOESN'T COUNT", 'SNARVEI – RUNDEN TELLER IKKE'],
+  'AIKA KÄY': ['CLOCK RUNNING', 'KLOKKA GÅR'], 'FINAL — FIND FINISH': ['FINAL — FIND FINISH', 'SISTE — FINN MÅL'], 'CHECKPOINT {0}': ['CHECKPOINT {0}', 'SJEKKPUNKT {0}'],
+  'KISA': ['RACE', 'LØP'],
+};
+const LANGS = ['fi', 'en', 'no']; let LANG = 'fi';
+try { const l = localStorage.getItem('ylasto1988-kieli'); if (LANGS.includes(l)) LANG = l; } catch (e) {}
+function T(s, ...a) { const e = LANG !== 'fi' && I18N[s], t = (e && e[LANGS.indexOf(LANG) - 1]) || s; return a.length ? t.replace(/\{(\d)\}/g, (m, i) => a[i] !== undefined ? a[i] : m) : t; }
+let STATS_LAST = null;
+function applyLang() { document.documentElement.lang = LANG === 'no' ? 'nb' : LANG;
+  document.querySelectorAll('[data-t]').forEach(el => { if (el.dataset.fi === undefined) el.dataset.fi = el.textContent; const t = T(el.dataset.fi); if (el.textContent !== t) el.textContent = t; });
+  const inp = document.getElementById('name-input'); if (inp) inp.placeholder = T('nimesi');
+  document.querySelectorAll('#lang button').forEach(b => b.classList.toggle('on', b.dataset.l === LANG)); }
+function setLang(l) { if (!LANGS.includes(l)) return; LANG = l; try { localStorage.setItem('ylasto1988-kieli', l); } catch (e) {}
+  applyLang(); if (typeof renderTop10 === 'function') renderTop10(); if (typeof renderChangelog === 'function') renderChangelog(); if (STATS_LAST) statsShow(STATS_LAST);
+  if (typeof trackMeshGroup !== 'undefined' && trackMeshGroup) trackMeshGroup.traverse(o => o.userData.relang && o.userData.relang()); }
+document.querySelectorAll('#lang button').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); setLang(b.dataset.l); b.blur(); }));
+applyLang();
 'use strict';
 // the leaderboard is asked for on the first line: with the track signature from the last visit, the request runs while the
 // world is being built (onlineRefresh takes it over if the track is the same)
@@ -944,10 +1013,12 @@ function buildGridBox() {
   const yel = new THREE.MeshBasicMaterial({ color: 0xffd23c, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false });
   bar(sx + L.x*w2*0.5, sz + L.z*w2*0.5, yaw + Math.PI/2, 0.55, w2 - 0.2);            // the start line: the left lane only
   const word = (lines, col, side, at) => {   // painted on the road, readable from the driver's seat: a modern heavy sans, true proportions
-    const c = document.createElement('canvas'); c.width = 640; c.height = Math.ceil(lines.reduce((a, [, fs]) => a + fs*0.95, 0) + 20); const g = c.getContext('2d'); let y = 10;   // lines: [text, px]
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = col;
-    for (const [t, fs] of lines) { g.font = '900 ' + fs + 'px "Arial Black", "Helvetica Neue", Arial, sans-serif'; g.fillText(t, 320, y + fs*0.5, 620); y += fs*0.95; }
-    const wd = w2*0.86, ht = wd*c.height/c.width, me = new THREE.Mesh(new THREE.PlaneGeometry(wd, ht), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false }));
+    const c = document.createElement('canvas'); c.width = 640; c.height = Math.ceil(lines.reduce((a, [, fs]) => a + fs*0.95, 0) + 20); const g = c.getContext('2d');   // lines: [text, px] (Finnish: T() at each paint)
+    const paint = () => { let y = 10; g.clearRect(0, 0, c.width, c.height); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = col;
+      for (const [t, fs] of lines) { g.font = '900 ' + fs + 'px "Arial Black", "Helvetica Neue", Arial, sans-serif'; g.fillText(T(t), 320, y + fs*0.5, 620); y += fs*0.95; } };
+    paint(); const tex = new THREE.CanvasTexture(c);
+    const wd = w2*0.86, ht = wd*c.height/c.width, me = new THREE.Mesh(new THREE.PlaneGeometry(wd, ht), new THREE.MeshBasicMaterial({ map: tex, transparent: true, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4, depthWrite: false }));
+    me.userData.relang = () => { paint(); tex.needsUpdate = true; };
     me.rotation.order = 'YXZ'; me.rotation.set(-Math.PI/2, yaw + Math.PI, 0); me.position.set(p.x + d.x*(at - ht/2) + L.x*w2*0.5*side, ROAD_Y + 0.04, p.y + d.y*(at - ht/2) + L.z*w2*0.5*side); me.renderOrder = 1; me.userData.key = 'grid'; trackMeshGroup.add(me); };
   word([['KISA', 250]], '#ffffff', 1, ahead - 1.0); word([['GTA', 300], ['VAPAA AJO', 110]], '#ffd23c', -1, ahead - 1.0);
   Object.assign(START_SPLIT, { x: sx, z: sz, dx: d.x, dz: d.y, lx: L.x, lz: L.z, hw: w2, prev: null, done: false, ok: true });
@@ -3903,7 +3974,7 @@ try { ONLINE.name = localStorage.getItem('ylasto1988-nimi') || ''; } catch (e) {
 // started races and drivers, on the start screen: every start is counted on the server under this browser's own id (a new one: one more driver)
 try { ONLINE.id = localStorage.getItem('ylasto1988-id') || ''; if (!/^[a-z0-9]{8,32}$/.test(ONLINE.id)) { ONLINE.id = Array.from(crypto.getRandomValues(new Uint8Array(16)), (v) => 'abcdefghijklmnopqrstuvwxyz0123456789'[v % 36]).join('');   /* (not Math.random: the seeded world stays the same) */ localStorage.setItem('ylasto1988-id', ONLINE.id); } } catch (e) { ONLINE.id = ''; }
 function statsShow(d) { const el = document.getElementById('stats'); if (!el || !d || !(d.starts >= 0)) return; const f = (v) => Math.round(v).toLocaleString('fi-FI');
-  el.innerHTML = 'ALOITETTUJA AJOJA: <b>' + f(d.starts) + '</b><span class="sl">/</span>KUSKEJA: <b>' + f(d.drivers) + '</b>'; el.classList.add('on'); }
+  el.innerHTML = T('ALOITETTUJA AJOJA') + ': <b>' + f(d.starts) + '</b><span class="sl">/</span>' + T('KUSKEJA') + ': <b>' + f(d.drivers) + '</b>'; el.classList.add('on'); STATS_LAST = d; }
 function onlineStats() { if (ONLINE.api) apiGet('/stats').then(statsShow).catch(() => {}); }
 let _startSent = 0;
 function onlineStart() { if (!ONLINE.api || !ONLINE.id || performance.now() - _startSent < 3000) return; _startSent = performance.now();   // (R hammered: one start a few seconds)
@@ -3935,6 +4006,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Kieli: alkuruudusta FI · EN · NO (tai L-näppäin) — englanti ja norja kaikkiin teksteihin, myös lähdön tiemaalaukseen'],
   ['27.9.', 'Tarkastuskierros: kaksi katkosta tieverkossa korjattu (poliisi ajoi 900 m kiertotietä ja jäi paloauton taakse), poliisi kiertää parkkiautot, hirvet ylittävät tien eivätkä kävele sitä pitkin, jumiin jääneet kävelijät luovuttavat, GTA-moodissa kartalla kaikki kadut'],
   ['27.9.', 'Kamera pitää auton ruudun alaosassa myös kovassa vauhdissa (ei enää valu keskelle)'],
   ['27.9.', 'ES-tempaus K-kaupan pihalla: jättitölkki, kajarit soittaa, tanssijat ja ES STOP -ruutu (pysähdy siihen → tölkki). ES:llä auto ei enää hajoa pienestä kolhusta'],
@@ -4004,28 +4076,28 @@ const CHANGES = [
   ['26.9.', 'Optimointi: puolet vähemmän piirtokutsuja'],
 ];
 function renderChangelog() { const el = document.getElementById('changelog'); if (!el) return;
-  el.innerHTML = '<div class="cl-head">MUUTOKSET</div><div class="cl-list"></div>'; const L = el.lastChild; CHANGES.forEach(([d, t]) => { const r = document.createElement('div'); r.className = 'cl-row'; r.title = t;   // (all of them: the box scrolls)
+  el.innerHTML = '<div class="cl-head">' + T('MUUTOKSET') + '</div><div class="cl-list"></div>'; const L = el.lastChild; CHANGES.forEach(([d, t]) => { const r = document.createElement('div'); r.className = 'cl-row'; r.title = t;   // (all of them: the box scrolls)
     r.innerHTML = '<span class="cl-d"></span><span></span>'; r.children[0].textContent = d; r.children[1].textContent = t; L.appendChild(r); }); }
 function renderTop10() { const el = document.getElementById('top10'); if (!el) return;
-  const head = '<div class="t10-head">Ennätyslista · kaikki kuskit</div>', loading = (small) => '<div class="t10-loading' + (small ? ' small' : '') + '"><span class="spin"></span>' + (small ? 'päivitetään aikoja…' : 'haetaan aikoja…') + '</div><div class="t10-bar' + (small ? ' small' : '') + '"></div>';
+  const head = '<div class="t10-head">' + T('Ennätyslista · kaikki kuskit') + '</div>', loading = (small) => '<div class="t10-loading' + (small ? ' small' : '') + '"><span class="spin"></span>' + T(small ? 'päivitetään aikoja…' : 'haetaan aikoja…') + '</div><div class="t10-bar' + (small ? ' small' : '') + '"></div>';
   { const ov = document.getElementById('overlay'); if (ov) ov.classList.toggle('loading', !!(ONLINE.api && ONLINE.busy)); }   // (the red stripes run too while it loads)
   if (!ONLINE.ok) { el.innerHTML = !ONLINE.api ? '' : ONLINE.busy ? head + loading() + '<div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div><div class="t10-skel" style="width:94%"></div>'
-    : head + '<div class="t10-empty t10-err">tuloksia ei saatu haettua — haamuna oma paras</div>'; return; }
+    : head + '<div class="t10-empty t10-err">' + T('tuloksia ei saatu haettua — haamuna oma paras') + '</div>'; return; }
   const me = onlineKey(ONLINE.name), rows = ONLINE.list;   // (every time on the board: the list scrolls after ten)
   { const tg = document.getElementById('tagline'), top = ONLINE.list[0];   // the tagline names whoever leads the board, in the old 1.29:000 style
     if (tg && top) { const ms = Math.round(top.t*1000), tt = Math.floor(ms/60000) + '.' + String(Math.floor(ms/1000) % 60).padStart(2, '0') + ':' + String(ms % 1000).padStart(3, '0');
-      tg.textContent = 'Kesä 1988. Vanha Pökö 205, ' + (top.k === me ? 'sinä ajoit eilen ' + tt + '. Muut eivät.' : top.name + ' ajoi eilen ' + tt + '. Sinä et.'); } }
+      tg.textContent = top.k === me ? T('Kesä 1988. Vanha Pökö 205, sinä ajoit eilen {1}. Muut eivät.', '', tt) : T('Kesä 1988. Vanha Pökö 205, {0} ajoi eilen {1}. Sinä et.', top.name, tt); } }
   if (ONLINE.busy && !rows.length) { el.innerHTML = head + loading() + '<div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div>'; return; }
-  el.innerHTML = head + (rows.length ? '' : '<div class="t10-empty">ei vielä aikoja — aja ensimmäinen</div>');
+  el.innerHTML = head + (rows.length ? '' : '<div class="t10-empty">' + T('ei vielä aikoja — aja ensimmäinen') + '</div>');
   const box = document.createElement('div'); box.className = 't10-list'; if (rows.length) el.appendChild(box); let myRow = null;
   rows.forEach((r, i) => { const d = document.createElement('div'); d.className = 't10-row' + (r.k === me ? ' me' : ''); if (r.k === me) myRow = d;
     d.innerHTML = '<span class="t10-pos"></span><span class="t10-name"></span><span class="t10-time"></span>'; d.children[0].textContent = (i + 1) + '.'; d.children[1].textContent = r.name; d.children[2].textContent = formatTime(r.t); box.appendChild(d); });
   if (myRow && myRow.offsetTop > box.clientHeight) box.scrollTop = myRow.offsetTop - box.clientHeight/2;   // (your own row in view)
   const fade = () => box.classList.toggle('more', box.scrollTop + box.clientHeight < box.scrollHeight - 4); fade(); box.addEventListener('scroll', fade);
-  if (rows.length > 10) el.firstChild.textContent = 'Ennätyslista · ' + rows.length + ' kuskia · vieritä';
+  if (rows.length > 10) el.firstChild.textContent = T('Ennätyslista · {0} kuskia · vieritä', rows.length);
   if (ONLINE.busy) { el.insertAdjacentHTML('beforeend', loading(true)); return; }   // (a refresh after a lap: the old list stays up meanwhile)
   const rivals = ONLINE.opp.map(o => o.name + ' ' + formatTime(o.t).replace(/^00:/, '')).join(' · '), d = document.createElement('div'); d.className = 't10-empty';
-  d.textContent = rivals ? 'haamuina radalla: ' + rivals : 'ei haamuja vielä'; el.appendChild(d); }
+  d.textContent = rivals ? T('haamuina radalla: {0}', rivals) : T('ei haamuja vielä'); el.appendChild(d); }
 function samplePose(S, st, t) {   // a ghost's pose at t: linear between samples (angle along the short way); st.cursor walks forward
   const n = S.length/4; if (st.cursor >= n - 1 || S[st.cursor*4] > t*1000) st.cursor = 0;
   while (st.cursor < n - 2 && S[(st.cursor + 1)*4] <= t*1000) st.cursor++;
@@ -4041,15 +4113,15 @@ function onlineOfferName() { const box = document.getElementById('name-form'); i
   box.style.display = 'flex'; const inp = document.getElementById('name-input'); inp.value = ONLINE.name; document.getElementById('name-status').textContent = '';
   setTimeout(() => { inp.focus(); inp.select(); }, 60); }
 async function onlineSubmit() { const inp = document.getElementById('name-input'), st = document.getElementById('name-status'), run = ONLINE.lastRun;
-  const name = inp.value.normalize('NFC').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 16); if (!name) { st.textContent = 'anna nimi'; return; }
+  const name = inp.value.normalize('NFC').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 16); if (!name) { st.textContent = T('anna nimi'); return; }
   if (!run) return; ONLINE.name = name; try { localStorage.setItem('ylasto1988-nimi', name); } catch (e) {}
-  st.textContent = 'tallennetaan…'; inp.blur();
+  st.textContent = T('tallennetaan…'); inp.blur();
   try { const r = await fetch(ONLINE.api + '/lap', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sig: trackSignature(), name, t: run.time, splits: run.splits, s: run.s }) });
     const d = await r.json(); if (!r.ok) throw new Error(d.error || r.status);
-    st.textContent = d.saved ? `tallennettu · sija ${d.rank}.` : `ei parannusta · ${name}: paras ${formatTime(d.best)} (sija ${d.rank}.)`;
+    st.textContent = d.saved ? T('tallennettu · sija {0}.', d.rank) : T('ei parannusta · {0}: paras {1} (sija {2}.)', name, formatTime(d.best), d.rank);
     if (d.saved) ONLINE.lastRun = null;
     ONLINE.list = d.list || ONLINE.list; renderTop10(); onlineRefresh();   // next start: the next three rungs up
-  } catch (e) { st.textContent = e.message === 'cut' ? 'mutka oikaistu — aikaa ei hyväksytty' : e.message === 'bad name' ? 'nimi ei käy — valitse toinen nimi' : 'tallennus ei onnistunut (' + e.message + ')'; if (e.message === 'bad name') { const i = document.getElementById('name-input'); i.focus(); i.select(); } } }
+  } catch (e) { st.textContent = e.message === 'cut' ? T('mutka oikaistu — aikaa ei hyväksytty') : e.message === 'bad name' ? T('nimi ei käy — valitse toinen nimi') : T('tallennus ei onnistunut ({0})', e.message); if (e.message === 'bad name') { const i = document.getElementById('name-input'); i.focus(); i.select(); } } }
 function ghostStartRun() { ghostRec = { s: [], splits: [], last: -1 }; ghostCursor = 0; ghostAlpha = 0; ghostGroup.visible = false; }
 function splitRef() {   // whose splits to race: the nearest rival FASTER than your best; leading (or no one faster), your own best lap
   const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), best = ONLINE.name && ONLINE.list.length ? (mine ? mine.t : Infinity) : (ghost ? ghost.time : Infinity);
@@ -5261,7 +5333,7 @@ const pizzaTask = (S) => ({ kind: 'pizza', update(h, dt) { const st = h.st || (h
     else if (walkTo(h, S.door[0], S.door[1], 1.8, dt)) { st.done = true; h.vx = h.vz = 0; return; }   // back at the door: in he goes (removed by pizzaUpdate)
     if (box.visible) { h.pose.armL = h.pose.armR = -1.25; } },
   knocked(h) { if (PIZZA.guy === h) PIZZA.guy = null; h.view.g.userData.box.visible = false; } });
-function pizzaDelivered(h) { PIZZA.got = true; PIZZA.k = PIZZA.BOOST; h.view.g.userData.box.visible = false; h.st.mode = 'back'; pizzaMsg('🍕 PIZZA! auto +10 %', true); beep(660, 0.12, 0.3, 'square'); setTimeout(() => beep(990, 0.25, 0.3, 'square'), 130);
+function pizzaDelivered(h) { PIZZA.got = true; PIZZA.k = PIZZA.BOOST; h.view.g.userData.box.visible = false; h.st.mode = 'back'; pizzaMsg(T('🍕 PIZZA! auto +10 %'), true); beep(660, 0.12, 0.3, 'square'); setTimeout(() => beep(990, 0.25, 0.3, 'square'), 130);
   const el = document.getElementById('pizza-hud'); if (el) el.textContent = '🍕 +10 %'; }
 let pizzaMsgT = null;
 function pizzaMsg(t, big) { const el = document.getElementById('pizza-msg'); if (!el) return; if (el.__t !== t) { el.__t = t; el.textContent = t; } el.style.opacity = 1; el.style.fontSize = big ? '38px' : '26px';
@@ -5274,7 +5346,7 @@ function pizzaUpdate(dt) {
     PIZZA.wait += dt;
     if (!PIZZA.guy && (!PIZZA.shop || PIZZA.shop === S)) { PIZZA.shop = S; const g = makePizzaGuy(); PIZZA.guy = new Human({ x: S.door[0], z: S.door[1], yaw: S.th, rig: g, task: pizzaTask(S), temp: true }); PIZZA.guy.ao = aoAlloc(); }
     if (PIZZA.guy && PIZZA.guy.st && PIZZA.guy.st.mode === 'back' && !PIZZA.got) { PIZZA.guy.st.mode = 'out'; PIZZA.guy.st.done = false; }   // (stopped again while he was going back in)
-    pizzaMsg('🍕 pizza tulossa… ' + Math.max(1, Math.ceil(PIZZA.WAIT - PIZZA.wait)), false);
+    pizzaMsg(T('🍕 pizza tulossa… {0}', Math.max(1, Math.ceil(PIZZA.WAIT - PIZZA.wait))), false);
   } else {
     PIZZA.wait = 0;
     if (PIZZA.guy && PIZZA.guy.st && !PIZZA.got) PIZZA.guy.st.mode = 'back';   // drove off: he takes it back in
@@ -5301,7 +5373,7 @@ function radioTune() { const R = RADIO, talk = R.list[R.i] && R.list[R.i].talk; 
 function radioVolume() { const g = RADIO.vol/10*0.9; if (RADIO.gain) RADIO.gain.gain.setTargetAtTime(g, audio.ctx.currentTime, 0.05); else if (RADIO.el) RADIO.el.volume = Math.min(1, g); }
 function radioShow(flash) { const box = document.getElementById('radio'); if (!box || !RADIO.list.length) return; const $ = (id) => document.getElementById(id), R = RADIO;
   box.classList.toggle('on', R.started && gameState !== State.MENU); box.classList.toggle('off', R.off);
-  const song = R.list[R.i], t = R.off ? 'RADIO POIS · E' : (song.sport ? '🏆 ' : song.talk ? '🎙 ' : '♪ ') + (song.title || song.file.replace(/\.[^.]+$/, ''));
+  const song = R.list[R.i], t = R.off ? T('RADIO POIS · E') : (song.sport ? '🏆 ' : song.talk ? '🎙 ' : '♪ ') + (song.title || song.file.replace(/\.[^.]+$/, ''));
   $('radio-freq').textContent = R.off || !R.st ? '--.-' : R.st.freq; $('radio-station').textContent = R.off || !R.st ? '' : R.st.name;
   $('radio-vol').innerHTML = Array.from({ length: 10 }, (_, k) => '<i' + (k < R.vol ? ' class="lit"' : '') + '></i>').join('');
   const T = $('radio-title');
@@ -5341,8 +5413,8 @@ function policeMsg(t, big) { const el = document.getElementById('police-msg'); i
 function policeIncident(kind) {
   if (gameState !== State.RACING || POLICE.hold > 0 || worldT - POLICE.lastT < 4 || (BASS.on && kind === 'people')) return;   /* (a crowd that throws itself at the car isn't the driver's doing) */ POLICE.lastT = worldT; POLICE.n++;   // (one pile-up is one incident)
   const on = POLICE.cars.filter(v => !v.gone && v.chase);
-  if (on.length) { if (on.length < 3) { policeSpawn(1); policeMsg('LISÄÄ POLIISEJA!'); } return; }
-  if (POLICE.n >= 3) { policeSpawn(2); policeMsg('🚨 POLIISIT TULEVAT!', true); } else policeMsg((kind === 'fire' ? '🔥 TULIPALO ' : 'KOLARI ') + POLICE.n + '/3'); }
+  if (on.length) { if (on.length < 3) { policeSpawn(1); policeMsg(T('LISÄÄ POLIISEJA!')); } return; }
+  if (POLICE.n >= 3) { policeSpawn(2); policeMsg(T('🚨 POLIISIT TULEVAT!'), true); } else policeMsg(T(kind === 'fire' ? '🔥 TULIPALO {0}/3' : 'KOLARI {0}/3', POLICE.n)); }
 function nearestNode(x, z) { const { nodes } = roadGraph(); let bi = -1, bd = 1e18; for (let i = 0; i < nodes.length; i++) { const d = (nodes[i].x - x)**2 + (nodes[i].z - z)**2; if (d < bd) { bd = d; bi = i; } } return bi; }
 function policeTree(fresh) { if (!fresh && POLICE.tree && worldT - POLICE.treeT < 1) return POLICE.tree; const si = nearestNode(car.x, car.z); if (si < 0) return null;
   const { nodes } = roadGraph(), d0 = Math.hypot(nodes[si].x - car.x, nodes[si].z - car.z), seeds = [];   // every street node near the car counts (off the road the nearest one can be on a street that joins far away)
@@ -5410,7 +5482,7 @@ function policeAI(v, dt) {
 const officerTask = (v) => ({ kind: 'officer', update(h, dt, t) {
   if (POLICE.hold > 0.6) { const [tx, tz] = lloc(car.x, car.z, car.angle, -1.4, 0.35); if (walkTo(h, tx, tz, 2.2, dt)) { h.yaw = Math.atan2(car.x - h.x, car.z - h.z); h.pose.armR = -1.45 + Math.sin(t*8)*0.22; h.pose.armL = -0.2; } return; }   // a finger wagged at the driver's window
   const [bx, bz] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 0.4); if (walkTo(h, bx, bz, 2.2, dt) || v.gone) humanRemove(h); } });
-function policeBust(v) { POLICE.hold = 7; POLICE.caughtT = 0; policeMsg('🚨 KIINNI! POLIISI PUHUTTELEE…', true);
+function policeBust(v) { POLICE.hold = 7; POLICE.caughtT = 0; policeMsg(T('🚨 KIINNI! POLIISI PUHUTTELEE…'), true);
   for (const o of POLICE.cars) if (o.chase) { o.pl.hold = true; o.chase = false; }
   const rig = makeAdult(0x2a3a60, 0x1c2c5a, lpick(L_HAIR), { sel: { hat: 3, top: 8, longSleeve: 1, longPants: 1, tache: Math.random() < 0.4 }, acc: 0x1c2540, shoes: 0x141414, w: 1.05 });   // cap, belt, badge
   const [x, z] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 0.4), h = new Human({ x, z, yaw: v.yaw, rig, task: officerTask(v), temp: true }); h.ao = aoAlloc(); v.pl.officer = h; }
@@ -5418,13 +5490,13 @@ function policeUpdate(dt) {
   POLICE.cars = POLICE.cars.filter(v => !v.gone); const chasing = POLICE.cars.filter(v => v.chase), hud = document.getElementById('police-hud');
   if (hud) { const on = chasing.length > 0 || POLICE.hold > 0; if (hud.__on !== on) { hud.__on = on; hud.style.display = on ? 'block' : 'none'; } }
   for (const v of POLICE.cars) if (!v.chase && !v.pl.hold) { v.pl.leaveT += dt; if (Math.hypot(v.x - car.x, v.z - car.z) > 220 || v.pl.leaveT > 50) vehicleRemove(v); }   // gone round the corner
-  if (POLICE.hold > 0) { POLICE.hold -= dt; if (POLICE.hold <= 0) { POLICE.hold = 0; POLICE.n = 0; policeMsg('SAAT JATKAA — AJA SIIVOSTI'); } return; }
+  if (POLICE.hold > 0) { POLICE.hold -= dt; if (POLICE.hold <= 0) { POLICE.hold = 0; POLICE.n = 0; policeMsg(T('SAAT JATKAA — AJA SIIVOSTI')); } return; }
   if (!chasing.length) return;
   if (gameState !== State.RACING) { chasing.forEach(v => { v.chase = false; }); POLICE.n = 0; return; }   // over the line: not their business any more
   const csp = Math.hypot(car.vx, car.vz), on = chasing.find(v => Math.hypot(v.x - car.x, v.z - car.z) < 8.5);
   POLICE.caughtT = on && csp < 2.5 ? POLICE.caughtT + dt : 0; if (POLICE.caughtT > 1.2) { policeBust(on); return; }
   POLICE.lostT = chasing.every(v => Math.hypot(v.x - car.x, v.z - car.z) > 450) ? POLICE.lostT + dt : 0;
-  if (POLICE.lostT > 10) { chasing.forEach(v => { v.chase = false; }); POLICE.n = 0; POLICE.lostT = 0; policeMsg('PÄÄSIT KARKUUN!', true); } }
+  if (POLICE.lostT > 10) { chasing.forEach(v => { v.chase = false; }); POLICE.n = 0; POLICE.lostT = 0; policeMsg(T('PÄÄSIT KARKUUN!'), true); } }
 function policeReset() { Object.assign(POLICE, { n: 0, lastT: -99, cars: [], hold: 0, tree: null, treeT: -99, lostT: 0, caughtT: 0 }); const hud = document.getElementById('police-hud'); if (hud) { hud.style.display = 'none'; hud.__on = false; } }
 
 // ════════ VILLAGE MISCHIEF: kids scrapping in yards, roofers up on a few roofs, broken-down cars smoking in yards, dog walkers in
@@ -5982,7 +6054,7 @@ function wreckCar(how) { if (WRECK.on || gameState !== State.RACING) return; WRE
   startFire({ vehicle: RV }); if (RV.fire) RV.fire.level = how === 'boom' ? 1 : 0.6;
   const [dx, dz] = lloc(car.x, car.z, car.angle, -1.4, 0.2), h = new Human({ x: dx, z: dz, yaw: car.angle, rig: makeAdult(0xf2f2ee, 0xf2f2ee, lpick(L_HAIR), { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), temp: true }); h.ao = aoAlloc(); WRECK.driver = h;
   const k = how === 'boom' ? 9 : 3; knock(h, -fz*k + car.vx*0.3, fx*k + car.vz*0.3, how === 'boom' ? 14 : 6);   // thrown clear out of the driver's door: the ambulance is on its way
-  car.vx *= 0.2; car.vz *= 0.2; esHud(); pizzaMsg(how === 'boom' ? '👽 UFO AMPUI AUTON!' : '⚡🔥 ES + KOLARI = TULIPALO!', true); }
+  car.vx *= 0.2; car.vz *= 0.2; esHud(); pizzaMsg(T(how === 'boom' ? '👽 UFO AMPUI AUTON!' : '⚡🔥 ES + KOLARI = TULIPALO!'), true); }
 function wreckReset() { if (WRECK.rv && WRECK.rv.charred) charVehicle(WRECK.rv, false); WRECK.on = false; WRECK.rv = null; WRECK.driver = null; }
 
 // ── 1. moose: big, slow, grazing in the woods; now and then one wanders across a road — and stops dead in the lights ──
@@ -6021,7 +6093,7 @@ const bearTask = (B) => ({ kind: 'bear', update(h, dt, t) { const S = B.s;
   if (S.up > 0) { S.up -= dt; h.vx = h.vz = 0; const k = Math.min(1, (2.5 - S.up)*3)*Math.min(1, S.up*3); h.tilt = -1.1*k; h.pose.dy = 0.75*k; return; }   // up on its hind legs, sniffing the air
   h.tilt = 0; if (!S.tx || walkTo(h, S.tx, S.tz, 0.8, dt)) { if (S.tx && Math.random() < 0.4) S.up = 2.5; for (let k = 0; k < 10; k++) { const a = Math.random()*6.3, r = 4 + Math.random()*16, x = B.hx + Math.sin(a)*r, z = B.hz + Math.cos(a)*r; if (!onRoad(x, z, 1)) { S.tx = x; S.tz = z; break; } } } },
   knocked(h) { h.vx *= 0.5; h.vz *= 0.5; B.s.up = 0; h.tilt = 0;
-    if (Math.hypot(car.x - h.x, car.z - h.z) < 6 && gameState === State.RACING) { POLICE.n = 3; POLICE.lastT = worldT; policeSpawn(10, 360); policeMsg('🐻 KARHU YLIAJETTU! 10 POLIISIA PERÄÄN!', true); } },
+    if (Math.hypot(car.x - h.x, car.z - h.z) < 6 && gameState === State.RACING) { POLICE.n = 3; POLICE.lastT = worldT; policeSpawn(10, 360); policeMsg(T('🐻 KARHU YLIAJETTU! 10 POLIISIA PERÄÄN!'), true); } },
   reset(h) { B.s = { up: 0, tx: 0, tz: 0 }; h.tilt = 0; } });
 function bearSpot() { return Math.random() < 0.6 ? forestSpot(20, 90) : openSpot(3, 20, 90); }
 function buildBear() { const sp = bearSpot(); if (!sp) return; const B = { hx: sp[0], hz: sp[1], s: { up: 0, tx: 0, tz: 0 } };
@@ -6075,7 +6147,7 @@ function buildPostVan() { const { nodes, adj } = roadGraph(); if (!nodes.length)
 const ES = { on: false, t: 0, got: false, wait: 0, guy: null, zone: null, door: null, DUR: 40, WAIT: 3 };
 function esHud() { const el = document.getElementById('es-hud'); if (!el) return; const on = (ES.on && ES.t > 0) || WRECK.on;
   if (el.__on !== on) { el.__on = on; el.style.display = on ? 'block' : 'none'; } if (!on) return;
-  const t = WRECK.on ? '🔥 AUTO PALAA · R = UUSI LÄHTÖ' : '⚡ ES ' + Math.ceil(ES.t) + ' s · 2× NOPEUS · ÄLÄ KOLAROI'; if (el.__t !== t) { el.__t = t; el.textContent = t; el.classList.toggle('wreck', WRECK.on); } }
+  const t = WRECK.on ? T('🔥 AUTO PALAA · R = UUSI LÄHTÖ') : T('⚡ ES {0} s · 2× NOPEUS · ÄLÄ KOLAROI', Math.ceil(ES.t)); if (el.__t !== t) { el.__t = t; el.textContent = t; el.classList.toggle('wreck', WRECK.on); } }
 function esZoneAt(x, z) { const Z = ES.zone; if (!Z) return false; const [kx, kz, kth, W, D] = Z, dx = x - kx, dz = z - kz, a = Math.cos(kth)*dx - Math.sin(kth)*dz, b = Math.sin(kth)*dx + Math.cos(kth)*dz;
   return Math.abs(a) < W/2 + 3 && b > D/2 + 2.4 && b < D/2 + 14; }   // in front of the shop, clear of the queue along its wall
 function makeEsGuy() { const g = makeAdult(0xf2f2ee, 0x2b2b30, lpick(L_HAIR), { sel: { hair: lpick([0, 2, 1]), top: 9, longSleeve: 1, longPants: 1 }, acc: 0xd83b2c });   // the white shop coat over a red shirt
@@ -6085,7 +6157,7 @@ const esTask = (door) => ({ kind: 'esguy', update(h, dt) { const st = h.st || (h
     if (Math.hypot(tx - h.x, tz - h.z) < 0.7 || walkTo(h, tx, tz, 2.4, dt)) { h.vx = h.vz = 0; h.yaw = Math.atan2(car.x - h.x, car.z - h.z); h.pose.armR = -1.4; if (ES.wait >= ES.WAIT) esGot(h); } }   // at the window: the can held out
   else if (walkTo(h, door[0], door[1], 1.8, dt)) { st.done = true; h.vx = h.vz = 0; } },
   knocked(h) { if (ES.guy === h) ES.guy = null; } });
-function esGot(h) { ES.got = true; ES.on = true; ES.t = ES.DUR; h.view.g.userData.can.visible = false; h.st.mode = 'back'; pizzaMsg('⚡ ES! BASSO PÄÄLLE JA TUPLANOPEUS 40 s', true);
+function esGot(h) { ES.got = true; ES.on = true; ES.t = ES.DUR; h.view.g.userData.can.visible = false; h.st.mode = 'back'; pizzaMsg(T('⚡ ES! BASSO PÄÄLLE JA TUPLANOPEUS 40 s'), true);
   beep(520, 0.08, 0.3, 'square'); setTimeout(() => beep(1040, 0.2, 0.3, 'square'), 90);
   if (!RADIO.started && RADIO.list.length) radioStart(); if (RADIO.shelf && audio) RADIO.shelf.gain.setTargetAtTime(16, audio.ctx.currentTime, 0.08); esHud(); }
 function esEnd() { if (!ES.on) return; ES.on = false; ES.t = 0; if (RADIO.shelf && audio && !BASS.on) RADIO.shelf.gain.setTargetAtTime(0, audio.ctx.currentTime, 0.1); esHud(); }
@@ -6096,7 +6168,7 @@ function esUpdate(dt) { esPromoUpdate(dt);
   if (esZoneAt(car.x, car.z) && Math.hypot(car.vx, car.vz) < 0.7) { ES.wait += dt;
     if (!ES.guy) { ES.guy = new Human({ x: ES.door[0], z: ES.door[1], yaw: ES.zone[2], rig: makeEsGuy(), task: esTask(ES.door), temp: true }); ES.guy.ao = aoAlloc(); }
     if (ES.guy.st && ES.guy.st.mode === 'back') { ES.guy.st.mode = 'out'; ES.guy.st.done = false; }   // (stopped again while he was going back in)
-    pizzaMsg('⚡ ES tulossa… ' + Math.max(1, Math.ceil(ES.WAIT - ES.wait)), false); }
+    pizzaMsg(T('⚡ ES tulossa… {0}', Math.max(1, Math.ceil(ES.WAIT - ES.wait))), false); }
   else { ES.wait = 0; if (ES.guy && ES.guy.st) ES.guy.st.mode = 'back'; } }
 function buildEs() { const K = LANDMARKS.find(L => L[0] === 'kauppa'); if (!K) { ES.zone = null; return; } const [W, D] = lmSize(K); ES.zone = [K[1], K[2], K[3], W, D]; ES.door = lloc(K[1], K[2], K[3], -1.5, D/2 + 0.55); esPromoBuild(K, W, D); }
 // ── the ES promotion in the K-shop yard: a giant can, two speaker stacks thumping out a beat you hear from the road, a banner, two
@@ -6285,7 +6357,7 @@ function cabbageUpdate(dt) { if (gameState !== State.RACING || Math.hypot(car.vx
       if (Math.random() < 0.5) lifeFx.emit(x, Y(x, z) + 0.2, z, (Math.random() - 0.5)*2, 1.5 + Math.random(), (Math.random() - 0.5)*2, 0.8, 0.18, 0.3, 0.9, 0.45, 0.7, 0.3, 0.45, 0.7, 0.3); }   // bits of leaf
     if (flat) C.im.instanceMatrix.needsUpdate = true;
     if (!C.angry && C.flat.size > 3) { C.angry = true; const T = VEHICLES.filter(v => v.kind === 'tractor' && v.ai && v.ai.S && !v.fire && !v.charred).sort((p, q) => Math.hypot(p.x - car.x, p.z - car.z) - Math.hypot(q.x - car.x, q.z - car.z))[0];
-      if (T && !T.ai.S.chase) { T.ai.S.chase = { t: 0, pT: 0, stuck: 0, rev: 0 }; pizzaMsg('🚜 ISÄNTÄ SUUTTUI! TRAKTORI PERÄÄN', true); } } } }
+      if (T && !T.ai.S.chase) { T.ai.S.chase = { t: 0, pT: 0, stuck: 0, rev: 0 }; pizzaMsg(T('🚜 ISÄNTÄ SUUTTUI! TRAKTORI PERÄÄN'), true); } } } }
 function cabbageReset() { for (const C of CABBAGE) { C.angry = false; if (C.flat.size) { for (const i of C.flat) C.im.setMatrixAt(i, C.orig[i]); C.im.instanceMatrix.needsUpdate = true; C.flat.clear(); } } }
 function chasePath(v) { const T = policeTree(), { nodes } = roadGraph(); if (!T) return; const pts = [[v.x, v.z]], fx = Math.sin(v.yaw), fz = Math.cos(v.yaw); let j = nearestNode(v.x, v.z);   // the road graph to the car (the police's own tree)
   for (let k = 0; j >= 0 && k < 600; k++) { const q = nodes[j]; if (pts.length > 1 || Math.hypot(q.x - v.x, q.z - v.z) > 7 || (q.x - v.x)*fx + (q.z - v.z)*fz > 0) pts.push([q.x, q.z]); if (j === T.src) break; j = T.prev[j]; }
@@ -6980,13 +7052,14 @@ addEventListener('keydown', e => {
   }
   if (e.code==='Space'&&gameState===State.FINISHED) { initAudio(); startRace(false); }
   if (e.code==='KeyR' && !e.repeat && gameState!==State.MENU) { initAudio(); startRace(false); }
+  if (e.code==='KeyL' && !e.repeat && gameState===State.MENU) setLang(LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length]);   // language: FI → EN → NO
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
   if (e.code==='KeyE' && !e.repeat && gameState !== State.MENU) { initAudio(); radioNext(); }
   if (e.code==='KeyB' && !e.repeat && gameState !== State.MENU) { initAudio(); bassToggle(); }
   if ((e.code==='Digit1' || e.code==='Numpad1') && gameState !== State.MENU) radioVol(-1);   // radio quieter / louder
   if ((e.code==='Digit2' || e.code==='Numpad2') && gameState !== State.MENU) radioVol(1);
-  if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'; cpd.style.color='#ffe9a8'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0, 900); }
-  if (e.code==='KeyG' && !e.repeat) { ghostEnabled = !ghostEnabled; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = ghost ? (ghostEnabled ? 'HAAMU PÄÄLLÄ' : 'HAAMU POIS') : 'EI HAAMUA VIELÄ'; cpd.style.color='#bfe2ff'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0,900); }   // restart any time: back to the grid, countdown again
+  if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = T(camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'); cpd.style.color='#ffe9a8'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0, 900); }
+  if (e.code==='KeyG' && !e.repeat) { ghostEnabled = !ghostEnabled; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = T(ghost ? (ghostEnabled ? 'HAAMU PÄÄLLÄ' : 'HAAMU POIS') : 'EI HAAMUA VIELÄ'); cpd.style.color='#bfe2ff'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0,900); }   // restart any time: back to the grid, countdown again
 });
 addEventListener('keyup', e => keys[e.code]=false);
 
@@ -7064,11 +7137,11 @@ function finishRace() {
   const prevBest = bestTime;
   if (CUT.on) cutUpdate();   // (finished while still off the road: judged now)
   if (CUT.bad) { ghostRec = null; ONLINE.lastRun = null; onlineOfferName(); document.getElementById('final-time').style.color = '#ff4444';
-    document.getElementById('best-time-display').textContent = 'mutka oikaistu — aika ei kelpaa' + (bestTime < Infinity ? ` · paras: ${formatTime(bestTime)}` : ''); return; }
+    document.getElementById('best-time-display').textContent = T('mutka oikaistu — aika ei kelpaa') + (bestTime < Infinity ? ' · ' + T('paras: {0}', formatTime(bestTime)) : ''); return; }
   ghostFinish(raceTime); onlineOfferName();
   if(raceTime<bestTime)bestTime=raceTime;
   if (prevBest < Infinity) showDelta(raceTime - prevBest, true);
-  if(bestTime<Infinity) document.getElementById('best-time-display').textContent = (raceTime <= bestTime && prevBest > raceTime ? 'uusi ennätys — haamu tallennettu · ' : '') + `paras: ${formatTime(bestTime)}` + (prevBest < Infinity && prevBest !== raceTime ? `  (${raceTime - prevBest < 0 ? '−' : '+'}${Math.abs(raceTime - prevBest).toFixed(3)})` : '');
+  if(bestTime<Infinity) document.getElementById('best-time-display').textContent = (raceTime <= bestTime && prevBest > raceTime ? T('uusi ennätys — haamu tallennettu') + ' · ' : '') + T('paras: {0}', formatTime(bestTime)) + (prevBest < Infinity && prevBest !== raceTime ? `  (${raceTime - prevBest < 0 ? '−' : '+'}${Math.abs(raceTime - prevBest).toFixed(3)})` : '');
 }
 
 function formatTime(t) {
@@ -7087,7 +7160,7 @@ function freeEnter() {
   if (FREE.on) return; FREE.on = true; lapStarted = false;
   trackMeshGroup.children.forEach(m => { const k = m.userData.key; if ((k === 'curb' || k === 'checkpoint' || k === 'grid' || m === finishMesh || m.userData.routePatch) && m.visible) { m.visible = false; FREE.hidden.push(m); } if (k === 'freeFillet') m.visible = true; });   // (the route's own tarmac out, the network's rounded junction corners in)
   tires.forEach(t => { if (t.kind !== 'tire' || t.off) return; t.off = true; t.freeOff = true; if (t.moving) { t.moving = false; movingProps = movingProps.filter(o => o !== t); } syncProp(t); }); staticDirty = true;
-  const cpd = document.getElementById('checkpoint-display'); cpd.textContent = 'VAPAA AJO – KOKO KYLÄ ON SINUN'; cpd.style.color = '#ffd23c'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2600);
+  const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('VAPAA AJO – KOKO KYLÄ ON SINUN'); cpd.style.color = '#ffd23c'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2600);
   beep(523, 0.1, 0.25, 'square'); setTimeout(() => beep(784, 0.2, 0.25, 'square'), 120); }
 function freeExit() {
   if (!FREE.on) return; FREE.on = false; FREE.hidden.forEach(m => { m.visible = true; }); FREE.hidden.length = 0; trackMeshGroup.children.forEach(m => { if (m.userData.key === 'freeFillet') m.visible = false; });
@@ -7106,7 +7179,7 @@ function cutUpdate() {
   if (!CUT.on && d > w + 3) { CUT.on = true; CUT.drv = CUT.gain = CUT.far = 0; }
   if (CUT.on) { CUT.far = Math.max(CUT.far, d - w); CUT.drv += Math.hypot(car.x - CUT.px, car.z - CUT.pz); let g = cutArc(p) - cutArc(CUT.pp); const L = cutArc(n); if (g < -L/2) g += L; if (g > L/2) g -= L; CUT.gain += g;
     if (d < w + 1 || gameState !== State.RACING) { if (CUT.gain - CUT.drv > 12 && CUT.far > 8 && !CUT.bad) { CUT.bad = true; CUT.at = [Math.round(car.x), Math.round(car.z)];
-        const cpd = document.getElementById('checkpoint-display'); cpd.textContent = 'OIKAISU – KIERROS EI KELPAA'; cpd.style.color = '#ff4444'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2200); beep(180, 0.3, 0.3, 'sawtooth'); }
+        const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('OIKAISU – KIERROS EI KELPAA'); cpd.style.color = '#ff4444'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2200); beep(180, 0.3, 0.3, 'sawtooth'); }
       CUT.on = false; } }
   CUT.px = car.x; CUT.pz = car.z; CUT.pp = p; }
 function updateCheckpoints(fdt) {
@@ -7123,7 +7196,7 @@ function updateCheckpoints(fdt) {
       lapStarted = true; raceTime = -f*fdt;                                  // updateHUD adds this frame's dt → exactly the time since crossing
       prevFinishS = s; prevCpS = null;
       beep(990, 0.1, 0.25, 'square');
-      const cpd=document.getElementById('checkpoint-display'); cpd.textContent='AIKA KÄY'; cpd.style.color='#ffffff'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0,700);
+      const cpd=document.getElementById('checkpoint-display'); cpd.textContent=T('AIKA KÄY'); cpd.style.color='#ffffff'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0,700);
     } else prevStartS = s;
     return;
   }
@@ -7145,8 +7218,8 @@ function updateCheckpoints(fdt) {
       if(checkpointMeshes[ci]){checkpointMeshes[ci].material.emissive.setHex(0x33cc33);
         setTimeout(()=>{if(checkpointMeshes[ci]){checkpointMeshes[ci].material.emissive.setHex(0x000000);}},300);}
       const cpd=document.getElementById('checkpoint-display');
-      if(checkpointsPassed===totalCheckpoints){cpd.textContent='FINAL — FIND FINISH';cpd.style.color='#ff4444';}
-      else{cpd.textContent=`CHECKPOINT ${checkpointsPassed}`;cpd.style.color='#44ff44';}
+      if(checkpointsPassed===totalCheckpoints){cpd.textContent=T('FINAL — FIND FINISH');cpd.style.color='#ff4444';}
+      else{cpd.textContent=T('CHECKPOINT {0}', checkpointsPassed);cpd.style.color='#44ff44';}
       cpd.style.opacity=1;setTimeout(()=>cpd.style.opacity=0,800);
     } else {
       prevCpS=s;
@@ -7371,10 +7444,10 @@ function drawCluster(g) {
 const setText = (el, t) => { if (el.__t !== t) { el.__t = t; el.textContent = t; } };   // touch the DOM only when the text changes
 function updateHUD(dt){
   if(gameState===State.RACING && lapStarted) raceTime+=dt;
-  setText(elTimer, FREE.on ? 'VAPAA AJO' : formatTime(raceTime));
-  setText(elCpC, FREE.on ? 'R uusi lähtö · Esc' : `${Math.min(checkpointsPassed,totalCheckpoints)} / ${totalCheckpoints}`);
+  setText(elTimer, FREE.on ? T('VAPAA AJO') : formatTime(raceTime));
+  setText(elCpC, FREE.on ? T('R uusi lähtö · Esc') : `${Math.min(checkpointsPassed,totalCheckpoints)} / ${totalCheckpoints}`);
   setText(elSpd, Math.abs(car.speed*3.6).toFixed(0));
-  setText(elBestHud, bestTime<Infinity ? `paras ${formatTime(bestTime)}` : '');
+  setText(elBestHud, bestTime<Infinity ? T('paras {0}', formatTime(bestTime)) : '');
   // instrument cluster
   updateEngine(dt);
   if (!clusterCtx) { clusterEl = document.getElementById('cluster'); if (clusterEl && clusterEl.getContext) { clusterEl.width = CL_W; clusterEl.height = CL_H; clusterCtx = clusterEl.getContext('2d'); } }
