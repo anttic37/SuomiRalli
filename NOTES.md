@@ -381,6 +381,7 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       Bike kids are steered by velocity now; the bike follows the kid. t_bump counts overlaps per task kind (should be {}).
     - Human fields are all created in the constructor (one hidden class): humansUpdate 1.5 → 1.1 ms.
     - Animals and aliens keep their own meshes (aliens on `makeKidOld`). The old crowd meshes (personGeos) remain only for tyre-prop people.
+- Radio: music/playlist.json also holds 5 spoken programmes (radio-ohjelma-1…5.mp3, `talk: true`, shown with 🎙), one after every 5 songs.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

@@ -25,6 +25,12 @@
   "artist": "anttii"
  },
  {
+  "file": "radio-ohjelma-1.mp3",
+  "title": "Radio-ohjelma 1",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
   "file": "yo-meita-kutsuu.mp3",
   "title": "Yö meitä kutsuu",
   "artist": "anttii"
@@ -48,6 +54,12 @@
   "file": "sillan-alta-kotiin.mp3",
   "title": "Sillan alta kotiin",
   "artist": "anttii"
+ },
+ {
+  "file": "radio-ohjelma-2.mp3",
+  "title": "Radio-ohjelma 2",
+  "artist": "anttii",
+  "talk": true
  },
  {
   "file": "aamu-loytaa-tuolin.mp3",
@@ -75,6 +87,12 @@
   "artist": "anttii"
  },
  {
+  "file": "radio-ohjelma-3.mp3",
+  "title": "Radio-ohjelma 3",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
   "file": "lasin-pohjalla.mp3",
   "title": "Lasin pohjalla",
   "artist": "anttii"
@@ -100,6 +118,12 @@
   "artist": "anttii"
  },
  {
+  "file": "radio-ohjelma-4.mp3",
+  "title": "Radio-ohjelma 4",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
   "file": "ma-tykkaan-susta-vahan.mp3",
   "title": "Mä tykkään susta vähän",
   "artist": "anttii"
@@ -123,5 +147,11 @@
   "file": "karamellipaiva.mp3",
   "title": "Karamellipäivä",
   "artist": "anttii"
+ },
+ {
+  "file": "radio-ohjelma-5.mp3",
+  "title": "Radio-ohjelma 5",
+  "artist": "anttii",
+  "talk": true
  }
 ]
