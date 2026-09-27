@@ -257,13 +257,101 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
     - Test: t_bass.
   - Lesson (bit three times this session): a `//` comment added in the middle of a one-line function swallows the rest of
     the line. Put mid-line comments in `/* */`.
+  - v16, set 3 (after "uutta toimintaa 1.–10. … tee nämä kaikki huolella ja käytä olemassaolevia systeemejä"): the "SET 3" module
+    in game.html (before lifeExtras2Build). Built by `lifeExtras3Build()` after lifeExtras2Build and before crowdBuild; run by
+    `extras3Update(dt)`; reset by `lifeExtras3Reset()`. Everything uses the existing parts (Human tasks, Vehicle + VSPEC, STATIC,
+    FIRES, DISPATCH, POLICE).
+    - Moose (6, `mooseTask`): big animal Humans (r 0.9, `h.big`: never onto the bonnet) in the woods 25–110 m from the route.
+      - They graze and wander; now and then one crosses the route (a point 14 m past it).
+      - On a road with a fast car within 34 m, one may freeze and stare.
+      - Hitting one tears off two parts and halves the car's speed. No ambulance, no police.
+    - Bear (1, `bearTask`): in the woods or on open ground 20–90 m from the route. It moves somewhere else every race.
+      - It rears up on its hind legs now and then.
+      - Run over by the rally car: `policeSpawn(10, 360)` (policeSpawn takes a max distance now) and POLICE.n = 3.
+    - Post van (`postvan` VSPEC row, `postVanAI`): drives between side-street stops using iceRoute.
+      - iceRoute now reads V.dMin / dMax / dAim; the van uses 60 / 220 / 120.
+      - At each stop the postman walks to the wall of the nearest house facing the van, posts a letter and walks back.
+      - Knocked over: the letters fly, and the van carries on without him.
+      - Its own scrapes don't wreck it (vehicleHit list). A watchdog stops it getting stuck, and it never parks on the route.
+      - t_s3_post: 7 stops and 5 deliveries in 5 minutes, never closer than 30 m to the route.
+    - ES at the K-shop (`ES`, `esUpdate`), the pizza pattern:
+      - Stand still for 3 s in front of the shop, 2.4–14 m out from the wall, clear of the queue. The shopkeeper brings a can.
+      - Then 40 s of double engine pull and top speed (`esK` in updateCar), and the bass kick plus the radio lowshelf.
+        bassUpdate runs while `BASS.on || ES.on`; the ES version has no speed cap and no crowd rave. `#es-hud` counts down.
+      - Any real hit meanwhile wrecks the car. That is carDamage ≥ 3 m/s (walls, cars, tyres, rock, moose) or knocking a
+        person down.
+    - WRECK (`wreckCar('es' | 'boom')`): the rally car becomes a pseudo-vehicle RV
+      (`{ kind: 'rally', view: { kind: 'mesh', g: carGroup } }`), so the fire code treats it like any vehicle.
+      - startFire({ vehicle: RV }) brings the fire engine; the car chars after 12 s.
+      - The driver (a temp Human in white overalls) is thrown out of the driver's door and hurt, so the ambulance comes.
+      - The car is held (like POLICE.hold) and stops dead, even on a slope. `#es-hud` turns red: "R = uusi lähtö".
+      - The reset un-chars it (charVehicle(RV, false)) and repairCar restores the parts.
+    - Costume olympics (`buildOlympics`, `olyTask`, `olyUpdate`): 8 friends in costumes on a compact stage.
+      - Costumes: viking, king, top hat, bunny, clown, pirate, superhero.
+      - The stage is beside the sports field (FIELD_GAMES[0]): along a touchline or beyond a goal end, off houses, the
+        pitch and the road.
+        - The front wins: every metre beyond 35 m from the route costs a point, and so do the trees on the stage (trunks ×6).
+        - Fans standing there make room.
+        - On the default track the goal end faces the route with only ~10 m to spare, so the stage goes on a touchline near
+          that end, 27–37 m from the route.
+      - Events rotate: sprint, javelin (it flies and sticks in the ground, then gets fetched), sack race (hopping).
+      - The phases line → go → cheer come with a whistle and an air horn. The rest cheer and jump.
+    - Grandstands (`buildGrandstands`, `standTask`): one by the finish line (16 m) and one by the K-shop (12 m).
+      - Each has four tiers, a roof and a concrete footing that hides a slope, and faces the route.
+      - The site is chosen by `placeGrandstand`: off roads, landmarks, the ES zone, tyres, cars, trees (`treeNear`), and at most
+        1.6 m of slope. It scores for the fewest trees. If nothing fits it tries looser rules, then a stand 3 m shorter.
+      - The stand is a static box (`addStaticBox`: a solid added after staticBuild). ~90 instanced spectators stand on the
+        tiers (`pose.dy`) and jump when the car passes.
+    - Cabbage → tractor (`cabbageUpdate`, `tractorChase`): each cabbage patch is remembered in CABBAGE (its instance matrices
+      too).
+      - Plants the car's box goes over are squashed flat, with bits of leaf. After 4 of them the nearest working tractor
+        chases the car.
+      - Chasing tractors use TRACTOR_MAD (vmax 15, about 40 km/h). They go straight at the car when it can be seen
+        (clearLine) and otherwise follow the police's road-graph tree (`chasePath` + policeFollow). They back off walls.
+      - The farmer shakes his fist (seatedTask). The chase ends after 45 s or 200 m back.
+      - The reset restores the plants and the tractor.
+    - UFOs (`buildUfos`, `ufoUpdate`): two, placed beyond the route's west-most and east-most points.
+      - Each site is 60–180 m out, ≥ 55 m from the route, clear of trees within 10 m, and 18–45 m from a street so the
+        ambulance can come. Open land is tried first.
+      - Each has a tilted silver disc, a dome, blinking rim lights, a crater, debris, smoke, and two aliens (animal Humans).
+      - The dome charges for 0.9 s, then a green beam fires. The rally car is shot within 46 m (`wreckCar('boom')`: parts fly off).
+      - Only after that (`U.woke`) does it turn on responders: ambulances and fire engines within 90 m whose job is within
+        110 m of it, police chasing within 70 m, and crews within 46 m. Up to 6 per UFO per race.
+        - Before the woke rule, the east UFO (82 m from the route) shot ambulances coming to an ordinary crash on the route,
+          and their wrecks blocked the lap (t_lap SEED=3 stuck).
+      - It looks for a target 5× a second (a human-grid scan every frame cost 0.1 ms).
+      - A shot responder (`ufoWreck`) burns and its crew is thrown out, hurt. Its job phase becomes 'wreck', which DISPATCH
+        doesn't count against the two-at-a-time limit. Its patients and its fire are re-sent after 5–6 s.
+      - Responders stuck in 'leave' for 75 s are removed, so wrecks can't lock the queue.
+      - One still in 'drive' after 60 s with < 90 m to go parks and the crew walks the rest.
+    - People in the road (`ROADIES`, `roadieTask`): a pool of 26 instanced Humans, placed each race at 2–4 random corners
+      (curvature ≥ 0.45, not near the grid or crossings), 3–7 per corner.
+      - A person is only placed where there is a way off the road (`roadieEscape`): a spot 4.5–9 m past the edge, ≥ 4 m
+        from every part of the route, reached by a straight run clear of tyre stacks (≥ r + 0.7), walls and cars
+        (`runClear`). The shortest run on the nearer side wins. A corner where fewer than 2 people fit is skipped for another.
+      - The stacks are checked straight from `tires`: forStaticNear's grid is stale or unbuilt when a race is set up (it
+        once let escapes run into the corner tyre walls).
+      - They react when the car is closer than speed × 3.6 + 14 m, then run 5.6–7.4 m/s. If held up, they run the other way.
+      - Once well off the road they stop. They walk back when the car has gone.
+      - t_s3_roadies: 0 of ~80 hit in 6 autopilot laps (SEED 1 and 3), closest pass ≥ 5 m.
+    - The rock (task 10): the kallio hill is solid for everything.
+      - `rockSolidAt` returns the height, except where it is clamped under streets as the mesh is. `rockOut` gives the way
+        out and the depth.
+      - The car checks 10 points round its body (`CAR_ROCK_PTS`, bumper height 0.42 m) instead of its centre, and is pushed
+        out if a turn swung a corner in.
+      - Vehicles check nose, middle and tail (0.5 m); people check at 0.7 m.
+      - The loose boulders at the rock's foot are now static boxes (`ROCK_BOULDERS`, kind 'rock').
+      - t_s3_rock: 8 directions, never more than 0.42 m into the rock; boulders and a police car stop too.
+    - Tests: t_set3 (smoke), t_s3_animals, t_s3_post, t_s3_es, t_s3_show (olympics, stands, cabbage/tractor), t_s3_ufo,
+      t_s3_ufo2 (7-minute chain log), t_s3_roadies, t_s3_rock.
+      - Run them with `s3run.sh outdir t_s3_…`, which puts s3_shot.inc (step + camera shot helpers) in front of each test.
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
 - A new kind of person: write a task `(…) => ({ kind, update(h, dt, t, near), knocked?(h), reset?(h) })` and `new Human({ x, z, yaw, rig: makeAdult(…) | inst: outfitIndex, task })` in worldBuild. Collision, knock-down, ambulance and restart come for free.
 - A new vehicle: add its VSPEC row and `new Vehicle({ kind, x, z, yaw, hw, hl, view: { kind: 'mesh', g } | { kind: 'inst', c }, axle, ai? })`. Driving physics, shoving, damage, fire and fire engine come for free; an `ai(v, dt)` sets `v.ctrl` (setPath + driveAlong for road routes, steerToward + speedTo for anything else).
-- A new solid thing: add a box in staticBuild. A new emergency: a DISPATCH entry + spawnResponder branch + a crew task.
+- A new solid thing: add a box in staticBuild (or `addStaticBox(b)` for something built after it). Keep big props clear of the scenery's trees with `treeNear(x, z, r)`. A new emergency: a DISPATCH entry + spawnResponder branch + a crew task.
 
 ## How heights work ("build flat, lift once")
 - World is built with Y()=0, then `buildHeightField()` + `liftWorld()` + `worldBuild()`; afterwards Y()=H() for all runtime users.

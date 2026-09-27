@@ -1,7 +1,7 @@
 // responders with the driving model: several patients in different places → each ambulance drives there, parks, leaves
 initAudio = () => {}; renderer.render = () => {};
 startRace(false); const step = (n, f) => { for (let i = 0; i < n; i++) { if (f) f(i); loop(lastTime + 1000/60); } };
-step(60*3.3);
+step(60*3.3); UFOS.forEach(U => { U.cool = 1e9; });   // (the car is parked next to random patients, one may be by a UFO: this test is about the driving)
 const pool = HUMANS.filter(h => h.task.kind === 'spectate' || h.task.kind === 'cook' || h.task.kind === 'mow');
 const picks = []; for (let k = 0; k < 40 && picks.length < 6; k++) { const h = pool[Math.floor(Math.random()*pool.length)]; if (picks.some(p => Math.hypot(p.x - h.x, p.z - h.z) < 80)) continue; picks.push(h); }
 const res = [];

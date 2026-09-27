@@ -1,0 +1,20 @@
+// set 3 smoke: what got built, then a race start and a minute of the world running with the car parked, no errors
+initAudio = () => {}; renderer.render = () => {};
+const kinds = {}; HUMANS.forEach(h => { const k = h.task ? h.task.kind : '-'; kinds[k] = (kinds[k] || 0) + 1; });
+const out = { kinds, humans: HUMANS.length, vehicles: VEHICLES.length };
+out.moose = HUMANS.filter(h => h.task && h.task.kind === 'moose').map(h => Math.round(distRoute(h.x, h.z)));
+out.bear = X3.bear ? { at: [Math.round(X3.bear.x), Math.round(X3.bear.z)], fromRoute: Math.round(distRoute(X3.bear.x, X3.bear.z)) } : null;
+out.postVan = !!X3.postVan; out.es = ES.zone ? ES.zone.map(v => Math.round(v*10)/10) : null;
+out.oly = X3.oly ? { at: [Math.round(X3.oly.x), Math.round(X3.oly.z)], fromRoute: Math.round(distRoute(X3.oly.x, X3.oly.z)) } : null;
+out.stands = STANDS.map(S => ({ at: [Math.round(S.x), Math.round(S.z)], people: S.people.length, fromRoute: Math.round(distRoute(S.x, S.z)) }));
+out.cabbage = CABBAGE.map(C => C.pts.length); out.tractors = VEHICLES.filter(v => v.kind === 'tractor' && v.ai).length;
+out.ufos = UFOS.map(U => ({ at: [Math.round(U.x), Math.round(U.z)], fromRoute: Math.round(distRoute(U.x, U.z)) }));
+out.roadies = ROADIES.corners.length + ' corners, ' + ROADIES.pool.filter(h => !h.inside).length + ' people';
+out.boulders = ROCK_BOULDERS.length; out.rockStatic = STATIC_LIST.filter(b => b.kind === 'rock').length;
+out.onRock = HUMANS.filter(h => rockHeightAt(h.x, h.z) > 0.7).map(h => h.task && h.task.kind);
+startRace(false); let T = performance.now(); const step = (n, f) => { for (let i = 0; i < n; i++) { f && f(i); T += 1000/60; loop(T); } };
+step(60*4); car.x += 0; const t0 = performance.now(); step(60*60); out.ms60 = Math.round(performance.now() - t0);
+out.state = gameState; out.fires = FIRES.length; out.down = HUMANS.filter(h => h.down).length;
+out.postVanMoved = X3.postVan ? Math.round(Math.hypot(X3.postVan.v.x - X3.postVan.v.home.x, X3.postVan.v.z - X3.postVan.v.home.z)) : null; out.deliveries = X3.postVan && X3.postVan.deliveries;
+out.olyRaces = X3.oly && X3.oly.races; out.throws = X3.oly && X3.oly.jav.throws;
+return out;
