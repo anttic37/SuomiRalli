@@ -410,6 +410,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   widths follow on the next build); the lane words are canvas text in a heavy sans at true proportions (KISA / GTA + VAPAA AJO);
   grandstands half full; sausageCart(S) in front of each stand (seller + 2–3 buyers, grill smoke); start screen badge
   #news 'UUTUUS: GTA-MOODI' (italic, red star).
+  FREE roads (after "korjaa tiet kun koristeet menee pois"): the route's own tarmac (buildCornerPatches: fans/strips/discs under
+  route corners, which also carry the widened start; userData.routePatch) is hidden in FREE, and buildFreeFillets() (built flat
+  with the network, lifted with it, key 'freeFillet', shown only in FREE) gives every road-graph junction rounded corners
+  (radius 1.2·hw + 2.5 ≤ 8 m, smaller at sharp angles) with a shoulder; gravel if either street is gravel. The road materials
+  draw front faces only: fan triangles are wound to face up.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

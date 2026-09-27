@@ -652,7 +652,7 @@ function generateTrack() {
   markRouteStreets();
   computeZones();
   startDir=new THREE.Vector2(trackPoints[1].x-trackPoints[0].x,trackPoints[1].y-trackPoints[0].y).normalize();
-  computeBarrierMask(); buildCurbs(); buildCornerPatches(); buildSurfaceSpill(); buildAsphaltDecor();
+  computeBarrierMask(); buildCurbs(); buildCornerPatches(); buildFreeFillets(); buildSurfaceSpill(); buildAsphaltDecor();
   // houses square to their street: turn by the small angle (< 25°) that makes one wall parallel to the nearest street
   BUILDINGS.forEach(B => { if (B.length > 5 || B._snapped) return; let best = null;
     sideRoads.forEach(R => { for (let i = 1; i < R.pts.length; i++) { const a = R.pts[i-1], b = R.pts[i], vx = b.x-a.x, vz = b.y-a.y, L2 = vx*vx+vz*vz || 1;
@@ -2256,9 +2256,45 @@ function buildCornerPatches() {
     const nrm = new Float32Array(B.verts.length); for (let i = 1; i < nrm.length; i += 3) nrm[i] = 1; geo.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
     const uv = new Float32Array(B.verts.length/3*2); for (let i = 0, j = 0; i < B.verts.length; i += 3, j += 2) { const q = roadUV(B.verts[i], B.verts[i+2]); uv[j] = q[0]; uv[j+1] = q[1]; } geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(B.verts.length).fill(m === gravelMat() ? 1.04 : 1.0), 3));   // both road materials use vertex colours
-    const mesh = new THREE.Mesh(geo, m); mesh.receiveShadow = true; mesh.userData.key = 'network'; trackMeshGroup.add(mesh);
+    const mesh = new THREE.Mesh(geo, m); mesh.receiveShadow = true; mesh.userData.key = 'network'; mesh.userData.routePatch = true; trackMeshGroup.add(mesh);
   });
 }
+// FREE (GTA) mode roads: the race's own tarmac (fans, strips and discs under the route's corners, the widened start) goes with the
+// kerbs, and every junction of the street network gets proper rounded corners instead, with the shoulder round them. Built flat with
+// the rest (the lift drapes them), hidden until FREE shows them.
+function buildFreeFillets() {
+  const G = roadGraph(), { nodes, adj } = G; ROADG = null; if (!nodes.length) return;
+  const gravelAt = (x, z) => { let best = null, bd = Infinity; const gx = Math.floor(x/RCELL), gz = Math.floor(z/RCELL); for (let ox = -2; ox <= 2; ox++) for (let oz = -2; oz <= 2; oz++) { const b = roadGrid.get(((gx+ox)*73856093) ^ ((gz+oz)*19349663)); if (b) for (const q of b) { const d = (q[0]-x)**2 + (q[1]-z)**2; if (d < bd) { bd = d; best = q; } } } return best ? !!best[3] : false; };
+  const B = { a: { v: [], i: [] }, g: { v: [], i: [] }, s: { v: [], i: [] } };
+  const fan = (T, P, pts, y) => { const b = T.v.length/3; T.v.push(P[0], y, P[1]); for (const q of pts) T.v.push(q[0], y, q[1]);
+    for (let k = 1; k < pts.length; k++) { const A = pts[k - 1], C = pts[k], up = (A[1] - P[1])*(C[0] - P[0]) - (A[0] - P[0])*(C[1] - P[1]) > 0; if (up) T.i.push(b, b + k, b + k + 1); else T.i.push(b, b + k + 1, b + k); } };   // (facing up: the road materials draw front faces only)
+  // the corner between two edge lines (point + direction each) with an arc of radius r → [corner, arc points…], or null
+  const corner = (p1, u1, p2, u2, r) => { const den = u1[0]*u2[1] - u1[1]*u2[0]; if (Math.abs(den) < 1e-3) return null;
+    const t = ((p2[0] - p1[0])*u2[1] - (p2[1] - p1[1])*u2[0])/den, P = [p1[0] + u1[0]*t, p1[1] + u1[1]*t];
+    const cosA = u1[0]*u2[0] + u1[1]*u2[1], A = Math.acos(Math.max(-1, Math.min(1, cosA))); if (A < 0.35 || A > 2.7) return null;
+    r = Math.min(r, 6*Math.tan(A/2)); const d = r/Math.tan(A/2);   /* (a sharp corner: a smaller radius, no long spike) */ const T1 = [P[0] + u1[0]*d, P[1] + u1[1]*d], T2 = [P[0] + u2[0]*d, P[1] + u2[1]*d];
+    const bx = u1[0] + u2[0], bz = u1[1] + u2[1], bl = Math.hypot(bx, bz) || 1, cd = r/Math.sin(A/2), C = [P[0] + bx/bl*cd, P[1] + bz/bl*cd];
+    let a0 = Math.atan2(T1[1] - C[1], T1[0] - C[0]), a1 = Math.atan2(T2[1] - C[1], T2[0] - C[0]), da = a1 - a0; while (da > Math.PI) da -= 2*Math.PI; while (da < -Math.PI) da += 2*Math.PI;
+    const arc = [], n = Math.max(3, Math.ceil(Math.abs(da)*r/0.6)); for (let k = 0; k <= n; k++) { const a = a0 + da*k/n; arc.push([C[0] + Math.cos(a)*r, C[1] + Math.sin(a)*r]); } return [P, arc]; };
+  const done = new Set();
+  for (let j = 0; j < nodes.length; j++) { if (adj[j].length < 3) continue; const J = nodes[j]; if ([...done].some(k => Math.hypot(nodes[k].x - J.x, nodes[k].z - J.z) < 4)) continue; done.add(j);
+    // each branch: its direction ~8 m out and its half width
+    const br = adj[j].map(([n0]) => { let prev = j, cur = n0, dist = Math.hypot(nodes[cur].x - J.x, nodes[cur].z - J.z);
+      while (dist < 8) { const nx = adj[cur].map(e => e[0]).filter(q => q !== prev); if (nx.length !== 1) break; prev = cur; cur = nx[0]; dist = Math.hypot(nodes[cur].x - J.x, nodes[cur].z - J.z); }
+      const dx = nodes[cur].x - J.x, dz = nodes[cur].z - J.z, l = Math.hypot(dx, dz) || 1; return { u: [dx/l, dz/l], hw: Math.max(nodes[n0].hw || 3, nodes[cur].hw || 3), a: Math.atan2(dz, dx), gravel: gravelAt(J.x + dx/l*5, J.z + dz/l*5) }; });
+    br.sort((p, q) => p.a - q.a); const uniq = br.filter((b, k) => k === 0 || Math.abs(b.a - br[k - 1].a) > 0.15);
+    for (let k = 0; k < uniq.length; k++) { const b1 = uniq[k], b2 = uniq[(k + 1) % uniq.length]; let gap = b2.a - b1.a; if (gap <= 0) gap += Math.PI*2; if (gap > 2.7 || uniq.length < 2) continue;
+      const n1 = [-b1.u[1], b1.u[0]], n2 = [b2.u[1], -b2.u[0]];   // the left edge of b1 and the right edge of b2 face each other across this corner
+      const r = Math.min(8, 1.2*Math.min(b1.hw, b2.hw) + 2.5), T = b1.gravel || b2.gravel ? B.g : B.a;   // (where gravel meets tarmac the corner is dirt)
+      for (const [off, dst, y] of [[0.7, B.s, ROAD_Y - 0.03], [0, T, T === B.g ? ROAD_Y - 0.012 : ROAD_Y - 0.006]]) {   // the shoulder first, the road over it
+        const c = corner([J.x + n1[0]*(b1.hw + off), J.z + n1[1]*(b1.hw + off)], b1.u, [J.x + n2[0]*(b2.hw + off), J.z + n2[1]*(b2.hw + off)], b2.u, r); if (c) fan(dst, c[0], c[1], y); } } }
+  const po = (m) => { const c = m.clone(); c.polygonOffset = true; c.polygonOffsetFactor = -1; c.polygonOffsetUnits = -1; return c; };   // (out at the corner the ground rises: the fillet stays on top of it)
+  const mats = [[B.a, po(asphaltMat()), 0.98], [B.g, po(gravelMat()), 1.02], [B.s, po(new THREE.MeshStandardMaterial({ color: 0x9d9884, roughness: 1, metalness: 0 })), 0]];
+  for (const [T, m, shade] of mats) { if (!T.i.length) continue; const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(T.v, 3)); g.setIndex(T.i);
+    const nrm = new Float32Array(T.v.length); for (let k = 1; k < nrm.length; k += 3) nrm[k] = 1; g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
+    if (shade) g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(T.v.length).fill(shade), 3));
+    { const uv = new Float32Array(T.v.length/3*2); for (let k = 0, q = 0; k < T.v.length; k += 3, q += 2) { const w = roadUV(T.v[k], T.v[k + 2]); uv[q] = w[0]; uv[q + 1] = w[1]; } g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); }
+    const me = new THREE.Mesh(g, m); me.receiveShadow = true; me.userData.key = 'freeFillet'; me.visible = false; trackMeshGroup.add(me); } }
 function buildRoadNetwork() {
   sideRoadPts = []; sideRoads = []; roadGrid.clear(); roadGridMaxHW = 0;
   const mat = asphaltMat();
@@ -3899,6 +3935,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'GTA-moodissa tiet siistiksi: radan omat asfalttipaikat pois, kaikkiin risteyksiin pyöristetyt kulmat pientareineen'],
   ['27.9.', 'Lähdön tekstit selkeämmiksi, tie leveämpi lähdössä, katsomoissa väljempää ja niiden edessä makkarakärryt; alkuruudussa UUTUUS: GTA-MOODI'],
   ['27.9.', 'GTA-moodi: lähtö on nyt vasemmalla kaistalla. Lähtöviivan yli = kisa; oikeaa kaistaa pitkin (VAPAA AJO) rata katoaa ja koko kylän kaduilla saa ajaa vapaasti'],
   ['27.9.', 'Alkuruudussa aloitetut ajot ja kuskien määrä; palvelin tarkistaa myös itse, ettei kierroksella ole oikaistu'],
@@ -6991,12 +7028,12 @@ let prevCpS = null;
 const FREE = { on: false, hidden: [] };
 function freeEnter() {
   if (FREE.on) return; FREE.on = true; lapStarted = false;
-  trackMeshGroup.children.forEach(m => { const k = m.userData.key; if ((k === 'curb' || k === 'checkpoint' || k === 'grid' || m === finishMesh) && m.visible) { m.visible = false; FREE.hidden.push(m); } });
+  trackMeshGroup.children.forEach(m => { const k = m.userData.key; if ((k === 'curb' || k === 'checkpoint' || k === 'grid' || m === finishMesh || m.userData.routePatch) && m.visible) { m.visible = false; FREE.hidden.push(m); } if (k === 'freeFillet') m.visible = true; });   // (the route's own tarmac out, the network's rounded junction corners in)
   tires.forEach(t => { if (t.kind !== 'tire' || t.off) return; t.off = true; t.freeOff = true; if (t.moving) { t.moving = false; movingProps = movingProps.filter(o => o !== t); } syncProp(t); }); staticDirty = true;
   const cpd = document.getElementById('checkpoint-display'); cpd.textContent = 'VAPAA AJO – KOKO KYLÄ ON SINUN'; cpd.style.color = '#ffd23c'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2600);
   beep(523, 0.1, 0.25, 'square'); setTimeout(() => beep(784, 0.2, 0.25, 'square'), 120); }
 function freeExit() {
-  if (!FREE.on) return; FREE.on = false; FREE.hidden.forEach(m => { m.visible = true; }); FREE.hidden.length = 0;
+  if (!FREE.on) return; FREE.on = false; FREE.hidden.forEach(m => { m.visible = true; }); FREE.hidden.length = 0; trackMeshGroup.children.forEach(m => { if (m.userData.key === 'freeFillet') m.visible = false; });
   tires.forEach(t => { if (!t.freeOff) return; t.freeOff = false; t.off = false; t.x = t.ox; t.z = t.oz; t.vx = t.vz = 0; syncProp(t); }); staticDirty = true; applyPhases(true); }
 function startSplit() {   // before the clock runs: over the start line in the left lane → the race; up the right lane → FREE
   const S = START_SPLIT; if (!S.ok || S.done) return; const dx = car.x - S.x, dz = car.z - S.z, s = dx*S.dx + dz*S.dz, lat = dx*S.lx + dz*S.lz;
