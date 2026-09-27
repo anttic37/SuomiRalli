@@ -25,12 +25,6 @@
   "artist": "anttii"
  },
  {
-  "file": "radio-ohjelma-1.mp3",
-  "title": "Radio-ohjelma 1",
-  "artist": "anttii",
-  "talk": true
- },
- {
   "file": "yo-meita-kutsuu.mp3",
   "title": "Yö meitä kutsuu",
   "artist": "anttii"
@@ -54,12 +48,6 @@
   "file": "sillan-alta-kotiin.mp3",
   "title": "Sillan alta kotiin",
   "artist": "anttii"
- },
- {
-  "file": "radio-ohjelma-2.mp3",
-  "title": "Radio-ohjelma 2",
-  "artist": "anttii",
-  "talk": true
  },
  {
   "file": "aamu-loytaa-tuolin.mp3",
@@ -87,12 +75,6 @@
   "artist": "anttii"
  },
  {
-  "file": "radio-ohjelma-3.mp3",
-  "title": "Radio-ohjelma 3",
-  "artist": "anttii",
-  "talk": true
- },
- {
   "file": "lasin-pohjalla.mp3",
   "title": "Lasin pohjalla",
   "artist": "anttii"
@@ -116,12 +98,6 @@
   "file": "sytyta-taivas.mp3",
   "title": "Sytytä taivas",
   "artist": "anttii"
- },
- {
-  "file": "radio-ohjelma-4.mp3",
-  "title": "Radio-ohjelma 4",
-  "artist": "anttii",
-  "talk": true
  },
  {
   "file": "ma-tykkaan-susta-vahan.mp3",
@@ -149,8 +125,62 @@
   "artist": "anttii"
  },
  {
+  "file": "radio-ohjelma-1.mp3",
+  "title": "Päivän peili: Ylästön laitos",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
+  "file": "radio-ohjelma-2.mp3",
+  "title": "Maatalousradio: kaalimaa kuntoon",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
+  "file": "radio-ohjelma-3.mp3",
+  "title": "Toivotut levyt – ilman levyjä",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
+  "file": "radio-ohjelma-4.mp3",
+  "title": "Liikenneradio: rallia Ylästössä",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
   "file": "radio-ohjelma-5.mp3",
-  "title": "Radio-ohjelma 5",
+  "title": "Kuunnelma: Mopo ja mies",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
+  "file": "radio-ohjelma-6.mp3",
+  "title": "Suora lähetys varikolta",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
+  "file": "radio-ohjelma-7.mp3",
+  "title": "Iltahartaus rattiin",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
+  "file": "radio-ohjelma-8.mp3",
+  "title": "Kansanradio: kuulijat soittavat",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
+  "file": "radio-ohjelma-9.mp3",
+  "title": "Säätiedotus merenkulkijoille – Vantaanjoki",
+  "artist": "anttii",
+  "talk": true
+ },
+ {
+  "file": "radio-ohjelma-10.mp3",
+  "title": "Lasten tuokio: Pyöräilevä lapsi",
   "artist": "anttii",
   "talk": true
  }

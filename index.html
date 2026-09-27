@@ -116,7 +116,7 @@
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline">Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 12.20 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
+  <div class="build-stamp">editorista 12.23 · 33 katua</div><div id="menu-content"><div class="start-hint">paina enter ja aja</div>
     <div id="keys"><span><kbd>↑</kbd>kaasu</span><span><kbd>↓</kbd>jarru / peruutus</span><span><kbd>← →</kbd>ohjaus</span><span><kbd>välilyönti</kbd>käsijarru</span><span><kbd>R</kbd>uusi lähtö</span><span><kbd>Esc</kbd>alkuruutu</span><span><kbd>C</kbd>kamera</span><span><kbd>G</kbd>haamu</span><span><kbd>E</kbd>radio: seuraava biisi</span><span><kbd>1</kbd><kbd>2</kbd>radio hiljemmalle / lujemmalle</span><span><kbd>B</kbd>bassoboost 🔊</span></div></div>
   <div id="results">
     <div class="label">maaliaika</div>
@@ -3857,6 +3857,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['27.9.', 'Radioon 5 puheohjelmaa lisää (nyt 10) ja hauskat nimet; ne tulevat satunnaisesti biisien väliin YLEn taajuuksilla'],
   ['27.9.', 'Radioon 5 puheohjelmaa biisien väliin (🎙)'],
   ['27.9.', 'Kaikilla ihmisillä samat törmäyssäännöt: pyöräilevät lapset ja muut eivät enää mene talojen, puiden, pensaiden, pihakalusteiden, autojen tai toistensa läpi'],
   ['27.9.', 'Ihmisten tarkkuus valitaan ruudun koon mukaan: isolla näytöllä pelikamerastakin näkyy tarkin malli'],
@@ -5198,8 +5199,12 @@ const STATIONS = ['Radio Ylästö', 'Kehä-FM', 'Radio Mäntykangas', 'Tikkurila
   'Radio Peltomies', 'Hiekkatie-FM', 'Radio Lauantai', 'Kasari-Kanava'];
 try { const v = +localStorage.getItem('yl-radio-vol'); if (v >= 0 && v <= 10 && localStorage.getItem('yl-radio-vol') !== null) RADIO.vol = v; } catch (e) {}
 async function radioLoad() { if (!/^https?:$/.test(location.protocol)) return; try { const r = await fetch('music/playlist.json', { cache: 'no-store' }); if (!r.ok) return; const d = await r.json();
-  RADIO.list = (Array.isArray(d) ? d : d.tracks || []).filter(t => t && t.file); if (RADIO.list.length) { const k = document.getElementById('radio-key'); if (k) k.style.display = ''; } } catch (e) {} }
-function radioTune() { let n; do n = Math.floor(Math.random()*STATIONS.length); while (RADIO.st && STATIONS[n] === RADIO.st.name && STATIONS.length > 1);
+  const all = (Array.isArray(d) ? d : d.tracks || []).filter(t => t && t.file), songs = all.filter(t => !t.talk), talks = all.filter(t => t.talk).sort(() => Math.random() - 0.5);
+  const gaps = songs.map((_, k) => k + 1).sort(() => Math.random() - 0.5).slice(0, talks.length).sort((a, b) => a - b);   // the spoken programmes in among the songs at random, never two in a row
+  RADIO.list = []; let g = 0; songs.forEach((t, k) => { RADIO.list.push(t); while (g < gaps.length && gaps[g] === k + 1) { RADIO.list.push(talks[g]); g++; } }); for (; g < talks.length; g++) RADIO.list.push(talks[g]); if (RADIO.list.length) { const k = document.getElementById('radio-key'); if (k) k.style.display = ''; } } catch (e) {} }
+const TALK_STATIONS = ['YLE Radio 1', 'YLE Rinnakkaisohjelma', 'Yleisradio – Ykkönen', 'Radio Ylästö'];
+function radioTune() { const R = RADIO, talk = R.list[R.i] && R.list[R.i].talk; let n; do n = Math.floor(Math.random()*STATIONS.length); while (R.st && STATIONS[n] === R.st.name && STATIONS.length > 1);
+  if (talk) { const k = Math.floor(Math.random()*TALK_STATIONS.length); R.st = { name: TALK_STATIONS[k], freq: (87.9 + k*2.3).toFixed(1) }; return; }   // (the talk is on the national broadcaster)
   RADIO.st = { name: STATIONS[n], freq: (87.6 + ((n*7 + 3) % 20)*1.0 + ((n*3) % 10)/10).toFixed(1) }; }   // (every station has its own place on the dial, 87.6–107.5 MHz)
 function radioVolume() { const g = RADIO.vol/10*0.9; if (RADIO.gain) RADIO.gain.gain.setTargetAtTime(g, audio.ctx.currentTime, 0.05); else if (RADIO.el) RADIO.el.volume = Math.min(1, g); }
 function radioShow(flash) { const box = document.getElementById('radio'); if (!box || !RADIO.list.length) return; const $ = (id) => document.getElementById(id), R = RADIO;
