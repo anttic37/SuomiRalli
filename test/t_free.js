@@ -1,6 +1,6 @@
 // FREE (GTA) mode: up the right lane at the start → the track goes (kerbs, tyres, gates, start/finish), no clock; drive the village's
 // streets end to end on the road graph (no tyre wall or gate in the way); R brings the track back. The left lane still starts the race.
-initAudio = () => {}; renderer.render = () => {}; const RR = () => {};
+initAudio = () => {}; renderer.render = () => {}; const RR = () => {}; TRAFFIC.cars = TRAFFIC.buses = 0;   // (the street network alone: the traffic has its own test, t_traffic)
 let T = performance.now(); const step = (n, f) => { for (let i = 0; i < n; i++) { if (f && f(i) === false) return; T += 1000/60; loop(T); } };
 const drive = (tx, tz, vmax) => { let dA = Math.atan2(tx - car.x, tz - car.z) - car.angle; while (dA > Math.PI) dA -= 2*Math.PI; while (dA < -Math.PI) dA += 2*Math.PI;
   keys.ArrowLeft = dA > 0.05; keys.ArrowRight = dA < -0.05; const v = Math.hypot(car.vx, car.vz), vm = Math.abs(dA) > 0.5 ? Math.min(vmax, 7) : vmax; keys.ArrowUp = v < vm; keys.ArrowDown = v > vm + 3; };

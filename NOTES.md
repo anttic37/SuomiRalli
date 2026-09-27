@@ -446,6 +446,16 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   circles on the axis) gives a 400 kg bale an impulse (car keeps ~72 %, carDamage at 0.7× the closing speed, off-centre → spin);
   it rolls across its axis (friction 1.1/s, rolling resistance 0.7 m/s², downhill only when steeper than that) and hardly slides
   along it; stops on trees, STATIC boxes and other bales. worldReset → balesReset. t_bales (109 bales, none drift at rest).
+- GTA traffic (28.9., "autot ja bussit ajamaan katuja pitkin", 15 + 3): freeEnter → trafficStart picks 15 kerbside cars (on a
+  network street: nearest graph node < 7 m; spread ≥ 20 m, nearer the player first) + the 3 buses and gives them trafficAI; freeExit →
+  trafficStop puts them home with no AI (the race never has traffic). trafficRoute: Dijkstra from the nearest node on setting off,
+  later always ON from the route's end node (V.ids) and never back along the last edge — the remaining path is kept, so no stops.
+  trafficAI on top of driveAlong: follow (v.follow skipped by driveAlong's go-round, v.vCap = gap rule), oncoming (only MOVING ones,
+  path-relative lateral clearance → v.swBias keep right + crawl ≥ 1.5 m/s: a hard stop deadlocked two facing cars), junction give-way
+  (nearer / already in it goes; ≤ 7 s), bus stops every 280–500 m on wide roads, watchdog (ghostT, then a new route), hoot().
+  Found on the way: driveAlong looked only ~20 m ahead for parked cars (fine at 8 m/s, not 13): reach grows with speed; speedTo now
+  brakes when rolling backwards (a car backed out of a jam rolled 40 m downhill in reverse). Cost ≈ +1 ms/frame in GTA mode only.
+  t_traffic: 80 s, all 18 moving (≈ 500 m each), no long stands, no fires.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
