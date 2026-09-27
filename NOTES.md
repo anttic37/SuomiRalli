@@ -352,6 +352,20 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
       t_s3_ufo2 (7-minute chain log), t_s3_roadies, t_s3_rock.
       - Run them with `s3run.sh outdir t_s3_…`, which puts s3_shot.inc (step + camera shot helpers) in front of each test.
 - Lesson: from the default high top-down camera (≈55° down, ~50 m up) relief barely reads; plinths, hillshade and the low camera show it.
+  - v17, people (after the concept sheets + the 1988 line-up; "tanakat mittasuhteet, vaatteet 1988-kuvasta", Gouraud):
+    - BODY (game.html, before makeAdult): one low-poly body per size (adult 1.75 m = 4 heads, kid 1.2 m = 3 heads), ten rigid parts
+      posed in the vertex shader (legs, knees, arms + spread, elbows, head nod), smooth normals (body2Normals, crease 50°).
+      Per person 8 numbers (`h.look.c`): shirt, pants, hair, skin, shoes, accent (packed RGB), sel = hair + hat·16 + top·256 +
+      bottom·4096 + extras bits·65536 (bits 0–7 only: stays exact in a float), shape = width·100·1000 + belly·100.
+      Wardrobe pieces are gated in the shader (hidden = folded to a point). Tops: 1 collar 2 tracksuit 3 knit 4 denim 5 cardigan
+      6 dress 7 overalls 8 uniform 9 coat 10 firefighter 11 rally 12 tank 13 post bag; hats 1 cap 2 flat cap 3 police 4 helmet 5 post.
+    - Looks: `lookCivil(kid, shirt, pants, hair, o)` picks a random 1988 cut (o.sel fixes it: roles), `lookCrowd(geo)` for the old
+      crowd outfits (16 = marshal). `makeAdult/makeKid(…, o)` return `bodyRig`: an empty group with four joint pivots at the body's
+      joints, for props (`handProp` → forearm end, that elbow kept straight) and `headGroup(rig)` for old-size hats (mapped ×1.5).
+    - Drawing: `humanSync` writes `h.bm` (matrix) + `h.bp` (pose); `bodyFill(cam)` (scene.onBeforeRender) packs everyone in the
+      camera frustum (+3.5 m for shadows) into 4 InstancedMeshes (adult/kid × near/far LOD, 30 m). Sitting/kneeling poses get
+      +0.18 m (kid 0.08) because the old poses were made for longer legs. Moving people walk automatically (pose.walk from speed).
+    - Animals and aliens keep their own meshes (aliens on `makeKidOld`). The old crowd meshes (personGeos) remain only for tyre-prop people.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
