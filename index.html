@@ -172,7 +172,7 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: GTA-MOODI</span><small data-t>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 12.47 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 13.12 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
@@ -1970,10 +1970,10 @@ let _carKit = null;
 function carKit() {
   if (_carKit) return _carKit;
   const inv = new THREE.Matrix4(); carGroup.updateMatrixWorld(true); inv.copy(carGroup.matrixWorld).invert();
-  const cats = { paint: [], dark: [], glass: [], misc: [] }, m = new THREE.Matrix4(), v = new THREE.Vector3();
+  const cats = { paint: [], dark: [], glass: [], misc: [], wheel: [] }, m = new THREE.Matrix4(), v = new THREE.Vector3();   // (wheel: kept whole — clustering turned the round tyres into chevrons)
   carGroup.traverse(o => { if (!o.isMesh || !o.visible || !o.geometry || !o.geometry.attributes.position) return;
-    const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry; m.multiplyMatrices(inv, o.matrixWorld);
-    const mt = o.material, cat = mt === paintMat ? 'paint' : mt === darkMat ? 'dark' : mt === glassMat ? 'glass' : 'misc', col = mt.color ? mt.color : new THREE.Color(0.5, 0.5, 0.5);
+    const g0 = o.geometry === tireGeo ? tireGeoLow : o.geometry === rimGeo ? rimGeoLow : o.geometry, g = g0.index ? g0.toNonIndexed() : g0; m.multiplyMatrices(inv, o.matrixWorld);
+    const mt = o.material, cat = o.geometry === tireGeo || o.geometry === rimGeo || o.geometry === hubGeo ? 'wheel' : mt === paintMat ? 'paint' : mt === darkMat ? 'dark' : mt === glassMat ? 'glass' : 'misc', col = mt.color ? mt.color : new THREE.Color(0.5, 0.5, 0.5);
     const P = g.attributes.position; for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i).applyMatrix4(m); cats[cat].push([v.x, v.y, v.z, col.r, col.g, col.b]); } });
   const C = 0.1; _carKit = [];
   for (const [cat, V] of Object.entries(cats)) {
@@ -1982,6 +1982,7 @@ function carKit() {
     const pos = [], col = [];
     for (let i = 0; i < V.length; i += 3) {
       const t = [V[i], V[i+1], V[i+2]].map(p => { const k = key(p); if (!rep.has(k)) rep.set(k, [Math.round(p[0]/C)*C, Math.round(p[1]/C)*C, Math.round(p[2]/C)*C]); return { k, q: rep.get(k), c: p }; });
+      if (cat === 'wheel') { t.forEach(({ c }) => { pos.push(c[0], c[1], c[2]); col.push(c[3], c[4], c[5]); }); continue; }
       if (t[0].k === t[1].k || t[1].k === t[2].k || t[0].k === t[2].k) continue;   // collapsed: drop
       t.forEach(({ q, c }) => { pos.push(q[0], q[1], q[2]); col.push(c[3], c[4], c[5]); });
     }
@@ -3212,14 +3213,31 @@ exhaustPipe.rotation.x = Math.PI/2; exhaustPipe.position.set(-0.5, 0.3, -1.84); 
 const EXHAUST_LOCAL = new THREE.Vector3(-0.5, 0.3, -1.99);
 const plate = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.1, 0.02), new THREE.MeshStandardMaterial({ color: 0xf0f0ea, roughness: 0.6 })); plate.position.set(0, 0.60, -1.86); bodyGroup.add(plate);
 
+// ── tyres: one shape for every wheel in the world — a rounded tread with block ribs, bulging sidewalls, the bead going in to the rim.
+//    Lathed round the Y axis (like a cylinder: the callers turn it onto the axle). Tractor tyres get chevron lugs as well. ──
+function tyreLathe(R, W, seg) { const h = W/2, Ri = R*0.64, n = seg || 22;
+  const P = [[Ri, -h*0.86], [R*0.8, -h], [R*0.93, -h*0.94], [R*0.985, -h*0.74], [R, -h*0.36], [R, h*0.36], [R*0.985, h*0.74], [R*0.93, h*0.94], [R*0.8, h], [Ri, h*0.86]].map(([r, y]) => new THREE.Vector2(r, y));
+  const g = new THREE.LatheGeometry(P, n), pa = g.attributes.position, per = P.length;
+  for (let i = 0; i < pa.count; i++) { const k = i % per, sgi = Math.floor(i/per); if (k === 4 || k === 5 || ((k === 3 || k === 6) && sgi % 2)) { const f = (sgi + (k === 5 ? 1 : 0)) % 2 ? 0.965 : 1; pa.setX(i, pa.getX(i)*f); pa.setZ(i, pa.getZ(i)*f); } }   // (the tread: blocks, staggered across it)
+  g.computeVertexNormals(); return g; }
+function tractorTyreGeo(R, W) { const base = tyreLathe(R, W, 18), parts = [base], h = W/2, N = Math.round(R*20);   // chevron lugs round the tread, both halves, staggered
+  for (let k = 0; k < N; k++) for (const sd of [-1, 1]) { const a = (k + (sd > 0 ? 0.5 : 0))/N*Math.PI*2, L = new THREE.BoxGeometry(R*0.1, h*0.95, R*0.13);
+    L.rotateX(sd*0.55); L.translate(R*1.02, sd*h*0.45, 0); L.rotateY(a); parts.push(L); }
+  let nv = 0, ni = 0; for (const q of parts) { nv += q.attributes.position.count; ni += q.index ? q.index.count : q.attributes.position.count; }
+  const pos = new Float32Array(nv*3), nor = new Float32Array(nv*3), idx = []; let o = 0;
+  for (const q of parts) { const pp = q.attributes.position.array, nn = q.attributes.normal.array; pos.set(pp, o*3); nor.set(nn, o*3); if (q.index) for (const i of q.index.array) idx.push(i + o); else for (let i = 0; i < pp.length/3; i++) idx.push(i + o); o += pp.length/3; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); g.setIndex(idx); return g; }
+function ltyre(R, W) { return lgeo('tyre' + R + ',' + W, () => tyreLathe(R, W)); }
+function ltractorTyre(R, W) { return lgeo('ttyre' + R + ',' + W, () => tractorTyreGeo(R, W)); }
 // wheels — dark tire + light rim + red hub, in steer groups
 const WHEEL_RADIUS = 0.34;
-const tireGeo = new THREE.CylinderGeometry(WHEEL_RADIUS, WHEEL_RADIUS, 0.3, 14);
+const tireGeo = tyreLathe(WHEEL_RADIUS, 0.3);
 tireGeo.rotateZ(Math.PI/2);
-const rimGeo = new THREE.CylinderGeometry(0.23, 0.23, 0.31, 12);
+const rimGeo = new THREE.CylinderGeometry(0.215, 0.215, 0.27, 16);
 rimGeo.rotateZ(Math.PI/2);
 const hubGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.32, 8);
 hubGeo.rotateZ(Math.PI/2);
+const tireGeoLow = tyreLathe(WHEEL_RADIUS, 0.3, 12).rotateZ(Math.PI/2), rimGeoLow = new THREE.CylinderGeometry(0.215, 0.215, 0.27, 9).rotateZ(Math.PI/2);   // (the parked copies: the same tyre, lighter)
 const tireMat = new THREE.MeshStandardMaterial({ color: 0x16161a, roughness: 0.9 });
 const rimMat = new THREE.MeshStandardMaterial({ color: 0xbfc1c6, roughness: 0.35, metalness: 0.7, envMap: carEnv, envMapIntensity: 0.8 });   // pepperpot grey
 const hubMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2e, roughness: 0.5, metalness: 0.3 });
@@ -3244,8 +3262,8 @@ let lastThud = 0;
 // barrier stacks: one lathed shape per height (2–4 tyres): bead hole, bottom and top sidewalls, a tread band per tyre
 // with a dip between tyres — the faces hidden between stacked tyres simply don't exist. Tread chevrons in the texture.
 const TYRE_H = 0.36;
-function stackProfile(h) { const P = [[0.47, 0.0], [0.62, 0.006], [0.77, 0.04]];
-  for (let k = 0; k < h; k++) { const yc = TYRE_H*0.5 + k*TYRE_H; P.push([0.80, yc - 0.13], [0.80, yc + 0.13]); if (k < h-1) P.push([0.75, yc + TYRE_H*0.5]); }
+function stackProfile(h) { const P = [[0.47, 0.0], [0.62, 0.006], [0.745, 0.035]];   // per tyre: a rounded tread (4 points), a groove where two meet
+  for (let k = 0; k < h; k++) { const yc = TYRE_H*0.5 + k*TYRE_H; P.push([0.786, yc - 0.12], [0.812, yc - 0.035], [0.812, yc + 0.035], [0.786, yc + 0.12]); if (k < h-1) P.push([0.735, yc + TYRE_H*0.5]); }
   const top = h*TYRE_H; P.push([0.77, top - 0.04], [0.62, top - 0.006], [0.47, top], [0.45, top - 0.12], [0.47, 0.0]); return P; }
 const STACK_GEO = {}, STACK_MAT = {};
 [2, 3, 4].forEach(h => {
@@ -3254,8 +3272,11 @@ const STACK_GEO = {}, STACK_MAT = {};
   const W = 256, Ht = 256, c = document.createElement('canvas'); c.width = W; c.height = Ht; const g = c.getContext('2d');
   g.fillStyle = '#f4f4f0'; g.fillRect(0, 0, W, Ht);
   const yOf = j => (1 - j/(N - 1))*Ht;
-  for (let k = 0; k < h; k++) { const j0 = 3 + k*3, y0 = yOf(j0), y1 = yOf(j0 + 1), top = Math.min(y0, y1), bot = Math.max(y0, y1), mid = (top + bot)/2;
-    g.fillStyle = '#8f8f8a'; for (let x = 0; x < W; x += 8) { g.beginPath(); g.moveTo(x, top); g.lineTo(x + 4, mid); g.lineTo(x, bot); g.lineTo(x + 2.5, bot); g.lineTo(x + 6.5, mid); g.lineTo(x + 2.5, top); g.closePath(); g.fill(); } }
+  for (let k = 0; k < h; k++) { const j0 = 3 + k*5, top = yOf(j0 + 3), bot = yOf(j0), mid = (top + bot)/2, hh = bot - top;   // the tread: two rows of blocks, a zigzag groove between, sipes
+    g.fillStyle = '#6e6e6a'; g.fillRect(0, top, W, hh*0.08); g.fillRect(0, bot - hh*0.08, W, hh*0.08);   // (the shoulders, worn darker)
+    g.fillStyle = '#8a8a85'; for (let x = 0; x < W; x += 10) { g.fillRect(x, top + hh*0.1, 2.2, hh*0.32); g.fillRect(x + 5, mid + hh*0.08, 2.2, hh*0.32); }
+    g.strokeStyle = '#7a7a76'; g.lineWidth = 2.2; g.beginPath(); for (let x = 0; x <= W; x += 5) g.lineTo(x, mid + ((x/5) % 2 ? 2.5 : -2.5)); g.stroke();
+    if (k < h - 1) { g.fillStyle = '#5a5a56'; g.fillRect(0, yOf(j0 + 4) - 2, W, 4); } }
   for (let k = 0; k < 360; k++) { g.fillStyle = 'rgba(40,36,30,' + (0.06 + Math.random()*0.16) + ')'; g.fillRect(Math.random()*W, Math.random()*Ht, 1 + Math.random()*4, 1 + Math.random()*2); }
   const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping;
   STACK_MAT[h] = new THREE.MeshStandardMaterial({ color: 0xffffff, map: t, roughness: 0.85 });
@@ -3766,7 +3787,7 @@ function makeBus(num) {
   const dispS = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 0.22), new THREE.MeshBasicMaterial({ map: numberTexture(num, 160, 60) })); dispS.position.set(-W/2 - 0.04, 2.3, L/2 - 2.2); dispS.rotation.y = -Math.PI/2; G.add(dispS);
   // wheels in arches
   [[L/2 - 2.2], [-L/2 + 2.4]].forEach(([z]) => [-1, 1].forEach(s => {
-    const wh = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.34, 14), black); wh.rotation.z = Math.PI/2; wh.position.set(s*(W/2 - 0.12), 0.5, z); wh.castShadow = true; G.add(wh);
+    const wh = new THREE.Mesh(tyreLathe(0.5, 0.34), black); wh.rotation.z = Math.PI/2; wh.position.set(s*(W/2 - 0.12), 0.5, z); wh.castShadow = true; G.add(wh);
     const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.36, 10), grey); hub.rotation.z = Math.PI/2; hub.position.set(s*(W/2 - 0.1), 0.5, z); G.add(hub);
     box(0.06, 0.7, 1.25, black, s*(W/2 + 0.005), 0.72, z); }));
   G.userData.key = 'bus'; G.userData.size = [W, L];
@@ -4085,6 +4106,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Renkaat uusiksi: kaikissa autoissa ja busseissa pyöreät renkaat kulutuspinnan palikoilla, rengaspinot pyöreämmiksi ja kuviolliseksi, traktoreille nappularenkaat; pihoille valkoiset traktorinrengaskukkapenkit ja peltojen laidoille vanhoja traktorinrenkaita'],
   ['28.9.', 'Maalin lähelle tulostaulu (TOP 5 -ajat), kolme pientä katsomoa ja varikko asfalttikentälle: kolme tiimiä teltoineen, rallikaarat numeroineen, mekaanikot, renkaat ja huoltoauto'],
   ['28.9.', 'P = tauko (myös kun välilehti vaihtuu); GTA-moodin minikartta 2× suurennettuna ja seuraa autoa, kartalla myös pizzeria; alkuruutuun PC-PELI · TOIMII 486-KONEELLA'],
   ['28.9.', 'ES STOP -ruutu nyt musta maalattu alusta (maasto ei näy läpi); pizzerian katolle valomainos teräskehikolla ja pyörivä jättipizza'],
@@ -4711,7 +4733,7 @@ function makeAmbulance() {
   for (const sx of [-1, 1]) { B(0.62, 0.48, 0.03, glass, sx*0.4, 1.72, -2.56); B(0.14, 0.34, 0.04, new THREE.MeshStandardMaterial({ color: 0x8a1010, emissive: 0xff2020, emissiveIntensity: 0.5 }), sx*0.8, 0.8, -2.57, 0, false); }
   B(1.2, 0.06, 0.25, trim, 0, 0.35, -2.7);                                                                // rear step
   // wheels, arches, mirrors
-  for (const sx of [-1, 1]) for (const zz of [1.5, -1.45]) { const w = lmesh(lcyl(0.33, 0.22, 14), black, sx*0.8, 0.33, zz, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.17, 0.23, 10), hub, sx*0.8, 0.33, zz, G, false); h.rotation.z = Math.PI/2;
+  for (const sx of [-1, 1]) for (const zz of [1.5, -1.45]) { const w = lmesh(ltyre(0.33, 0.22), black, sx*0.8, 0.33, zz, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.17, 0.23, 10), hub, sx*0.8, 0.33, zz, G, false); h.rotation.z = Math.PI/2;
     B(0.06, 0.12, 0.9, trim, sx*0.87, 0.66, zz); }
   for (const sx of [-1, 1]) { B(0.3, 0.03, 0.03, black, sx*0.98, 1.22, 1.15, 0, false); B(0.05, 0.2, 0.14, black, sx*1.12, 1.26, 1.15); }
   // side lettering
@@ -5444,7 +5466,7 @@ function makeFireEngine() {
     B(0.14, 0.3, 0.05, new THREE.MeshStandardMaterial({ color: 0x8a1010, emissive: 0xff2020, emissiveIntensity: 0.5 }), sx*1.05, 1.0, -4.08, 0, false); B(0.05, 0.3, 0.2, black, sx*1.35, 1.9, 3.8); }
   for (const sx of [-0.45, 0.45]) B(0.06, 0.06, 6.4, alu, sx, 2.96, -1.2); for (let k = 0; k < 16; k++) B(0.9, 0.04, 0.05, alu, 0, 2.96, 1.9 - k*0.4, 0, false);   // ladder
   B(2.2, 0.06, 5.4, lmat(0x9a9a9a, 0.4), 0, 2.87, -1.1);                                                                 // roof deck
-  for (const sx of [-1, 1]) for (const zz of [2.5, -2.2]) { const w = lmesh(lcyl(0.5, 0.36, 14), black, sx*1.05, 0.5, zz, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.24, 0.37, 10), alu, sx*1.05, 0.5, zz, G, false); h.rotation.z = Math.PI/2; }
+  for (const sx of [-1, 1]) for (const zz of [2.5, -2.2]) { const w = lmesh(ltyre(0.5, 0.36), black, sx*1.05, 0.5, zz, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.24, 0.37, 10), alu, sx*1.05, 0.5, zz, G, false); h.rotation.z = Math.PI/2; }
   for (const sx of [-1, 1]) { const s = new THREE.Mesh(lgeo('fireside', () => new THREE.PlaneGeometry(2.4, 0.45)), new THREE.MeshBasicMaterial({ map: fireSideTex(), transparent: true, depthWrite: false })); s.position.set(sx*1.232, 1.0, 1.4); s.rotation.y = sx*Math.PI/2; G.add(s); }
   const bm = [0, 1].map(() => new THREE.MeshStandardMaterial({ color: 0x2a4ac0, emissive: 0x3a6aff, emissiveIntensity: 0.2, roughness: 0.2, transparent: true, opacity: 0.9 }));
   const beacons = [-0.85, 0.85].map((x, i) => { lmesh(lcyl(0.14, 0.06, 10), white, x, 2.2, 3.7, G, false); return lmesh(lcyl(0.12, 0.22, 12), bm[i], x, 2.34, 3.7, G, false); });
@@ -5585,7 +5607,7 @@ function makePoliceCar() {   // a boxy 80s saloon: white, a blue band, POLIISI o
   B(1.84, 0.15, 0.16, black, 0, 0.4, 2.36); B(1.84, 0.15, 0.16, black, 0, 0.4, -2.36); B(1.3, 0.2, 0.04, black, 0, 0.68, 2.36);   // bumpers, grille
   const head = new THREE.MeshStandardMaterial({ color: 0xfff6d8, emissive: 0xfff0c8, emissiveIntensity: 0.9, roughness: 0.3 });
   for (const sx of [-1, 1]) { B(0.3, 0.16, 0.05, head, sx*0.66, 0.68, 2.36, 0, false); B(0.34, 0.14, 0.04, lmat(0xa01818, 0.4), sx*0.66, 0.7, -2.36, 0, false); }
-  for (const sx of [-1, 1]) for (const zz of [1.4, -1.35]) { const w = lmesh(lcyl(0.32, 0.22, 14), black, sx*0.8, 0.32, zz, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.16, 0.23, 10), hub, sx*0.8, 0.32, zz, G, false); h.rotation.z = Math.PI/2; }
+  for (const sx of [-1, 1]) for (const zz of [1.4, -1.35]) { const w = lmesh(ltyre(0.32, 0.22), black, sx*0.8, 0.32, zz, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.16, 0.23, 10), hub, sx*0.8, 0.32, zz, G, false); h.rotation.z = Math.PI/2; }
   B(1.2, 0.1, 0.32, white, 0, 1.53, -0.15);                                                                  // light bar
   const bm = [0, 1].map(() => new THREE.MeshStandardMaterial({ color: 0x2a4ac0, emissive: 0x3a6aff, emissiveIntensity: 0.2, roughness: 0.2, transparent: true, opacity: 0.9 }));
   const beacons = [-0.4, 0.4].map((x, i) => lmesh(lcyl(0.12, 0.2, 12), bm[i], x, 1.67, -0.15, G, false));
@@ -5944,7 +5966,7 @@ function makeIceVan() { const G = new THREE.Group(), white = lmat(0xf6f6f2, 0.4)
   B(0.03, 0.6, 1.3, glass, 0.905, 1.62, -0.8); B(0.28, 0.04, 1.3, lmat(0xe8e8e0, 0.5), 1.02, 1.3, -0.8);  // the hatch, its counter
   const aw = B(0.55, 0.03, 1.5, blue, 1.12, 2.02, -0.8); aw.rotation.z = -0.35;                            // awning over it
   lmesh(lgeo('head', () => new THREE.SphereGeometry(0.135, 10, 8)), lmat(0xe8b795, 0.8), 0.55, 1.72, -0.8, G, false); B(0.3, 0.12, 0.3, lmat(0xffffff, 0.6), 0.55, 1.88, -0.8, 0, false);   // the vendor in his white hat
-  for (const sx of [-1, 1]) for (const zz of [1.5, -1.5]) { const w = lmesh(lcyl(0.34, 0.24, 14), black, sx*0.8, 0.34, zz, G); w.rotation.z = Math.PI/2; const hh = lmesh(lcyl(0.17, 0.25, 10), hub, sx*0.8, 0.34, zz, G, false); hh.rotation.z = Math.PI/2; }
+  for (const sx of [-1, 1]) for (const zz of [1.5, -1.5]) { const w = lmesh(ltyre(0.34, 0.24), black, sx*0.8, 0.34, zz, G); w.rotation.z = Math.PI/2; const hh = lmesh(lcyl(0.17, 0.25, 10), hub, sx*0.8, 0.34, zz, G, false); hh.rotation.z = Math.PI/2; }
   const cone = lmesh(lgeo('icecone', () => new THREE.ConeGeometry(0.26, 0.7, 10)), lmat(0xd8a860, 0.8), 0, 2.62, -0.6, G); cone.rotation.x = Math.PI;   // the big cone on the roof
   lmesh(lgeo('scoop', () => new THREE.SphereGeometry(0.3, 12, 8)), pink, 0, 3.02, -0.6, G); lmesh(lgeo('scoop2', () => new THREE.SphereGeometry(0.24, 12, 8)), lmat(0xfaf4e8, 0.6), 0, 3.3, -0.6, G);
   const sign = (txt, w, h, x, y, z, ry) => { const m = new THREE.Mesh(lgeo('ice' + w + 'x' + h, () => new THREE.PlaneGeometry(w, h)), new THREE.MeshBasicMaterial({ map: iceTex(txt), transparent: true, depthWrite: false })); m.position.set(x, y, z); m.rotation.y = ry; G.add(m); };
@@ -6262,7 +6284,7 @@ function makePostVan() { const G = new THREE.Group(), orange = lmat(0xe8701a, 0.
   B(1.64, 0.75, 0.06, glass, 0, 1.4, 1.62, -0.38); B(1.74, 0.16, 0.7, orange, 0, 0.97, 1.85); B(1.82, 0.12, 4.42, white, 0, 0.78, 0);
   B(1.84, 0.16, 0.16, black, 0, 0.42, 2.24); B(1.84, 0.16, 0.16, black, 0, 0.42, -2.24);
   const head = new THREE.MeshStandardMaterial({ color: 0xfff6d8, emissive: 0xfff0c8, emissiveIntensity: 0.9, roughness: 0.3 }); for (const sx of [-1, 1]) { B(0.26, 0.18, 0.05, head, sx*0.66, 0.74, 2.21, 0, false); B(0.14, 0.26, 0.04, lmat(0xa01818, 0.4), sx*0.78, 0.8, -2.22, 0, false); }
-  for (const sx of [-1, 1]) for (const zz of [1.45, -1.45]) { const w = lmesh(lcyl(0.34, 0.24, 14), black, sx*0.8, 0.34, zz, G); w.rotation.z = Math.PI/2; const hh = lmesh(lcyl(0.17, 0.25, 10), hub, sx*0.8, 0.34, zz, G, false); hh.rotation.z = Math.PI/2; }
+  for (const sx of [-1, 1]) for (const zz of [1.45, -1.45]) { const w = lmesh(ltyre(0.34, 0.24), black, sx*0.8, 0.34, zz, G); w.rotation.z = Math.PI/2; const hh = lmesh(lcyl(0.17, 0.25, 10), hub, sx*0.8, 0.34, zz, G, false); hh.rotation.z = Math.PI/2; }
   for (const sx of [-1, 1]) { const m = new THREE.Mesh(lgeo('postside', () => new THREE.PlaneGeometry(2.2, 0.55)), new THREE.MeshBasicMaterial({ map: postTex(), transparent: true, depthWrite: false })); m.position.set(sx*0.912, 1.6, -0.75); m.rotation.y = sx*Math.PI/2; G.add(m); }
   return G; }
 const postVanManTask = (V) => ({ kind: 'postvan', update(h, dt, t) { const st = h.st || (h.st = { mode: 'go', t: 0 });
@@ -6529,7 +6551,7 @@ function scoreboardDraw() { const g = FINISH_AREA.ctx; if (!g) return; const row
 function makeRallyCar(col, num) { const G = new THREE.Group(), body = lmat(col, 0.45), black = lmat(0x141414, 0.8), glass = lmat(0x1c2630, 0.15), hub = lmat(0xd8d8d8, 0.35);
   lmesh(lbox(1.66, 0.55, 3.7), body, 0, 0.6, 0, G); lmesh(lbox(1.52, 0.52, 1.9), body, 0, 1.12, -0.25, G); lmesh(lbox(1.54, 0.4, 1.7), glass, 0, 1.14, -0.25, G, false);
   lmesh(lbox(1.7, 0.1, 3.72), lmat(0xf2f2ea, 0.5), 0, 0.7, 0, G, false); lmesh(lbox(1.3, 0.08, 0.3), black, 0, 1.42, -1.1, G, false);   // a stripe, the roof vent
-  for (const sx of [-1, 1]) for (const zz of [1.2, -1.2]) { const w = lmesh(lcyl(0.33, 0.24, 14), black, sx*0.8, 0.33, zz, G); w.rotation.z = Math.PI/2; const hh = lmesh(lcyl(0.18, 0.25, 10), hub, sx*0.8, 0.33, zz, G, false); hh.rotation.z = Math.PI/2; }
+  for (const sx of [-1, 1]) for (const zz of [1.2, -1.2]) { const w = lmesh(ltyre(0.33, 0.24), black, sx*0.8, 0.33, zz, G); w.rotation.z = Math.PI/2; const hh = lmesh(lcyl(0.18, 0.25, 10), hub, sx*0.8, 0.33, zz, G, false); hh.rotation.z = Math.PI/2; }
   const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#f4f4ee'; g.beginPath(); g.arc(64, 64, 60, 0, 6.3); g.fill(); g.fillStyle = '#111'; g.font = 'bold 78px Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(num), 64, 70);
   const nm = new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), transparent: true, roughness: 0.5 }); for (const sx of [-1, 1]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), nm); m.position.set(sx*0.84, 0.64, 0.1); m.rotation.y = sx*Math.PI/2; G.add(m); }
   return G; }
@@ -6555,12 +6577,28 @@ function buildFinishArea() { FINISH_AREA.ctx = null; FINISH_AREA.last = ''; if (
       { const tri = new THREE.Mesh(lgeo('canopy', () => { const g = new THREE.ConeGeometry(2.3, 0.9, 4, 1, true); g.rotateY(Math.PI/4); return g; }), new THREE.MeshStandardMaterial({ color: c1, roughness: 0.7, side: THREE.DoubleSide })); tri.position.y = 2.95; tri.castShadow = true; G.add(tri); }
       lmesh(lbox(3.3, 0.3, 0.04), lmat(c1, 0.6), 0, 2.38, 1.62, G, false); const [x, z] = lloc(L.x, L.z, L.yaw, u, -4.2); placeAt(G, x, z, L.yaw); lifeGroup.add(G); addStaticBox({ x, z, yaw: L.yaw, hw: 1.7, hl: 1.7, kind: 'lm' }); }
     const car = makeRallyCar(c1, num), [cxp, czp] = lloc(L.x, L.z, L.yaw, u, 0.8), cyaw = L.yaw + Math.PI; placeAt(car, cxp, czp, cyaw); lifeGroup.add(car); addStaticBox({ x: cxp, z: czp, yaw: cyaw, hw: 0.85, hl: 1.9, kind: 'lm' });
-    for (const [a, b] of [[-2.6, -1.2], [-2.6, 0.5], [2.4, -2.6]]) { const [x, z] = lloc(L.x, L.z, L.yaw, u + a, b); for (let s = 0; s < 3 + (k % 2); s++) { const t = lmesh(lgeo('ptyre', () => { const g = new THREE.TorusGeometry(0.3, 0.13, 8, 14); g.rotateX(Math.PI/2); return g; }), lmat(0x1a1a1c, 0.9), x, H(x, z) + 0.13 + s*0.24, z, lifeGroup); t.castShadow = true; } }   // spare tyres
+    for (const [a, b] of [[-2.6, -1.2], [-2.6, 0.5], [2.4, -2.6]]) { const [x, z] = lloc(L.x, L.z, L.yaw, u + a, b); for (let s = 0; s < 3 + (k % 2); s++) { const t = lmesh(ltyre(0.32, 0.22), lmat(0x1a1a1c, 0.9), x, H(x, z) + 0.11 + s*0.22, z, lifeGroup); t.castShadow = true; } }   // spare tyres
     { const [x, z] = lloc(L.x, L.z, L.yaw, u + 2.3, -1.2); lmesh(lbox(0.7, 0.55, 0.4), lmat(0xc8201e, 0.5), x, H(x, z) + 0.28, z, lifeGroup).rotation.y = L.yaw; }   // the toolbox
     const fake = { x: cxp, z: czp, yaw: cyaw, hl: 1.9 }; new Human({ x: cxp + 2, z: czp, yaw: cyaw, rig: makeAdult(c1, 0x1c2230, lpick(L_HAIR), { sel: { top: 8, longSleeve: 1, longPants: 1, hat: 1 }, acc: c2 }), task: fixTask(fake, 1) }); });
   { const G = makePostVan(); G.traverse(o => { if (o.isMesh && o.material && o.material.color && o.material.color.getHex() === 0xe8701a) o.material = lmat(0x3a4a5a, 0.5); if (o.isMesh && o.material && o.material.map) o.visible = false; });   // the service van: the post van, painted grey-blue
     const [x, z] = lloc(L.x, L.z, L.yaw, -11, 4.2); placeAt(G, x, z, L.yaw + Math.PI/2); lifeGroup.add(G); addStaticBox({ x, z, yaw: L.yaw + Math.PI/2, hw: 0.95, hl: 2.3, kind: 'lm' }); }
   FINISH_AREA.pits = [L.x, L.z]; }
+
+// ── old tractor tyres: painted white and planted with flowers in front yards (the 80s yard classic), and lying in piles by the
+//    farms' fields where the tractors live ──
+function buildTractorTyres() { const houses = STATIC_LIST.filter(B => B.kind === 'house' && Math.abs(B.x) < 520 && Math.abs(B.z) < 520).sort(() => Math.random() - 0.5), white = lmat(0xf0f0ea, 0.6), black = lmat(0x1c1c1e, 0.9), soil = lmat(0x4a3424, 1);
+  const flowers = [0xe8384a, 0xffd23c, 0xf08ab0, 0xf4f4ee, 0x8a5ad8, 0xff8a3a], ok = (x, z, r) => !onRoad(x, z, 2) && !treeNear(x, z, r + 0.4) && clearSpot(x, z, r) && !VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < 3.5) && !tires.some(t => Math.hypot(t.x - x, t.z - z) < 2.5);
+  let beds = 0; for (const B of houses) { if (beds >= 12) break; const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), rx = fz, rz = -fx;
+    for (const [a, b] of [[B.hw + 3, B.hl*0.4], [-(B.hw + 3), -B.hl*0.3], [B.hw*0.5, B.hl + 3.2], [-B.hw*0.5, -(B.hl + 3.2)]].sort(() => Math.random() - 0.5)) { const x = B.x + rx*a + fx*b, z = B.z + rz*a + fz*b; if (!ok(x, z, 1.2)) continue;
+      const G = new THREE.Group(); lmesh(ltractorTyre(0.75, 0.42), white, 0, 0.21, 0, G); lmesh(lcyl(0.5, 0.3, 14), soil, 0, 0.2, 0, G, false);   // lying flat: the axle is up
+      for (let k = 0; k < 9; k++) { const an = Math.random()*6.3, r = Math.random()*0.38, f = lmesh(lgeo('flower', () => new THREE.SphereGeometry(0.075, 6, 5)), lmat(flowers[(beds + k) % flowers.length], 0.7), Math.sin(an)*r, 0.42 + Math.random()*0.1, Math.cos(an)*r, G, false);
+        lmesh(lbox(0.02, 0.2, 0.02), lmat(0x3a6a2a, 0.8), Math.sin(an)*r, 0.33, Math.cos(an)*r, G, false); }
+      placeAt(G, x, z, Math.random()*6.3); lifeGroup.add(G); addStaticBox({ x, z, yaw: 0, hw: 0.72, hl: 0.72, kind: 'lm' }); reserve('tyrebed', [x, z], 1.2); beds++; break; } }
+  for (const v of VEHICLES) { if (v.kind !== 'tractor') continue;   // a pile by each farm's tractor: two or three lying flat, one leaning against it
+    for (let k = 0; k < 30; k++) { const a = Math.random()*6.3, d = 6 + Math.random()*8, x = v.home.x + Math.sin(a)*d, z = v.home.z + Math.cos(a)*d; if (!ok(x, z, 1.5)) continue;
+      const G = new THREE.Group(), n = 2 + Math.floor(Math.random()*2); for (let q = 0; q < n; q++) { const t = lmesh(ltractorTyre(0.75, 0.42), black, (Math.random() - 0.5)*0.15, 0.21 + q*0.42, (Math.random() - 0.5)*0.15, G); t.rotation.y = Math.random()*6.3; }
+      const lean = lmesh(ltractorTyre(0.75, 0.42), black, 1.05, 0.72, 0, G); lean.rotation.z = Math.PI/2 - 0.35;
+      placeAt(G, x, z, Math.random()*6.3); lifeGroup.add(G); addStaticBox({ x, z, yaw: 0, hw: 1.3, hl: 1.3, kind: 'lm' }); reserve('tyrepile', [x, z], 1.8); break; } } }
 
 // a sausage cart in front of each grandstand: the seller at the grill under a red-and-white parasol, a few people waiting, one eating
 function sausageCart(S) {
@@ -6790,7 +6828,7 @@ function buildRoadies() { ROADIES.pool.length = 0; for (let k = 0; k < 26; k++) 
 
 function lifeExtras3Build() {
   TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
-  buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildUfos(); buildRoadies();
+  buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies();
 }
 function extras3Update(dt) { for (const f of X3.upd) f(dt); esUpdate(dt); cabbageUpdate(dt); ufoUpdate(dt); }
 function lifeExtras3Reset() { for (const f of X3.reset) f(); wreckReset(); esReset(); cabbageReset(); ufoReset(); roadiesPlace(true); }
@@ -6810,8 +6848,8 @@ function makeTractorMesh(paint) { const G = new THREE.Group(), red = lmat(paint 
       lmesh(lbox(0.75, 0.62, 1.9), red, 0, 1.0, 0.55, G); lmesh(lbox(0.8, 0.12, 1.95), lmat(0xf0f0f0, 0.5), 0, 1.3, 0.55, G); lmesh(lbox(1.25, 0.08, 1.35), lmat(0xf0f0f0, 0.5), 0, 2.45, -0.62, G); lmesh(lbox(1.15, 0.95, 1.2), glass, 0, 1.9, -0.62, G);
       for (const [a, b] of [[-0.58, -0.02], [0.58, -0.02], [-0.58, -1.22], [0.58, -1.22]]) lmesh(lbox(0.07, 1.3, 0.07), red, a, 1.78, b, G);
       lmesh(lbox(1.0, 0.25, 1.2), red, 0, 1.35, -0.62, G); lmesh(lcyl(0.045, 1.1, 6), black, 0.25, 1.85, 1.1, G);
-      const wheels = []; for (const s of [-1, 1]) { const w = lmesh(lcyl(0.75, 0.42, 14), black, s*0.82, 0.75, -0.6, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.4, 0.44, 10), rim, s*0.82, 0.75, -0.6, G); h.rotation.z = Math.PI/2; wheels.push([w, 0.75], [h, 0.75]);
-        const f = lmesh(lcyl(0.42, 0.24, 12), black, s*0.62, 0.42, 1.15, G); f.rotation.z = Math.PI/2; const fh = lmesh(lcyl(0.22, 0.26, 8), rim, s*0.62, 0.42, 1.15, G); fh.rotation.z = Math.PI/2; wheels.push([f, 0.42], [fh, 0.42]); }
+      const wheels = []; for (const s of [-1, 1]) { const w = lmesh(ltractorTyre(0.75, 0.42), black, s*0.82, 0.75, -0.6, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.46, 0.4, 14), rim, s*0.82, 0.75, -0.6, G); h.rotation.z = Math.PI/2; wheels.push([w, 0.75], [h, 0.75]);
+        const f = lmesh(ltractorTyre(0.42, 0.24), black, s*0.62, 0.42, 1.15, G); f.rotation.z = Math.PI/2; const fh = lmesh(lcyl(0.26, 0.22, 12), rim, s*0.62, 0.42, 1.15, G); fh.rotation.z = Math.PI/2; wheels.push([f, 0.42], [fh, 0.42]); }
       lmesh(lbox(2.4, 0.14, 0.3), grey, 0, 0.55, -1.95, G); lmesh(lbox(0.12, 0.12, 0.8), grey, 0, 0.62, -1.5, G); for (let k = -3; k <= 3; k++) { const tn = lmesh(lbox(0.05, 0.45, 0.05), grey, k*0.36, 0.32, -2.0, G); tn.rotation.x = 0.35; }
   return { G, wheels }; }
 function worldBuild() {

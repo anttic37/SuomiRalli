@@ -494,6 +494,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   or along the route): draped asphalt, box lines, three teams (canopy, makeRallyCar with its number, spare tyres, toolbox, a mechanic
   on fixTask), the post van painted as the service van. t_pause, t_finish_area. (t_logic 1.35 → ~1.67: the machine, not this — HEAD
   measured the same.)
+- Tyres (28.9., "traktorinrenkaita… parantaa mallia kaikissa renkaissa"): tyreLathe(R, W, seg) — rounded tread with staggered block
+  ribs, bulging sidewalls, the bead going in to the rim (lathed round Y like a cylinder); ltyre()/ltractorTyre() share them via lgeo.
+  All vehicles (the rally car, bus, police, ambulance/fire, post and ice vans, pit cars) use it; tractors get tractorTyreGeo (the tyre
+  + chevron lug boxes, N = R·20). carKit keeps the parked cars' wheels out of the 10 cm vertex clustering (it made chevrons of them)
+  and uses a 12-segment copy (tireGeoLow/rimGeoLow). Barrier stacks: 4-point rounded tread per tyre, still 10 segments, a block-tread
+  texture. buildTractorTyres: 12 white tractor-tyre flower beds in front yards, a pile (2–3 flat + one leaning) by each tractor.
+  Vertices 3.44 → ~3.7 M (fewer draw calls). t_tyres.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
