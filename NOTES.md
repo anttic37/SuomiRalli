@@ -474,6 +474,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   site is makeCrater: a ragged lathe bowl (rim ~1 m, low where the furrow comes in, heaped opposite), a 40-row furrow along the clearest
   of 16 directions (ufoFurrowDir, up to 30 m): dark trough, lumpy fresh-soil berms, torn turf outside, wandering a little; 34 clods;
   a draped radial scorch decal. All vertices laid on Y(); the UFO nose-down into the far wall, the furrow behind it. t_ufo_crater.
+- GTA dressing (28.9., "gta tilassa renkaita varastoon talojen pihaan… siivo k kaupan… isompi mainostus"): freeYardTires(true) pushes
+  ~100 tyre stacks (yard: true, mostly worn black, some race red/white) in rows of 2–5 along a wall of 30 random houses (off roads,
+  trees, cars, other boxes) and rebuilds the prop instances — real, knockable props; false removes them. freeKshop(true): the K-shop
+  grandstand's whole build (buildGrandstands records S.built: objs, static boxes, humans, emitters — boxes moved 1e5 away, people
+  inside, grill smoke under ground; NEAR_VIS honours userData.hide) goes, and esGta(true) shows ES.promo.gta: an inflatable arch,
+  a stage with four more dancers (h.stageDy), eight feather flags, a billboard — each placed by fits() (no road, tree, house, car),
+  the can ×2.1; the beat reaches 190 m (120). t_gta_yard.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

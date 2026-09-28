@@ -4055,6 +4055,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'GTA-moodissa radan renkaat varastoituna talojen pihoille (voi kaataa), K-kaupan katsomo ja makkarakärry pois ja ES-kampanja isommaksi: puhallettava kaari, lava ja neljä tanssijaa lisää, liput, mainostaulu, jättitölkki, musiikki kuuluu kauemmas'],
   ['28.9.', 'Ufon suora osuma ei enää tapa kerralla: heittää ja kolhii autoa, vasta kolmas osuma räjäyttää. Ufojen kuopat uusiksi: kohollaan oleva multareuna, hiiltynyt pohja, pitkä kyntöura ja palanut nurmi'],
   ['28.9.', 'Ufot: nyt kauempana tien päissä (160–250 m reitistä) eivätkä koskaan ammu kisassa radalla ajavaa. Heräävät vasta kun ajat niiden luo: vihreitä plasmakuulia joka suuntaan, suurin osa ohi, kylän väki tulee töllistelemään ja saa osansa, autot palavat – kaaos'],
   ['28.9.', 'Alkuruudussa oma autoradio (Ylästö Sound CR-85): virta, kanavat ◀◀ ▶▶ ja ääni − + (tai nupit ja rulla) – voi vain kuunnella pelaamatta'],
@@ -6314,18 +6315,48 @@ function esPromoBuild(K, W, D) {
     ban.position.set(0, 3.0, 0); G.add(ban); placeAt(G, bx, bz, yaw); lifeGroup.add(G); }
   // the promoters: black and lime, dancing either side
   for (const sd of [-1, 1]) { const [x, z] = at(sd*(W/2 + 2.2), D/2 + 6), rig = makeAdult(0x141414, 0x141414, lpick(L_HAIR), { sel: { hair: sd < 0 ? 4 : 2, top: 12, bottom: 4, hat: sd > 0 ? 1 : 0 }, acc: 0x9be22a, shoes: 0xf2f2ee, w: 0.92 });
-    P.dancers.push(new Human({ x, z, yaw: yaw, rig, task: esDanceTask(sd) })); } }
+    P.dancers.push(new Human({ x, z, yaw: yaw, rig, task: esDanceTask(sd) })); }
+  // ── GTA mode only: the big campaign (built now, shown with FREE) — an inflatable arch, a stage with four more dancers, feather flags, a billboard ──
+  const X = P.gta = { g: new THREE.Group(), boxes: [], people: [] }; X.g.visible = false; X.g.userData.hide = true; lifeGroup.add(X.g); nearVis(X.g, P.x, P.z);
+  const fits = (a, b, hw, hl, rot) => { const r = rot || 0; for (const [u, v] of [[-hw, -hl], [hw, -hl], [-hw, hl], [hw, hl], [0, 0]]) { const [x, z] = at(a + u*Math.cos(r) + v*Math.sin(r), b - u*Math.sin(r) + v*Math.cos(r)); if (onRoad(x, z, 0.6) || treeNear(x, z, 0.9) || VEHICLES.some(o => Math.hypot(o.x - x, o.z - z) < 2.6)) return false; let hit = false; staticNear(x, z, 1.5, B => { if (!hit && B.kind !== 'lm' && boxPush(B, x, z, 0.6)) hit = true; }); if (hit) return false; } return true; },
+    pick = (cands, hw, hl, rot) => cands.find(([a, b]) => fits(a, b, hw, hl, rot));
+  const put = (G, a, b, rot) => { const [x, z] = at(a, b); placeAt(G, x, z, yaw + (rot || 0)); X.g.add(G); return [x, z]; }, box = (a, b, hw, hl, rot) => { const [x, z] = at(a, b), B = { x: x + 1e5, z, yaw: yaw + (rot || 0), hw, hl, kind: 'lm', hx: x }; addStaticBox(B); X.boxes.push(B); };
+  { const G = new THREE.Group(), R = Math.min(5.2, W*0.35 + 2);   // the arch over the way in: lime and black rings
+    for (let k = 0; k < 9; k++) { const seg = new THREE.Mesh(new THREE.TorusGeometry(R, 0.55, 10, 6, Math.PI/9), k % 2 ? new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.5 }) : new THREE.MeshStandardMaterial({ color: 0x9be22a, roughness: 0.45 })); seg.rotation.z = k*Math.PI/9; G.add(seg); }
+    const sg = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.1), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, map: tex(512, 176, (g, w, h) => { g.fillStyle = '#141414'; g.fillRect(0, 0, w, h); g.fillStyle = '#9be22a'; g.font = font(120); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('ES', w/2, h/2 + 4); }) })); sg.position.set(0, R + 0.9, 0); G.add(sg);
+    const ab = [9.8, 9.2, 8.6, 6.2, 5.0, 7.4, 3.8, 10.6].map(b => [0, D/2 + b]).find(([a, b]) => fits(-R, b, 0.6, 0.6) && fits(R, b, 0.6, 0.6)); if (ab) { put(G, 0, ab[1]); for (const sd of [-1, 1]) box(sd*R, ab[1], 0.6, 0.6); } }
+  { const G = new THREE.Group(), st = lmat(0x2a2a2e, 0.6), tr = lmat(0xb8bcc2, 0.3);   // the stage, a truss, four lamps
+    lmesh(lbox(6.4, 0.7, 3.4), st, 0, 0.35, 0, G); lmesh(lbox(6.5, 0.08, 3.5), lmat(0x9be22a, 0.5), 0, 0.72, 0, G, false);
+    for (const sx of [-3, 3]) lmesh(lbox(0.18, 4.2, 0.18), tr, sx, 2.1, -1.5, G); lmesh(lbox(6.2, 0.2, 0.2), tr, 0, 4.2, -1.5, G);
+    for (let k = 0; k < 4; k++) { const l = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.24, 0.35, 10), new THREE.MeshStandardMaterial({ color: 0x222222, emissive: [0xff3a3a, 0x9be22a, 0x3a8aff, 0xffd23c][k], emissiveIntensity: 1.6 })); l.position.set(-2.25 + k*1.5, 3.95, -1.3); l.rotation.x = 0.6; G.add(l); }
+    const bk = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 3.2), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, map: tex(1024, 520, (g, w, h) => { g.fillStyle = '#141414'; g.fillRect(0, 0, w, h); g.fillStyle = '#9be22a'; g.font = font(300); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('ES', w/2, h*0.45); g.fillStyle = '#fff'; g.font = font(64); g.fillText('KESÄKIERTUE 1988', w/2, h*0.85); }) })); bk.position.set(0, 2.45, -1.62); G.add(bk);
+    const cs = []; for (const b of [D/2 + 4.5, D/2 + 2, D/2 - 1, D/2 - 4, D/2 + 6.5]) for (const a of [-(W/2 + 8.5), -(W/2 + 11), W/2 + 11, W/2 + 14, -(W/2 + 14)]) cs.push([a, b]); const sp = pick(cs, 3.4, 1.9) || [-(W/2 + 8.5), D/2 + 4.5], sx0 = sp[0], sb = sp[1]; put(G, sx0, sb); box(sx0, sb, 3.3, 1.8);
+    for (let k = 0; k < 4; k++) { const [x, z] = at(sx0 - 2.1 + k*1.4, sb + 0.4), rig = makeAdult(k % 2 ? 0x9be22a : 0x141414, 0x141414, lpick(L_HAIR), { sel: { hair: k, top: 12, bottom: 4 }, acc: 0x9be22a, shoes: 0xf2f2ee, w: 0.92 });
+      const h = new Human({ x, z, yaw, rig, task: esDanceTask(k % 2 ? 1 : -1) }); h.stageDy = 0.72 - (Y(x, z) - Y(...at(sx0, sb))); h.inside = true; X.people.push(h); } }
+  for (let k = 0; k < 8; k++) { const G = new THREE.Group(), a = -13 + k*(26/7);   // feather flags along the front
+    lmesh(lbox(0.07, 4.2, 0.07), lmat(0xd8d8d8, 0.4), 0, 2.1, 0, G);
+    const fg = new THREE.PlaneGeometry(0.9, 3.0, 1, 6); { const pa = fg.attributes.position; for (let i = 0; i < pa.count; i++) { const y = pa.getY(i); pa.setX(i, pa.getX(i) + 0.45); pa.setZ(i, Math.sin((y + 1.5)*1.1)*0.18); } fg.computeVertexNormals(); }
+    const fl = new THREE.Mesh(fg, new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.7, map: tex(128, 420, (g, w, h) => { g.fillStyle = k % 2 ? '#9be22a' : '#141414'; g.fillRect(0, 0, w, h); g.save(); g.translate(w/2, h/2); g.rotate(-Math.PI/2); g.fillStyle = k % 2 ? '#141414' : '#9be22a'; g.font = font(92); g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('ES', 0, 4); g.restore(); }) }));
+    fl.position.y = 2.6; G.add(fl); G.userData.flag = fl; const fb = [8.4, 9.4, 7.6, 10.6, 12.5].map(b => D/2 + b).find(b => fits(a, b, 0.4, 0.4)); if (fb !== undefined) put(G, a, fb); }
+  { const G = new THREE.Group(), bw = 9, bh = 3.6;   // the billboard, side on to the road
+    for (const sx of [-3.2, 3.2]) lmesh(lbox(0.25, 3.2, 0.25), lmat(0x5a5a5e, 0.5), sx, 1.6, 0, G);
+    const bb = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.6, map: tex(1024, 410, (g, w, h) => { g.fillStyle = '#9be22a'; g.fillRect(0, 0, w, h); g.fillStyle = '#141414'; g.fillRect(24, 24, w - 48, h - 48);
+      g.fillStyle = '#9be22a'; g.font = font(210); g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText('ES', 70, h*0.44); g.fillStyle = '#fff'; g.font = font(58); g.fillText('ENERGIAA', 420, h*0.33); g.fillText('KOKO KYLÄLLE!', 420, h*0.55); g.fillStyle = '#9be22a'; g.font = font(40); g.fillText('ILMAISEKSI K-KAUPALTA', 70, h*0.82); }) }));
+    bb.position.y = 3.2 + bh/2; G.add(bb); const cb = []; for (const b of [D/2 + 3, D/2, D/2 + 6, D/2 - 3]) for (const a of [W/2 + 11, W/2 + 8, -(W/2 + 16), W/2 + 15]) cb.push([a, b]); const bp = pick(cb, 3.5, 0.5, 0.5); if (bp) { put(G, bp[0], bp[1], 0.5); box(bp[0], bp[1], 3.4, 0.3, 0.5); } } }
+function esGta(on) { const P = ES.promo; if (!P || !P.gta) return; const X = P.gta; X.g.userData.hide = !on; X.g.visible = on;
+  X.boxes.forEach(B => { B.x = on ? B.hx : B.hx + 1e5; }); X.people.forEach(h => { h.inside = !on; humanSync(h); });
+  if (P.can) { const k = on ? 2.1 : 1; P.can.scale.set(k, k, k); } }
 const esDanceTask = (sd) => ({ kind: 'esdance', update(h, dt, t) { if (Math.hypot(h.x - h.home.x, h.z - h.home.z) > 0.5) { walkTo(h, h.home.x, h.home.z, 1.5, dt); return; }
   h.vx = h.vz = 0; const b = t*124/60*Math.PI, near = Math.hypot(car.x - h.x, car.z - h.z) < 40; h.yaw = near ? Math.atan2(car.x - h.x, car.z - h.z) : h.home.yaw + Math.sin(t*0.5)*0.6;
-  h.pose.armL = -2.6 + Math.sin(b)*0.4; h.pose.armR = near ? -2.9 : -1.2 + Math.sin(b + 1)*0.9; h.pose.armLz = -0.3*sd; h.pose.dy = Math.abs(Math.sin(b))*0.08; h.sway = Math.sin(b*0.5)*0.25; } });   // (waving you in when you're near)
+  h.pose.armL = -2.6 + Math.sin(b)*0.4; h.pose.armR = near ? -2.9 : -1.2 + Math.sin(b + 1)*0.9; h.pose.armLz = -0.3*sd; h.pose.dy = (h.stageDy || 0) + Math.abs(Math.sin(b))*0.08; h.sway = Math.sin(b*0.5)*0.25; } });   // (waving you in when you're near)
 // the beat: made here (kick, off-beat hi-hat, a bass line), louder the nearer the car; the speaker cones pump with the kick
 function esPromoUpdate(dt) { const P = ES.promo; if (!P) return; const d = Math.hypot(car.x - P.x, car.z - P.z), bl = 60/124;
-  if (P.can) P.can.rotation.y += dt*0.6;
+  if (P.can) P.can.rotation.y += dt*0.6; if (P.gta && P.gta.g.visible && d < 200) P.gta.g.children.forEach(G => { const f = G.userData.flag; if (f) f.rotation.y = Math.sin(worldT*2.2 + G.position.x)*0.35; });
   const ph = audio ? ((audio.ctx.currentTime - P.nextT) % bl + bl) % bl : (worldT % bl); const k = 1 + 0.07*Math.exp(-ph*14);
   if (d < 140) P.speakers.forEach(F => F.scale.set(k, k, k));
   if (!audio || gameState === State.MENU) { if (P.g) P.g.gain.value = 0; return; } const ctx = audio.ctx;
   if (!P.g) { P.g = ctx.createGain(); P.g.gain.value = 0; P.g.connect(audio.master); const nb = ctx.createBuffer(1, ctx.sampleRate*0.1, ctx.sampleRate), a = nb.getChannelData(0); for (let i = 0; i < a.length; i++) a[i] = Math.random()*2 - 1; P.noise = nb; P.nextT = ctx.currentTime + 0.05; }
-  const vol = d < 120 ? 0.55*Math.pow(1 - d/120, 2) : 0; P.g.gain.setTargetAtTime(vol, ctx.currentTime, 0.1); if (vol <= 0.001) { P.nextT = ctx.currentTime + 0.05; return; }
+  const RR = FREE.on ? 190 : 120, vol = d < RR ? (FREE.on ? 0.7 : 0.55)*Math.pow(1 - d/RR, 2) : 0; P.g.gain.setTargetAtTime(vol, ctx.currentTime, 0.1); if (vol <= 0.001) { P.nextT = ctx.currentTime + 0.05; return; }
   const s16 = bl/4, BASSN = [55, 0, 55, 65.4, 0, 55, 82.4, 73.4];
   while (P.nextT < ctx.currentTime + 0.12) { const t0 = P.nextT, st = P.step % 16;
     if (st % 4 === 0) { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(150, t0); o.frequency.exponentialRampToValueAtTime(42, t0 + 0.12); g.gain.setValueAtTime(1, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.28); o.connect(g); g.connect(P.g); o.start(t0); o.stop(t0 + 0.3); }
@@ -6432,13 +6463,13 @@ function placeGrandstand(cx, cz, L, relax) {   // 8–45 m from (cx, cz), off ev
     if (!ok || hi - lo > (relax ? 2 : 1.6)) continue; const [mx, mz] = lloc(x, z, yaw, 0, -1.5), sc = -dr - (hi - lo)*5 - r*0.15 - treeCount(mx, mz, L/2 + 3)*3; if (!best || sc > best.sc) best = { x, z, yaw, sc }; if (k > 250 && best) break; }   // (fewest trees round it)
   return best; }
 function buildGrandstands() { STANDS.length = 0; const spots = []; if (finishLine) spots.push([finishLine.position.x, finishLine.position.y, 16]); const K = LANDMARKS.find(L => L[0] === 'kauppa'); if (K) spots.push([K[1], K[2], 12]);
-  for (const [cx, cz, L0] of spots) { let L = L0, S = placeGrandstand(cx, cz, L) || placeGrandstand(cx, cz, L, true); if (!S) { L -= 3; S = placeGrandstand(cx, cz, L, true); } if (!S) continue;   /* (a tight spot: looser, then shorter) */ reserve('stand', [S.x, S.z], L/2 + 1);
+  for (const [si, [cx, cz, L0]] of spots.entries()) { const b0 = { o: lifeGroup.children.length, s: STATIC_LIST.length, h: HUMANS.length, e: EMITTERS.length }; let L = L0, S = placeGrandstand(cx, cz, L) || placeGrandstand(cx, cz, L, true); if (!S) { L -= 3; S = placeGrandstand(cx, cz, L, true); } if (!S) continue;   /* (a tight spot: looser, then shorter) */ reserve('stand', [S.x, S.z], L/2 + 1);
     const [bx, bz] = lloc(S.x, S.z, S.yaw, 0, -1.5); S.base = footprintBase(bx, bz, L/2, 1.8, S.yaw); S.L = L; const G = makeGrandstand(L); G.position.set(S.x, S.base, S.z); G.rotation.y = S.yaw; lifeGroup.add(G); STANDS.push(S);
     addStaticBox({ x: bx, z: bz, yaw: S.yaw, hw: L/2 + 0.1, hl: 1.75, kind: 'lm' });
     for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i], a = Math.cos(S.yaw)*(h.x - bx) - Math.sin(S.yaw)*(h.z - bz), b = Math.sin(S.yaw)*(h.x - bx) + Math.cos(S.yaw)*(h.z - bz); if (Math.abs(a) < L/2 + 0.8 && Math.abs(b) < 2.6 && !h.seat) humanRemove(h); }   // spectators standing where it went up
     S.people = []; for (let row = 0; row < 4; row++) for (let a = -L/2 + 0.55; a <= L/2 - 0.45; a += 0.6) { const [x, z] = lloc(S.x, S.z, S.yaw, a + (Math.random() - 0.5)*0.1, -row*0.85 + 0.12);
       if (Math.random() < 0.5) continue; const h = new Human({ x, z, yaw: S.yaw, inst: Math.floor(Math.random()*16), task: standTask(S, row) });   /* (half full: room to see the stand) */ h.pose.dy = S.base + 0.51 + row*0.5 - Y(x, z); S.people.push(h); }
-    sausageCart(S); } }
+    sausageCart(S); S.kshop = si === 1 && !!K; S.built = { objs: lifeGroup.children.slice(b0.o), boxes: STATIC_LIST.slice(b0.s), humans: HUMANS.slice(b0.h), emitters: EMITTERS.slice(b0.e) }; } }
 
 // a sausage cart in front of each grandstand: the seller at the grill under a red-and-white parasol, a few people waiting, one eating
 function sausageCart(S) {
@@ -6756,7 +6787,7 @@ function worldBuild() {
 }
 const NEAR_VIS = []; let nearVisT = 0;   // props only drawn near the car (grills, mowers, bikes, flags)
 function nearVis(g, x, z) { NEAR_VIS.push({ g, x, z }); }
-function nearVisUpdate(dt) { if ((nearVisT -= dt) > 0) return; nearVisT = 0.25; for (const e of NEAR_VIS) { const n = (e.x - car.x)**2 + (e.z - car.z)**2 < 240*240; if (e.g.visible !== n) e.g.visible = n; } }
+function nearVisUpdate(dt) { if ((nearVisT -= dt) > 0) return; nearVisT = 0.25; for (const e of NEAR_VIS) { const n = !e.g.userData.hide && (e.x - car.x)**2 + (e.z - car.z)**2 < 240*240; if (e.g.visible !== n) e.g.visible = n; } }
 const EMITTERS = [];   // grills, broken-down cars: smoke that goes on whatever the people do
 function emittersUpdate(dt) {
   for (const E of EMITTERS) { if (E.v) { const [ex, ez] = lloc(E.v.x, E.v.z, E.v.yaw, 0, (E.end || 1)*(E.v.hl - 0.4)); E.x = ex; E.z = ez; E.y = E.v.gy + 0.95; }
@@ -7423,14 +7454,31 @@ function trafficStop() { for (const v of TRAFFIC.list) { if (v.gone) continue; v
 // ── FREE (GTA) mode: taken by driving up the right lane at the start. The race dressing goes (kerbs, tyre walls, gates, start/finish,
 //    checkpoints, grid), no clock, no laps: every street of the village to drive. R: a new start, Esc: the start screen (both put the track back). ──
 const FREE = { on: false, hidden: [] };
+// GTA mode: the race tyres go into storage — stacked against walls in thirty yards round the village — and the K-shop's grandstand
+// and sausage cart are cleared away (the ES campaign gets the yard). Leaving FREE puts it all back.
+function freeYardTires(on) { for (let i = tires.length - 1; i >= 0; i--) if (tires[i].yard) tires.splice(i, 1);
+  if (on) { const houses = STATIC_LIST.filter(B => B.kind === 'house' && Math.abs(B.x) < 520 && Math.abs(B.z) < 520).sort(() => Math.random() - 0.5); let piles = 0;
+    for (const B of houses) { if (piles >= 30) break; const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), rx = fz, rz = -fx;
+      for (const [sf, sr] of [[0, 1], [0, -1], [-1, 0], [1, 0]].sort(() => Math.random() - 0.5)) {   // a wall of the house: along it, 1.3 m out
+        const dist = sf ? B.hl + 1.3 : B.hw + 1.3, ax = sf ? rx : fx, az = sf ? rz : fz, cx = B.x + (sf ? fx*sf : rx*sr)*dist, cz = B.z + (sf ? fz*sf : rz*sr)*dist, n = 2 + Math.floor(Math.random()*4), pts = [];
+        for (let k = 0; k < n; k++) { const o = (k - (n - 1)/2)*1.7, x = cx + ax*o, z = cz + az*o; if (onRoad(x, z, 2.5) || treeNear(x, z, 1.1) || !clearSpot(x, z, 0.9) || VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < 3)) break; let hit = false; staticNear(x, z, 2, S => { if (!hit && boxPush(S, x, z, 0.85)) hit = true; }); if (hit) break; pts.push([x, z]); }
+        if (pts.length < 2) continue; piles++;
+        for (const [x, z] of pts) { const h = 2 + Math.floor(Math.random()*3), c = Math.random() < 0.7 ? 0 : 1 + Math.floor(Math.random()*2), cols = Array(h).fill(c);
+          tires.push({ kind: 'tire', x, z, ox: x, oz: z, vx: 0, vz: 0, hop: 0, r: 0.82, cols, inst: [], yaw: Math.random()*6.3, moving: false, yard: true }); }
+        break; } } }
+  buildPropInstances(); movingProps = movingProps.filter(t => tires.includes(t)); staticDirty = true; }
+function freeKshop(on) { for (const S of STANDS) { if (!S.kshop || !S.built) continue; const B = S.built;   // on: the race dressing gone
+  B.objs.forEach(o => { o.visible = !on; o.userData.hide = on; }); B.boxes.forEach(b => { if (on && !b.gone) { b.x += 1e5; b.gone = true; } else if (!on && b.gone) { b.x -= 1e5; b.gone = false; } });
+  B.humans.forEach(h => { if (!h.gone) { h.inside = on; humanSync(h); } }); B.emitters.forEach(e => { if (on && !e.gone) { e.y -= 1e4; e.gone = true; } else if (!on && e.gone) { e.y += 1e4; e.gone = false; } }); }
+  esGta(on); }
 function freeEnter() {
   if (FREE.on) return; FREE.on = true; lapStarted = false;
   trackMeshGroup.children.forEach(m => { const k = m.userData.key; if ((k === 'curb' || k === 'checkpoint' || k === 'grid' || m === finishMesh || m.userData.routePatch) && m.visible) { m.visible = false; FREE.hidden.push(m); } if (k === 'freeFillet') m.visible = true; });   // (the route's own tarmac out, the network's rounded junction corners in)
   tires.forEach(t => { if (t.kind !== 'tire' || t.off) return; t.off = true; t.freeOff = true; if (t.moving) { t.moving = false; movingProps = movingProps.filter(o => o !== t); } syncProp(t); }); staticDirty = true;
   const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('VAPAA AJO – KOKO KYLÄ ON SINUN'); cpd.style.color = '#ffd23c'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2600);
-  beep(523, 0.1, 0.25, 'square'); setTimeout(() => beep(784, 0.2, 0.25, 'square'), 120); trafficStart(); }
+  beep(523, 0.1, 0.25, 'square'); setTimeout(() => beep(784, 0.2, 0.25, 'square'), 120); trafficStart(); freeYardTires(true); freeKshop(true); }
 function freeExit() {
-  if (!FREE.on) return; FREE.on = false; trafficStop(); FREE.hidden.forEach(m => { m.visible = true; }); FREE.hidden.length = 0; trackMeshGroup.children.forEach(m => { if (m.userData.key === 'freeFillet') m.visible = false; });
+  if (!FREE.on) return; FREE.on = false; trafficStop(); freeYardTires(false); freeKshop(false); FREE.hidden.forEach(m => { m.visible = true; }); FREE.hidden.length = 0; trackMeshGroup.children.forEach(m => { if (m.userData.key === 'freeFillet') m.visible = false; });
   tires.forEach(t => { if (!t.freeOff) return; t.freeOff = false; t.off = false; t.x = t.ox; t.z = t.oz; t.vx = t.vz = 0; syncProp(t); }); staticDirty = true; applyPhases(true); }
 function startSplit() {   // before the clock runs: over the start line in the left lane → the race; up the right lane → FREE
   const S = START_SPLIT; if (!S.ok || S.done) return; const dx = car.x - S.x, dz = car.z - S.z, s = dx*S.dx + dz*S.dz, lat = dx*S.lx + dz*S.lz;
