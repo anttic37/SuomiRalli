@@ -522,6 +522,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - UFO sites (28.9., "ufo laskeutunut talon päälle"): ufoRoom(x, z, r) = no BUILDINGS rectangle within r and no static box
   (> 0.8 m) within r; site r 16 → 13 (search widened to 3200 tries / 160 m), the dead-end fallback 13, the furrow path 5.
   The east end (among the yards at ~470,190) used to land 0–10 m from sheds. t_ufo_site (8 seeds, top-down shots).
+- UFOs just landed (28.9., "laitetaan vaan että se on laskeutunut… ei mitään viivaa"): makeCrater and ufoFurrowDir are gone
+  (with the furrow smoke, debris and the "still smoking" emitter); the saucer stands level at a random yaw on three straight legs
+  with feet (leg feet at r 3.0, y −1.78): y = max(highest foot ground + 1.8, highest ground under the disc + 1.0). Bolts leave
+  from U.y + 1.2. ufoRoom still keeps 13–16 m from buildings. t_ufo_crater still names it a crater (shots of the site).
+- ES STOP pad (28.9., "es kyltti menee maan sisään"): half of it lay on the gravel street in front of the K-shop, whose surface is
+  drawn over it. esPromoBuild now fits it (5.6/5.0/4.4 deep, slid toward the shop and sideways up to ±6 m) where no sample is
+  onRoad(·, 0.4): ES.padA/padB; esZoneAt's near edge follows padB. Verge tufts/lupins under the pad are zero-scaled. t_es_pad.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

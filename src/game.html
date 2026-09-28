@@ -4150,6 +4150,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Ufot vain laskeutuneet nurmelle suorana kolmen jalan päälle (ei kraatteria, vakoa eikä romuja); ES STOP -ruutu siirretty kokonaan nurmelle, ei enää katuun uppoamista eikä heinää läpi'],
   ['28.9.', 'Betoniporsaat nyt tien suuntaisesti yhtenä rivinä sisäkaarteen reunassa (ei rivikaupalla nurmella): 991 → 542 porsasta ja vähemmän avoimia oikaisuja; ufot laskeutuvat vähintään 13 m päähän taloista ja vajoista'],
   ['28.9.', 'Pikatarkistus: kisa, kierros, haamu, GTA-liikenne, ufot ja tauko toimivat – alkuruutuun leima "28.9. peli skulaa"'],
   ['28.9.', 'Alkuruutu tarkistettu 12 ikkunakoolla puhelimesta 2560-leveään: QR ei enää peitä otsikkoa eikä kielinappeja'],
@@ -6373,7 +6374,7 @@ function esHud() { const el = document.getElementById('es-hud'); if (!el) return
   if (el.__on !== on) { el.__on = on; el.style.display = on ? 'block' : 'none'; } if (!on) return;
   const t = WRECK.on ? T('🔥 AUTO PALAA · R = UUSI LÄHTÖ') : T('⚡ ES {0} s · 2× NOPEUS · ÄLÄ KOLAROI', Math.ceil(ES.t)); if (el.__t !== t) { el.__t = t; el.textContent = t; el.classList.toggle('wreck', WRECK.on); } }
 function esZoneAt(x, z) { const Z = ES.zone; if (!Z) return false; const [kx, kz, kth, W, D] = Z, dx = x - kx, dz = z - kz, a = Math.cos(kth)*dx - Math.sin(kth)*dz, b = Math.sin(kth)*dx + Math.cos(kth)*dz;
-  return Math.abs(a) < W/2 + 3 && b > D/2 + 2.4 && b < D/2 + 14; }   // in front of the shop, clear of the queue along its wall
+  return Math.abs(a) < W/2 + 3 && b > Math.min(D/2 + 2.4, (ES.padB || 99) - 2) && b < D/2 + 14; }   // in front of the shop, clear of the queue along its wall
 function makeEsGuy() { const g = makeAdult(0xf2f2ee, 0x2b2b30, lpick(L_HAIR), { sel: { hair: lpick([0, 2, 1]), top: 9, longSleeve: 1, longPants: 1 }, acc: 0xd83b2c });   // the white shop coat over a red shirt
   const can = new THREE.Group(); lmesh(lcyl(0.045, 0.16, 10), lmat(0x1a1a1a, 0.4), 0, 0, 0, can); lmesh(lcyl(0.047, 0.05, 10), lmat(0x8ae02a, 0.5), 0, 0.02, 0, can, false); can.position.set(0.25, 1.05, 0.3); g.add(can); g.userData.can = can; return g; }
 const esTask = (door) => ({ kind: 'esguy', update(h, dt) { const st = h.st || (h.st = { mode: 'out' });
@@ -6403,7 +6404,14 @@ function esPromoBuild(K, W, D) {
   const tex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t; };
   const font = (px) => '900 ' + px + 'px "Arial Black", "Helvetica Neue", Arial, sans-serif';
   // the painted box to park in
-  { const [x, z] = at(0, D/2 + 6.2); P.x = x; P.z = z; const pg = new THREE.PlaneGeometry(Math.min(7, W*0.55), 5.6, 10, 8); const m = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({ roughness: 0.85, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,   // (a solid black pad: no ground showing through)
+  { const pw = Math.min(7, W*0.55); let pd = 5.6, pb = D/2 + 6.2;   // (off every street surface: a road drawn over it swallowed half the pad)
+    let pax = 0; const clear = (a, b, d) => { for (const u of [-0.5, -0.25, 0, 0.25, 0.5]) for (const v of [-0.5, -0.25, 0, 0.25, 0.5]) { const [x, z] = at(a + u*pw, b + v*d); if (onRoad(x, z, 0.4)) return false; } return true; };
+    fit: for (const d of [5.6, 5.0, 4.4]) for (let b = D/2 + 6.2; b >= D/2 + 1.6 + d/2; b -= 0.2) for (const a of [0, -1.5, 1.5, -3, 3, -4.5, 4.5, -6, 6]) if (Math.abs(a) + pw/2 < W/2 + 3 && clear(a, b, d)) { pd = d; pb = b; pax = a; break fit; }
+    ES.padB = pb; ES.padA = pax; const [x, z] = at(pax, pb);
+    { const M = new THREE.Matrix4(), v = new THREE.Vector3(), zero = new THREE.Matrix4().makeScale(0, 0, 0);   // (the verge tufts and lupins under it cut: no grass through the paint)
+      trackMeshGroup.children.forEach(im => { if (!im.isInstancedMesh || im.userData.key !== 'verge') return; let hit = false;
+        for (let k = 0; k < im.count; k++) { im.getMatrixAt(k, M); v.setFromMatrixPosition(M); const dx = v.x - x, dz = v.z - z, u = Math.cos(yaw)*dx - Math.sin(yaw)*dz, w = Math.sin(yaw)*dx + Math.cos(yaw)*dz;
+          if (Math.abs(u) < pw/2 + 0.5 && Math.abs(w) < pd/2 + 0.5) { im.setMatrixAt(k, zero); hit = true; } } if (hit) im.instanceMatrix.needsUpdate = true; }); } P.x = x; P.z = z; const pg = new THREE.PlaneGeometry(pw, pd, 10, 8); const m = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({ roughness: 0.85, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,   // (a solid black pad: no ground showing through)
       map: tex(512, 640, (g, w, h) => { g.fillStyle = '#121212'; g.fillRect(0, 0, w, h); g.strokeStyle = '#9be22a'; g.lineWidth = 22; g.strokeRect(14, 14, w - 28, h - 28); g.fillStyle = '#9be22a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = font(210); g.fillText('ES', w/2, h*0.4); g.font = font(96); g.fillText('STOP', w/2, h*0.72); }) }));
     m.rotation.order = 'YXZ'; m.rotation.set(-Math.PI/2, yaw, 0); m.position.set(x, 0, z); m.updateMatrix(); pg.applyMatrix4(m.matrix); m.position.set(0, 0, 0); m.rotation.set(0, 0, 0);   // (draped: each vertex on the ground)
     const pa = pg.attributes.position; for (let i = 0; i < pa.count; i++) pa.setY(i, Y(pa.getX(i), pa.getZ(i)) + 0.06); pg.computeBoundingSphere(); m.renderOrder = 1; m.userData.noBatch = true; lifeGroup.add(m); }
@@ -6707,7 +6715,7 @@ function makeUfo() { const G = new THREE.Group(), hull = new THREE.MeshStandardM
   lmesh(lgeo('uforing', () => new THREE.TorusGeometry(4.2, 0.18, 6, 32)), dark, 0, 0, 0, G).rotation.x = Math.PI/2;
   const dome = new THREE.Mesh(lgeo('ufodome', () => new THREE.SphereGeometry(1.7, 18, 10, 0, Math.PI*2, 0, Math.PI/2)), new THREE.MeshStandardMaterial({ color: 0x7af0d0, emissive: 0x2aa080, emissiveIntensity: 0.6, roughness: 0.1, transparent: true, opacity: 0.8 })); dome.position.y = 0.55; G.add(dome);
   const lights = []; for (let k = 0; k < 10; k++) { const a = k*0.628, m = new THREE.Mesh(lgeo('ufolight', () => new THREE.SphereGeometry(0.17, 8, 6)), new THREE.MeshBasicMaterial({ color: k % 2 ? 0x40ff80 : 0xff4040 })); m.position.set(Math.cos(a)*4.3, 0.1, Math.sin(a)*4.3); G.add(m); lights.push(m); }
-  for (let k = 0; k < 3; k++) { const leg = lmesh(lbox(0.12, 1.6, 0.12), dark, Math.cos(k*2.1)*2.6, -0.9, Math.sin(k*2.1)*2.6, G); leg.rotation.z = (k - 1)*0.5; }   // bent landing legs
+  for (let k = 0; k < 3; k++) { lmesh(lbox(0.14, 1.9, 0.14), dark, Math.cos(k*2.1)*3.0, -0.85, Math.sin(k*2.1)*3.0, G); lmesh(lcyl(0.35, 0.08, 10), dark, Math.cos(k*2.1)*3.0, -1.78, Math.sin(k*2.1)*3.0, G); }   // landing legs and feet
   return { G, lights, dome }; }
 function makeAlien() { const g = makeKidOld(0xc0c4cc), skin = lmat(0x7ad870, 0.7);
   for (const o of g.children.slice()) if (o.isMesh && (o.geometry === lgeo('khead', () => null) || o.geometry === lgeo('khair', () => null))) g.remove(o);   // off with the kid's head…
@@ -6720,7 +6728,7 @@ const UFO_BOLTS = [], UFO_GAWK = [], UFO_GAWK_KINDS = new Set(['walk', 'spectate
 let _boltGeo = null, _boltMat = null;
 function ufoFire(U, tx, tz, tvx, tvz, spread, atCar) {   // a plasma bolt from the dome at where the target will be — give or take a good few metres
   const warm = atCar && (U.carShots = (U.carShots || 0) + 1) <= 5;   // (the first few at the car always go wide: time to see what's happening)
-  const x0 = U.x, y0 = U.y + 1.9, z0 = U.z, d = Math.hypot(tx - x0, tz - z0), sp = 38, ft = d/sp, a = Math.random()*6.3, e = warm ? 4 + Math.random()*8 : spread*(0.3 + Math.random()*0.7)*(Math.random() < (atCar ? 0.12 : 0.22) ? 0.15 : 1);   // (now and then one right on)
+  const x0 = U.x, y0 = U.y + 1.2, z0 = U.z, d = Math.hypot(tx - x0, tz - z0), sp = 38, ft = d/sp, a = Math.random()*6.3, e = warm ? 4 + Math.random()*8 : spread*(0.3 + Math.random()*0.7)*(Math.random() < (atCar ? 0.12 : 0.22) ? 0.15 : 1);   // (now and then one right on)
   let ax = tx + tvx*ft + Math.sin(a)*e, az = tz + tvz*ft + Math.cos(a)*e; if (warm) { const dx = ax - car.x, dz = az - car.z, l = Math.hypot(dx, dz) || 1; if (l < 5) { ax = car.x + dx/l*5; az = car.z + dz/l*5; } }
   const ay = Y(ax, az) + 0.5, L = Math.hypot(ax - x0, ay - y0, az - z0) || 1;
   let B = UFO_BOLTS.find(b => !b.live); if (!B) { if (!_boltGeo) { _boltGeo = new THREE.SphereGeometry(0.42, 10, 8); _boltMat = new THREE.MeshBasicMaterial({ color: 0x9dffb0, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }); }
@@ -6784,44 +6792,9 @@ function ufoEnds() {   // where they came down: off the west and the east end of
   const out = (i) => { const st = i < pts.length/2 ? 1 : -1, p = pts[i], q = pts[Math.max(0, Math.min(pts.length - 1, i + st*8))], l = Math.hypot(p.x - q.x, p.y - q.y) || 1, back = [];
     for (let k = 0; k < 40; k++) { const j = i + st*k; if (j < 0 || j >= pts.length) break; back.push(pts[j]); } return [p, (p.x - q.x)/l, (p.y - q.y)/l, back]; };   // (the end, the way on past it, and the road back from it)
   return [out(wi), out(ei)]; }
-// the crash site: a raised dirt rim round a scorched floor, the furrow it ploughed coming in (berms both sides, clods thrown out),
-// burnt grass all round — every vertex laid on the ground where it is
-function ufoRoom(x, z, r) {   // no house, shed, shop or other building within r (the crater rim is 12.5 m out; it came down in a yard once)
+function ufoRoom(x, z, r) {   // no house, shed, shop or other building within r (room round it: it came down in a yard once)
   for (const B of BUILDINGS) if (inLandmark(x, z, [0, B[0], B[1], B[4], B[2], B[3]], r)) return false;
   let ok = true; staticNear(x, z, r + 12, B => { if (ok && (B.hw > 0.8 || B.hl > 0.8) && boxPush(B, x, z, r)) ok = false; }); return ok; }
-function ufoFurrowDir(x, z) { let best = 0, bs = -1e9;
-  for (let k = 0; k < 16; k++) { const a = k/16*Math.PI*2, sx = Math.sin(a), sz = Math.cos(a); let clear = 0;
-    for (let d = 8; d <= 34; d += 2) { const px = x + sx*d, pz = z + sz*d; let bad = treeNear(px, pz, 2.5) || onRoad(px, pz, 2) || distRoute(px, pz) < 30 || Math.abs(px) > 560 || Math.abs(pz) > 560; if (!bad) bad = !ufoRoom(px, pz, 5); if (bad) break; clear = d; }
-    const sc = clear + Math.random()*3; if (sc > bs) { bs = sc; best = a; } } return [best, Math.max(10, bs - 3)]; }
-function makeCrater(x, z, dir, len) { const G = new THREE.Group(), col = new THREE.Color(), cols = (g, f) => { const P = g.attributes.position, C = new Float32Array(P.count*3); for (let i = 0; i < P.count; i++) { f(i, P, col); C[i*3] = col.r; C[i*3 + 1] = col.g; C[i*3 + 2] = col.b; } g.setAttribute('color', new THREE.BufferAttribute(C, 3)); };
-  const drape = (g, lift) => { const P = g.attributes.position; for (let i = 0; i < P.count; i++) { const wx = P.getX(i), wz = P.getZ(i); P.setY(i, Y(wx, wz) + P.getY(i) + (lift || 0)); } P.needsUpdate = true; g.computeVertexNormals(); };
-  const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, flatShading: true }), soil = [0x2a221c, 0x4a3828, 0x6e5438, 0x7e6444, 0x5e4a32];
-  // the bowl: a lathe, the rim ragged
-  const prof = [[0, 0.03], [3.6, 0.04], [5.0, 0.16], [6.0, 0.55], [6.9, 0.98], [7.6, 1.05], [8.4, 0.72], [9.6, 0.34], [11, 0.1], [12.5, 0.0]].map(([r, h]) => new THREE.Vector2(r, h));
-  const bowl = new THREE.LatheGeometry(prof, 44); { const P = bowl.attributes.position; for (let i = 0; i < P.count; i++) { const px = P.getX(i), pz = P.getZ(i), r = Math.hypot(px, pz), a = Math.atan2(px, pz);
-      const toward = Math.cos(a - dir), rag = 1 + 0.35*Math.sin(a*5 + 1.3) + 0.2*Math.sin(a*11) - 0.55*Math.max(0, toward);   // (lower where the furrow comes in, heaped up opposite)
-      P.setY(i, P.getY(i)*Math.max(0.2, rag + 0.4*Math.max(0, -toward))); P.setX(i, x + px); P.setZ(i, z + pz); } }
-  cols(bowl, (i, P) => { const r = Math.hypot(P.getX(i) - x, P.getZ(i) - z), c = r < 4.5 ? soil[0] : r < 5.8 ? soil[1] : r < 8.2 ? (Math.random() < 0.5 ? soil[3] : soil[2]) : r < 10.5 ? soil[4] : 0x4f5a30; col.setHex(c).multiplyScalar(0.9 + Math.random()*0.2); });
-  drape(bowl, 0.02); const mb = new THREE.Mesh(bowl, mat); mb.receiveShadow = true; mb.castShadow = true; G.add(mb);
-  // the furrow: a trough between two berms, narrowing to nothing at its far end
-  const S = 40, sec = [[-5.2, 0], [-4.3, 0.18], [-3.5, 0.52], [-2.8, 0.66], [-2.2, 0.42], [-1.5, 0.1], [-0.6, 0.03], [0.6, 0.03], [1.5, 0.1], [2.2, 0.42], [2.8, 0.66], [3.5, 0.52], [4.3, 0.18], [5.2, 0]], fx = Math.sin(dir), fz = Math.cos(dir), rx = fz, rz = -fx, pos = [], idx = [];
-  const lumpL = Math.random()*9, lumpR = Math.random()*9;
-  for (let j = 0; j <= S; j++) { const t = j/S, d = 6.5 + t*len, w = 1 - t*0.7, hk = (1 - t*0.75)*(t < 0.08 ? 0.6 + t*5 : 1), wob = Math.sin(t*7 + lumpL)*0.35;   // (it wanders a little, as a slide would)
-    sec.forEach(([o, h], k) => { const side = o < 0 ? lumpL : lumpR, lump = 0.7 + 0.35*Math.sin(t*23 + side) + 0.25*Math.sin(t*57 + side*2) + (Math.random() - 0.5)*0.25;
-      pos.push(x + fx*d + rx*(o*w + wob), h*hk*Math.max(0.2, h > 0.3 ? lump : 1), z + fz*d + rz*(o*w + wob)); }); }
-  const n = sec.length; for (let j = 0; j < S; j++) for (let k = 0; k < n - 1; k++) { const a = j*n + k, b = a + 1, c = a + n, d = c + 1; idx.push(a, c, b, b, c, d); }
-  const fur = new THREE.BufferGeometry(); fur.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); fur.setIndex(idx);
-  cols(fur, (i) => { const k = i % n, e = Math.min(k, n - 1 - k); col.setHex(e >= 5 ? soil[0] : e === 4 ? soil[1] : e === 3 || e === 2 ? (Math.random() < 0.6 ? soil[3] : soil[2]) : e === 1 ? (Math.random() < 0.5 ? 0x5a5e34 : soil[4]) : 0x4f5a30).multiplyScalar(0.86 + Math.random()*0.28); });   // dark trough, fresh soil on the berms, torn turf on their outsides
-  drape(fur, 0.03); const mf = new THREE.Mesh(fur, mat); mf.receiveShadow = true; G.add(mf);
-  // clods and turf thrown out
-  for (let k = 0; k < 34; k++) { const along = Math.random() < 0.55, d = along ? 6 + Math.random()*len : 7 + Math.random()*7, side = (Math.random() < 0.5 ? -1 : 1)*(along ? 2.8 + Math.random()*2.5 : 0), a = along ? 0 : Math.random()*6.3;
-    const px = along ? x + fx*d + rx*side : x + Math.sin(a)*d, pz = along ? z + fz*d + rz*side : z + Math.cos(a)*d, sz = 0.25 + Math.random()*0.5;
-    const c = lmesh(lbox(sz, sz*0.6, sz*(0.8 + Math.random()*0.6)), lmat(Math.random() < 0.3 ? 0x4c6a34 : soil[2 + (k % 2)], 1), px, Y(px, pz) + sz*0.25, pz, G, false); c.rotation.set(Math.random(), Math.random()*6.3, Math.random()); }
-  // burnt grass: a soft dark halo, longer along the furrow
-  const tex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 8, 64, 64, 64); gr.addColorStop(0, 'rgba(18,14,10,0.85)'); gr.addColorStop(0.55, 'rgba(26,20,14,0.5)'); gr.addColorStop(1, 'rgba(30,24,16,0)'); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
-  const scorch = new THREE.PlaneGeometry(30, 30 + len*0.8, 18, 18); scorch.rotateX(-Math.PI/2); scorch.rotateY(dir); { const P = scorch.attributes.position; for (let i = 0; i < P.count; i++) { P.setX(i, P.getX(i) + x + fx*len*0.3); P.setZ(i, P.getZ(i) + z + fz*len*0.3); } }
-  drape(scorch, 0.05); const ms = new THREE.Mesh(scorch, new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 })); ms.renderOrder = 1; G.add(ms);
-  return G; }
 function buildUfos() { UFOS.length = 0; UFO_GAWK.length = 0; for (const B of UFO_BOLTS) { B.live = false; B.m.visible = false; } const { nodes } = roadGraph();
   for (const [p, ux, uz, back] of ufoEnds()) { let sp = null; for (let k = 0; k < 3200 && !sp; k++) { const d = 30 + Math.random()*(k < 2000 ? 70 : 130), a = Math.atan2(ux, uz) + (Math.random() - 0.5)*(k < 700 ? 2.2 : 6.3), x = p.x + Math.sin(a)*d, z = p.y + Math.cos(a)*d;   // (on past the road's end first, then anywhere round it)
       if (Math.abs(x) > 540 || Math.abs(z) > 540 || distRoute(x, z) < (k < 1400 ? 85 : 70) || rockHeightAt(x, z) > -0.5 || treeNear(x, z, k < 700 ? 10 : 7.5)) continue;
@@ -6829,12 +6802,11 @@ function buildUfos() { UFOS.length = 0; UFO_GAWK.length = 0; for (const B of UFO
       if (clearSpot(x, z, 6) && ufoRoom(x, z, k < 1400 ? 16 : 13)) sp = [x, z]; }
     if (!sp && back) for (const q of back || []) { if (treeNear(q.x, q.y, 6) || distRoute(q.x, q.y) < 70) continue; let ok = !VEHICLES.some(v => Math.hypot(v.x - q.x, v.z - q.y) < 9);   // woods all round: down on the dead end of the road itself (no trees there)
       if (ok) ok = ufoRoom(q.x, q.y, 13); if (ok) { sp = [q.x, q.y]; break; } }
-    if (!sp) continue; const [x, z] = sp, [fdir, flen] = ufoFurrowDir(x, z), y = Y(x, z) + 0.2, M = makeUfo(); M.G.position.set(x, y, z); M.G.rotation.set(-0.3, fdir + Math.PI, 0.1, 'YXZ'); lifeGroup.add(M.G); nearVis(M.G, x, z);   // (nose down into the far wall, the furrow behind it)
-    const crater = makeCrater(x, z, fdir, Math.min(30, flen)); lifeGroup.add(crater); nearVis(crater, x, z);
-    EMITTERS.push({ x: x + Math.sin(fdir)*9, z: z + Math.cos(fdir)*9, y: Y(x + Math.sin(fdir)*9, z + Math.cos(fdir)*9) + 0.3, kind: 'breakdown', acc: 0 });   // (the furrow smoulders too)
-    const deb = new THREE.Group(); lifeGroup.add(deb); nearVis(deb, x, z); for (let k = 0; k < 7; k++) { const a = Math.random()*6.3, r = 6 + Math.random()*6, dx = x + Math.sin(a)*r, dz = z + Math.cos(a)*r, d = lmesh(lbox(0.6 + Math.random(), 0.1, 0.4 + Math.random()*0.6), lmat(0xa8acb4, 0.3), dx, Y(dx, dz) + 0.06, dz, deb); d.rotation.set((Math.random() - 0.5)*0.4, Math.random()*6.3, (Math.random() - 0.5)*0.4); }
+    if (!sp) continue; const [x, z] = sp, yaw = Math.random()*6.3, M = makeUfo(); let gL = -1e9, gD = -1e9;   // simply landed there: level on its three legs, nothing ploughed up
+    for (let k = 0; k < 3; k++) { const a = k*2.1 - yaw; gL = Math.max(gL, Y(x + Math.cos(a)*3.0, z + Math.sin(a)*3.0)); }
+    for (let r = 0; r <= 4.8; r += 1.2) for (let k = 0; k < 12; k++) gD = Math.max(gD, Y(x + Math.sin(k*0.52)*r, z + Math.cos(k*0.52)*r));
+    const y = Math.max(gL + 1.8, gD + 1.0); M.G.position.set(x, y, z); M.G.rotation.set(0, yaw, 0); lifeGroup.add(M.G); nearVis(M.G, x, z);
     const U = { x, z, y, lights: M.lights, dome: M.dome, t: Math.random()*5, cool: 0, kills: 0, shots: 0, woke: false }; UFOS.push(U); addStaticBox({ x, z, yaw: 0, hw: 4.0, hl: 4.0, kind: 'lm' }); reserve('ufo', sp, 13);
-    EMITTERS.push({ x: x + 1.5, z, y: y + 0.8, kind: 'breakdown', acc: 0 });   // still smoking
     for (let k = 0; k < 2; k++) { const a = k*3 + Math.random(), ax = x + Math.sin(a)*7.5, az = z + Math.cos(a)*7.5; let ok = !onRoad(ax, az, 1); if (ok) staticNear(ax, az, 2, B => { if (ok && boxPush(B, ax, az, 0.5)) ok = false; }); if (!ok) continue;   // (not clearSpot: the UFO's own reservation would keep them off)
       new Human({ x: ax, z: az, yaw: a, kid: true, animal: true, rig: makeAlien(), task: { kind: 'alien', update(h, dt, t) { h.vx = h.vz = 0; h.yaw += Math.sin(t*0.7 + k)*dt*0.8; h.pose.armL = -1.5 + Math.sin(t*3 + k)*0.4; if (Math.hypot(car.x - h.x, car.z - h.z) < 60) h.pose.armR = -2.8 + Math.sin(t*9)*0.3; } } }); } } }
 function ufoReset() { UFO_REDO.length = 0; UFO_HITS.n = 0; for (const B of UFO_BOLTS) { B.live = false; B.m.visible = false; } for (const h of UFO_GAWK) if (h.task && h.task.kind === 'gawk') h.task.reset(h); UFO_GAWK.length = 0;
