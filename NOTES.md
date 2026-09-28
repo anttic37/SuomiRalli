@@ -507,6 +507,9 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   is pushed out (not the pig), bounces (1.25 × the closing speed back), carDamage ×1.15; a pig's kick 0.08, friction 10; vehicles
   bounce off them; people are kept off; GTA hides them with the tyres. Outer-corner walls and the phase gates stay tyres.
   Tyres 5989 → 3734 (stacks 1869 → 1181), 991 pigs; vertices ~3.7 M → 3.48 M. t_pigs.
+- Pig depots (28.9., "siirrä betoniporsaat varastoon gta moodissa"): freeYardTires(true) → freeDepotPigs(): three council street
+  depots (DEPOTS, found once per world, ≥ 140 m apart, 9–14 m off a street, level, clear): a draped gravel pad 14×10, 32 pigs as real
+  props (yard: true, removed with the yard tyres), a decorative second layer of 7, a 'VANTAAN KAUPUNKI · KATUVARASTO' sign. t_depots.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

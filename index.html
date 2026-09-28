@@ -172,7 +172,7 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: GTA-MOODI</span><small data-t>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 13.24 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 13.56 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
@@ -4123,6 +4123,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'GTA-moodissa betoniporsaat varastossa: kolme Vantaan kaupungin katuvarastoa soratasanteineen, porsaat riveissä ja pinossa'],
   ['28.9.', 'Oikaisut ja sivukatujen suut suljettu nyt betoniporsailla rengasmuurien sijaan: raskaita, auto pomppaa niistä ja kolhiintuu – ja renkaita on puolet vähemmän'],
   ['28.9.', 'Renkaat uusiksi: kaikissa autoissa ja busseissa pyöreät renkaat kulutuspinnan palikoilla, rengaspinot pyöreämmiksi ja kuviolliseksi, traktoreille nappularenkaat; pihoille valkoiset traktorinrengaskukkapenkit ja peltojen laidoille vanhoja traktorinrenkaita'],
   ['28.9.', 'Maalin lähelle tulostaulu (TOP 5 -ajat), kolme pientä katsomoa ja varikko asfalttikentälle: kolme tiimiä teltoineen, rallikaarat numeroineen, mekaanikot, renkaat ja huoltoauto'],
@@ -7616,7 +7617,33 @@ function freeYardTires(on) { for (let i = tires.length - 1; i >= 0; i--) if (tir
         for (const [x, z] of pts) { const h = 2 + Math.floor(Math.random()*3), c = Math.random() < 0.7 ? 0 : 1 + Math.floor(Math.random()*2), cols = Array(h).fill(c);
           tires.push({ kind: 'tire', x, z, ox: x, oz: z, vx: 0, vz: 0, hop: 0, r: 0.82, cols, inst: [], yaw: Math.random()*6.3, moving: false, yard: true }); }
         break; } } }
+  if (on) freeDepotPigs(); else freeDepots(false);
   buildPropInstances(); movingProps = movingProps.filter(t => tires.includes(t)); staticDirty = true; }
+// …and the concrete pigs into the council's street depots: three gravel pads by the streets, pigs in tight rows (real, heavy props),
+// a second layer on the middle row, a sign. Found once per world, the same each time you come back.
+const DEPOTS = { list: null, world: null };
+function freeDepots(on) { if (DEPOTS.list) for (const D of DEPOTS.list) { D.g.visible = on; D.g.userData.hide = !on; } }
+function freeDepotPigs() {
+  if (!DEPOTS.list || DEPOTS.world !== lifeGroup.children[0]) { DEPOTS.list = []; DEPOTS.world = lifeGroup.children[0]; const { nodes } = roadGraph();
+    for (let k = 0; k < 1500 && DEPOTS.list.length < 3; k++) { const n = nodes[Math.floor(Math.random()*nodes.length)]; if (!n || Math.abs(n.x) > 480 || Math.abs(n.z) > 480) continue;
+      const a = Math.random()*6.3, d = n.hw + 9 + Math.random()*5, x = n.x + Math.sin(a)*d, z = n.z + Math.cos(a)*d, yaw = a;   // (the pad's long side to the street)
+      if (DEPOTS.list.some(D => Math.hypot(D.x - x, D.z - z) < 140)) continue; let ok = true, lo = 1e9, hi = -1e9;
+      for (let u = -6; u <= 6 && ok; u += 2) for (let v = -4; v <= 4 && ok; v += 2) { const [px, pz] = lloc(x, z, yaw, u, v); if (onRoad(px, pz, 1) || treeNear(px, pz, 1.4) || !clearSpot(px, pz, 0.6) || distRoute(px, pz) < 8 || tires.some(t => Math.hypot(t.x - px, t.z - pz) < 2)) ok = false; else { const g = H(px, pz); lo = Math.min(lo, g); hi = Math.max(hi, g); } }
+      if (!ok || hi - lo > 1.2) continue;
+      const G = new THREE.Group(); G.visible = false; G.userData.hide = true; lifeGroup.add(G); nearVis(G, x, z);
+      { const nx = 8, nz = 6, V = [], I = []; for (let j = 0; j <= nz; j++) for (let i = 0; i <= nx; i++) { const [px, pz] = lloc(x, z, yaw, -7 + 14*i/nx, -5 + 10*j/nz); V.push(px, H(px, pz) + 0.05, pz); }   // the gravel pad
+        for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) { const q = j*(nx + 1) + i; I.push(q, q + nx + 1, q + 1, q + 1, q + nx + 1, q + nx + 2); }
+        const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(V, 3)); geo.setIndex(I); geo.computeVertexNormals(); if (geo.attributes.normal.array[1] < 0) { I.reverse(); geo.setIndex(I); geo.computeVertexNormals(); }
+        const pm = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x8a8272, roughness: 1, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); pm.receiveShadow = true; pm.userData.noBatch = true; G.add(pm); }
+      const slots = []; for (let row = 0; row < 4; row++) for (let c = 0; c < 8; c++) slots.push([-4.6 + c*1.32, -2.4 + row*1.5]);
+      for (let c = 0; c < 7; c++) { const m = new THREE.Mesh(PIG_GEO, PIG_MAT); const [px, pz] = lloc(x, z, yaw, -3.94 + c*1.32, -2.4 + 1.5*1.5); m.position.set(px, H(px, pz) + 0.62, pz); m.rotation.y = yaw + Math.PI/2; m.castShadow = true; G.add(m); }   // the second layer, across two rows
+      { const c = document.createElement('canvas'); c.width = 512; c.height = 160; const g = c.getContext('2d'); g.fillStyle = '#f4f4ee'; g.fillRect(0, 0, 512, 160); g.fillStyle = '#1e4ad8'; g.fillRect(0, 0, 512, 44);
+        g.fillStyle = '#fff'; g.font = '900 30px Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('VANTAAN KAUPUNKI', 256, 23); g.fillStyle = '#1a1a1a'; g.font = '900 46px Arial, sans-serif'; g.fillText('KATUVARASTO', 256, 96); g.font = '700 22px Arial, sans-serif'; g.fillText('ASIATTOMILTA PÄÄSY KIELLETTY', 256, 138);
+        const sg = new THREE.Group(); for (const sx of [-0.8, 0.8]) lmesh(lbox(0.08, 1.9, 0.08), lmat(0x6a6c70, 0.5), sx, 0.95, 0, sg); const b = new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.62), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), side: THREE.DoubleSide, roughness: 0.6 })); b.position.y = 1.6; sg.add(b);
+        const [sx, sz] = lloc(x, z, yaw, 6.3, 4.4); placeAt(sg, sx, sz, yaw + Math.PI/2); G.add(sg); }
+      DEPOTS.list.push({ x, z, yaw, g: G, slots }); } }
+  freeDepots(true);
+  for (const D of DEPOTS.list) for (const [u, v] of D.slots) { const [x, z] = lloc(D.x, D.z, D.yaw, u, v); tires.push({ kind: 'pig', x, z, ox: x, oz: z, vx: 0, vz: 0, hop: 0, r: 0.64, inst: [], yaw: D.yaw + Math.PI/2, moving: false, tone: Math.floor(Math.random()*PIG_TONES.length), yard: true }); } }
 function freeKshop(on) { for (const S of STANDS) { if (!S.kshop || !S.built) continue; const B = S.built;   // on: the race dressing gone
   B.objs.forEach(o => { o.visible = !on; o.userData.hide = on; }); B.boxes.forEach(b => { if (on && !b.gone) { b.x += 1e5; b.gone = true; } else if (!on && b.gone) { b.x -= 1e5; b.gone = false; } });
   B.humans.forEach(h => { if (!h.gone) { h.inside = on; humanSync(h); } }); B.emitters.forEach(e => { if (on && !e.gone) { e.y -= 1e4; e.gone = true; } else if (!on && e.gone) { e.y += 1e4; e.gone = false; } }); }
