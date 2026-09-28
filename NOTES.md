@@ -485,6 +485,15 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   black MeshStandard pad (canvas filled #121212) — no ground through it. The pizzeria's roof carries a lit steel-framed sign (canvas
   'PIZZERIA / MAMMA MIA · YLÄSTÖ', a drawn pizza, emissive 0.35) and a two-faced 3D pizza that turns (PIZZA_SIGNS, pizzaUpdate); the
   group rides the building with liftAnchor like the painted roof text. t_signs.
+- Pause, sticker, GTA map, finish area (28.9., "TULOSTAULU maalin lähelle… pienempiä katsomoita… varikko asfaltilla… minikartta
+  kahteen… Pause P… PC PELI 486"): P → setPause (loop only renders; audio ctx suspended; the radio paused/resumed; also on a hidden tab;
+  only P/R/Esc work paused; #pause box). #pcnote sticker on the start screen (3 languages). drawMinimapFree: cached at 2× (280 px),
+  drawn centred on the car, pizzeria dot too. buildGrandstands: three small (7 m, ~28 % full, no sausage cart) round the finish (the
+  K-shop keeps index 1). buildFinishArea: finishLot() (an open level lot facing the route) → the scoreboard (canvas, top 5 from
+  ONLINE.list or your ghost, redrawn from renderTop10 when it changes) and the service park 26×13 m (near the finish, else by the grid
+  or along the route): draped asphalt, box lines, three teams (canopy, makeRallyCar with its number, spare tyres, toolbox, a mechanic
+  on fixTask), the post van painted as the service van. t_pause, t_finish_area. (t_logic 1.35 → ~1.67: the machine, not this — HEAD
+  measured the same.)
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
