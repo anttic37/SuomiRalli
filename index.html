@@ -117,7 +117,8 @@
   #share .sh-qr { background: #fff; padding: 6px 6px 3px; border-radius: 4px; box-shadow: 0 0 0 3px #e0141e, 0 6px 16px rgba(0,0,0,0.6); transform: rotate(4deg); }
   #share .sh-code { display: block; width: clamp(110px, 10.5vw, 150px); height: auto; }
   #share .sh-url { margin-top: 3px; text-align: center; font: 700 9px/1 "Courier New", monospace; color: #222; letter-spacing: 0.02em; }
-  @media (max-width: 820px) { #share { position: static; margin: 10px auto 0; transform: rotate(-2deg); justify-content: center; } }
+  @media (max-width: 1100px) { #share { position: static; margin: 10px auto 0; transform: rotate(-2deg); justify-content: center; } }
+  @media (max-width: 560px) { #share { margin-top: 44px; } }
   #lang { position: absolute; top: 12px; right: 14px; display: flex; gap: 4px; z-index: 2; }
   #lang button { font: 800 12px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.12em; padding: 6px 8px; color: #8a8a84; background: transparent; border: 1px solid #333; border-radius: 3px; cursor: pointer; }
   #lang button:hover { color: #e8e8e4; border-color: #666; } #lang button.on { color: #fff; background: #e0141e; border-color: #e0141e; }
@@ -183,7 +184,7 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: GTA-MOODI</span><small data-t>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 14.26 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 14.38 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
@@ -4135,6 +4136,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Alkuruutu tarkistettu 12 ikkunakoolla puhelimesta 2560-leveään: QR ei enää peitä otsikkoa eikä kielinappeja'],
   ['28.9.', 'Alkuruutuun QR-koodi pelin osoitteeseen: KERRO KAVERILLE – ota kuva ja jaa peliä!'],
   ['28.9.', 'GTA-moodissa betoniporsaat varastossa: kolme Vantaan kaupungin katuvarastoa soratasanteineen, porsaat riveissä ja pinossa'],
   ['28.9.', 'Oikaisut ja sivukatujen suut suljettu nyt betoniporsailla rengasmuurien sijaan: raskaita, auto pomppaa niistä ja kolhiintuu – ja renkaita on puolet vähemmän'],
