@@ -602,6 +602,22 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   it along the road at 13 km/h: t_lap went 150 → 217 s), a sideways slew to the side it was hit on, back 0.75 of the closing speed
   for a real hit (> 3 m/s; 0.2 for a nudge), friction 6 (tyres 3). t_pig_hit at 15 m/s: tyre stack → 7.4–9.5 m/s kept, pig →
   1.7–4.2 (it moves 1–4 m). t_lap back to 150 s.
+- Junctions (28.9., "korjaa radat ja tie risteykset, näkyy gta moodissa, ettei mikään vilku, käytä aikaa"): all in buildRoadNetwork,
+  and ONLY for drawing — R.pts0 (the geometry as it stood) is what sideRoads.pts, roadGrid/onRoad/surfaceAt, route snapping, the road
+  graph and the houses use, so the course (track id 3e1d147c, 1083 points), grip and ghosts are unchanged; R.pts (drawn) is reshaped:
+  2b a paved end still lying ON a gravel road (the "curving target" join ran the tarmac to the gravel's centreline: the slab across the
+  gravel ending mid-road in the screenshot) is cut to the gravel's edge like the square-on case; 2c a street ending on another of the
+  same surface (a T) is cut to that street's edge, no disc (its own shade/disc no longer shows in the middle of the other road);
+  both kinds of cut end then have their last row slid along the street onto the other road's edge (conform: 0.25/0.35 m in), so the
+  joint follows that road's line; 2d end-to-end continuations (ends ≤ 2.5 m apart, often overlapping and offset sideways, e.g.
+  Hiirivuorentie 6.5 m → Isonmännyntie 8 m) are both pulled back 5 m and rejoined by one Hermite curve through a shared midpoint;
+  both strips end there on the same mitre row (a round disc join if the bend is > ~20°), widths eased to the mean over 20 m and
+  asphalt shades eased to a common value over 14 m. DRAWN (drawnPut/drawnPaved: the drawn tarmac by segment) keeps asphalt decor and
+  the gravel spill off gravel that used to be under a slab. Also found while here: three mid-line // comments that silently disabled
+  code (the new mitre — it threw and cut the network build short; a road-distance check in the finish-area lot search; a static check
+  in the grandstand lane search) → /* */. Checks: t_junctions (+ t_jn_route2 / t_jn_other: all 32 junctions from GTA height),
+  t_flicker + flicker_cmp.py (each chase view rendered twice, camera nudged 2 cm: no road blotches in 16 views — only dithered
+  foliage), t_roadlook in race mode, ghost times identical (129.972 / 118.157 / 144.414).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
