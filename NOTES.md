@@ -545,6 +545,12 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   0.95·(1 − d/140)², Doppler on the pitched parts; the radio ducks up to 92 % while it's near. B off → HEVI.leave: gone at > 170 m or
   > 70 m unseen. Restart: bass off, temp → removed. 5 seeds × 2 min: avg 44–72 km/h, max ~100, off the path 5–15 s. t_hevi,
   t_hevi_tune, t_hevi_audio (real audio: gain ~0.85 alongside, 0 after).
+- ES pad back in front of the door (28.9., "missä es juomapiste on? pitäis olla kaupan edessä"): the fit-off-the-street search
+  slid it to the shop's corner. Now fixed at a 0, b D/2 + 5.8, full 5.6 deep; draped with + ROAD_Y where onRoad(·, 0.2), so its street
+  end is paint on the street surface instead of disappearing under it. (ES.padA/padB kept for esZoneAt.)
+- Grass tufts (28.9., "ruohot näyttää mustilta lätkiltä"): two causes. The canvas texture's see-through pixels were black (dark
+  fringes when filtered/mipmapped) → a DataTexture whose clear pixels carry the grass colour; and DoubleSide flipped the up-facing
+  normals on back faces, so the far side of every blade plane rendered black → each face twice (both windings), FrontSide. t_tufts.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

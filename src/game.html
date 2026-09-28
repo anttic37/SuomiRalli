@@ -3909,13 +3909,18 @@ function buildRoadside() {
   // verges: grass tufts and lupins, instanced in 80 m chunks (culled), thinner inside mown plots
   const tuftTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
     for (let k = 0; k < 46; k++) { const x0 = 6 + Math.random()*52, h = 26 + Math.random()*36, lean = (Math.random()-0.5)*18, v = 90 + Math.random()*70;
-      g.strokeStyle = 'rgb(' + (v*0.55|0) + ',' + (v|0) + ',' + (v*0.35|0) + ')'; g.lineWidth = 1.5 + Math.random()*1.8; g.beginPath(); g.moveTo(x0, 64); g.quadraticCurveTo(x0 + lean*0.4, 64 - h*0.6, x0 + lean, 64 - h); g.stroke(); }
-    return new THREE.CanvasTexture(c); })();
+      g.strokeStyle = 'rgb(' + (v*0.62|0) + ',' + (v|0) + ',' + (v*0.36|0) + ')'; g.lineWidth = 1.5 + Math.random()*1.8; g.beginPath(); g.moveTo(x0, 64); g.quadraticCurveTo(x0 + lean*0.4, 64 - h*0.6, x0 + lean, 64 - h); g.stroke(); }
+    // (as data, not a canvas texture: the see-through pixels get the grass colour instead of black, so the blades don't grow dark
+    //  fringes when filtered and mipmapped — from any distance they looked like black blots)
+    const d = g.getImageData(0, 0, 64, 64).data, px = new Uint8Array(64*64*4);
+    for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) { const i = (y*64 + x)*4, o = ((63 - y)*64 + x)*4, a = d[i + 3];
+      px[o] = a ? d[i] : 104; px[o + 1] = a ? d[i + 1] : 168; px[o + 2] = a ? d[i + 2] : 60; px[o + 3] = a; }
+    const t = new THREE.DataTexture(px, 64, 64, THREE.RGBAFormat); t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; t.needsUpdate = true; return t; })();
   const tuftGeo = (() => { const a = new THREE.PlaneGeometry(0.9, 0.6), b = new THREE.PlaneGeometry(0.9, 0.6); a.translate(0, 0.3, 0); b.translate(0, 0.3, 0); b.rotateY(Math.PI/2);
     const g = new THREE.BufferGeometry(), pa = [...a.attributes.position.array, ...b.attributes.position.array], ua = [...a.attributes.uv.array, ...b.attributes.uv.array], na = [];
     for (let i = 0; i < pa.length/3; i++) na.push(0, 1, 0);   // up-facing normals: tufts light like the ground
-    const ia = [...a.index.array, ...Array.from(b.index.array, v => v + 4)]; g.setAttribute('position', new THREE.Float32BufferAttribute(pa, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(ua, 2)); g.setAttribute('normal', new THREE.Float32BufferAttribute(na, 3)); g.setIndex(ia); return g; })();
-  const tuftMat = new THREE.MeshStandardMaterial({ map: tuftTex, alphaTest: 0.45, side: THREE.DoubleSide, roughness: 1 });
+    const i0 = [...a.index.array, ...Array.from(b.index.array, v => v + 4)], ia = [...i0]; for (let k = 0; k < i0.length; k += 3) ia.push(i0[k], i0[k + 2], i0[k + 1]);   /* (each face twice, both windings, all normals up: a DoubleSide material turned the back faces' normals down and those sides went black) */ g.setAttribute('position', new THREE.Float32BufferAttribute(pa, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(ua, 2)); g.setAttribute('normal', new THREE.Float32BufferAttribute(na, 3)); g.setIndex(ia); return g; })();
+  const tuftMat = new THREE.MeshStandardMaterial({ map: tuftTex, alphaTest: 0.4, roughness: 1 });
   const lupinGeo = new THREE.ConeGeometry(0.09, 0.62, 6); lupinGeo.translate(0, 0.62, 0);
   const stemGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.55, 4); stemGeo.translate(0, 0.27, 0);
   const lupinMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }), stemMat = new THREE.MeshStandardMaterial({ color: 0x3f6a2c, roughness: 0.9 });
@@ -4150,6 +4155,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'ES STOP -ruutu takaisin keskelle kaupan ovea (kadun puoleinen pää maalattu kadun päälle); ruohotupsut eivät enää näytä mustilta läiskiltä'],
   ['28.9.', 'Bassoboost (B) päälle → Havuhelvetin keikkabussi kaduille: metsähevibändi katolla (sukkahousunaamat ja ruumismeikit), ajaa ihan liian kovaa eikä mikään pysäytä sitä – ohi mennessä pelkkää blastbeatia ja huutoa, radio hukkuu'],
   ['28.9.', 'Radioon 11 koelähetystä (📡) omilla asemillaan: paikallisradion koelähetys, Radio Ylästö ja tuntematon asema – lyhyitä pätkiä biisien väliin'],
   ['28.9.', 'Radioon kolme säätiedotusta (🌦) omilla sääkanavillaan: YLE Radio 1 – Sää, Ilmatieteen laitos ja Radio Ylästön säähavainto'],
@@ -6500,9 +6506,7 @@ function esPromoBuild(K, W, D) {
   const tex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t; };
   const font = (px) => '900 ' + px + 'px "Arial Black", "Helvetica Neue", Arial, sans-serif';
   // the painted box to park in
-  { const pw = Math.min(7, W*0.55); let pd = 5.6, pb = D/2 + 6.2;   // (off every street surface: a road drawn over it swallowed half the pad)
-    let pax = 0; const clear = (a, b, d) => { for (const u of [-0.5, -0.25, 0, 0.25, 0.5]) for (const v of [-0.5, -0.25, 0, 0.25, 0.5]) { const [x, z] = at(a + u*pw, b + v*d); if (onRoad(x, z, 0.4)) return false; } return true; };
-    fit: for (const d of [5.6, 5.0, 4.4]) for (let b = D/2 + 6.2; b >= D/2 + 1.6 + d/2; b -= 0.2) for (const a of [0, -1.5, 1.5, -3, 3, -4.5, 4.5, -6, 6]) if (Math.abs(a) + pw/2 < W/2 + 3 && clear(a, b, d)) { pd = d; pb = b; pax = a; break fit; }
+  { const pw = Math.min(7, W*0.55), pd = 5.6, pb = D/2 + 5.8, pax = 0;   // (right in front of the door; the street side of it painted on the street itself)
     ES.padB = pb; ES.padA = pax; const [x, z] = at(pax, pb);
     { const M = new THREE.Matrix4(), v = new THREE.Vector3(), zero = new THREE.Matrix4().makeScale(0, 0, 0);   // (the verge tufts and lupins under it cut: no grass through the paint)
       trackMeshGroup.children.forEach(im => { if (!im.isInstancedMesh || im.userData.key !== 'verge') return; let hit = false;
@@ -6510,7 +6514,7 @@ function esPromoBuild(K, W, D) {
           if (Math.abs(u) < pw/2 + 0.5 && Math.abs(w) < pd/2 + 0.5) { im.setMatrixAt(k, zero); hit = true; } } if (hit) im.instanceMatrix.needsUpdate = true; }); } P.x = x; P.z = z; const pg = new THREE.PlaneGeometry(pw, pd, 10, 8); const m = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({ roughness: 0.85, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,   // (a solid black pad: no ground showing through)
       map: tex(512, 640, (g, w, h) => { g.fillStyle = '#121212'; g.fillRect(0, 0, w, h); g.strokeStyle = '#9be22a'; g.lineWidth = 22; g.strokeRect(14, 14, w - 28, h - 28); g.fillStyle = '#9be22a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = font(210); g.fillText('ES', w/2, h*0.4); g.font = font(96); g.fillText('STOP', w/2, h*0.72); }) }));
     m.rotation.order = 'YXZ'; m.rotation.set(-Math.PI/2, yaw, 0); m.position.set(x, 0, z); m.updateMatrix(); pg.applyMatrix4(m.matrix); m.position.set(0, 0, 0); m.rotation.set(0, 0, 0);   // (draped: each vertex on the ground)
-    const pa = pg.attributes.position; for (let i = 0; i < pa.count; i++) pa.setY(i, Y(pa.getX(i), pa.getZ(i)) + 0.06); pg.computeBoundingSphere(); m.renderOrder = 1; m.userData.noBatch = true; lifeGroup.add(m); }
+    const pa = pg.attributes.position; for (let i = 0; i < pa.count; i++) pa.setY(i, Y(pa.getX(i), pa.getZ(i)) + (onRoad(pa.getX(i), pa.getZ(i), 0.2) ? ROAD_Y : 0) + 0.06); pg.computeBoundingSphere(); m.renderOrder = 1; m.userData.noBatch = true; lifeGroup.add(m); }
   // the giant can, turning slowly
   { const [x, z] = at(W/2 + 4.6, D/2 + 7.5), G = new THREE.Group(); const lab = new THREE.MeshStandardMaterial({ roughness: 0.35, metalness: 0.3, map: tex(512, 256, (g, w, h) => { g.fillStyle = '#141414'; g.fillRect(0, 0, w, h); g.fillStyle = '#9be22a'; g.fillRect(0, h*0.62, w, h*0.1);
         g.font = font(150); g.textAlign = 'center'; g.textBaseline = 'middle'; for (const cx of [w*0.25, w*0.75]) { g.fillStyle = '#9be22a'; g.fillText('ES', cx, h*0.38); } g.fillStyle = '#fff'; g.font = font(34); for (const cx of [w*0.25, w*0.75]) g.fillText('ENERGY', cx, h*0.86); }) });
