@@ -456,6 +456,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   Found on the way: driveAlong looked only ~20 m ahead for parked cars (fine at 8 m/s, not 13): reach grows with speed; speedTo now
   brakes when rolling backwards (a car backed out of a jam rolled 40 m downhill in reverse). Cost ≈ +1 ms/frame in GTA mode only.
   t_traffic: 80 s, all 18 moving (≈ 500 m each), no long stands, no fires.
+- Start-screen radio (28.9., "alkumenuun radio… vuoden 85 autoradio… ei tarte pelaa"): #mradio in #menu-content, 'Ylästö Sound
+  CR-85' (CSS only: chrome knobs, amber LCD, rubber keys). Power knob = radioPower (start / pause / resume, wheel = volume), tune knob
+  and ▶▶ = radioNext, ◀◀ = radioPrev, − + = radioVol; E / 1 / 2 now work in the menu too. mradioShow is called from radioShow and
+  radioLoad (shown only with a playlist, i.e. on the site). The race carries on with the same song. Found: radioShow's local
+  `const T` shadowed T() (turning the radio off with E threw), and the cabbage tractor's `const T` too — renamed; t_mradio.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
