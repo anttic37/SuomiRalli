@@ -580,6 +580,17 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   small line), font clamp(15px, 2.4vw, 28px), max-width 86vw, more margin (the rotated box touched the title); #share static in the
   flow up to 1380 px (the longer news reached it at 1280–1360); .sh-txt margin-bottom 14 px (the QR covered "JAA PELIÄ"); #top10
   font clamp(11px, 1.45vw, 16px), 600 px wide. v.js at 14 sizes: no overlaps, no h-scroll.
+- Havuhelvetti, round 4 (28.9., "maassa havuhelvetin logo; käännä myyntipiste rataan päin; paranna isomäntyä; äijät kuin uudet
+  ihmiset, nyt laatikkoukkoja"): the booth now faces the RACE ROUTE (roadInfo of the pine → that track point; u = pine → it):
+  centre at hw + 1.3 + 4.9 + 1.5 back from the centreline; between it and the kerb the logo painted on the ground (6.8 × 4.6,
+  canvas: rgb white, alpha from the logo's luminance, draped, polygonOffset; tyre stacks on it get t.off + t.lpOff, gate tyres
+  left alone). Statics are the counter, the back wall and the speakers (moved out to a ±3.75) — the old one box over the whole
+  booth had the seller inside it; lpSellerTask walks him round the counter end (a ±2.95) both ways, and delivers only at the
+  window (< 2.6 m from the car). The pine: 5 tapering segments (grey furrowed below 8.4 m, orange above), a root flare and 5 roots,
+  7 boughs from 9 m (golden-angle azimuths) each with two flat needle tufts, a broad flat top. The gig bus's band: the old box
+  figures are gone; 4 Humans (makeHeviMember, 2 with red guitars) sit on the roof via h.seat {v, a, b, y: 3, tilt, yaw} — humanSync
+  now honours seat.tilt/seat.yaw/P.dy — and heviRoofTask rocks them to the beat, keeping h.x/z on the bus (else 'far' hid them);
+  they are v.crew, so they go with the bus. t_lp (booth facing, props on the logo, the walk), t_hevi (roofBand 4).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
