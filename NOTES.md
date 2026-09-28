@@ -534,6 +534,17 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - Test broadcasts (28.9., "11 koelähetystä, oma kategoria"): music/koelahetys-1…11.mp3 (14–47 s), `talk` + `koe: true`, 📡, KOE_STATIONS
   (106.2 + k·0.6). radioLoad: 30 talks > 25 gaps, so the koes get their own random gaps (one each at most) and play just before any
   programme sharing it; the long talks still never meet. t_radio_saa checks the weather ones and that rule.
+- Gig bus (28.9., "bassoboost päälle → metsähevisukkahousunaamameikkibändin keikkabussi… LIIAN kovaa… ei mikään pysäytä"): HEVI.
+  B on (heviBass) → heviUpdate spawns it as soon as gameState is RACING (so B in the countdown works; retries every 3 s): a node
+  110–230 m off (mostly behind), pointed down its trafficRoute. VSPEC.hevi mass 60, accel 9, vmax 36, lat 11. heviAI: own follow
+  (no stopping for anything), corner speed at HEVI.grip 0.95 × tyre grip (it slides), dead end → fresh route (≤ 1/s), stuck 2.2 s →
+  back out 1.6 s; 3 jams without 3 s of real speed → respawn out of sight. Unstoppable: vehicleHit ignores it, pigs and small statics
+  (hw/hl < 1.6: poles, signs) don't stop it, boxHitsHumans knocks people (no police: not the player). makeHeviBus: black bus,
+  HAVUHELVETTI canvas logo (sides + back), red-lit windows, roof speakers, 4 headbangers on the roof (2 pantyhose, 2 corpse paint).
+  Audio: 200 bpm blast beat + distorted tremolo power chords + formant screams every 1.6–3.4 s into HEVI.g → StereoPanner; gain
+  0.95·(1 − d/140)², Doppler on the pitched parts; the radio ducks up to 92 % while it's near. B off → HEVI.leave: gone at > 170 m or
+  > 70 m unseen. Restart: bass off, temp → removed. 5 seeds × 2 min: avg 44–72 km/h, max ~100, off the path 5–15 s. t_hevi,
+  t_hevi_tune, t_hevi_audio (real audio: gain ~0.85 alongside, 0 after).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
