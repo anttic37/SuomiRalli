@@ -461,6 +461,14 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   and ▶▶ = radioNext, ◀◀ = radioPrev, − + = radioVol; E / 1 / 2 now work in the menu too. mradioShow is called from radioShow and
   radioLoad (shown only with a playlist, i.e. on the site). The race carries on with the same song. Found: radioShow's local
   `const T` shadowed T() (turning the radio off with E threw), and the cabbage tractor's `const T` too — renamed; t_mradio.
+- UFOs rework (28.9., "ufo aina tien päässä… ampui kun kisasin… ampuvat paljon ohi… ihmisiä tulee paikalle… VASTA jos pelaaja menee
+  sinne"): placed ≥ 85 m (fallback 70) from the route, 30–100 m past Ylästöntie's ends (now 158 / 247 m). ufoWake only when the car is
+  < 60 m AND (FREE or > 25 m off the route) — never from the race line. Awake: up to 16 idle people within 230 m get gawkTask (run
+  there, stare, point; flee when a bolt lands near; reset restores their own task). ufoFire: a real plasma bolt (additive sphere +
+  green trail, 38 m/s) at the target's predicted spot ± spread (car 11 m, people 7, cars 8; 12–22 % dead on); the first 5 at the car
+  always land ≥ 5 m off it. ufoBoom: car < 2.2 m → wreckCar('boom'), < 7 m shoved + dented; vehicles → fire (responders via
+  ufoWreck); people < 3 m knocked (→ ambulances → shot at too). Targets weighted: car 3, responders 3, cars 1.2, people 1; fire every
+  0.35–1.25 s. t_s3_ufo: never woken from the route; a standing car lasts ~6–7 s with ~10 near misses.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
