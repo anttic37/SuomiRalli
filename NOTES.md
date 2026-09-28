@@ -481,6 +481,10 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   inside, grill smoke under ground; NEAR_VIS honours userData.hide) goes, and esGta(true) shows ES.promo.gta: an inflatable arch,
   a stage with four more dancers (h.stageDy), eight feather flags, a billboard — each placed by fits() (no road, tree, house, car),
   the can ×2.1; the beat reaches 190 m (120). t_gta_yard.
+- ES pad + pizzeria sign (28.9., "es mainos pitää olla maassa musta… pitseria katolla parempi mainos"): the ES STOP plane is a solid
+  black MeshStandard pad (canvas filled #121212) — no ground through it. The pizzeria's roof carries a lit steel-framed sign (canvas
+  'PIZZERIA / MAMMA MIA · YLÄSTÖ', a drawn pizza, emissive 0.35) and a two-faced 3D pizza that turns (PIZZA_SIGNS, pizzaUpdate); the
+  group rides the building with liftAnchor like the painted roof text. t_signs.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

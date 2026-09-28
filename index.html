@@ -165,7 +165,7 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: GTA-MOODI</span><small data-t>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 11.38 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 11.49 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -1681,6 +1681,27 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
       const [sx, sz] = rot(0, fr+0.2); addSign(sx, y0+0.3+h-0.3, sz, th, 6.5, 0.62, 'PIZZERIA', '#1f5a34', '#ffffff');
       { const m = new THREE.Mesh(new THREE.PlaneGeometry(w - 1.2, 2.2), new THREE.MeshStandardMaterial({ map: signTex('PIZZERIA', '#f4f1e8', '#c8201e'), roughness: 0.7 }));   // painted on the roof: the high camera reads it
         m.rotation.order = 'YXZ'; m.rotation.set(-Math.PI/2, th, 0); m.position.set(bx, y0+0.3+h+0.22, bz); m.userData.key = 'sign'; m.userData.liftAnchor = [lx, lz, LW/2, LD/2, th]; trackMeshGroup.add(m); }
+      { const G = new THREE.Group(), steel = new THREE.MeshStandardMaterial({ color: 0x5a5c60, roughness: 0.5, metalness: 0.4 }), bw = Math.min(8.5, w - 1.5), bh = 2.4, post = 1.1;   // on the roof: a lit sign on a steel frame, a turning pizza on top
+        const c = document.createElement('canvas'); c.width = 1024; c.height = 288; const g = c.getContext('2d');
+        g.fillStyle = '#c8201e'; g.fillRect(0, 0, 1024, 288); g.strokeStyle = '#f4f1e8'; g.lineWidth = 14; g.strokeRect(12, 12, 1000, 264); g.fillStyle = '#1f5a34'; g.fillRect(26, 222, 972, 40);
+        { const cx = 150, cy = 130, r = 104; g.fillStyle = '#d99a4a'; g.beginPath(); g.arc(cx, cy, r, 0, 6.3); g.fill(); g.fillStyle = '#c8401e'; g.beginPath(); g.arc(cx, cy, r*0.84, 0, 6.3); g.fill();   // a pizza, drawn
+          g.fillStyle = '#f6d65a'; for (let k = 0; k < 14; k++) { const a = k*2.4, rr = r*0.55*Math.sqrt((k + 1)/14); g.beginPath(); g.arc(cx + Math.cos(a)*rr, cy + Math.sin(a)*rr, 16, 0, 6.3); g.fill(); }
+          g.fillStyle = '#8a1e14'; for (let k = 0; k < 7; k++) { const a = k*0.9 + 0.4, rr = r*0.5; g.beginPath(); g.arc(cx + Math.cos(a)*rr, cy + Math.sin(a)*rr, 14, 0, 6.3); g.fill(); }
+          g.strokeStyle = '#f4f1e8'; g.lineWidth = 5; for (let k = 0; k < 3; k++) { g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + Math.cos(k*2.1)*r, cy + Math.sin(k*2.1)*r); g.stroke(); } }
+        g.fillStyle = '#ffffff'; g.font = '900 118px "Arial Black", "Helvetica Neue", Arial, sans-serif'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.shadowColor = 'rgba(0,0,0,0.45)'; g.shadowOffsetY = 5; g.fillText('PIZZERIA', 282, 112, 710);
+        g.shadowColor = 'transparent'; g.fillStyle = '#f6d65a'; g.font = '900 46px "Arial Black", Arial, sans-serif'; g.fillText('MAMMA MIA · YLÄSTÖ', 286, 190, 700); g.fillStyle = '#f4f1e8'; g.font = '800 28px Arial, sans-serif'; g.textAlign = 'center'; g.fillText('AVOINNA  11–23  ·  MYÖS KOTIIN', 512, 243);
+        const tx = new THREE.CanvasTexture(c); tx.anisotropy = 4;
+        const board = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 0.22), [steel, steel, steel, steel, new THREE.MeshStandardMaterial({ map: tx, emissiveMap: tx, emissive: 0xffffff, emissiveIntensity: 0.35, roughness: 0.6 }), new THREE.MeshStandardMaterial({ color: 0x2a2a2e, roughness: 0.7 })]);
+        board.position.set(0, post + bh/2, 0); board.castShadow = true; G.add(board);
+        for (const sx of [-bw*0.36, bw*0.36]) { const p0 = new THREE.Mesh(new THREE.BoxGeometry(0.16, post + 0.2, 0.16), steel); p0.position.set(sx, (post + 0.2)/2, 0); G.add(p0); const br = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 1.6), steel); br.position.set(sx, 0.3, -0.7); br.rotation.x = -0.6; G.add(br); }
+        for (let k = 0; k < 4; k++) { const L = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.3), steel); L.position.set(-bw/2 + bw*(k + 0.5)/4, post + bh + 0.1, 0.25); L.rotation.x = 0.5; G.add(L); }   // the lamps along the top
+        const pz = new THREE.Group(); pz.position.set(bw/2 - 0.2, post + bh + 1.55, 0); G.add(pz);   // the pizza: crust, sauce, cheese, salami — both faces
+        pz.add(new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.25, 0.22, 28), new THREE.MeshStandardMaterial({ color: 0xd99a4a, roughness: 0.8 })).rotateX(Math.PI/2));
+        for (const f of [-1, 1]) { const top = new THREE.Mesh(new THREE.CircleGeometry(1.06, 28), new THREE.MeshStandardMaterial({ color: 0xe0b040, roughness: 0.7, emissive: 0x3a2000, emissiveIntensity: 0.4 })); top.position.z = f*0.115; if (f < 0) top.rotation.y = Math.PI; pz.add(top);
+          for (let k = 0; k < 7; k++) { const a = k*0.9 + 0.3, rr = 0.62*(k % 2 ? 1 : 0.55), sm = new THREE.Mesh(new THREE.CircleGeometry(0.19, 14), new THREE.MeshStandardMaterial({ color: 0x9a2a1e, roughness: 0.6 })); sm.position.set(Math.cos(a)*rr, Math.sin(a)*rr, f*0.125); if (f < 0) sm.rotation.y = Math.PI; pz.add(sm); } }
+        { const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.0, 8), steel); pole.position.set(bw/2 - 0.2, post + bh + 0.35, 0); G.add(pole); }
+        G.userData.spin = pz; PIZZA_SIGNS.push(G);
+        const [gx, gz] = rot(0, bc + d/2 - 1.2); G.position.set(gx, y0+0.3+h+0.2, gz); G.rotation.y = th; G.userData.key = 'sign'; G.userData.liftAnchor = [lx, lz, LW/2, LD/2, th]; trackMeshGroup.add(G); }
       { const PW = P.W, b0 = P.yard0 - 0.4, b1 = P.yard1, nx = Math.ceil(PW/2), nz = Math.ceil((b1 - b0)/2), V = [], I = [];   // the yard: asphalt, draped with the ground
         for (let j = 0; j <= nz; j++) for (let i = 0; i <= nx; i++) { const [px, pz] = rot(-PW/2 + PW*i/nx, b0 + (b1 - b0)*j/nz); V.push(px, y0 + 0.07, pz); }
         for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) { const q = j*(nx + 1) + i; I.push(q, q + nx + 1, q + 1, q + 1, q + nx + 1, q + nx + 2); }
@@ -4052,6 +4073,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'ES STOP -ruutu nyt musta maalattu alusta (maasto ei näy läpi); pizzerian katolle valomainos teräskehikolla ja pyörivä jättipizza'],
   ['28.9.', 'GTA-moodissa radan renkaat varastoituna talojen pihoille (voi kaataa), K-kaupan katsomo ja makkarakärry pois ja ES-kampanja isommaksi: puhallettava kaari, lava ja neljä tanssijaa lisää, liput, mainostaulu, jättitölkki, musiikki kuuluu kauemmas'],
   ['28.9.', 'Ufon suora osuma ei enää tapa kerralla: heittää ja kolhii autoa, vasta kolmas osuma räjäyttää. Ufojen kuopat uusiksi: kohollaan oleva multareuna, hiiltynyt pohja, pitkä kyntöura ja palanut nurmi'],
   ['28.9.', 'Ufot: nyt kauempana tien päissä (160–250 m reitistä) eivätkä koskaan ammu kisassa radalla ajavaa. Heräävät vasta kun ajat niiden luo: vihreitä plasmakuulia joka suuntaan, suurin osa ohi, kylän väki tulee töllistelemään ja saa osansa, autot palavat – kaaos'],
@@ -5419,6 +5441,7 @@ function makeFireEngine() {
 // ════════ BUILD / UPDATE / RESET ════════
 let worldT = 0;
 // ════════ PIZZERIA: stop in the yard for 5 s and the pizza is brought out to the car → the car runs 10 % faster for the rest of the run ════════
+const PIZZA_SIGNS = [];   // the rooftop signs' pizzas turn
 const PIZZA = { k: 1, got: false, shops: [], wait: 0, guy: null, shop: null, BOOST: 1.1, WAIT: 5 };
 function pizzaShops() { PIZZA.shops = LANDMARKS.filter(L => L[0] === 'pitseria').map(L => { const P = pizzeriaLayout(L), [dx, dz] = lloc(L[1], L[2], L[3], P.bw*0.3, P.front + 0.7); return { L, P, x: L[1], z: L[2], th: L[3], door: [dx, dz] }; }); }
 function pizzaYardAt(x, z) { for (const S of PIZZA.shops) { const dx = x - S.x, dz = z - S.z, a = Math.cos(S.th)*dx - Math.sin(S.th)*dz, b = Math.sin(S.th)*dx + Math.cos(S.th)*dz;
@@ -5440,6 +5463,7 @@ let pizzaMsgT = null;
 function pizzaMsg(t, big) { const el = document.getElementById('pizza-msg'); if (!el) return; if (el.__t !== t) { el.__t = t; el.textContent = t; } el.style.opacity = 1; el.style.fontSize = big ? '38px' : '26px';
   clearTimeout(pizzaMsgT); pizzaMsgT = setTimeout(() => { el.style.opacity = 0; el.__t = null; }, big ? 2500 : 400); }
 function pizzaUpdate(dt) {
+  for (let i = PIZZA_SIGNS.length - 1; i >= 0; i--) { const G = PIZZA_SIGNS[i]; if (!G.parent) { PIZZA_SIGNS.splice(i, 1); continue; } G.userData.spin.rotation.y += dt*0.9; }
   if (!PIZZA.shops.length) return;
   if (PIZZA.guy && PIZZA.guy.st && PIZZA.guy.st.done) { humanRemove(PIZZA.guy); PIZZA.guy = null; }
   const racing = gameState === State.RACING, S = racing && !PIZZA.got ? pizzaYardAt(car.x, car.z) : null, still = Math.hypot(car.vx, car.vz) < 0.7;
@@ -6293,8 +6317,8 @@ function esPromoBuild(K, W, D) {
   const tex = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t; };
   const font = (px) => '900 ' + px + 'px "Arial Black", "Helvetica Neue", Arial, sans-serif';
   // the painted box to park in
-  { const [x, z] = at(0, D/2 + 6.2); P.x = x; P.z = z; const pg = new THREE.PlaneGeometry(Math.min(7, W*0.55), 5.6, 10, 8); const m = new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,
-      map: tex(512, 640, (g, w, h) => { g.strokeStyle = '#9be22a'; g.lineWidth = 22; g.strokeRect(14, 14, w - 28, h - 28); g.fillStyle = '#9be22a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = font(210); g.fillText('ES', w/2, h*0.4); g.font = font(96); g.fillText('STOP', w/2, h*0.72); }) }));
+  { const [x, z] = at(0, D/2 + 6.2); P.x = x; P.z = z; const pg = new THREE.PlaneGeometry(Math.min(7, W*0.55), 5.6, 10, 8); const m = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({ roughness: 0.85, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4,   // (a solid black pad: no ground showing through)
+      map: tex(512, 640, (g, w, h) => { g.fillStyle = '#121212'; g.fillRect(0, 0, w, h); g.strokeStyle = '#9be22a'; g.lineWidth = 22; g.strokeRect(14, 14, w - 28, h - 28); g.fillStyle = '#9be22a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = font(210); g.fillText('ES', w/2, h*0.4); g.font = font(96); g.fillText('STOP', w/2, h*0.72); }) }));
     m.rotation.order = 'YXZ'; m.rotation.set(-Math.PI/2, yaw, 0); m.position.set(x, 0, z); m.updateMatrix(); pg.applyMatrix4(m.matrix); m.position.set(0, 0, 0); m.rotation.set(0, 0, 0);   // (draped: each vertex on the ground)
     const pa = pg.attributes.position; for (let i = 0; i < pa.count; i++) pa.setY(i, Y(pa.getX(i), pa.getZ(i)) + 0.06); pg.computeBoundingSphere(); m.renderOrder = 1; m.userData.noBatch = true; lifeGroup.add(m); }
   // the giant can, turning slowly
