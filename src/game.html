@@ -3268,6 +3268,14 @@ const TYRE_H = 0.36;
 function stackProfile(h) { const P = [[0.47, 0.0], [0.62, 0.006], [0.745, 0.035]];   // per tyre: a rounded tread (4 points), a groove where two meet
   for (let k = 0; k < h; k++) { const yc = TYRE_H*0.5 + k*TYRE_H; P.push([0.786, yc - 0.12], [0.812, yc - 0.035], [0.812, yc + 0.035], [0.786, yc + 0.12]); if (k < h-1) P.push([0.735, yc + TYRE_H*0.5]); }
   const top = h*TYRE_H; P.push([0.77, top - 0.04], [0.62, top - 0.006], [0.47, top], [0.45, top - 0.12], [0.47, 0.0]); return P; }
+// the concrete pig (betoniporsas): 1.3 m of cast concrete, a trapezoid in section with soft edges, rounded ends — the anti-cut walls
+const PIG_GEO = (() => { const sh = new THREE.Shape(); sh.moveTo(-0.3, 0); sh.lineTo(0.3, 0); sh.lineTo(0.2, 0.56); sh.lineTo(-0.2, 0.56); sh.lineTo(-0.3, 0);
+  const g = new THREE.ExtrudeGeometry(sh, { depth: 1.1, bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.05, bevelSegments: 3, curveSegments: 1 }); g.translate(0, 0.05, -0.55); g.computeVertexNormals(); return g; })();
+const PIG_MAT = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#e8e6e0'; g.fillRect(0, 0, 128, 128);
+  for (let k = 0; k < 900; k++) { const v = 170 + Math.random()*70; g.fillStyle = `rgba(${v|0},${v|0},${(v - 6)|0},0.5)`; g.fillRect(Math.random()*128, Math.random()*128, 1 + Math.random()*2, 1 + Math.random()*2); }   // (cast concrete: speckled, a few stains)
+  for (let k = 0; k < 6; k++) { g.fillStyle = 'rgba(90,86,76,0.18)'; g.beginPath(); g.ellipse(Math.random()*128, Math.random()*128, 6 + Math.random()*14, 3 + Math.random()*8, Math.random()*3, 0, 6.3); g.fill(); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return new THREE.MeshStandardMaterial({ map: t, roughness: 0.95 }); })();
+const PIG_TONES = [0xbdbab2, 0xb0ada4, 0xc6c3ba, 0xa39f95, 0xb8b4a8];
 const STACK_GEO = {}, STACK_MAT = {};
 [2, 3, 4].forEach(h => {
   const P = stackProfile(h), N = P.length;
@@ -3385,6 +3393,8 @@ function buildTrackTires() {
   }
   function gridPut(x, z, r) { const k = sKey(x, z); let b = sg.get(k); if (!b) sg.set(k, b = []); b.push([x, z, r]); }
   function nearBuilding(x, z, m) { for (let j = 0; j < BUILDINGS.length; j++) { const B = BUILDINGS[j]; if (inLandmark(x, z, [0, B[0], B[1], B[4], B[2], B[3]], m)) return true; } return false; }   // exact rotated rectangle for every building
+  function addPig(x, z, yaw) { if (inPaved(x, z)) return; tires.push({ kind: 'pig', x, z, ox: x, oz: z, vx: 0, vz: 0, hop: 0, r: 0.64, inst: [], yaw, moving: false, tone: Math.floor(Math.random()*PIG_TONES.length) }); }
+  function addPigChecked(x, z, yaw) { if (!stackFree(x, z, 0.62)) return false; addPig(x, z, yaw); gridPut(x, z, 0.62); return true; }
   function addStackChecked(x, z) {
     if (!stackFree(x, z, 0.82) || nearBuilding(x, z, 0.9)) return false;
     addStack(x, z); gridPut(x, z, 0.82); return true;
@@ -3393,12 +3403,12 @@ function buildTrackTires() {
     if (!stackFree(x, z, 0.42)) return false;
     addPerson(x, z, yaw); gridPut(x, z, 0.42); return true;
   }
-  function rowAlong(i0, i1, off, spacing, phase, paintRun) {
+  function rowAlong(i0, i1, off, spacing, phase, paintRun, pig) {   // (pig: a row of concrete pigs end to end instead of stacks)
     let acc = spacing - phase, prev = stackAt(i0, off), k = 0;
     for (let i = i0+1; i <= i1; i++) {
       const cur = stackAt(i, off), L = Math.hypot(cur[0]-prev[0], cur[1]-prev[1]);
       let t = 0;
-      while (acc + (L - t) >= spacing) { t += spacing - acc; acc = 0; if (paintRun) stackCol = (Math.floor(k/2) % 2) ? 2 : 1; k++; addStackChecked(prev[0] + (cur[0]-prev[0])*t/L, prev[1] + (cur[1]-prev[1])*t/L); }
+      while (acc + (L - t) >= spacing) { t += spacing - acc; acc = 0; if (paintRun) stackCol = (Math.floor(k/2) % 2) ? 2 : 1; k++; const x = prev[0] + (cur[0]-prev[0])*t/L, z = prev[1] + (cur[1]-prev[1])*t/L; if (pig) addPigChecked(x, z, Math.atan2(cur[0] - prev[0], cur[1] - prev[1])); else addStackChecked(x, z); }
       acc += L - t; prev = cur;
     }
   }
@@ -3431,8 +3441,9 @@ function buildTrackTires() {
             cuts.sort((p, q) => q.save - p.save); stackH = 3;
             for (const C of cuts) { let open = true; for (let t = 0; t <= C.L && open; t += 0.5) if (solid(C.A[0] + (C.B[0] - C.A[0])*t/C.L, C.A[1] + (C.B[1] - C.A[1])*t/C.L)) open = false;
               if (!open) continue; stackCol = cuts.indexOf(C) % 2 ? 1 : 2;
-              for (let t = 0.9; t < C.L; t += 1.7) { const x = C.A[0] + (C.B[0] - C.A[0])*t/C.L, z = C.A[1] + (C.B[1] - C.A[1])*t/C.L, r = roadInfo(x, z);
-                if (r.d2 < (wAt(r.idx)*0.5 + 2.3)**2 || onRoad(x, z, 1.0)) continue; addStackChecked(x, z); } }   // (a street through the corner stays open)
+              const yawC = Math.atan2(C.B[0] - C.A[0], C.B[1] - C.A[1]);   // concrete pigs end to end across it (they were tyre stacks: a lot of tyres)
+              for (let t = 0.8; t < C.L; t += 1.32) { const x = C.A[0] + (C.B[0] - C.A[0])*t/C.L, z = C.A[1] + (C.B[1] - C.A[1])*t/C.L, r = roadInfo(x, z);
+                if (r.d2 < (wAt(r.idx)*0.5 + 2.3)**2 || onRoad(x, z, 1.0)) continue; addPigChecked(x, z, yawC); } }   // (a street through the corner stays open)
             stackH = 2; stackCol = -1; }
         }
         if (am > 0.42) {   // sharp corner: a small cluster of stacks in the inside corner
@@ -3459,7 +3470,7 @@ function buildTrackTires() {
   function wallAt(idx, side) {
     if (walls.some(w => w.side === side && Math.min(Math.abs(w.idx-idx), n-Math.abs(w.idx-idx)) < 8)) return;
     walls.push({ idx, side, off1 });
-    stackH = 3; rowAlong(idx - 3, idx + 3, off1*side, 1.75, 0, true); rowAlong(idx - 3, idx + 3, (off1 + 1.7)*side, 1.75, 0.87, true); stackH = 2; stackCol = -1;
+    rowAlong(idx - 4, idx + 4, (off1 + 0.4)*side, 1.32, 0, false, true);   // a row of concrete pigs across the mouth (was two rows of stacks)
   }
   sideRoads.forEach(R => {
     // mouth candidates: street points near the route but OUTSIDE its curb (on-route points have lat ≈ 0 and never qualify)
@@ -3656,6 +3667,12 @@ function buildPropInstances() {
     im.castShadow = true; im.receiveShadow = true; scene.add(im); propInst.push(im);
     list.forEach((t, k) => { t.inst = [{ im, idx: k, dy: 0 }]; im.setColorAt(k, _tc.setHex(TYRE_PAINT[t.cols[t.cols.length-1]])); });
     if (im.instanceColor) im.instanceColor.needsUpdate = true; });
+  { const pg = new Map(); tires.forEach(t => { if (t.kind !== 'pig') return; const key = Math.floor(t.ox/80) + ',' + Math.floor(t.oz/80); let l = pg.get(key); if (!l) pg.set(key, l = []); l.push(t); });   // the pigs: instanced per 80 m chunk too
+    pg.forEach(list => { let cx = 0, cz = 0; list.forEach(t => { cx += t.ox; cz += t.oz; }); cx /= list.length; cz /= list.length; let r = 0, y0 = 1e9, y1 = -1e9; list.forEach(t => { r = Math.max(r, Math.hypot(t.ox - cx, t.oz - cz)); const y = worldLifted ? H(t.ox, t.oz) : 0; y0 = Math.min(y0, y); y1 = Math.max(y1, y); });
+      const g = new THREE.BufferGeometry(); for (const nm in PIG_GEO.attributes) g.setAttribute(nm, PIG_GEO.attributes[nm]); if (PIG_GEO.index) g.setIndex(PIG_GEO.index);
+      g.boundingSphere = new THREE.Sphere(new THREE.Vector3(cx, (y0 + y1)/2 + 0.4, cz), Math.hypot(r, (y1 - y0)/2 + 1) + 6);
+      const im = new THREE.InstancedMesh(g, PIG_MAT, list.length); im.frustumCulled = true; im.castShadow = true; im.receiveShadow = true; scene.add(im); propInst.push(im);
+      list.forEach((t, k) => { t.inst = [{ im, idx: k, dy: 0 }]; im.setColorAt(k, _tc.setHex(PIG_TONES[t.tone || 0])); }); if (im.instanceColor) im.instanceColor.needsUpdate = true; }); }
   const pCounts = personGeos.map(() => 0); tires.forEach(t => { if (t.kind === 'person') pCounts[t.geo]++; });
   if (!pCounts.some(n => n)) { tires.forEach(t => syncProp(t)); return; }   // the crowd are Humans (drawn by the world): stacks only
   // arms-up pose: a small shared pool per outfit (only a few cheer at once) — slots handed out on demand
@@ -3664,7 +3681,7 @@ function buildPropInstances() {
   const personIM = personGeos.map((g, i) => { const im = new THREE.InstancedMesh(g, personMat, Math.max(1, pCounts[i])); im.count = pCounts[i]; im.castShadow = true; scene.add(im); propInst.push(im); return im; });
   const pcur = personGeos.map(() => 0);
   tires.forEach(t => {
-    if (t.kind === 'tire') { /* instanced above */ }
+    if (t.kind === 'tire' || t.kind === 'pig') { /* instanced above */ }
     else { const k = pcur[t.geo]++; t.inst = { im: personIM[t.geo], idx: k, imUp: personIMup[t.geo] }; t.upSlot = -1; }
     syncProp(t);
   });
@@ -3672,7 +3689,7 @@ function buildPropInstances() {
 const _zm = new THREE.Matrix4();
 function syncProp(t) {
   if (t.ao) aoSync(t);
-  if (t.kind === 'tire') {
+  if (t.kind === 'tire' || t.kind === 'pig') {
     if (!t.inst) return;
     _ie.set(0, t.yaw, 0); _iq.setFromEuler(_ie);
     const y = Y(t.x, t.z);
@@ -4109,6 +4126,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Oikaisut ja sivukatujen suut suljettu nyt betoniporsailla rengasmuurien sijaan: raskaita, auto pomppaa niistä ja kolhiintuu – ja renkaita on puolet vähemmän'],
   ['28.9.', 'Renkaat uusiksi: kaikissa autoissa ja busseissa pyöreät renkaat kulutuspinnan palikoilla, rengaspinot pyöreämmiksi ja kuviolliseksi, traktoreille nappularenkaat; pihoille valkoiset traktorinrengaskukkapenkit ja peltojen laidoille vanhoja traktorinrenkaita'],
   ['28.9.', 'Maalin lähelle tulostaulu (TOP 5 -ajat), kolme pientä katsomoa ja varikko asfalttikentälle: kolme tiimiä teltoineen, rallikaarat numeroineen, mekaanikot, renkaat ja huoltoauto'],
   ['28.9.', 'P = tauko (myös kun välilehti vaihtuu); GTA-moodin minikartta 2× suurennettuna ja seuraa autoa, kartalla myös pizzeria; alkuruutuun PC-PELI · TOIMII 486-KONEELLA'],
@@ -4866,7 +4884,7 @@ function walkTo(h, tx, tz, sp, dt) { const dx = tx - h.x, dz = tz - h.z, d = Mat
   if (Math.abs(tx - h.wgx) + Math.abs(tz - h.wgz) > 2 || d < h.wbest - 0.3) { h.wgx = tx; h.wgz = tz; h.wbest = d; h.wT = 0; } else if ((h.wT += dt) > 4) { h.wT = 0; h.wbest = d; h.vx = h.vz = 0; return true; }   // (4 s without getting any nearer — a wall, a hedge, a tree in the way: give up, as if there)
   let ux = dx/d, uz = dz/d; if (h.slide && h.slide.t > 0) { h.slide.t -= dt; ux = h.slide.x; uz = h.slide.z; }   // a wall in the way: along it for a moment
   const v = Math.min(sp, d*3); h.vx = ux*v; h.vz = uz*v; h.yaw = Math.atan2(ux, uz); h.pose.walk = Math.min(0.6, v*0.35); h.pose.ph += dt*(4 + v*3); return false; }
-function pushOffStacks(h) { forStaticNear(h.x, h.z, t => { if (t.kind !== 'tire' || t.off) return; const dx = h.x - t.x, dz = h.z - t.z, d = Math.hypot(dx, dz), R = t.r + h.r; if (d < R && d > 1e-4) { h.x = t.x + dx/d*R; h.z = t.z + dz/d*R; } }); }
+function pushOffStacks(h) { forStaticNear(h.x, h.z, t => { if ((t.kind !== 'tire' && t.kind !== 'pig') || t.off) return; const dx = h.x - t.x, dz = h.z - t.z, d = Math.hypot(dx, dz), R = t.r + h.r; if (d < R && d > 1e-4) { h.x = t.x + dx/d*R; h.z = t.z + dz/d*R; } }); }
 // any box moving over people (the rally car, a van, a tractor): the same test, the same result
 function boxHitsHumans(B, bvx, bvz, isPlayer) {
   const sp = Math.hypot(bvx, bvz); if (!isPlayer && sp < 0.8) return;
@@ -5156,7 +5174,7 @@ function vehicleVsWorld(v) {   // a vehicle that moves: other vehicles (each mov
   if (ROCK_HILLS.length && rockNear(v.x, v.z, v.hl + 2)) { const fx = Math.sin(v.yaw), fz = Math.cos(v.yaw);   // the granite: nose, middle, tail
     for (const s of [v.hl*0.95, 0, -v.hl*0.95]) { const o = rockOut(v.x + fx*s, v.z + fz*s, 0.5); if (!o) continue; v.x -= o.nx*o.depth; v.z -= o.nz*o.depth; const into = v.vx*o.nx + v.vz*o.nz; if (into > 0) { v.vx -= o.nx*into*1.2; v.vz -= o.nz*into*1.2; v.w *= 0.5; if (into > 5) vehicleHit(v, into); } } }
   const sp = Math.hypot(v.vx, v.vz); if (sp > 1) { const fx = Math.sin(v.yaw), fz = Math.cos(v.yaw);
-    for (const s of [-v.hl*0.6, 0, v.hl*0.6]) forStaticNear(v.x + fx*s, v.z + fz*s, t => { if (t.kind !== 'tire' || t.off) return; const hit = boxPush(v, t.x, t.z, t.r); if (!hit) return;
+    for (const s of [-v.hl*0.6, 0, v.hl*0.6]) forStaticNear(v.x + fx*s, v.z + fz*s, t => { if ((t.kind !== 'tire' && t.kind !== 'pig') || t.off) return; const hit = boxPush(v, t.x, t.z, t.r); if (!hit) return; if (t.kind === 'pig') { v.x -= hit.nx*hit.ov; v.z -= hit.nz*hit.ov; const into = -(v.vx*hit.nx + v.vz*hit.nz); if (into > 0) { v.vx += hit.nx*into*1.2; v.vz += hit.nz*into*1.2; } return; }   /* (a pig doesn't give) */
       t.x += hit.nx*hit.ov; t.z += hit.nz*hit.ov; t.vx = v.vx*1.1 + hit.nx*1.5; t.vz = v.vz*1.1 + hit.nz*1.5; setMoving(t); }); }
   boxHitsHumans(v, v.vx, v.vz, false);
 }
@@ -7044,16 +7062,16 @@ function carBoxPush(x, z, r) {
   if (pr < pf) { const sg = Math.sign(lr) || 1; return { nx: rx*sg, nz: rz*sg, ov: pr + r }; } const sg = Math.sign(lf) || 1; return { nx: fx*sg, nz: fz*sg, ov: pf + r };
 }
 function propHitByCar(t) {
-  const person = t.kind === 'person';
+  const person = t.kind === 'person', pig = t.kind === 'pig';
   const hit = carBoxPush(t.x, t.z, person ? 0.3 : t.r); if (!hit) return;
-  const nx = hit.nx, nz = hit.nz; t.x += nx*hit.ov; t.z += nz*hit.ov;
+  const nx = hit.nx, nz = hit.nz; if (pig) { car.x -= nx*hit.ov*0.92; car.z -= nz*hit.ov*0.92; t.x += nx*hit.ov*0.08; t.z += nz*hit.ov*0.08; } else { t.x += nx*hit.ov; t.z += nz*hit.ov; }   // (a pig: 1.5 t of concrete — the car comes off it)
   const rel = (t.vx - car.vx)*nx + (t.vz - car.vz)*nz;
   if (rel < 0) {
-    const kick = person ? 2.4 : 1.15;                                  // heavier tire stacks: they don't fly as far…
+    const kick = person ? 2.4 : pig ? 0.08 : 1.15;                     // heavier tire stacks: they don't fly as far (a pig hardly shifts)…
     t.vx -= nx*rel*kick; t.vz -= nz*rel*kick;
-    car.vx += nx*rel*(person ? 0.02 : 0.16); car.vz += nz*rel*(person ? 0.02 : 0.16);   // …and the car pays for hitting them
+    const back = person ? 0.02 : pig ? 1.25 : 0.16; car.vx += nx*rel*back; car.vz += nz*rel*back;   // …and the car pays for hitting them (off a pig it bounces)
     if (person) { if (Math.hypot(car.vx, car.vz) > 3) { t.vy = Math.min(9, -rel*0.45 + 2); t.down = true; t.spin = (Math.random()-0.5)*8; propInjured(t); } else { t.vx *= 0.3; t.vz *= 0.3; } }
-    else carDamage(nx, nz, -rel);
+    else carDamage(nx, nz, pig ? -rel*1.15 : -rel);
     const now = performance.now();
     if (audio && now - lastThud > 110) { lastThud = now; beep(person ? 240 + Math.random()*120 : 65 + Math.random()*35, person ? 0.14 : 0.09, Math.min(0.3, -rel*0.025), person ? 'square' : 'triangle'); }
   }
@@ -7087,7 +7105,7 @@ function updateTires(dt) {
   // integrate moving props
   for (const t of movingProps) {
     const person = t.kind === 'person';
-    const fr = person ? 2.2 : 3;
+    const fr = person ? 2.2 : t.kind === 'pig' ? 10 : 3;
     t.vx *= Math.max(1 - fr*dt, 0); t.vz *= Math.max(1 - fr*dt, 0);
     if (Math.abs(t.vx) < 0.01 && Math.abs(t.vz) < 0.01) { t.vx = 0; t.vz = 0; }
     t.x += t.vx*dt; t.z += t.vz*dt;
@@ -7110,7 +7128,7 @@ function updateTires(dt) {
     const t = movingProps[i];
     const person = t.kind === 'person';
     if (person && t.down) { t.yaw += t.spin * dt; if (!(t.hop > 0)) t.spin *= Math.exp(-dt*7); t.tilt += ((-Math.PI/2 + 0.15) - t.tilt) * Math.min(8*dt, 1); if (t.vx === 0 && t.vz === 0) t.spin *= 0.9; }
-    else if (!person) t.yaw += (t.vx + t.vz) * 0.4 * dt;
+    else if (!person) t.yaw += (t.vx + t.vz) * (t.kind === 'pig' ? 0.05 : 0.4) * dt;
     syncProp(t);
     const settled = t.vx === 0 && t.vz === 0 && !(t.hop > 0) && (!person || !t.down || Math.abs(t.tilt - (-Math.PI/2 + 0.15)) < 0.01);
     if (settled) { t.moving = false; movingProps.splice(i, 1); staticDirty = true; }
@@ -7609,7 +7627,7 @@ function freeKshop(on) { for (const S of STANDS) { if (!S.kshop || !S.built) con
 function freeEnter() {
   if (FREE.on) return; FREE.on = true; lapStarted = false;
   trackMeshGroup.children.forEach(m => { const k = m.userData.key; if ((k === 'curb' || k === 'checkpoint' || k === 'grid' || m === finishMesh || m.userData.routePatch) && m.visible) { m.visible = false; FREE.hidden.push(m); } if (k === 'freeFillet') m.visible = true; });   // (the route's own tarmac out, the network's rounded junction corners in)
-  tires.forEach(t => { if (t.kind !== 'tire' || t.off) return; t.off = true; t.freeOff = true; if (t.moving) { t.moving = false; movingProps = movingProps.filter(o => o !== t); } syncProp(t); }); staticDirty = true;
+  tires.forEach(t => { if ((t.kind !== 'tire' && t.kind !== 'pig') || t.off) return; t.off = true; t.freeOff = true; if (t.moving) { t.moving = false; movingProps = movingProps.filter(o => o !== t); } syncProp(t); }); staticDirty = true;
   const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('VAPAA AJO – KOKO KYLÄ ON SINUN'); cpd.style.color = '#ffd23c'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2600);
   beep(523, 0.1, 0.25, 'square'); setTimeout(() => beep(784, 0.2, 0.25, 'square'), 120); trafficStart(); freeYardTires(true); freeKshop(true); }
 function freeExit() {

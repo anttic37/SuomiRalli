@@ -501,6 +501,12 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   and uses a 12-segment copy (tireGeoLow/rimGeoLow). Barrier stacks: 4-point rounded tread per tyre, still 10 segments, a block-tread
   texture. buildTractorTyres: 12 white tractor-tyre flower beds in front yards, a pile (2–3 flat + one leaning) by each tractor.
   Vertices 3.44 → ~3.7 M (fewer draw calls). t_tyres.
+- Concrete pigs (28.9., "renkaita vähentää… betoniporsaita… estämässä oikaisuja"): the inside-corner short-cut walls and the
+  side-street mouth barricades are rows of betoniporsas (kind 'pig' in tires[], PIG_GEO = a bevelled trapezoid extrusion 1.3 m, grey
+  speckled PIG_MAT, 5 tones; instanced per 80 m chunk in buildPropInstances; r 0.64, 1.32 m apart end to end). propHitByCar: the car
+  is pushed out (not the pig), bounces (1.25 × the closing speed back), carDamage ×1.15; a pig's kick 0.08, friction 10; vehicles
+  bounce off them; people are kept off; GTA hides them with the tyres. Outer-corner walls and the phase gates stay tyres.
+  Tyres 5989 → 3734 (stacks 1869 → 1181), 991 pigs; vertices ~3.7 M → 3.48 M. t_pigs.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
