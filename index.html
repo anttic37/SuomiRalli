@@ -186,7 +186,7 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: GTA-MOODI</span><small data-t>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 15.18 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 15.46 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
@@ -3449,10 +3449,19 @@ function buildTrackTires() {
             const solid = (x, z) => !stackFree(x, z, 0.95) || nearBuilding(x, z, 0.95);
             const cuts = []; for (let ka = 3; ka <= 14; ka++) for (let kb = 3; kb <= 14; kb++) { const A = edge(apex - ka), B = edge(apex + kb); let route = 0;
                 for (let k = apex - ka; k < apex + kb; k++) { const p = trackPoints[(k%n+n)%n], q = trackPoints[((k+1)%n+n)%n]; route += Math.hypot(q.x - p.x, q.y - p.y); }
-                const L = Math.hypot(B[0] - A[0], B[1] - A[1]); if (route - L >= 6 && !onRoad((A[0] + B[0])/2, (A[1] + B[1])/2, 0)) cuts.push({ A, B, L, save: route - L }); }
+                const L = Math.hypot(B[0] - A[0], B[1] - A[1]); if (route - L >= 6 && !onRoad((A[0] + B[0])/2, (A[1] + B[1])/2, 0)) cuts.push({ A, B, L, save: route - L, k0: apex - ka, k1: apex + kb }); }
             cuts.sort((p, q) => q.save - p.save); stackH = 3;
-            for (const C of cuts) { let open = true; for (let t = 0; t <= C.L && open; t += 0.5) if (solid(C.A[0] + (C.B[0] - C.A[0])*t/C.L, C.A[1] + (C.B[1] - C.A[1])*t/C.L)) open = false;
-              if (!open) continue; stackCol = cuts.indexOf(C) % 2 ? 1 : 2;
+            const isOpen = (C) => { for (let t = 0; t <= C.L; t += 0.5) if (solid(C.A[0] + (C.B[0] - C.A[0])*t/C.L, C.A[1] + (C.B[1] - C.A[1])*t/C.L)) return false; return true; };
+            { // first ONE row of pigs end to end along the inside kerb (lengthwise to the road) over the whole stretch the open cuts span:
+              // it closes them all with a handful of pigs (it used to be a wall across the grass for every cut: rows and rows of them)
+              const open = cuts.filter(isOpen); if (open.length) { const k0 = Math.min(...open.map(C => C.k0)), k1 = Math.max(...open.map(C => C.k1));
+                const at = (k) => { const q = (k%n+n)%n, p = trackPoints[q], nm = getNormal(q), o = (wAt(q)*0.5 + off1)*s; return [p.x + nm.x*o, p.y + nm.y*o]; };
+                let prev = at(k0 - 1), acc = 0;
+                for (let k = k0 - 1; k <= k1 + 1; k++) { const cur = at(k), L = Math.hypot(cur[0] - prev[0], cur[1] - prev[1]); let t = 0;
+                  while (acc + (L - t) >= 1.32) { t += 1.32 - acc; acc = 0; const x = prev[0] + (cur[0] - prev[0])*t/L, z = prev[1] + (cur[1] - prev[1])*t/L, r = roadInfo(x, z);
+                    if (r.d2 < (wAt(r.idx)*0.5 + off1 - 0.4)**2 || onRoad(x, z, 1.0)) continue; addPigChecked(x, z, Math.atan2(cur[0] - prev[0], cur[1] - prev[1])); }   // (a street through the corner stays open)
+                  acc += L - t; prev = cur; } } }
+            for (const C of cuts) { if (!isOpen(C)) continue;   /* (only what the kerb row left open, e.g. past a street mouth) */ stackCol = cuts.indexOf(C) % 2 ? 1 : 2;
               const yawC = Math.atan2(C.B[0] - C.A[0], C.B[1] - C.A[1]);   // concrete pigs end to end across it (they were tyre stacks: a lot of tyres)
               for (let t = 0.8; t < C.L; t += 1.32) { const x = C.A[0] + (C.B[0] - C.A[0])*t/C.L, z = C.A[1] + (C.B[1] - C.A[1])*t/C.L, r = roadInfo(x, z);
                 if (r.d2 < (wAt(r.idx)*0.5 + 2.3)**2 || onRoad(x, z, 1.0)) continue; addPigChecked(x, z, yawC); } }   // (a street through the corner stays open)
@@ -4138,6 +4147,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Betoniporsaat nyt tien suuntaisesti yhtenä rivinä sisäkaarteen reunassa (ei rivikaupalla nurmella): 991 → 542 porsasta ja vähemmän avoimia oikaisuja; ufot laskeutuvat vähintään 13 m päähän taloista ja vajoista'],
   ['28.9.', 'Pikatarkistus: kisa, kierros, haamu, GTA-liikenne, ufot ja tauko toimivat – alkuruutuun leima "28.9. peli skulaa"'],
   ['28.9.', 'Alkuruutu tarkistettu 12 ikkunakoolla puhelimesta 2560-leveään: QR ei enää peitä otsikkoa eikä kielinappeja'],
   ['28.9.', 'Alkuruutuun QR-koodi pelin osoitteeseen: KERRO KAVERILLE – ota kuva ja jaa peliä!'],
@@ -6773,9 +6783,12 @@ function ufoEnds() {   // where they came down: off the west and the east end of
   return [out(wi), out(ei)]; }
 // the crash site: a raised dirt rim round a scorched floor, the furrow it ploughed coming in (berms both sides, clods thrown out),
 // burnt grass all round — every vertex laid on the ground where it is
+function ufoRoom(x, z, r) {   // no house, shed, shop or other building within r (the crater rim is 12.5 m out; it came down in a yard once)
+  for (const B of BUILDINGS) if (inLandmark(x, z, [0, B[0], B[1], B[4], B[2], B[3]], r)) return false;
+  let ok = true; staticNear(x, z, r + 12, B => { if (ok && (B.hw > 0.8 || B.hl > 0.8) && boxPush(B, x, z, r)) ok = false; }); return ok; }
 function ufoFurrowDir(x, z) { let best = 0, bs = -1e9;
   for (let k = 0; k < 16; k++) { const a = k/16*Math.PI*2, sx = Math.sin(a), sz = Math.cos(a); let clear = 0;
-    for (let d = 8; d <= 34; d += 2) { const px = x + sx*d, pz = z + sz*d; let bad = treeNear(px, pz, 2.5) || onRoad(px, pz, 2) || distRoute(px, pz) < 30 || Math.abs(px) > 560 || Math.abs(pz) > 560; if (!bad) staticNear(px, pz, 4, B => { if (!bad && boxPush(B, px, pz, 3.2)) bad = true; }); if (bad) break; clear = d; }
+    for (let d = 8; d <= 34; d += 2) { const px = x + sx*d, pz = z + sz*d; let bad = treeNear(px, pz, 2.5) || onRoad(px, pz, 2) || distRoute(px, pz) < 30 || Math.abs(px) > 560 || Math.abs(pz) > 560; if (!bad) bad = !ufoRoom(px, pz, 5); if (bad) break; clear = d; }
     const sc = clear + Math.random()*3; if (sc > bs) { bs = sc; best = a; } } return [best, Math.max(10, bs - 3)]; }
 function makeCrater(x, z, dir, len) { const G = new THREE.Group(), col = new THREE.Color(), cols = (g, f) => { const P = g.attributes.position, C = new Float32Array(P.count*3); for (let i = 0; i < P.count; i++) { f(i, P, col); C[i*3] = col.r; C[i*3 + 1] = col.g; C[i*3 + 2] = col.b; } g.setAttribute('color', new THREE.BufferAttribute(C, 3)); };
   const drape = (g, lift) => { const P = g.attributes.position; for (let i = 0; i < P.count; i++) { const wx = P.getX(i), wz = P.getZ(i); P.setY(i, Y(wx, wz) + P.getY(i) + (lift || 0)); } P.needsUpdate = true; g.computeVertexNormals(); };
@@ -6807,12 +6820,12 @@ function makeCrater(x, z, dir, len) { const G = new THREE.Group(), col = new THR
   drape(scorch, 0.05); const ms = new THREE.Mesh(scorch, new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 })); ms.renderOrder = 1; G.add(ms);
   return G; }
 function buildUfos() { UFOS.length = 0; UFO_GAWK.length = 0; for (const B of UFO_BOLTS) { B.live = false; B.m.visible = false; } const { nodes } = roadGraph();
-  for (const [p, ux, uz, back] of ufoEnds()) { let sp = null; for (let k = 0; k < 2000 && !sp; k++) { const d = 30 + Math.random()*70, a = Math.atan2(ux, uz) + (Math.random() - 0.5)*(k < 700 ? 2.2 : 6.3), x = p.x + Math.sin(a)*d, z = p.y + Math.cos(a)*d;   // (on past the road's end first, then anywhere round it)
+  for (const [p, ux, uz, back] of ufoEnds()) { let sp = null; for (let k = 0; k < 3200 && !sp; k++) { const d = 30 + Math.random()*(k < 2000 ? 70 : 130), a = Math.atan2(ux, uz) + (Math.random() - 0.5)*(k < 700 ? 2.2 : 6.3), x = p.x + Math.sin(a)*d, z = p.y + Math.cos(a)*d;   // (on past the road's end first, then anywhere round it)
       if (Math.abs(x) > 540 || Math.abs(z) > 540 || distRoute(x, z) < (k < 1400 ? 85 : 70) || rockHeightAt(x, z) > -0.5 || treeNear(x, z, k < 700 ? 10 : 7.5)) continue;
       let nd = 1e9; for (const n of nodes) nd = Math.min(nd, Math.hypot(n.x - x, n.z - z)); if (nd < 16 || nd > 50) continue;   // a street near enough for the ambulance to come (and be shot)
-      let ok = clearSpot(x, z, 6); if (ok) staticNear(x, z, 10, B => { if (ok && boxPush(B, x, z, 6.5)) ok = false; }); if (ok) sp = [x, z]; }
+      if (clearSpot(x, z, 6) && ufoRoom(x, z, k < 1400 ? 16 : 13)) sp = [x, z]; }
     if (!sp && back) for (const q of back || []) { if (treeNear(q.x, q.y, 6) || distRoute(q.x, q.y) < 70) continue; let ok = !VEHICLES.some(v => Math.hypot(v.x - q.x, v.z - q.y) < 9);   // woods all round: down on the dead end of the road itself (no trees there)
-      if (ok) staticNear(q.x, q.y, 10, B => { if (ok && boxPush(B, q.x, q.y, 5.5)) ok = false; }); if (ok) { sp = [q.x, q.y]; break; } }
+      if (ok) ok = ufoRoom(q.x, q.y, 13); if (ok) { sp = [q.x, q.y]; break; } }
     if (!sp) continue; const [x, z] = sp, [fdir, flen] = ufoFurrowDir(x, z), y = Y(x, z) + 0.2, M = makeUfo(); M.G.position.set(x, y, z); M.G.rotation.set(-0.3, fdir + Math.PI, 0.1, 'YXZ'); lifeGroup.add(M.G); nearVis(M.G, x, z);   // (nose down into the far wall, the furrow behind it)
     const crater = makeCrater(x, z, fdir, Math.min(30, flen)); lifeGroup.add(crater); nearVis(crater, x, z);
     EMITTERS.push({ x: x + Math.sin(fdir)*9, z: z + Math.cos(fdir)*9, y: Y(x + Math.sin(fdir)*9, z + Math.cos(fdir)*9) + 0.3, kind: 'breakdown', acc: 0 });   // (the furrow smoulders too)
