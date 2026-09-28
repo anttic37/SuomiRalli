@@ -551,6 +551,14 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - Grass tufts (28.9., "ruohot näyttää mustilta lätkiltä"): two causes. The canvas texture's see-through pixels were black (dark
   fringes when filtered/mipmapped) → a DataTexture whose clear pixels carry the grass colour; and DoubleSide flipped the up-facing
   normals on back faces, so the far side of every blade plane rendered black → each face twice (both windings), FrontSide. t_tufts.
+- Havuhelvetti, round 2 (28.9., Antti's logo + "bass boost → auto 75 % nopeudella… joskus gta moodissa muutenkin… auto vois hyppiä"):
+  HEVI_LOGO = his logo as a 640×436 grey JPEG data URI (~51 kB → index ~1.0 MB); heviLogoImg() loads it once, the side canvas
+  (2048×500: logo 'lighten'-drawn in the middle, spruce skyline, KUOLEMAN KIERTUE -88 / YLÄSTÖ · TIKKURILA · TUONELA either side)
+  and the back one repaint on load; emissiveMap 0.3 so it reads at dusk; the side windows are gone (blacked out). Bass speed: the
+  existing bass-boost crawl cap (0.2 × DRIVE.maxSpeed) is now 0.68 × — 75 % of the ~148 km/h the car really reaches (t_bass: 112 vs
+  148 km/h; I first read "75 %" as +75 % — that would have needed the lap voided; it doesn't now). Hop: BASS.hopV = 3.4 m/s on every
+  other kick when on the ground (0.56 m, visual only: carGroup y + BASS.hopY; integrated in bassUpdate even when off, so it lands).
+  GTA visits: without the bass, HEVI.freeT (first 90–210 s, then 150–300 s) → heviSpawn, HEVI.visitT 60–110 s, then leave. t_bass.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

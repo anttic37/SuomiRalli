@@ -1,14 +1,15 @@
-initAudio = () => {}; startRace(false); setTimeOfDay('paiva'); const RR = renderer.render.bind(renderer); renderer.render = () => {};
-let T = performance.now(); const step = (n, f) => { for (let i = 0; i < n; i++) { f && f(i); T += 1000/60; loop(T); } };
-const key = (c) => { dispatchEvent(new KeyboardEvent('keydown', { code: c })); dispatchEvent(new KeyboardEvent('keyup', { code: c })); };
-const steer = () => { const n = trackPoints.length, tp = trackPoints[(car.prog + 7) % n]; let dA = Math.atan2(tp.x - car.x, tp.y - car.z) - car.angle; while (dA > Math.PI) dA -= 2*Math.PI; while (dA < -Math.PI) dA += 2*Math.PI;
-  keys.ArrowLeft = dA > 0.05; keys.ArrowRight = dA < -0.05; keys.ArrowUp = true; keys.ArrowDown = false; };
-step(60*3.5); step(60*8, steer); const out = { v0: +Math.hypot(car.vx, car.vz).toFixed(1) };
-key('KeyB'); const near = () => HUMANS.filter(h => h.task && h.task.kind === 'spectate' && !h.down && Math.hypot(h.x - car.x, h.z - car.z) < 10).length;
-out.near0 = near(); let maxV = 0; step(60*8, (i) => { steer(); if (i > 120) maxV = Math.max(maxV, Math.hypot(car.vx, car.vz)); }); out.vCap = +maxV.toFixed(1); out.near8 = near(); out.pulses = BASS.pulse;
-keys.ArrowUp = false; keys.ArrowDown = true; step(60*2); keys.ArrowDown = false; step(60*3); out.nearStopped = near(); out.jumping = HUMANS.filter(h => h.st && h.st.rave && h.hop > 0).length; out.down = HUMANS.filter(h => h.down).length;
-const fx = Math.sin(car.angle), fz = Math.cos(car.angle); camera.position.set(car.x - fx*14 + fz*6, H(car.x, car.z) + 9, car.z - fz*14 - fx*6); camera.lookAt(car.x, H(car.x, car.z), car.z); camera.updateMatrixWorld();
-lightAnchor.x = lightAnchor.z = 1e9; dirLight.position.set(car.x + SUN.x, H(car.x, car.z) + SUN.y, car.z + SUN.z); dirLight.target.position.set(car.x, H(car.x, car.z), car.z); dirLight.target.updateMatrixWorld(); RR(scene, camera); await __pageshot('bass.png');
-key('KeyB'); step(60*25); out.afterOff = { near: near(), raving: HUMANS.filter(h => h.st && h.st.rave).length, hud: document.getElementById('bass-hud').style.display };
-keys.ArrowUp = true; step(60*4, steer); out.vAfter = +Math.hypot(car.vx, car.vz).toFixed(1);
+// bass boost: the car goes up to 75 % of its top speed (it was a fifth); it hops to the beat; in GTA mode the gig bus visits
+// now and then without the bass; the band's logo on the bus
+startRace(false); step(60*4); const out = {}, n = trackPoints.length;
+const run = (frames) => { const i0 = gridIndex(), p = trackPoints[(i0 + 10) % n], q = trackPoints[(i0 + 11) % n], a = Math.atan2(q.x - p.x, q.y - p.y); car.vx = car.vz = 0; let v = 0;
+  step(frames, (i) => { keys.ArrowUp = true; car.angle = a; car.x = p.x; car.z = p.y; v = car.speed; }); keys.ArrowUp = false; car.vx = car.vz = 0; return +(v*3.6).toFixed(1); };
+out.off = { pull2s: run(120), top: run(60*25) };
+bassToggle(); step(2); out.on = { pull2s: run(120), top: run(60*25) }; out.ratio = { pull: +(out.on.pull2s/out.off.pull2s).toFixed(2), top: +(out.on.top/out.off.top).toFixed(2) };
+{ let maxH = 0, hops = 0, air = false; step(60*6, () => { const h = carGroup.position.y - Y(car.x, car.z); maxH = Math.max(maxH, h); if (h > 0.05 && !air) { hops++; air = true; } if (h <= 0.001) air = false; }); out.hop = { maxM: +maxH.toFixed(2), hopsIn6s: hops }; }
+startRace(false); step(60*4); out.afterRestart = { bass: BASS.on, hopY: BASS.hopY };
+// GTA: a visit without the bass
+freeEnter(); step(10); HEVI.freeT = 0.1; step(30); const v = HEVI.v; out.gtaVisit = { came: !!v, visitT: +HEVI.visitT.toFixed(0), bass: BASS.on };
+if (v) { await new Promise(r => setTimeout(r, 400)); const fx = Math.sin(v.yaw), fz = Math.cos(v.yaw); car.x = v.x + 40; car.z = v.z; step(1);
+  await shot('bass_bus_side', v.x, v.z, fz*12, -fx*12, 2.2, 1.6); await shot('bass_bus_rear', v.x, v.z, -fx*9, -fz*9, 2.2, 1.7);
+  HEVI.visitT = 0.05; step(3); out.gtaVisit.leaving = HEVI.leave; car.x = v.x + 400; step(5); out.gtaVisit.goneAfter = !HEVI.v; }
 return out;
