@@ -572,6 +572,14 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   from the road): 3 members drinking round a yellow crate (bottle in the right hand, a swig every few s, horns up now and then,
   swaying), empties in the grass, the banner (logo, 4.4 m, on two poles). heviCanvasMat(w, h, draw) now shared by bus/stall/banner.
   t_lp, t_lp_radio (over serve.mjs: 4 songs, none on the normal radio, all after the LP; the bus plays havuhelvetti-*.mp3).
+- LP booth + start screen (28.9., "myyntipiste huomattavasti isommaksi, banderolli siihen; UUTUUS HAVUHELVETTI HEAVY PÄNDI PELISSÄ;
+  qr ja kerro kaverille päällekkäin; pienempi ennätyslistan fontti"): the stall is a 5.8 × 3.1 m booth (e + 2.4 back from the road):
+  4 posts, black canopy, the logo banner (5.6 × 1.26) across the front at 1.8–3.0 m, a 4.8 m counter with 16 LPs, a 3 × 7 record
+  wall, cabinet speakers at both ends, a price board by the road; static 2.95 × 1.45 + the speakers. The seller stands behind the
+  counter (b −0.3; he walks round it, ~10 s back). #news: 'UUTUUS: HAVUHELVETTI – HEAVY PÄNDI PELISSÄ' (the GTA hint kept in the
+  small line), font clamp(15px, 2.4vw, 28px), max-width 86vw, more margin (the rotated box touched the title); #share static in the
+  flow up to 1380 px (the longer news reached it at 1280–1360); .sh-txt margin-bottom 14 px (the QR covered "JAA PELIÄ"); #top10
+  font clamp(11px, 1.45vw, 16px), 600 px wide. v.js at 14 sizes: no overlaps, no h-scroll.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

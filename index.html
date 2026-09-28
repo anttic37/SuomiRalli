@@ -96,7 +96,7 @@
   #overlay .build-stamp { display: none !important; }   /* (the editor still stamps its build into the page; not shown) */
   #overlay .build-stamp-old { display: flex; align-items: center; gap: 22px; font-size: clamp(10px, 1.6vw, 15px); font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: #ff2a2a; margin: 0 16px clamp(18px, 4vh, 44px); text-align: center; max-width: 92vw; }
   #overlay .build-stamp::before, #overlay .build-stamp::after { content: ''; width: clamp(24px, 6vw, 74px); height: 2px; background: #e0141e; }
-  #news { position: relative; margin: 4px 0 18px; padding: 6px 22px 6px 2.3em; font-weight: 900; font-style: italic; font-size: clamp(18px, 3.6vw, 34px); letter-spacing: 0.04em; color: #ffd23c;
+  #news { position: relative; margin: 14px 0 26px; padding: 6px 22px 6px 2.3em; font-weight: 900; font-style: italic; font-size: clamp(15px, 2.4vw, 28px); letter-spacing: 0.04em; color: #ffd23c; max-width: 86vw; box-sizing: border-box; white-space: normal;
     transform: rotate(-3deg) skewX(-8deg); text-shadow: 0 3px 0 #7a1010, 0 0 18px rgba(255,210,60,0.35); font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif; }
   #news small { display: block; font-size: 0.38em; font-style: normal; letter-spacing: 0.25em; color: #f0f0ec; text-shadow: none; text-transform: uppercase; margin-top: 2px; }
   #news .star { position: absolute; left: 2px; top: 50%; width: 1.6em; height: 1.6em; margin-top: -0.8em; line-height: 1.6em; text-align: center; font-size: 1em; font-style: normal; color: #fff; background: #e0141e; border-radius: 50%;
@@ -113,13 +113,14 @@
   #okstamp b { color: #5fd35f; }
   #pcnote small { font-size: 0.82em; letter-spacing: 0.1em; color: #d8d8d0; text-transform: none; }
   #share { position: absolute; top: 14px; left: 16px; z-index: 2; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; align-items: end; column-gap: 4px; transform: rotate(-3deg); pointer-events: none; }
-  #share .sh-txt { grid-column: 1 / 3; font: italic 900 clamp(15px, 1.7vw, 22px)/1 "Arial Black", "Helvetica Neue", Arial, sans-serif; color: #ffd23c; text-shadow: 0 2px 0 #7a1010; letter-spacing: 0.03em; margin-bottom: 2px; }
+  #share .sh-txt { grid-column: 1 / 3; font: italic 900 clamp(15px, 1.7vw, 22px)/1 "Arial Black", "Helvetica Neue", Arial, sans-serif; color: #ffd23c; text-shadow: 0 2px 0 #7a1010; letter-spacing: 0.03em; margin-bottom: 14px; }
   #share .sh-txt span { display: block; margin-top: 4px; font: 700 clamp(10px, 1vw, 12px)/1.1 "Courier New", monospace; letter-spacing: 0.14em; color: #e8e8e4; text-shadow: none; text-transform: uppercase; }
   #share .sh-arrow { width: 62px; height: 48px; margin-bottom: 36px; }
   #share .sh-qr { background: #fff; padding: 6px 6px 3px; border-radius: 4px; box-shadow: 0 0 0 3px #e0141e, 0 6px 16px rgba(0,0,0,0.6); transform: rotate(4deg); }
   #share .sh-code { display: block; width: clamp(110px, 10.5vw, 150px); height: auto; }
   #share .sh-url { margin-top: 3px; text-align: center; font: 700 9px/1 "Courier New", monospace; color: #222; letter-spacing: 0.02em; }
-  @media (max-width: 1100px) { #share { position: static; margin: 10px auto 0; transform: rotate(-2deg); justify-content: center; } }
+  @media (max-width: 560px) { #news small { letter-spacing: 0.1em; } }
+  @media (max-width: 1380px) { #share { position: static; margin: 10px auto 0; transform: rotate(-2deg); justify-content: center; } }
   @media (max-width: 560px) { #share { margin-top: 44px; } }
   #lang { position: absolute; top: 12px; right: 14px; display: flex; gap: 4px; z-index: 2; }
   #lang button { font: 800 12px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.12em; padding: 6px 8px; color: #8a8a84; background: transparent; border: 1px solid #333; border-radius: 3px; cursor: pointer; }
@@ -141,7 +142,7 @@
   #changelog .cl-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #changelog .cl-d { color: #4a4a46; margin-right: 8px; } #changelog .cl-row:first-child { color: #b8b8b0; }
   #overlay > .deco.bottom { margin-bottom: 0; }
   @media (min-width: 1560px) and (min-height: 640px) { #changelog { position: absolute; right: 28px; bottom: 26px; width: 400px; margin: 0; } #changelog .cl-list { max-height: min(260px, 34vh); } #overlay > .deco.bottom { margin-bottom: auto; } }
-  #top10 { margin-top: clamp(16px, 3.5vh, 34px); width: min(660px, 88vw); font-size: clamp(13px, 2vw, 21px); color: #f0f0ec; font-variant-numeric: tabular-nums; }
+  #top10 { margin-top: clamp(16px, 3.5vh, 34px); width: min(600px, 88vw); font-size: clamp(11px, 1.45vw, 16px); color: #f0f0ec; font-variant-numeric: tabular-nums; }
   #top10 .t10-head { font-size: clamp(9px, 1.3vw, 13px); letter-spacing: 0.4em; color: #8a8a86; text-align: center; margin-bottom: clamp(8px, 1.6vh, 16px); text-transform: uppercase; }
   #top10 .t10-row { display: flex; gap: 0.9em; padding: 0.12em 6px; align-items: baseline; } #top10 .t10-row.me .t10-name { color: #44e24a; font-weight: 700; }
   #top10 .t10-list { max-height: calc(10*1.52em + 4px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: #444 transparent; position: relative; }
@@ -183,10 +184,10 @@
   <div id="lang"><button data-l="fi">FI</button><button data-l="en">EN</button><button data-l="no">NO</button></div>
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
-  <div id="news"><span class="star">★</span><span data-t>UUTUUS: GTA-MOODI</span><small data-t>aja lähdössä oikeaa kaistaa</small></div>
+  <div id="news"><span class="star">★</span><span data-t>UUTUUS: HAVUHELVETTI – HEAVY PÄNDI PELISSÄ</span><small data-t>B = keikkabussi · levyt ison männyn luota · GTA: aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 18.25 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 19.10 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
@@ -236,7 +237,7 @@
 // T('finnish text', a, b…) → the text in the chosen language, {0} {1}… filled in. A text missing here stays Finnish. HTML with data-t: applyLang.
 // Street names, shop signs, radio stations and the change log stay Finnish (it's Vantaa, 1988).
 const I18N = {
-  'UUTUUS: GTA-MOODI': ['NEW: GTA MODE', 'NYHET: GTA-MODUS'],
+  'UUTUUS: GTA-MOODI': ['NEW: GTA MODE', 'NYHET: GTA-MODUS'], 'UUTUUS: HAVUHELVETTI – HEAVY PÄNDI PELISSÄ': ['NEW: HAVUHELVETTI – A HEAVY BAND IN THE GAME', 'NYHET: HAVUHELVETTI – ET HEAVY-BAND I SPILLET'], 'B = keikkabussi · levyt ison männyn luota · GTA: aja lähdössä oikeaa kaistaa': ['B = tour bus · LPs by the big pine · GTA: take the right lane at the start', 'B = turnébuss · plater ved den store furua · GTA: ta høyre felt ved start'],
   'aja lähdössä oikeaa kaistaa': ['take the right lane at the start', 'kjør høyre felt ved start'],
   'Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.': ["Summer 1988. Peugeot 205. Wihka did 1.29:000 yesterday. You didn't.", 'Sommer 1988. Peugeot 205. Wihka kjørte 1.29:000 i går. Ikke du.'],
   'Kesä 1988. Vanha Pökö 205, {0} ajoi eilen {1}. Sinä et.': ["Summer 1988. Peugeot 205. {0} did {1} yesterday. You didn't.", 'Sommer 1988. Peugeot 205. {0} kjørte {1} i går. Ikke du.'],
@@ -4152,6 +4153,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Havuhelvetin levypiste nyt iso myyntikoju: katos, banderolli, levytiski, levyseinä ja kajarit; alkuruudussa UUTUUS: HAVUHELVETTI – HEAVY PÄNDI PELISSÄ; QR-teksti ei enää mene koodin alle; ennätyslistassa pienempi fontti'],
   ['28.9.', 'Havuhelvetin omat biisit soivat keikkabussista; ison männyn vieressä Havuhelvetin levypiste – pysähdy, jäsen tuo levyn ja sen jälkeen radiosta tulee vain Havuhelvettiä; bändi dokaa metsässä banderollinsa alla'],
   ['28.9.', 'Havuhelvetin oma logo bussin kylkiin ja perään; bassoboostilla auto kulkee nyt 75 % nopeudella (ennen viidesosa) ja hyppii bassorummun tahtiin; GTA-moodissa bussi käy joskus kylillä ilman bassoakin'],
   ['28.9.', 'ES STOP -ruutu takaisin keskelle kaupan ovea (kadun puoleinen pää maalattu kadun päälle); ruohotupsut eivät enää näytä mustilta läiskiltä'],
@@ -5768,17 +5770,26 @@ const lpDrinkTask = (k, cx, cz) => ({ kind: 'lpdrink', update(h, dt, t) { if (Ma
 function buildLpStall() { LP.stall = null; LP.drinkers.length = 0; LP.seller = null; const M = LANDMARKS.find(L => L[0] === 'manty'); if (!M) return; const px = M[1], pz = M[2];
   let R = null; for (let r = 3; r < 70 && !R; r++) for (let k = 0; k < 48; k++) { const a = k/48*6.283, x = px + Math.sin(a)*r, z = pz + Math.cos(a)*r; if (onRoad(x, z, 0)) { R = [x, z, a]; break; } }   // the nearest road
   if (!R) return; const ux = Math.sin(R[2]), uz = Math.cos(R[2]); let e = 0; while (e < 10 && onRoad(R[0] - ux*e, R[1] - uz*e, 1.2)) e += 0.25;
-  const sx = R[0] - ux*(e + 0.9), sz = R[1] - uz*(e + 0.9), yaw = Math.atan2(ux, uz), at = (a, b) => lloc(sx, sz, yaw, a, b);   // (local +b: towards the road)
-  const G = new THREE.Group(), wood = lmat(0x6a4a2c, 0.9), cloth = lmat(0x0e0e10, 0.95), sleeve = lpSleeveMat(); lifeGroup.add(G); nearVis(G, sx, sz);
-  const put = (m, a, b, y, ry) => { const [x, z] = at(a, b); m.position.set(x, Y(x, z) + y, z); m.rotation.y = yaw + (ry || 0); G.add(m); return m; };
-  put(new THREE.Mesh(lbox(2.2, 0.06, 0.8), wood), 0, 0, 0.8); put(new THREE.Mesh(lbox(2.22, 0.7, 0.02), cloth), 0, 0.41, 0.45);
-  for (const [a, b] of [[-1, -0.35], [1, -0.35], [-1, 0.35], [1, 0.35]]) put(new THREE.Mesh(lbox(0.06, 0.8, 0.06), wood), a, b, 0.4);
-  for (let k = 0; k < 5; k++) { const s = put(new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve), -0.8 + k*0.4, 0.05, 0.99); s.rotation.x = -0.5; s.rotation.order = 'YXZ'; }   // (LPs propped up, facing the road)
-  const board = heviCanvasMat(512, 160, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) g.drawImage(img, 6, 6, 190, 190*img.naturalHeight/img.naturalWidth);
-      g.fillStyle = '#e8e4dc'; g.font = '900 40px "Courier New", monospace'; g.textAlign = 'left'; g.fillText('LEVYJÄ', 214, 58); g.fillStyle = '#c21414'; g.fillText('30 MK', 214, 112); g.fillStyle = '#9a9a92'; g.font = '700 20px "Courier New", monospace'; g.fillText('PYSÄHDY TIEN VIEREEN', 214, 146); });
-  for (const a of [-0.9, 0.9]) put(new THREE.Mesh(lbox(0.07, 2.3, 0.07), wood), a, -0.55, 1.15); put(new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.62), board), 0, -0.53, 1.95);
-  addStaticBox({ x: sx, z: sz, yaw, hw: 1.1, hl: 0.4, kind: 'lm' }); reserve('lp', [sx, sz], 3.5);
-  const [hx, hz] = at(0, -0.95), rig = makeHeviMember(0), lp = new THREE.Group(); lp.position.set(0, 1.02, 0.34); rig.add(lp); const ls = lmesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve, 0, 0, 0, lp, false); ls.rotation.x = -0.25; lp.visible = false; rig.userData.lp = lp;
+  const sx = R[0] - ux*(e + 2.4), sz = R[1] - uz*(e + 2.4), yaw = Math.atan2(ux, uz), at = (a, b) => lloc(sx, sz, yaw, a, b);   // (local +b: towards the road)
+  const G = new THREE.Group(), wood = lmat(0x6a4a2c, 0.9), cloth = lmat(0x0e0e10, 0.95), dk = lmat(0x1c1c20, 0.6), sleeve = lpSleeveMat(); lifeGroup.add(G); nearVis(G, sx, sz);
+  const gy = Y(sx, sz), put = (m, a, b, y, ry) => { const [x, z] = at(a, b); m.position.set(x, gy + y, z); m.rotation.y = yaw + (ry || 0); G.add(m); return m; };
+  // a proper market booth: a black canopy on four posts, the band's banner right across the front, a counter full of LPs, a wall of them behind, a cabinet speaker at each end
+  for (const [a, b] of [[-2.7, -1.35], [2.7, -1.35], [-2.7, 1.35], [2.7, 1.35]]) put(new THREE.Mesh(lbox(0.1, 3.05, 0.1), wood), a, b, 1.52);
+  put(new THREE.Mesh(lbox(5.8, 0.1, 3.1), cloth), 0, 0, 3.08);
+  const banner = heviCanvasMat(1024, 230, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) { const lh = h*0.98, lw = lh*img.naturalWidth/img.naturalHeight; g.drawImage(img, (w - lw)/2, (h - lh)/2, lw, lh); }
+      g.fillStyle = '#9a1010'; g.fillRect(0, h - 10, w, 10); g.fillRect(0, 0, w, 6); });
+  banner.side = THREE.DoubleSide; put(new THREE.Mesh(new THREE.PlaneGeometry(5.6, 1.26), banner), 0, 1.4, 2.4);
+  put(new THREE.Mesh(lbox(4.8, 1.0, 0.8), cloth), 0, 0.75, 0.5); put(new THREE.Mesh(lbox(4.9, 0.06, 0.9), wood), 0, 0.75, 1.03);
+  for (let r = 0; r < 2; r++) for (let k = 0; k < 8; k++) { const s = put(new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve), -2.0 + k*0.57, 0.95 - r*0.38, 1.2 + r*0.08); s.rotation.order = 'YXZ'; s.rotation.x = -0.45 - r*0.15; }   // (two rows propped up on the counter)
+  put(new THREE.Mesh(new THREE.PlaneGeometry(5.3, 2.6), cloth), 0, -1.32, 1.5);
+  for (let r = 0; r < 3; r++) for (let k = 0; k < 7; k++) put(new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.34), sleeve), -2.1 + k*0.7, -1.3, 0.85 + r*0.62);   // the record wall
+  for (const s of [-1, 1]) { put(new THREE.Mesh(lbox(0.8, 1.7, 0.6), dk), s*3.35, 0.7, 0.85); put(new THREE.Mesh(new THREE.PlaneGeometry(0.62, 1.4), lmat(0x2c2c30, 0.9)), s*3.35, 1.16, 0.85);
+    for (const y of [0.45, 1.25]) put(new THREE.Mesh(lgeo('lpcone', () => new THREE.CircleGeometry(0.22, 14)), lmat(0x101012, 0.5)), s*3.35, 1.17, y); }
+  const board = heviCanvasMat(512, 300, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) g.drawImage(img, 56, 4, 400, 400*img.naturalHeight/img.naturalWidth);
+      g.textAlign = 'center'; g.fillStyle = '#e8e4dc'; g.font = '900 46px "Courier New", monospace'; g.fillText('LEVYJÄ 30 MK', w/2, 236); g.fillStyle = '#c21414'; g.font = '700 24px "Courier New", monospace'; g.fillText('PYSÄHDY TIEN VIEREEN', w/2, 282); });
+  { const bb = put(new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.64), board), -3.3, 2.1, 0.95); bb.rotation.order = 'YXZ'; bb.rotation.x = -0.25; for (const s of [-1, 1]) put(new THREE.Mesh(lbox(0.05, 1.0, 0.05), wood), -3.3 + s*0.5, 2.0, 0.5); }   // (a board by the road)
+  addStaticBox({ x: sx, z: sz, yaw, hw: 2.95, hl: 1.45, kind: 'lm' }); for (const s of [-1, 1]) { const [x, z] = at(s*3.35, 0.7); addStaticBox({ x, z, yaw, hw: 0.4, hl: 0.3, kind: 'lm' }); } reserve('lp', [sx, sz], 5.5);
+  const [hx, hz] = at(0, -0.3), rig = makeHeviMember(0), lp = new THREE.Group(); lp.position.set(0, 1.02, 0.34); rig.add(lp); const ls = lmesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve, 0, 0, 0, lp, false); ls.rotation.x = -0.25; lp.visible = false; rig.userData.lp = lp;
   LP.seller = new Human({ x: hx, z: hz, yaw, rig, task: lpSellerTask() });
   const [zx, zz] = [R[0] + ux*1.5, R[1] + uz*1.5]; LP.stall = { x: sx, z: sz, yaw, zx, zz };   // (where to stop: on the road by the stall)
   // the band in the woods behind the pine: round a beer crate, under their banner
