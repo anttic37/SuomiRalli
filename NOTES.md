@@ -529,6 +529,8 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - ES STOP pad (28.9., "es kyltti menee maan sisään"): half of it lay on the gravel street in front of the K-shop, whose surface is
   drawn over it. esPromoBuild now fits it (5.6/5.0/4.4 deep, slid toward the shop and sideways up to ±6 m) where no sample is
   onRoad(·, 0.4): ES.padA/padB; esZoneAt's near edge follows padB. Verge tufts/lupins under the pad are zero-scaled. t_es_pad.
+- Weather on the radio (28.9., "sääradiot"): music/saatiedotus-1…3.mp3 (2.4 / 3.5 / 2.4 min) in playlist.json with `talk` + `weather: true`;
+  shown with 🌦, tuned to WEATHER_STATIONS (94.3 + k·1.4 MHz). Titles are made up (the clips weren't transcribed). 19 talks in 25 gaps.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

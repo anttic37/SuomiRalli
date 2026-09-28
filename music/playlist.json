@@ -225,5 +225,26 @@
   "artist": "anttii",
   "talk": true,
   "sport": true
+ },
+ {
+  "file": "saatiedotus-1.mp3",
+  "title": "Sää: Ylästön iltapäivä",
+  "artist": "anttii",
+  "talk": true,
+  "weather": true
+ },
+ {
+  "file": "saatiedotus-2.mp3",
+  "title": "Säätiedotus: Uudenmaan pitkä sää",
+  "artist": "anttii",
+  "talk": true,
+  "weather": true
+ },
+ {
+  "file": "saatiedotus-3.mp3",
+  "title": "Sää ja keli: huomisen näkymät",
+  "artist": "anttii",
+  "talk": true,
+  "weather": true
  }
 ]
