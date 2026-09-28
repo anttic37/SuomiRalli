@@ -510,6 +510,9 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - Pig depots (28.9., "siirrä betoniporsaat varastoon gta moodissa"): freeYardTires(true) → freeDepotPigs(): three council street
   depots (DEPOTS, found once per world, ≥ 140 m apart, 9–14 m off a street, level, clear): a draped gravel pad 14×10, 32 pigs as real
   props (yard: true, removed with the yard tyres), a decorative second layer of 7, a 'VANTAAN KAUPUNKI · KATUVARASTO' sign. t_depots.
+- Share QR (28.9., "alkuruutuun qr koodi… nuoli. KERRO KAVERILLE!"): #share top-left of the start screen (in the flow under 820 px):
+  a static inline SVG QR (segno, version 3-Q, https://suomiralli.netlify.app/ — checked with OpenCV from page screenshots at 700,
+  1280 and 1920 px), a hand-drawn yellow arrow, 'KERRO KAVERILLE! / ota kuva ja jaa peliä' (3 languages).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
