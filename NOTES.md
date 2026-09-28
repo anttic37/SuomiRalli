@@ -514,6 +514,7 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   a static inline SVG QR (segno, version 3-Q, https://suomiralli.netlify.app/ — checked with OpenCV from page screenshots at 700,
   1280 and 1920 px), a hand-drawn yellow arrow, 'KERRO KAVERILLE! / ota kuva ja jaa peliä' (3 languages).
 - Start screen at all window sizes: checked 15 viewports (360×640 … 2560×1440) for overlaps/h-scroll/off-screen with a bounding-box script; the share QR goes static in the flow ≤1100 px (was 820 → hit the title at 1024) and gets 44 px top margin ≤560 px (clear of the absolute FI/EN/NO buttons).
+- 28.9. quick check (t_lap, t_start, t_phases, t_ghost, t_traffic, t_gta_extras, t_pause, t_s3_ufo) → start screen gets a green "✔ 28.9. TESTATTU: PELI SKULAA – jos ei, niin voi voi" stamp (#okstamp under #pcnote, FI/EN/NO). Update the date when re-checking.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

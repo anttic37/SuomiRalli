@@ -109,6 +109,8 @@
   #pause .p-s { margin-top: 12px; font: 700 12px/1 "Courier New", monospace; letter-spacing: 0.25em; color: #bbb; text-transform: uppercase; }
   #pcnote { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; margin: clamp(10px, 2vh, 16px) auto 0; padding: 6px 14px 5px; border: 2px solid #ffd23c; border-radius: 3px;
     transform: rotate(-1.5deg); font: 700 clamp(10px, 1.4vw, 13px)/1.15 "Courier New", monospace; letter-spacing: 0.14em; color: #ffd23c; text-transform: uppercase; background: rgba(255,210,60,0.06); }
+  #okstamp { margin: 6px auto 0; font: 700 11px/1.2 "Courier New", monospace; letter-spacing: 0.08em; color: #bfbfb6; }
+  #okstamp b { color: #5fd35f; }
   #pcnote small { font-size: 0.82em; letter-spacing: 0.1em; color: #d8d8d0; text-transform: none; }
   #share { position: absolute; top: 14px; left: 16px; z-index: 2; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; align-items: end; column-gap: 4px; transform: rotate(-3deg); pointer-events: none; }
   #share .sh-txt { grid-column: 1 / 3; font: italic 900 clamp(15px, 1.7vw, 22px)/1 "Arial Black", "Helvetica Neue", Arial, sans-serif; color: #ffd23c; text-shadow: 0 2px 0 #7a1010; letter-spacing: 0.03em; margin-bottom: 2px; }
@@ -185,7 +187,7 @@
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
   <div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
-    <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div></div>
+    <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -283,7 +285,7 @@ const I18N = {
   'KISA': ['RACE', 'LØP'],
   'KERRO KAVERILLE!': ['TELL A FRIEND!', 'SI DET TIL EN VENN!'], 'ota kuva ja jaa peliä': ['snap it and share the game', 'ta et bilde og del spillet'],
   'TAUKO': ['PAUSED', 'PAUSE'], 'P jatka · R uusi lähtö · Esc alkuruutu': ['P resume · R restart · Esc menu', 'P fortsett · R ny start · Esc meny'],
-  '💾 PC-PELI · TOIMII 486-KONEELLA': ['💾 PC GAME · RUNS ON A 486', '💾 PC-SPILL · KJØRER PÅ EN 486'], 'ei mobiilipeli – voi kyynel 😢': ["not a mobile game – boo hoo 😢", 'ikke et mobilspill – snufs 😢'],
+  '💾 PC-PELI · TOIMII 486-KONEELLA': ['💾 PC GAME · RUNS ON A 486', '💾 PC-SPILL · KJØRER PÅ EN 486'], 'ei mobiilipeli – voi kyynel 😢': ["not a mobile game – boo hoo 😢", 'ikke et mobilspill – snufs 😢'], '✔ 28.9. TESTATTU: PELI SKULAA': ['✔ TESTED 28.9.: GAME WORKS', '✔ TESTET 28.9.: SPILLET FUNKER'], '– jos ei, niin voi voi': ['– if not, oh well', '– hvis ikke, synd det'],
   'P tauko': ['P pause', 'P pause'], 'tauko': ['pause', 'pause'],
   '👽 OSUMA! {0}/{1}': ['👽 HIT! {0}/{1}', '👽 TREFF! {0}/{1}'],
   'virta': ['power', 'på/av'], 'viritys': ['tuning', 'tuning'], 'kanava': ['station', 'kanal'], 'ääni': ['volume', 'volum'],
@@ -4139,6 +4141,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Pikatarkistus: kisa, kierros, haamu, GTA-liikenne, ufot ja tauko toimivat – alkuruutuun leima "28.9. peli skulaa"'],
   ['28.9.', 'Alkuruutu tarkistettu 12 ikkunakoolla puhelimesta 2560-leveään: QR ei enää peitä otsikkoa eikä kielinappeja'],
   ['28.9.', 'Alkuruutuun QR-koodi pelin osoitteeseen: KERRO KAVERILLE – ota kuva ja jaa peliä!'],
   ['28.9.', 'GTA-moodissa betoniporsaat varastossa: kolme Vantaan kaupungin katuvarastoa soratasanteineen, porsaat riveissä ja pinossa'],
