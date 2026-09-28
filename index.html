@@ -186,7 +186,7 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: GTA-MOODI</span><small data-t>aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 18.08 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 18.25 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
@@ -263,7 +263,7 @@ const I18N = {
   'ei parannusta · {0}: paras {1} (sija {2}.)': ['no improvement · {0}: best {1} (position {2})', 'ingen forbedring · {0}: beste {1} (plass {2})'],
   'mutka oikaistu — aikaa ei hyväksytty': ['corner cut — time not accepted', 'svingen ble kuttet — tiden godkjennes ikke'],
   'nimi ei käy — valitse toinen nimi': ['that name is not allowed — pick another', 'navnet er ikke tillatt — velg et annet'], 'tallennus ei onnistunut ({0})': ['saving failed ({0})', 'lagring mislyktes ({0})'],
-  '🍕 PIZZA! auto +10 %': ['🍕 PIZZA! car +10 %', '🍕 PIZZA! bil +10 %'], '🤘 HAVUHELVETIN KEIKKABUSSI LIIKKEELLÄ!': ['🤘 THE HAVUHELVETTI TOUR BUS IS LOOSE!', '🤘 HAVUHELVETTIS TURNÉBUSS ER LØS!'], '🍕 pizza tulossa… {0}': ['🍕 pizza coming… {0}', '🍕 pizza kommer… {0}'],
+  '🍕 PIZZA! auto +10 %': ['🍕 PIZZA! car +10 %', '🍕 PIZZA! bil +10 %'], '🤘 LEVY OSTETTU! RADIOSSA NYT VAIN HAVUHELVETTIÄ': ['🤘 LP BOUGHT! NOTHING BUT HAVUHELVETTI ON THE RADIO NOW', '🤘 PLATE KJØPT! BARE HAVUHELVETTI PÅ RADIOEN NÅ'], '🤘 levy tulossa… {0}': ['🤘 LP coming… {0}', '🤘 platen kommer… {0}'], '🤘 HAVUHELVETIN KEIKKABUSSI LIIKKEELLÄ!': ['🤘 THE HAVUHELVETTI TOUR BUS IS LOOSE!', '🤘 HAVUHELVETTIS TURNÉBUSS ER LØS!'], '🍕 pizza tulossa… {0}': ['🍕 pizza coming… {0}', '🍕 pizza kommer… {0}'],
   'RADIO POIS · E': ['RADIO OFF · E', 'RADIO AV · E'],
   'LISÄÄ POLIISEJA!': ['MORE POLICE!', 'MER POLITI!'], '🚨 POLIISIT TULEVAT!': ['🚨 THE POLICE ARE COMING!', '🚨 POLITIET KOMMER!'],
   '🔥 TULIPALO {0}/3': ['🔥 FIRE {0}/3', '🔥 BRANN {0}/3'], 'KOLARI {0}/3': ['CRASH {0}/3', 'KRASJ {0}/3'],
@@ -4152,6 +4152,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Havuhelvetin omat biisit soivat keikkabussista; ison männyn vieressä Havuhelvetin levypiste – pysähdy, jäsen tuo levyn ja sen jälkeen radiosta tulee vain Havuhelvettiä; bändi dokaa metsässä banderollinsa alla'],
   ['28.9.', 'Havuhelvetin oma logo bussin kylkiin ja perään; bassoboostilla auto kulkee nyt 75 % nopeudella (ennen viidesosa) ja hyppii bassorummun tahtiin; GTA-moodissa bussi käy joskus kylillä ilman bassoakin'],
   ['28.9.', 'ES STOP -ruutu takaisin keskelle kaupan ovea (kadun puoleinen pää maalattu kadun päälle); ruohotupsut eivät enää näytä mustilta läiskiltä'],
   ['28.9.', 'Bassoboost (B) päälle → Havuhelvetin keikkabussi kaduille: metsähevibändi katolla (sukkahousunaamat ja ruumismeikit), ajaa ihan liian kovaa eikä mikään pysäytä sitä – ohi mennessä pelkkää blastbeatia ja huutoa, radio hukkuu'],
@@ -5577,25 +5578,25 @@ function pizzaReset() { PIZZA.k = 1; PIZZA.got = false; PIZZA.wait = 0; PIZZA.gu
 // ════════ CAR RADIO: the songs in music/ (listed in music/playlist.json: [{ file, title, artist, talk? }]; talk = a spoken programme, shown with 🎙) play in turn while you drive,
 //          each one on some station of the dial (20 made-up 80s stations, picked at random for every song).
 //          E: the next song — after the last one the radio goes off, then the first again. 1 / 2: quieter / louder. No playlist: no radio. ════════
-const RADIO = { list: [], i: 0, el: null, gain: null, off: false, started: false, st: null, vol: 5, volT: 0 };
+const RADIO = { hevi: [], lp: false, list: [], i: 0, el: null, gain: null, off: false, started: false, st: null, vol: 5, volT: 0 };
 const STATIONS = ['Radio Ylästö', 'Kehä-FM', 'Radio Mäntykangas', 'Tikkurila Tänään', 'Radio Vantaanjoki', 'Pop-Kanava 88', 'Radio Kesäyö', 'Asemakylän Aallot',
   'Radio Ralli', 'Lentokenttä-FM', 'Radio Hiidenkivi', 'Iskelmä-Vantaa', 'Radio Kasetti', 'Yöradio Pökö', 'Radio Sokeritoppa', 'Kylänraitti FM',
   'Radio Peltomies', 'Hiekkatie-FM', 'Radio Lauantai', 'Kasari-Kanava'];
 try { const v = +localStorage.getItem('yl-radio-vol'); if (v >= 0 && v <= 10 && localStorage.getItem('yl-radio-vol') !== null) RADIO.vol = v; } catch (e) {}
 async function radioLoad() { if (!/^https?:$/.test(location.protocol)) return; try { const r = await fetch('music/playlist.json', { cache: 'no-store' }); if (!r.ok) return; const d = await r.json();
-  const all = (Array.isArray(d) ? d : d.tracks || []).filter(t => t && t.file), songs = all.filter(t => !t.talk), talks = all.filter(t => t.talk && !t.koe).sort(() => Math.random() - 0.5), koes = all.filter(t => t.koe).sort(() => Math.random() - 0.5);
+  const all0 = (Array.isArray(d) ? d : d.tracks || []).filter(t => t && t.file), all = all0.filter(t => !t.hevi); RADIO.hevi = all0.filter(t => t.hevi); const songs = all.filter(t => !t.talk), talks = all.filter(t => t.talk && !t.koe).sort(() => Math.random() - 0.5), koes = all.filter(t => t.koe).sort(() => Math.random() - 0.5);
   const gaps = songs.map((_, k) => k + 1).sort(() => Math.random() - 0.5).slice(0, talks.length).sort((a, b) => a - b);   // the spoken programmes in among the songs at random, never two in a row
   const kg = songs.map((_, k) => k + 1).sort(() => Math.random() - 0.5).slice(0, koes.length); let kn = 0;   // (the short test broadcasts: one in a gap at most, just before any programme there)
   RADIO.list = []; let g = 0; songs.forEach((t, k) => { RADIO.list.push(t); if (kg.includes(k + 1) && kn < koes.length) RADIO.list.push(koes[kn++]); while (g < gaps.length && gaps[g] === k + 1) { RADIO.list.push(talks[g]); g++; } }); for (; kn < koes.length; kn++) RADIO.list.push(koes[kn]); for (; g < talks.length; g++) RADIO.list.push(talks[g]); if (RADIO.list.length) { const k = document.getElementById('radio-key'); if (k) k.style.display = ''; } mradioShow(); } catch (e) {} }
 const TALK_STATIONS = ['YLE Radio 1', 'YLE Rinnakkaisohjelma', 'Yleisradio – Ykkönen', 'Radio Ylästö'], SPORT_STATIONS = ['YLE Urheiluradio', 'Radio 1 – Urheilua', 'Radio Ralli – selostus'], WEATHER_STATIONS = ['YLE Radio 1 – Sää', 'Ilmatieteen laitos tiedottaa', 'Radio Ylästö – Säähavainto'],
   KOE_STATIONS = ['Paikallisradio – koelähetys', 'Radio Ylästö (koelähetys)', 'Tuntematon asema'];
-function radioTune() { const R = RADIO, talk = R.list[R.i] && R.list[R.i].talk; let n; do n = Math.floor(Math.random()*STATIONS.length); while (R.st && STATIONS[n] === R.st.name && STATIONS.length > 1);
+function radioTune() { if (RADIO.lp) { RADIO.st = { name: 'HAVUHELVETTI – LP', freq: '33⅓' }; return; } const R = RADIO, talk = R.list[R.i] && R.list[R.i].talk; let n; do n = Math.floor(Math.random()*STATIONS.length); while (R.st && STATIONS[n] === R.st.name && STATIONS.length > 1);
   if (talk) { const sp = R.list[R.i].sport, wx = R.list[R.i].weather, ko = R.list[R.i].koe, L = sp ? SPORT_STATIONS : wx ? WEATHER_STATIONS : ko ? KOE_STATIONS : TALK_STATIONS, k = Math.floor(Math.random()*L.length); R.st = { name: L[k], freq: (sp ? 101.1 + k*1.7 : wx ? 94.3 + k*1.4 : ko ? 106.2 + k*0.6 : 87.9 + k*2.3).toFixed(1) }; return; }   // (sport: the sports channels)   // (the talk is on the national broadcaster)
   RADIO.st = { name: STATIONS[n], freq: (87.6 + ((n*7 + 3) % 20)*1.0 + ((n*3) % 10)/10).toFixed(1) }; }   // (every station has its own place on the dial, 87.6–107.5 MHz)
 function radioVolume() { const g = RADIO.vol/10*0.9; if (RADIO.gain) RADIO.gain.gain.setTargetAtTime(g, audio.ctx.currentTime, 0.05); else if (RADIO.el) RADIO.el.volume = Math.min(1, g); }
 function radioShow(flash) { const box = document.getElementById('radio'); if (!box || !RADIO.list.length) return; const $ = (id) => document.getElementById(id), R = RADIO;
   box.classList.toggle('on', R.started && gameState !== State.MENU); box.classList.toggle('off', R.off);
-  const song = R.list[R.i], t = R.off ? T('RADIO POIS · E') : (song.sport ? '🏆 ' : song.weather ? '🌦 ' : song.koe ? '📡 ' : song.talk ? '🎙 ' : '♪ ') + (song.title || song.file.replace(/\.[^.]+$/, ''));
+  const song = R.list[R.i], t = R.off ? T('RADIO POIS · E') : (song.hevi ? '🤘 ' : song.sport ? '🏆 ' : song.weather ? '🌦 ' : song.koe ? '📡 ' : song.talk ? '🎙 ' : '♪ ') + (song.title || song.file.replace(/\.[^.]+$/, ''));
   $('radio-freq').textContent = R.off || !R.st ? '--.-' : R.st.freq; $('radio-station').textContent = R.off || !R.st ? '' : R.st.name;
   $('radio-vol').innerHTML = Array.from({ length: 10 }, (_, k) => '<i' + (k < R.vol ? ' class="lit"' : '') + '></i>').join('');
   const TL = $('radio-title');
@@ -5605,6 +5606,7 @@ function radioPlay() { const R = RADIO; if (!R.el) { R.el = new Audio(); R.el.pr
     if (audio && audio.ctx) { try { const src = audio.ctx.createMediaElementSource(R.el); R.gain = audio.ctx.createGain(); R.shelf = audio.ctx.createBiquadFilter(); R.shelf.type = 'lowshelf'; R.shelf.frequency.value = 140; R.shelf.gain.value = BASS.on || ES.on ? 16 : 0; src.connect(R.gain); R.gain.connect(R.shelf); R.shelf.connect(audio.master); } catch (e) { R.gain = null; } }   // (through the game's mix)
     radioVolume(); }
   R.el.src = 'music/' + encodeURIComponent(R.list[R.i].file); R.el.play().catch(() => {}); }
+function radioLp() { const R = RADIO; R.lp = true; if (!R.hevi.length) return; R.list = shuffled(R.hevi.slice()); R.i = 0; R.off = false; R.started = true; radioTune(); radioPlay(); radioShow(true); }   // (the LP on: nothing but Havuhelvetti)
 function radioStart() { if (!RADIO.list.length || RADIO.started) { radioShow(); return; } RADIO.started = true; RADIO.i = Math.floor(Math.random()*RADIO.list.length); radioTune(); radioPlay(); radioShow(true); }   // (the first race: a song from anywhere in the list)
 function radioNext() { const R = RADIO; if (!R.list.length) return; if (!R.started) { radioStart(); return; }
   if (R.off) { R.off = false; R.i = 0; radioTune(); radioPlay(); } else if (R.i === R.list.length - 1) { R.off = true; R.el.pause(); } else { R.i++; radioTune(); radioPlay(); }
@@ -5616,7 +5618,7 @@ function mradioShow() { const box = document.getElementById('mradio'); if (!box)
   const live = R.started && !R.off; box.classList.toggle('off', !live); box.classList.toggle('play', live);
   $('mr-freq').textContent = live && R.st ? R.st.freq : '--.-'; $('mr-st').textContent = live && R.st ? R.st.name : '';
   $('mr-vol').innerHTML = Array.from({ length: 10 }, (_, k) => '<i style="height:' + (30 + k*7) + '%"' + (k < R.vol ? ' class="lit"' : '') + '></i>').join('');
-  const song = R.list[R.i], t = !R.started ? T('paina virtaa — radio soi täälläkin') : R.off ? T('RADIO POIS') : (song.sport ? '🏆 ' : song.weather ? '🌦 ' : song.koe ? '📡 ' : song.talk ? '🎙 ' : '♪ ') + (song.title || song.file.replace(/\.[^.]+$/, '')), el = $('mr-title');
+  const song = R.list[R.i], t = !R.started ? T('paina virtaa — radio soi täälläkin') : R.off ? T('RADIO POIS') : (song.hevi ? '🤘 ' : song.sport ? '🏆 ' : song.weather ? '🌦 ' : song.koe ? '📡 ' : song.talk ? '🎙 ' : '♪ ') + (song.title || song.file.replace(/\.[^.]+$/, '')), el = $('mr-title');
   if (el.textContent !== t) { el.textContent = t; el.classList.remove('scroll'); requestAnimationFrame(() => { const over = el.scrollWidth - el.parentNode.clientWidth; if (over > 0) { el.style.setProperty('--shift', over + 6); el.style.setProperty('--dur', (3 + over/25) + 's'); el.classList.add('scroll'); } }); }
   $('mr-power').style.transform = 'rotate(' + (-135 + R.vol*27) + 'deg)'; $('mr-tune').style.transform = 'rotate(' + (R.st && live ? (+R.st.freq - 87.5)*13.5 - 135 : -135) + 'deg)'; }
 { const on = (id, f) => { const b = document.getElementById(id); if (b) b.addEventListener('click', (e) => { e.stopPropagation(); initAudio(); f(); b.blur(); }); };
@@ -5650,8 +5652,7 @@ function makeHeviBus() {
   const box = (w, h, d, m, x, y, z) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); b.castShadow = true; b.receiveShadow = true; G.add(b); return b; };
   box(W, 2.55, L, blk, 0, 0.35 + 1.275, 0); box(W - 0.1, 0.1, L - 0.2, dk, 0, 2.95, 0);
   box(W - 0.2, 1.1, 0.06, glass, 0, 2.0, L/2 + 0.02); box(W, 0.3, 0.14, chrome, 0, 0.5, L/2 + 0.04);
-  const logoImg = heviLogoImg(), mk = (w, h, draw) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'), t = new THREE.CanvasTexture(c); t.anisotropy = 4;
-      const paint = () => { draw(g, w, h); t.needsUpdate = true; }; paint(); if (!logoImg.complete) logoImg.addEventListener('load', paint); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.5, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.3 }); };   // (a little glow of its own: the logo reads at dusk too)
+  const logoImg = heviLogoImg(), mk = (w, h, draw) => heviCanvasMat(w, h, (g, w2, h2) => draw(g, w2, h2));
   const side = mk(2048, 500, (g, w, h) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h);   // the band's own logo big in the middle, a spruce skyline under it, the tour either side
       g.fillStyle = '#17201a'; for (let k = 0; k < 54; k++) { const x = k*38 + ((k*37) % 11), th = 70 + ((k*53) % 90); g.beginPath(); g.moveTo(x, h); g.lineTo(x + 19, h - th); g.lineTo(x + 38, h); g.fill(); }
       if (logoImg.complete && logoImg.naturalWidth) { const lh = h*0.96, lw = lh*logoImg.naturalWidth/logoImg.naturalHeight; g.globalCompositeOperation = 'lighten'; g.drawImage(logoImg, (w - lw)/2, (h - lh)/2, lw, lh); g.globalCompositeOperation = 'source-over'; }
@@ -5706,6 +5707,12 @@ function heviAI(v, dt) { const H = v.H, C = v.ctrl, sp = Math.abs(v.vF); H.retry
   const d = Math.hypot(v.x - car.x, v.z - car.z), p = new THREE.Vector3(v.x, v.gy + 2, v.z).project(camera), seen = p.z < 1 && Math.abs(p.x) < 1.2 && Math.abs(p.y) < 1.2;
   if (HEVI.leave) { if (d > 170 || (d > 70 && !seen)) { vehicleRemove(v); HEVI.v = null; } }
   else if (H.fails >= 3 && (d > 60 && !seen || d > 170)) { vehicleRemove(v); HEVI.v = null; heviSpawn(); } }   // (really jammed somewhere: out of sight it turns up elsewhere)
+function heviSong(dop) { const R = RADIO.hevi, file = (i) => 'music/' + encodeURIComponent(R[i].file);
+  if (!HEVI.el) { const el = HEVI.el = new Audio(); el.preload = 'auto'; el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = false;   // (so the Doppler bends the pitch)
+    try { audio.ctx.createMediaElementSource(el).connect(HEVI.g); } catch (e) {}
+    el.addEventListener('ended', () => { HEVI.songI = (HEVI.songI + 1) % R.length; el.src = file(HEVI.songI); el.play().catch(() => {}); });
+    HEVI.songI = Math.floor(Math.random()*R.length); el.src = file(HEVI.songI); el.addEventListener('loadedmetadata', () => { try { el.currentTime = Math.random()*Math.max(0, el.duration - 60); } catch (e) {} }, { once: true }); }
+  const el = HEVI.el; el.playbackRate = Math.max(0.8, Math.min(1.25, dop)); if (el.paused) el.play().catch(() => {}); }
 function heviBass(on) { HEVI.leave = !on; HEVI.spawnT = 0; HEVI.visitT = 0; }   // (on: heviUpdate brings it as soon as there's driving going on)
 function heviUpdate(dt) { if (!HEVI.v || HEVI.v.gone) { HEVI.v = null; HEVI.spawnT -= dt; if (BASS.on && gameState === State.RACING && !WRECK.on && HEVI.spawnT <= 0) { HEVI.spawnT = 3; heviSpawn(); } }
   if (FREE.on && !BASS.on && gameState === State.RACING && !WRECK.on) {   // (GTA mode: now and then it comes through anyway, a minute or two, then off again)
@@ -5718,9 +5725,10 @@ function heviUpdate(dt) { if (!HEVI.v || HEVI.v.gone) { HEVI.v = null; HEVI.spaw
   if (!HEVI.g) { HEVI.g = ctx.createGain(); HEVI.g.gain.value = 0; HEVI.pan = ctx.createStereoPanner ? ctx.createStereoPanner() : null; if (HEVI.pan) { HEVI.g.connect(HEVI.pan); HEVI.pan.connect(audio.master); } else HEVI.g.connect(audio.master);
     const nb = ctx.createBuffer(1, ctx.sampleRate*0.5, ctx.sampleRate), a = nb.getChannelData(0); for (let i = 0; i < a.length; i++) a[i] = Math.random()*2 - 1; HEVI.noise = nb;
     const cv = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i/512 - 1; cv[i] = Math.tanh(x*9); } HEVI.shape = cv; HEVI.nextT = ctx.currentTime + 0.05; }
-  HEVI.g.gain.setTargetAtTime(vol, ctx.currentTime, 0.08); if (vol <= 0.002) { HEVI.nextT = ctx.currentTime + 0.05; return; }
+  HEVI.g.gain.setTargetAtTime(vol, ctx.currentTime, 0.08); if (vol <= 0.002) { HEVI.nextT = ctx.currentTime + 0.05; if (HEVI.el && !HEVI.el.paused) HEVI.el.pause(); return; }
   const dx = v.x - car.x, dz = v.z - car.z, close = -((v.vx - car.vx)*dx + (v.vz - car.vz)*dz)/Math.max(d, 1), dop = 340/(340 - Math.max(-90, Math.min(90, close)));   // (Doppler: higher coming, lower going)
   if (HEVI.pan) { const lat = (dx*Math.cos(car.angle) - dz*Math.sin(car.angle))/Math.max(d, 1); HEVI.pan.pan.setTargetAtTime(Math.max(-0.9, Math.min(0.9, -lat*0.9)), ctx.currentTime, 0.05); }
+  if (RADIO.hevi.length) { heviSong(dop); return; }   // (their own songs out of the bus when we have them; the synth below is the fallback)
   const s16 = 60/200/4, RIFF = [82.4, 82.4, 87.3, 82.4, 77.8, 82.4, 98.0, 92.5], dist = () => { const w = ctx.createWaveShaper(); w.curve = HEVI.shape; return w; };
   while (HEVI.nextT < ctx.currentTime + 0.12) { const t0 = HEVI.nextT, st = HEVI.step % 16;
     if (st % 2 === 0) { const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(140, t0); o.frequency.exponentialRampToValueAtTime(45, t0 + 0.07); g.gain.setValueAtTime(0.9, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.12); o.connect(g); g.connect(HEVI.g); o.start(t0); o.stop(t0 + 0.13); }   // double bass drum
@@ -5735,6 +5743,64 @@ function heviUpdate(dt) { if (!HEVI.v || HEVI.v.gone) { HEVI.v = null; HEVI.spaw
     g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.55, t0 + 0.06); g.gain.setValueAtTime(0.5, t0 + dur*0.8); g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
     o.connect(w); w.connect(bp); bp.connect(g); n.connect(nf); nf.connect(g); g.connect(HEVI.g); o.start(t0); lfo.start(t0); n.start(t0); o.stop(t0 + dur + 0.05); lfo.stop(t0 + dur + 0.05); n.stop(t0 + dur + 0.05); } }
 
+// ════════ HAVUHELVETTI'S RECORD STALL by the big pine ('manty'): a trestle table of LPs facing the road, a price board, the seller;
+//          behind the pine, in the trees, the rest of the band drinking under their banner. Stop on the road by the stall and the
+//          seller brings the LP to your window — from then on the car radio plays nothing but Havuhelvetti (for the whole session). ════════
+const LP = { stall: null, got: false, wait: 0, WAIT: 3, seller: null, drinkers: [] };
+function heviCanvasMat(w, h, draw) { const img = heviLogoImg(), c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'), t = new THREE.CanvasTexture(c); t.anisotropy = 4;
+  const paint = () => { draw(g, w, h, img.complete && img.naturalWidth ? img : null); t.needsUpdate = true; }; paint(); if (!img.complete) img.addEventListener('load', paint);
+  return new THREE.MeshStandardMaterial({ map: t, roughness: 0.5, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.3 }); }
+let _lpSleeve = null; const lpSleeveMat = () => _lpSleeve || (_lpSleeve = heviCanvasMat(256, 256, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) g.drawImage(img, 8, 50, w - 16, (w - 16)*img.naturalHeight/img.naturalWidth); g.fillStyle = '#9a1010'; g.fillRect(0, h - 26, w, 8); }));
+function makeHeviMember(k) {   // black clothes, long black hair; the face: pantyhose (even k) or corpse paint (odd k)
+  const rig = makeAdult(0x121215, 0x16161a, 0x0a0a0a, { sel: { hair: 3, top: 1, longSleeve: 1, longPants: 1 }, shoes: 0x0a0a0a, acc: 0x2a2a2e }), G = headGroup(rig);
+  if (k % 2) { lmesh(lbox(0.25, 0.27, 0.02), lmat(0xeceae4, 0.8), 0, 1.68, 0.128, G, false); for (const s of [-1, 1]) lmesh(lbox(0.08, 0.07, 0.02), lmat(0x0a0a0a, 0.6), s*0.06, 1.715, 0.142, G, false); lmesh(lbox(0.1, 0.025, 0.02), lmat(0x0a0a0a, 0.6), 0, 1.625, 0.142, G, false); }
+  else { const ny = lmat(0xa98468, 0.35); lmesh(lbox(0.27, 0.3, 0.03), ny, 0, 1.69, 0.128, G, false); lmesh(lbox(0.05, 0.04, 0.02), ny, 0, 1.68, 0.15, G, false); const toe = lmesh(lbox(0.07, 0.17, 0.07), ny, 0.03, 1.92, -0.02, G, false); toe.rotation.z = -0.4; }   // (the stocking squashes the face; its toe flops on top)
+  return rig; }
+const lpSellerTask = (S) => ({ kind: 'lpseller', update(h, dt, t) { const st = h.st || (h.st = { mode: 'home' }), sl = h.view.g.userData.lp;
+    if (st.mode === 'out') { const fx = Math.sin(car.angle), fz = Math.cos(car.angle), rx = Math.cos(car.angle), rz = -Math.sin(car.angle), sd = (h.x - car.x)*rx + (h.z - car.z)*rz >= 0 ? 1 : -1, tx = car.x + rx*1.45*sd + fx*0.25, tz = car.z + rz*1.45*sd + fz*0.25;
+      sl.visible = true; if (Math.hypot(tx - h.x, tz - h.z) < 0.7 || walkTo(h, tx, tz, 2.4, dt)) { h.vx = h.vz = 0; h.yaw = Math.atan2(car.x - h.x, car.z - h.z); if (LP.wait >= LP.WAIT) lpDelivered(h); } h.pose.armL = h.pose.armR = -1.3; return; }
+    if (Math.hypot(h.x - h.home.x, h.z - h.home.z) > 0.4) { walkTo(h, h.home.x, h.home.z, 1.8, dt); sl.visible = false; return; }
+    h.vx = h.vz = 0; sl.visible = false; h.yaw = h.home.yaw; const b = t*3.3; h.pose.armL = -0.2; h.pose.armR = Math.sin(t*0.4) > 0.6 ? -2.8 : -0.25; h.pose.dy = Math.abs(Math.sin(b))*0.03; h.sway = Math.sin(b)*0.2; },   // (nodding along; now and then the horns up)
+  knocked(h) { h.st = { mode: 'home' }; } });
+const lpDrinkTask = (k, cx, cz) => ({ kind: 'lpdrink', update(h, dt, t) { if (Math.hypot(h.x - h.home.x, h.z - h.home.z) > 0.5) { walkTo(h, h.home.x, h.home.z, 1.2, dt); return; }
+    h.vx = h.vz = 0; h.yaw = Math.atan2(cx - h.x, cz - h.z) + Math.sin(t*0.5 + k*2)*0.35; const c = (t + k*2.3) % (5 + k);   // round the crate, swaying; a swig every few seconds, now and then the horns up
+    h.pose.armR = c < 1.3 ? -2.5 : -0.35; h.pose.armL = Math.sin(t*0.3 + k) > 0.8 ? -2.9 : -0.2; h.sway = Math.sin(t*0.9 + k)*0.35; h.pose.dy = 0; } });
+function buildLpStall() { LP.stall = null; LP.drinkers.length = 0; LP.seller = null; const M = LANDMARKS.find(L => L[0] === 'manty'); if (!M) return; const px = M[1], pz = M[2];
+  let R = null; for (let r = 3; r < 70 && !R; r++) for (let k = 0; k < 48; k++) { const a = k/48*6.283, x = px + Math.sin(a)*r, z = pz + Math.cos(a)*r; if (onRoad(x, z, 0)) { R = [x, z, a]; break; } }   // the nearest road
+  if (!R) return; const ux = Math.sin(R[2]), uz = Math.cos(R[2]); let e = 0; while (e < 10 && onRoad(R[0] - ux*e, R[1] - uz*e, 1.2)) e += 0.25;
+  const sx = R[0] - ux*(e + 0.9), sz = R[1] - uz*(e + 0.9), yaw = Math.atan2(ux, uz), at = (a, b) => lloc(sx, sz, yaw, a, b);   // (local +b: towards the road)
+  const G = new THREE.Group(), wood = lmat(0x6a4a2c, 0.9), cloth = lmat(0x0e0e10, 0.95), sleeve = lpSleeveMat(); lifeGroup.add(G); nearVis(G, sx, sz);
+  const put = (m, a, b, y, ry) => { const [x, z] = at(a, b); m.position.set(x, Y(x, z) + y, z); m.rotation.y = yaw + (ry || 0); G.add(m); return m; };
+  put(new THREE.Mesh(lbox(2.2, 0.06, 0.8), wood), 0, 0, 0.8); put(new THREE.Mesh(lbox(2.22, 0.7, 0.02), cloth), 0, 0.41, 0.45);
+  for (const [a, b] of [[-1, -0.35], [1, -0.35], [-1, 0.35], [1, 0.35]]) put(new THREE.Mesh(lbox(0.06, 0.8, 0.06), wood), a, b, 0.4);
+  for (let k = 0; k < 5; k++) { const s = put(new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve), -0.8 + k*0.4, 0.05, 0.99); s.rotation.x = -0.5; s.rotation.order = 'YXZ'; }   // (LPs propped up, facing the road)
+  const board = heviCanvasMat(512, 160, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) g.drawImage(img, 6, 6, 190, 190*img.naturalHeight/img.naturalWidth);
+      g.fillStyle = '#e8e4dc'; g.font = '900 40px "Courier New", monospace'; g.textAlign = 'left'; g.fillText('LEVYJÄ', 214, 58); g.fillStyle = '#c21414'; g.fillText('30 MK', 214, 112); g.fillStyle = '#9a9a92'; g.font = '700 20px "Courier New", monospace'; g.fillText('PYSÄHDY TIEN VIEREEN', 214, 146); });
+  for (const a of [-0.9, 0.9]) put(new THREE.Mesh(lbox(0.07, 2.3, 0.07), wood), a, -0.55, 1.15); put(new THREE.Mesh(new THREE.PlaneGeometry(2.0, 0.62), board), 0, -0.53, 1.95);
+  addStaticBox({ x: sx, z: sz, yaw, hw: 1.1, hl: 0.4, kind: 'lm' }); reserve('lp', [sx, sz], 3.5);
+  const [hx, hz] = at(0, -0.95), rig = makeHeviMember(0), lp = new THREE.Group(); lp.position.set(0, 1.02, 0.34); rig.add(lp); const ls = lmesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve, 0, 0, 0, lp, false); ls.rotation.x = -0.25; lp.visible = false; rig.userData.lp = lp;
+  LP.seller = new Human({ x: hx, z: hz, yaw, rig, task: lpSellerTask() });
+  const [zx, zz] = [R[0] + ux*1.5, R[1] + uz*1.5]; LP.stall = { x: sx, z: sz, yaw, zx, zz };   // (where to stop: on the road by the stall)
+  // the band in the woods behind the pine: round a beer crate, under their banner
+  let cx = px - ux*8, cz = pz - uz*8; for (let k = 0; k < 12 && (onRoad(cx, cz, 3) || BUILDINGS.some(B => inLandmark(cx, cz, [0, B[0], B[1], B[4], B[2], B[3]], 4))); k++) { const a = R[2] + Math.PI + (k % 2 ? 1 : -1)*(0.4 + k*0.15); cx = px + Math.sin(a)*(8 + k*0.5); cz = pz + Math.cos(a)*(8 + k*0.5); }
+  const W = new THREE.Group(); lifeGroup.add(W); nearVis(W, cx, cz); const fx = cx - px, fz = cz - pz, fl = Math.hypot(fx, fz) || 1, bx = fx/fl, bz = fz/fl, byaw = Math.atan2(-bx, -bz);   // (the banner faces the pine and the road beyond it)
+  const crate = lmesh(lbox(0.52, 0.32, 0.36), lmat(0xd8a020, 0.7), cx, Y(cx, cz) + 0.16, cz, W); crate.rotation.y = 0.4;
+  for (let k = 0; k < 7; k++) { const a = k*0.9 + 0.3, r = 0.6 + (k % 3)*0.5, x = cx + Math.sin(a)*r, z = cz + Math.cos(a)*r, b = lmesh(lcyl(0.035, 0.24, 7), lmat(0x3d5a1c, 0.25), x, Y(x, z) + 0.035, z, W); b.rotation.set(Math.PI/2, a, 0); }   // (empties in the grass)
+  const bnx = cx + bx*3.2, bnz = cz + bz*3.2, rx = Math.cos(byaw), rz = -Math.sin(byaw);
+  for (const s of [-1, 1]) lmesh(lbox(0.09, 2.8, 0.09), wood, bnx + rx*s*2.3, Y(bnx + rx*s*2.3, bnz + rz*s*2.3) + 1.4, bnz + rz*s*2.3, W);
+  const ban = heviCanvasMat(1024, 330, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) { const lh = h*0.96, lw = lh*img.naturalWidth/img.naturalHeight; g.drawImage(img, (w - lw)/2, (h - lh)/2, lw, lh); } });
+  ban.side = THREE.DoubleSide; const bm = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 1.42), ban); bm.position.set(bnx, Y(bnx, bnz) + 1.95, bnz); bm.rotation.y = byaw; W.add(bm);
+  reserve('lpband', [cx, cz], 5);
+  for (let k = 0; k < 3; k++) { const a = k*2.1 + 0.5, x = cx + Math.sin(a)*1.3, z = cz + Math.cos(a)*1.3, rg = makeHeviMember(k + 1); lmesh(lcyl(0.035, 0.24, 7), lmat(0x3d5a1c, 0.25), 0, -0.6, 0.06, rg.userData.rig.armR, false);
+    LP.drinkers.push(new Human({ x, z, yaw: Math.atan2(cx - x, cz - z), rig: rg, task: lpDrinkTask(k, cx, cz) })); } }
+function lpZoneAt(x, z) { const S = LP.stall; return S && Math.hypot(x - S.zx, z - S.zz) < 6; }
+function lpDelivered(h) { LP.got = true; h.st.mode = 'home'; h.view.g.userData.lp.visible = false; pizzaMsg(T('🤘 LEVY OSTETTU! RADIOSSA NYT VAIN HAVUHELVETTIÄ'), true); beep(330, 0.2, 0.3, 'sawtooth'); setTimeout(() => beep(247, 0.4, 0.3, 'sawtooth'), 180);
+  radioLp(); }
+function lpUpdate(dt) { if (!LP.stall || !LP.seller) return; const S = LP.seller; if (S.gone || S.down) return; const st = S.st || (S.st = { mode: 'home' });
+  const racing = gameState === State.RACING, inZ = racing && !LP.got && lpZoneAt(car.x, car.z), still = Math.hypot(car.vx, car.vz) < 0.7;
+  if (inZ && still) { LP.wait += dt; st.mode = 'out'; pizzaMsg(T('🤘 levy tulossa… {0}', Math.max(1, Math.ceil(LP.WAIT - LP.wait))), false); }
+  else { LP.wait = 0; if (st.mode === 'out') st.mode = 'home'; } }
+function lpReset() { LP.wait = 0; if (LP.seller) LP.seller.st = { mode: 'home' }; }   // (the record itself stays bought)
 // ════════ POLICE: three incidents in one race (people knocked over by the rally car, a fire it started) and the police come.
 //          White-and-blue 80s cruisers from 90–200 m back down the streets, siren and beacons; they follow the road graph
 //          towards the car (one Dijkstra from the car serves them all) and go straight for it when it's close and the way is
@@ -6960,7 +7026,7 @@ function buildRoadies() { ROADIES.pool.length = 0; for (let k = 0; k < 26; k++) 
 
 function lifeExtras3Build() {
   TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
-  buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies();
+  buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies();
 }
 function extras3Update(dt) { for (const f of X3.upd) f(dt); esUpdate(dt); cabbageUpdate(dt); ufoUpdate(dt); }
 function lifeExtras3Reset() { for (const f of X3.reset) f(); wreckReset(); esReset(); cabbageReset(); ufoReset(); roadiesPlace(true); }
@@ -7065,7 +7131,7 @@ function emittersUpdate(dt) {
 function worldUpdate(dt) {
   worldT += dt;
   carStillT = Math.hypot(car.vx, car.vz) < 1.5 && gameState === State.RACING ? carStillT + dt : 0;
-  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); queueUpdate(dt); extras2Update(dt); extras3Update(dt); policeUpdate(dt); bassUpdate(dt); heviUpdate(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
+  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); lpUpdate(dt); queueUpdate(dt); extras2Update(dt); extras3Update(dt); policeUpdate(dt); bassUpdate(dt); heviUpdate(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
   let siren = 0; for (const v of VEHICLES) if ((v.job && v.job.phase === 'drive') || v.chase) siren = Math.max(siren, Math.max(0, 1 - Math.hypot(v.x - car.x, v.z - car.z)/240));
   sirenSet(siren, dt);
 }
@@ -7078,7 +7144,7 @@ function worldReset() {
   for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i]; if (h.temp) { humanRemove(h); continue; } if (h.seat0) { h.seat = h.seat0; h.task = h.task0; }
     h.x = h.home.x; h.z = h.home.z; h.yaw = h.home.yaw; h.vx = h.vz = h.vy = h.hop = h.tilt = h.roll = h.spin = h.sway = 0; h.down = h.hurt = h.gone = false; h.ride = null; h.pose.up = false; if (h.task && h.task.reset) h.task.reset(h); humanSync(h); }
   for (const F of FIELD_GAMES) if (F.kids) { F.ball.a = F.ball.b = 0; F.ball.va = F.ball.vb = F.ball.vy = 0; F.ball.y = 0.16; }
-  pizzaReset(); lifeExtrasReset(); lifeExtras2Reset(); lifeExtras3Reset(); policeReset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); waterFx.clear(); sirenSet(0, 0);
+  pizzaReset(); lpReset(); lifeExtrasReset(); lifeExtras2Reset(); lifeExtras3Reset(); policeReset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); waterFx.clear(); sirenSet(0, 0);
 }
 function roadPathTo(x, z) { return ambPath(x, z); }
 

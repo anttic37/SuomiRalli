@@ -559,6 +559,19 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   148 km/h; I first read "75 %" as +75 % — that would have needed the lap voided; it doesn't now). Hop: BASS.hopV = 3.4 m/s on every
   other kick when on the ground (0.56 m, visual only: carGroup y + BASS.hopY; integrated in bassUpdate even when off, so it lands).
   GTA visits: without the bass, HEVI.freeT (first 90–210 s, then 150–300 s) → heviSpawn, HEVI.visitT 60–110 s, then leave. t_bass.
+- Havuhelvetti, round 3 (28.9., 5 mp3s + "levypiste isonmännyn viereen… sen jälkeen radiosta vain havuhelvettiä… jäsenet dokaavat
+  metsässä, siinä niiden banderolli"): music/havuhelvetti-1…4.mp3 (his 2 and 3 were the same file), playlist `hevi: true`,
+  artist Havuhelvetti, titles made up (Havujen herra, Tuonelan tervaskanto, Kuusikon kutsu, Ylästön yö). radioLoad keeps them off the
+  normal radio (RADIO.hevi). The bus: heviSong() plays them through one <audio> → MediaElementSource → HEVI.g (distance gain, pan),
+  preservesPitch off + playbackRate = Doppler; paused when out of earshot; the synth is only the fallback (no playlist: editor, file://).
+  LP stall (buildLpStall, after buildEs): the 'manty' landmark (one, at ~375,71) → nearest road round it → stall on the verge facing
+  the road (table, 5 LP sleeves with the logo, "LEVYJÄ 30 MK" board, static box), the seller (makeHeviMember: headGroup face —
+  even k pantyhose with the toe flopping on top, odd k corpse paint; long black hair, black clothes). Stop still within 6 m of the
+  road point by it: lpUpdate sends him to the window (pizza pattern), LP.WAIT 3 s → lpDelivered → radioLp(): RADIO.list = the
+  Havuhelvetti songs, station 'HAVUHELVETTI – LP' at 33⅓, 🤘. LP.got stays for the session (R keeps it). Behind the pine (8 m, away
+  from the road): 3 members drinking round a yellow crate (bottle in the right hand, a swig every few s, horns up now and then,
+  swaying), empties in the grass, the banner (logo, 4.4 m, on two poles). heviCanvasMat(w, h, draw) now shared by bus/stall/banner.
+  t_lp, t_lp_radio (over serve.mjs: 4 songs, none on the normal radio, all after the LP; the bus plays havuhelvetti-*.mp3).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

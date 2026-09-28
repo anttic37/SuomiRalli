@@ -323,5 +323,29 @@
   "artist": "anttii",
   "talk": true,
   "koe": true
+ },
+ {
+  "file": "havuhelvetti-1.mp3",
+  "title": "Havujen herra",
+  "artist": "Havuhelvetti",
+  "hevi": true
+ },
+ {
+  "file": "havuhelvetti-2.mp3",
+  "title": "Tuonelan tervaskanto",
+  "artist": "Havuhelvetti",
+  "hevi": true
+ },
+ {
+  "file": "havuhelvetti-3.mp3",
+  "title": "Kuusikon kutsu",
+  "artist": "Havuhelvetti",
+  "hevi": true
+ },
+ {
+  "file": "havuhelvetti-4.mp3",
+  "title": "Ylästön yö",
+  "artist": "Havuhelvetti",
+  "hevi": true
  }
 ]
