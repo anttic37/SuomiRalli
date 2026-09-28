@@ -103,6 +103,13 @@
     box-shadow: 0 0 0 3px #ffd23c; animation: newsStar 1.6s ease-in-out infinite; }
   @keyframes newsStar { 0%, 100% { transform: rotate(-12deg) scale(1); } 50% { transform: rotate(12deg) scale(1.12); } }
   #stats { margin: 10px 16px 0; min-height: 1.3em; text-align: center; font-size: clamp(10px, 1.5vw, 14px); letter-spacing: 0.22em; color: #b8b8b0; font-variant-numeric: tabular-nums; opacity: 0; transition: opacity 0.4s; }
+  #pause { display: none; position: fixed; inset: 0; z-index: 60; align-items: center; justify-content: center; background: rgba(8,8,10,0.55); }
+  #pause .p-box { text-align: center; padding: 26px 46px; border: 2px solid #e0141e; background: rgba(10,10,10,0.85); box-shadow: 0 0 0 4px rgba(0,0,0,0.5); }
+  #pause .p-t { font: italic 900 clamp(36px, 7vw, 72px)/1 "Arial Black", "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.06em; color: #fff; }
+  #pause .p-s { margin-top: 12px; font: 700 12px/1 "Courier New", monospace; letter-spacing: 0.25em; color: #bbb; text-transform: uppercase; }
+  #pcnote { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; margin: clamp(10px, 2vh, 16px) auto 0; padding: 6px 14px 5px; border: 2px solid #ffd23c; border-radius: 3px;
+    transform: rotate(-1.5deg); font: 700 clamp(10px, 1.4vw, 13px)/1.15 "Courier New", monospace; letter-spacing: 0.14em; color: #ffd23c; text-transform: uppercase; background: rgba(255,210,60,0.06); }
+  #pcnote small { font-size: 0.82em; letter-spacing: 0.1em; color: #d8d8d0; text-transform: none; }
   #lang { position: absolute; top: 12px; right: 14px; display: flex; gap: 4px; z-index: 2; }
   #lang button { font: 800 12px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.12em; padding: 6px 8px; color: #8a8a84; background: transparent; border: 1px solid #333; border-radius: 3px; cursor: pointer; }
   #lang button:hover { color: #e8e8e4; border-color: #666; } #lang button.on { color: #fff; background: #e0141e; border-color: #e0141e; }
@@ -166,8 +173,9 @@
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
   <div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+    <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div></div>
     <div id="stats"></div>
-    <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span></div>
+    <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
       <div class="mr-knobcell"><button class="mr-knob" id="mr-power" title="virta · rulla: ääni"></button><span class="mr-cap" data-t>virta</span></div>
       <div class="mr-mid"><div class="mr-brand"><span><i class="led"></i>YLÄSTÖ SOUND</span><small>CR-85 · FM STEREO</small></div>
@@ -198,13 +206,14 @@
 <div id="ghost-delta"></div>
 <div id="pizza-msg"></div><div id="police-msg"></div><div id="police-hud" data-t>🚨 POLIISI JAHTAA</div>
 <div id="countdown"></div>
+<div id="pause"><div class="p-box"><div class="p-t" data-t>TAUKO</div><div class="p-s" data-t>P jatka · R uusi lähtö · Esc alkuruutu</div></div></div>
 <div id="bass-hud" data-t>🔊 BASSOBOOST · B</div><div id="es-hud"></div>
 <div id="radio"><div class="r-top"><span class="r-band">FM <b id="radio-freq">--.-</b></span><span class="r-station" id="radio-station"></span><span class="r-vol" id="radio-vol"></span></div><div class="r-win"><span class="r-title" id="radio-title"></span></div></div>
 <canvas id="cluster"></canvas>
 <canvas id="minimap"></canvas>
 <div id="controls-hint">
   <span class="key-hint" data-t>↑ kaasu</span><span class="key-hint" data-t>↓ jarru / peruutus</span>
-  <span class="key-hint" data-t>← → ohjaus</span><span class="key-hint" data-t>välilyönti käsijarru</span><span class="key-hint" data-t>R uusi lähtö</span><span class="key-hint" data-t>Esc alkuruutu</span><span class="key-hint" data-t>G haamu</span><span class="key-hint" data-t>C kamera</span><span class="key-hint" id="radio-key" style="display:none" data-t>E radio · 1/2 ääni</span><span class="key-hint" data-t>B bassoboost</span>
+  <span class="key-hint" data-t>← → ohjaus</span><span class="key-hint" data-t>välilyönti käsijarru</span><span class="key-hint" data-t>R uusi lähtö</span><span class="key-hint" data-t>Esc alkuruutu</span><span class="key-hint" data-t>G haamu</span><span class="key-hint" data-t>C kamera</span><span class="key-hint" id="radio-key" style="display:none" data-t>E radio · 1/2 ääni</span><span class="key-hint" data-t>B bassoboost</span><span class="key-hint" data-t>P tauko</span>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -260,6 +269,9 @@ const I18N = {
   'R uusi lähtö · Esc': ['R restart · Esc', 'R ny start · Esc'], 'OIKAISU – KIERROS EI KELPAA': ["SHORTCUT – THE LAP DOESN'T COUNT", 'SNARVEI – RUNDEN TELLER IKKE'],
   'AIKA KÄY': ['CLOCK RUNNING', 'KLOKKA GÅR'], 'FINAL — FIND FINISH': ['FINAL — FIND FINISH', 'SISTE — FINN MÅL'], 'CHECKPOINT {0}': ['CHECKPOINT {0}', 'SJEKKPUNKT {0}'],
   'KISA': ['RACE', 'LØP'],
+  'TAUKO': ['PAUSED', 'PAUSE'], 'P jatka · R uusi lähtö · Esc alkuruutu': ['P resume · R restart · Esc menu', 'P fortsett · R ny start · Esc meny'],
+  '💾 PC-PELI · TOIMII 486-KONEELLA': ['💾 PC GAME · RUNS ON A 486', '💾 PC-SPILL · KJØRER PÅ EN 486'], 'ei mobiilipeli – voi kyynel 😢': ["not a mobile game – boo hoo 😢", 'ikke et mobilspill – snufs 😢'],
+  'P tauko': ['P pause', 'P pause'], 'tauko': ['pause', 'pause'],
   '👽 OSUMA! {0}/{1}': ['👽 HIT! {0}/{1}', '👽 TREFF! {0}/{1}'],
   'virta': ['power', 'på/av'], 'viritys': ['tuning', 'tuning'], 'kanava': ['station', 'kanal'], 'ääni': ['volume', 'volum'],
   'paina virtaa — radio soi täälläkin': ['press power — the radio plays here too', 'trykk på — radioen spiller her også'], 'RADIO POIS': ['RADIO OFF', 'RADIO AV'],
@@ -4076,6 +4088,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'P = tauko (myös kun välilehti vaihtuu); GTA-moodin minikartta 2× suurennettuna ja seuraa autoa, kartalla myös pizzeria; alkuruutuun PC-PELI · TOIMII 486-KONEELLA'],
   ['28.9.', 'ES STOP -ruutu nyt musta maalattu alusta (maasto ei näy läpi); pizzerian katolle valomainos teräskehikolla ja pyörivä jättipizza'],
   ['28.9.', 'GTA-moodissa radan renkaat varastoituna talojen pihoille (voi kaataa), K-kaupan katsomo ja makkarakärry pois ja ES-kampanja isommaksi: puhallettava kaari, lava ja neljä tanssijaa lisää, liput, mainostaulu, jättitölkki, musiikki kuuluu kauemmas'],
   ['28.9.', 'Ufon suora osuma ei enää tapa kerralla: heittää ja kolhii autoa, vasta kolmas osuma räjäyttää. Ufojen kuopat uusiksi: kohollaan oleva multareuna, hiiltynyt pohja, pitkä kyntöura ja palanut nurmi'],
@@ -7293,6 +7306,9 @@ addEventListener('keydown', e => {
     if (gameState===State.MENU||gameState===State.FINISHED) { initAudio(); startRace(false); }
   }
   if (e.code==='Space'&&gameState===State.FINISHED) { initAudio(); startRace(false); }
+  if (e.code==='KeyP' && !e.repeat) { setPause(!PAUSE.on); return; }
+  if (PAUSE.on && e.code !== 'KeyR' && e.code !== 'Escape') return;   // (paused: only P, R and Esc)
+  if ((e.code==='KeyR' || e.code==='Escape') && PAUSE.on) setPause(false);
   if (e.code==='KeyR' && !e.repeat && gameState!==State.MENU) { initAudio(); startRace(false); }
   if (e.code==='KeyL' && !e.repeat && gameState===State.MENU) setLang(LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length]);   // language: FI → EN → NO
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
@@ -7651,17 +7667,20 @@ function updateCamera(dt) {
 const mmCanvas=document.getElementById('minimap'),mmCtx=mmCanvas.getContext('2d');
 mmCanvas.width=mmCanvas.height=140;
 let mmBase = null, mmScale = null, mmFree = null;   // (mmFree: the whole street network, for FREE mode)
-function drawMinimapFree(ctx) {   // FREE (GTA): every street of the village, gravel lighter; the ES stand; the car
+function drawMinimapFree(ctx) {   // FREE (GTA): the village's streets at 2× (gravel lighter), following the car; the ES stand, the pizzeria, the traffic
+  const Z = 2;
   if (!mmFree) { let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity; sideRoads.forEach(R => R.pts.forEach(p => { x0 = Math.min(x0, p.x); x1 = Math.max(x1, p.x); z0 = Math.min(z0, p.y); z1 = Math.max(z1, p.y); }));
-    const pad = 10, rx = x1 - x0 + pad*2, rz = z1 - z0 + pad*2, sc = Math.min(140/rx, 140/rz), ox = (140 - rx*sc)/2 - (x0 - pad)*sc, oz = (140 - rz*sc)/2 - (z0 - pad)*sc;
-    const c = document.createElement('canvas'); c.width = c.height = 140; const b = c.getContext('2d'); b.lineCap = b.lineJoin = 'round';
-    for (const pass of [0, 1]) sideRoads.forEach(R => { if ((pass === 1) !== !R.gravel) return; b.strokeStyle = R.gravel ? '#6a624e' : '#4a4a4e'; b.lineWidth = Math.max(1.5, R.w*sc*1.6); b.beginPath(); R.pts.forEach((p, i) => { const x = p.x*sc + ox, y = p.y*sc + oz; i ? b.lineTo(x, y) : b.moveTo(x, y); }); b.stroke(); });
+    const pad = 10, rx = x1 - x0 + pad*2, rz = z1 - z0 + pad*2, S = 140*Z, sc = Math.min(S/rx, S/rz), ox = (S - rx*sc)/2 - (x0 - pad)*sc, oz = (S - rz*sc)/2 - (z0 - pad)*sc;
+    const c = document.createElement('canvas'); c.width = c.height = S; const b = c.getContext('2d'); b.lineCap = b.lineJoin = 'round';
+    for (const pass of [0, 1]) sideRoads.forEach(R => { if ((pass === 1) !== !R.gravel) return; b.strokeStyle = R.gravel ? '#6a624e' : '#4a4a4e'; b.lineWidth = Math.max(2, R.w*sc*1.3); b.beginPath(); R.pts.forEach((p, i) => { const x = p.x*sc + ox, y = p.y*sc + oz; i ? b.lineTo(x, y) : b.moveTo(x, y); }); b.stroke(); });
     mmFree = { c, sc, ox, oz }; }
-  const { c, sc, ox, oz } = mmFree; ctx.clearRect(0, 0, 140, 140); ctx.drawImage(c, 0, 0);
-  if (ES.promo) { ctx.fillStyle = '#9be22a'; ctx.beginPath(); ctx.arc(ES.promo.x*sc + ox, ES.promo.z*sc + oz, 3, 0, Math.PI*2); ctx.fill(); }
-  for (const v of TRAFFIC.list) { if (v.gone) continue; ctx.fillStyle = v.kind === 'bus' ? '#ffb020' : '#d8d8d0'; ctx.fillRect(v.x*sc + ox - 1.5, v.z*sc + oz - 1.5, 3, 3); }   // the traffic
-  const cx = Math.max(5, Math.min(135, car.x*sc + ox)), cy = Math.max(5, Math.min(135, car.z*sc + oz));
-  ctx.fillStyle = ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, 3.5, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.sin(car.angle)*5, cy + Math.cos(car.angle)*5); ctx.stroke(); }
+  const { c, sc, ox, oz } = mmFree, px = car.x*sc + ox, py = car.z*sc + oz, tx = 70 - px, ty = 70 - py, at = (x, z) => [x*sc + ox + tx, z*sc + oz + ty];
+  ctx.clearRect(0, 0, 140, 140); ctx.fillStyle = 'rgba(20,24,18,0.55)'; ctx.fillRect(0, 0, 140, 140); ctx.drawImage(c, tx, ty);
+  const dot = (x, z, col, r) => { const [u, v] = at(x, z); if (u < -4 || v < -4 || u > 144 || v > 144) return; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(u, v, r, 0, Math.PI*2); ctx.fill(); };
+  if (ES.promo) dot(ES.promo.x, ES.promo.z, '#9be22a', 3.5); for (const S of PIZZA.shops) dot(S.x, S.z, '#ff8a3a', 3.5);
+  for (const v of TRAFFIC.list) { if (v.gone) continue; const [u, w] = at(v.x, v.z); if (u < -3 || w < -3 || u > 143 || w > 143) continue; ctx.fillStyle = v.kind === 'bus' ? '#ffb020' : '#d8d8d0'; ctx.fillRect(u - 2, w - 2, 4, 4); }   // the traffic
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1; ctx.strokeRect(0.5, 0.5, 139, 139);
+  ctx.fillStyle = ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(70, 70, 4, 0, Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.moveTo(70, 70); ctx.lineTo(70 + Math.sin(car.angle)*7, 70 + Math.cos(car.angle)*7); ctx.stroke(); }
 function drawMinimap(){const ctx=mmCtx; if (FREE.on) { drawMinimapFree(ctx); return; }
   if(!mmBase){
     // cache the static track drawing once
@@ -7813,8 +7832,16 @@ function adaptResolution(raw) {
 }
 const PHYS_DT = 1/120;
 let lastTime = 0, acc = 0;
+// P: pause (in a race or GTA mode; also when the tab is left) — the world stops, the sound stops, the radio waits
+const PAUSE = { on: false, radio: false };
+function setPause(on) { if (on === PAUSE.on) return; if (on && gameState !== State.RACING && gameState !== State.COUNTDOWN) return; PAUSE.on = on; for (const k in keys) keys[k] = false;
+  const el = document.getElementById('pause'); if (el) el.style.display = on ? 'flex' : 'none';
+  if (audio && audio.ctx) { if (on) audio.ctx.suspend(); else audio.ctx.resume(); }
+  if (RADIO.el) { if (on) { PAUSE.radio = !RADIO.el.paused; RADIO.el.pause(); } else if (PAUSE.radio && !RADIO.off) RADIO.el.play().catch(() => {}); } }
+document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
 function loop(time) {
   requestAnimationFrame(loop);
+  if (PAUSE.on) { lastTime = time; renderer.render(scene, camera); return; }
   adaptResolution((time - lastTime)/1000);
   const dt = Math.max(0, Math.min((time-lastTime)/1000, 0.05));
   lastTime = time;
