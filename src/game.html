@@ -4160,6 +4160,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['28.9.', 'Havuhelvetin alue: iso koju (8 m), logo maalattu radalle kojun eteen ja banderolleja joka suuntaan (radan varsi, kojun sivut, iso mänty); betoniporsaat nyt 2× rengaspinon painoiset – liikkuvat, mutta vievät reilusti vauhtia'],
   ['28.9.', 'Havuhelvetin koju kääntyi rataan päin ja sen eteen nurmelle maalattiin iso logo; iso mänty uusiksi (kapeneva runko, juuret, oksat ja neulastupsut); keikkabussin katolla nyt oikeat ihmiset headbangaamassa'],
   ['28.9.', 'Havuhelvetin levypiste nyt iso myyntikoju: katos, banderolli, levytiski, levyseinä ja kajarit; alkuruudussa UUTUUS: HAVUHELVETTI – HEAVY PÄNDI PELISSÄ; QR-teksti ei enää mene koodin alle; ennätyslistassa pienempi fontti'],
   ['28.9.', 'Havuhelvetin omat biisit soivat keikkabussista; ison männyn vieressä Havuhelvetin levypiste – pysähdy, jäsen tuo levyn ja sen jälkeen radiosta tulee vain Havuhelvettiä; bändi dokaa metsässä banderollinsa alla'],
@@ -5763,10 +5764,10 @@ const lpSellerTask = (S) => ({ kind: 'lpseller', update(h, dt, t) { const st = h
     const dx = h.x - B.x, dz = h.z - B.z, la = Math.cos(B.yaw)*dx - Math.sin(B.yaw)*dz, lb = Math.sin(B.yaw)*dx + Math.cos(B.yaw)*dz, sd = la >= 0 ? 1 : -1;   // (where he is in the booth: round the end of the counter, never through it)
     const via = (a, b, sp) => { const [x, z] = lloc(B.x, B.z, B.yaw, a, b); walkTo(h, x, z, sp, dt); };
     if (st.mode === 'out') { sl.visible = true; h.pose.armL = h.pose.armR = -1.3;
-      if (lb < 1.2 && Math.abs(la) < 2.75) { via(sd*2.95, -0.5, 2.4); return; } if (lb < 1.35) { via(sd*2.95, 1.9, 2.4); return; }
+      if (lb < B.cf - 0.1 && Math.abs(la) < B.cw) { via(sd*B.lane, B.behind, 2.4); return; } if (lb < B.cf + 0.1) { via(sd*B.lane, B.front, 2.4); return; }
       const fx = Math.sin(car.angle), fz = Math.cos(car.angle), rx = Math.cos(car.angle), rz = -Math.sin(car.angle), cs = (h.x - car.x)*rx + (h.z - car.z)*rz >= 0 ? 1 : -1, tx = car.x + rx*1.45*cs + fx*0.25, tz = car.z + rz*1.45*cs + fz*0.25;
       if (Math.hypot(tx - h.x, tz - h.z) < 0.7 || walkTo(h, tx, tz, 2.4, dt)) { h.vx = h.vz = 0; h.yaw = Math.atan2(car.x - h.x, car.z - h.z); if (LP.wait >= LP.WAIT && Math.hypot(car.x - h.x, car.z - h.z) < 2.6) lpDelivered(h); } return; }
-    if (Math.hypot(h.x - h.home.x, h.z - h.home.z) > 0.4) { sl.visible = false; if (lb > 1.1 && Math.abs(la) < 2.75) { via(sd*2.95, 1.9, 1.8); return; } if (Math.abs(la) > 2.6 && lb > 0.2) { via(sd*2.95, -0.5, 1.8); return; } walkTo(h, h.home.x, h.home.z, 1.8, dt); return; }
+    if (Math.hypot(h.x - h.home.x, h.z - h.home.z) > 0.4) { sl.visible = false; if (lb > B.cf - 0.2 && Math.abs(la) < B.cw) { via(sd*B.lane, B.front, 1.8); return; } if (Math.abs(la) > B.cw - 0.2 && lb > B.behind + 0.6) { via(sd*B.lane, B.behind, 1.8); return; } walkTo(h, h.home.x, h.home.z, 1.8, dt); return; }
     h.vx = h.vz = 0; sl.visible = false; h.yaw = h.home.yaw; const b = t*3.3; h.pose.armL = -0.2; h.pose.armR = Math.sin(t*0.4) > 0.6 ? -2.8 : -0.25; h.pose.dy = Math.abs(Math.sin(b))*0.03; h.sway = Math.sin(b)*0.2; },   // (nodding along; now and then the horns up)
   knocked(h) { h.st = { mode: 'home' }; } });
 const lpDrinkTask = (k, cx, cz) => ({ kind: 'lpdrink', update(h, dt, t) { if (Math.hypot(h.x - h.home.x, h.z - h.home.z) > 0.5) { walkTo(h, h.home.x, h.home.z, 1.2, dt); return; }
@@ -5774,39 +5775,53 @@ const lpDrinkTask = (k, cx, cz) => ({ kind: 'lpdrink', update(h, dt, t) { if (Ma
     h.pose.armR = c < 1.3 ? -2.5 : -0.35; h.pose.armL = Math.sin(t*0.3 + k) > 0.8 ? -2.9 : -0.2; h.sway = Math.sin(t*0.9 + k)*0.35; h.pose.dy = 0; } });
 function buildLpStall() { LP.stall = null; LP.drinkers.length = 0; LP.seller = null; const M = LANDMARKS.find(L => L[0] === 'manty'); if (!M) return; const px = M[1], pz = M[2];
   const ri = roadInfo(px, pz), TP = trackPoints[ri.idx], hw = wAt(ri.idx)*0.5, dl = Math.hypot(TP.x - px, TP.y - pz) || 1, ux = (TP.x - px)/dl, uz = (TP.y - pz)/dl;   // facing the race route
-  const R = [TP.x - ux*hw, TP.y - uz*hw, Math.atan2(ux, uz)], logoAt = hw + 1.3 + 2.4, back = hw + 1.3 + 4.9 + 1.5;   // (R: the route's edge on this side; between it and the booth the logo on the ground)
+  const R = [TP.x - ux*hw, TP.y - uz*hw, Math.atan2(ux, uz)], back = hw + 6.0;   // (R: the route's edge on this side; the booth well back behind the tyre wall, the logo out on the route itself)
   const sx = TP.x - ux*back, sz = TP.y - uz*back, yaw = Math.atan2(ux, uz), at = (a, b) => lloc(sx, sz, yaw, a, b);   // (local +b: towards the route)
   const G = new THREE.Group(), wood = lmat(0x6a4a2c, 0.9), cloth = lmat(0x0e0e10, 0.95), dk = lmat(0x1c1c20, 0.6), sleeve = lpSleeveMat(); lifeGroup.add(G); nearVis(G, sx, sz);
   const gy = Y(sx, sz), put = (m, a, b, y, ry) => { const [x, z] = at(a, b); m.position.set(x, gy + y, z); m.rotation.y = yaw + (ry || 0); G.add(m); return m; };
-  // a proper market booth: a black canopy on four posts, the band's banner right across the front, a counter full of LPs, a wall of them behind, a cabinet speaker at each end
-  for (const [a, b] of [[-2.7, -1.35], [2.7, -1.35], [-2.7, 1.35], [2.7, 1.35]]) put(new THREE.Mesh(lbox(0.1, 3.05, 0.1), wood), a, b, 1.52);
-  put(new THREE.Mesh(lbox(5.8, 0.1, 3.1), cloth), 0, 0, 3.08);
-  const banner = heviCanvasMat(1024, 230, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) { const lh = h*0.98, lw = lh*img.naturalWidth/img.naturalHeight; g.drawImage(img, (w - lw)/2, (h - lh)/2, lw, lh); }
-      g.fillStyle = '#9a1010'; g.fillRect(0, h - 10, w, 10); g.fillRect(0, 0, w, 6); });
-  banner.side = THREE.DoubleSide; put(new THREE.Mesh(new THREE.PlaneGeometry(5.6, 1.26), banner), 0, 1.4, 2.4);
-  put(new THREE.Mesh(lbox(4.8, 1.0, 0.8), cloth), 0, 0.75, 0.5); put(new THREE.Mesh(lbox(4.9, 0.06, 0.9), wood), 0, 0.75, 1.03);
-  for (let r = 0; r < 2; r++) for (let k = 0; k < 8; k++) { const s = put(new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve), -2.0 + k*0.57, 0.95 - r*0.38, 1.2 + r*0.08); s.rotation.order = 'YXZ'; s.rotation.x = -0.45 - r*0.15; }   // (two rows propped up on the counter)
-  put(new THREE.Mesh(new THREE.PlaneGeometry(5.3, 2.6), cloth), 0, -1.32, 1.5);
-  for (let r = 0; r < 3; r++) for (let k = 0; k < 7; k++) put(new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.34), sleeve), -2.1 + k*0.7, -1.3, 0.85 + r*0.62);   // the record wall
-  for (const s of [-1, 1]) { put(new THREE.Mesh(lbox(0.8, 1.7, 0.6), dk), s*3.75, 0.7, 0.85); put(new THREE.Mesh(new THREE.PlaneGeometry(0.62, 1.4), lmat(0x2c2c30, 0.9)), s*3.75, 1.16, 0.85);
-    for (const y of [0.45, 1.25]) put(new THREE.Mesh(lgeo('lpcone', () => new THREE.CircleGeometry(0.22, 14)), lmat(0x101012, 0.5)), s*3.75, 1.17, y); }
+  const ban = heviCanvasMat(1024, 330, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) { const lh = h*0.96, lw = lh*img.naturalWidth/img.naturalHeight; g.drawImage(img, (w - lw)/2, (h - lh)/2, lw, lh); }
+      g.fillStyle = '#9a1010'; g.fillRect(0, h - 12, w, 12); g.fillRect(0, 0, w, 8); }); ban.side = THREE.DoubleSide; LP.banMat = ban;
+  // a big market booth: a black canopy on six posts, the band's banner right across the front and down both sides, a 7 m counter full of LPs, a record wall behind, speaker stacks at the ends
+  for (const [a, b] of [[-3.9, -1.9], [0, -1.9], [3.9, -1.9], [-3.9, 1.9], [0, 1.9], [3.9, 1.9]]) put(new THREE.Mesh(lbox(0.12, 3.62, 0.12), wood), a, b, 1.81);
+  put(new THREE.Mesh(lbox(8.4, 0.12, 4.4), cloth), 0, 0, 3.66);
+  put(new THREE.Mesh(new THREE.PlaneGeometry(8.2, 1.8), ban), 0, 2.0, 2.75);
+  for (const s of [-1, 1]) put(new THREE.Mesh(new THREE.PlaneGeometry(4.2, 1.3), ban), s*4.0, 0, 3.0, s*Math.PI/2);
+  put(new THREE.Mesh(lbox(7.0, 1.0, 0.9), cloth), 0, 0.9, 0.5); put(new THREE.Mesh(lbox(7.1, 0.06, 1.0), wood), 0, 0.9, 1.03);
+  for (let r = 0; r < 2; r++) for (let k = 0; k < 12; k++) { const s = put(new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve), -3.1 + k*0.565, 1.1 - r*0.4, 1.2 + r*0.08); s.rotation.order = 'YXZ'; s.rotation.x = -0.45 - r*0.15; }
+  put(new THREE.Mesh(new THREE.PlaneGeometry(7.6, 3.2), cloth), 0, -1.86, 1.75);
+  for (let r = 0; r < 4; r++) for (let k = 0; k < 10; k++) put(new THREE.Mesh(new THREE.PlaneGeometry(0.36, 0.36), sleeve), -3.3 + k*0.733, -1.84, 0.75 + r*0.66);   // the record wall
+  for (const s of [-1, 1]) { put(new THREE.Mesh(lbox(1.0, 2.3, 0.7), dk), s*4.95, 1.0, 1.15); put(new THREE.Mesh(new THREE.PlaneGeometry(0.8, 2.0), lmat(0x2c2c30, 0.9)), s*4.95, 1.36, 1.15);
+    for (const y of [0.55, 1.2, 1.85]) put(new THREE.Mesh(lgeo('lpcone', () => new THREE.CircleGeometry(0.22, 14)), lmat(0x101012, 0.5)), s*4.95, 1.37, y); }
   const board = heviCanvasMat(512, 300, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) g.drawImage(img, 56, 4, 400, 400*img.naturalHeight/img.naturalWidth);
       g.textAlign = 'center'; g.fillStyle = '#e8e4dc'; g.font = '900 46px "Courier New", monospace'; g.fillText('LEVYJÄ 30 MK', w/2, 236); g.fillStyle = '#c21414'; g.font = '700 24px "Courier New", monospace'; g.fillText('PYSÄHDY TIEN VIEREEN', w/2, 282); });
-  { const bb = put(new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.64), board), -3.3, 2.1, 0.95); bb.rotation.order = 'YXZ'; bb.rotation.x = -0.25; for (const s of [-1, 1]) put(new THREE.Mesh(lbox(0.05, 1.0, 0.05), wood), -3.3 + s*0.5, 2.0, 0.5); }   // (a board by the road)
-  { const img = heviLogoImg(), c = document.createElement('canvas'); c.width = 768; c.height = 522; const g = c.getContext('2d'), t = new THREE.CanvasTexture(c); t.anisotropy = 8;   // Havuhelvetti's logo painted on the ground in front of it, white on the grass, top towards the booth
+  { const bb = put(new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.88), board), -6.2, 1.2, 1.25); bb.rotation.order = 'YXZ'; bb.rotation.x = -0.2; for (const s of [-1, 1]) put(new THREE.Mesh(lbox(0.06, 1.3, 0.06), wood), -6.2 + s*0.68, 1.15, 0.65); }   // (the price board beside it)
+  const clearProps = (cx, cz, yw, hwid, hlen) => { for (const t of tires) { if (t.off || t.gate || t.kind === 'person') continue; const ex = t.x - cx, ez = t.z - cz, a = Math.cos(yw)*ex - Math.sin(yw)*ez, b = Math.sin(yw)*ex + Math.cos(yw)*ez;
+      if (Math.abs(a) < hwid + t.r && Math.abs(b) < hlen + t.r) { t.off = true; t.lpOff = true; syncProp(t); } } };
+  clearProps(sx, sz, yaw, 6.9, 2.5);   // (no tyre stacks standing in the booth)
+  { const img = heviLogoImg(), c = document.createElement('canvas'); c.width = 768; c.height = 522; const g = c.getContext('2d'), t = new THREE.CanvasTexture(c); t.anisotropy = 8;   // Havuhelvetti's logo painted big on the route in front of it, white on the tarmac, top towards the booth
     const paint = () => { if (!img.complete || !img.naturalWidth) return; g.clearRect(0, 0, 768, 522); g.drawImage(img, 0, 0, 768, 522); const d = g.getImageData(0, 0, 768, 522), a = d.data;
       for (let i = 0; i < a.length; i += 4) { const l = Math.max(a[i], a[i + 1], a[i + 2]); a[i + 3] = Math.min(255, Math.max(0, (l - 30)*2.4)); a[i] = 238; a[i + 1] = 234; a[i + 2] = 226; } g.putImageData(d, 0, 0); t.needsUpdate = true; };
     paint(); if (!img.complete) img.addEventListener('load', paint);
-    const gx = TP.x - ux*logoAt, gz = TP.y - uz*logoAt, pg = new THREE.PlaneGeometry(6.8, 4.6, 18, 12); pg.rotateX(-Math.PI/2); pg.rotateY(yaw); pg.translate(gx, 0, gz);
+    const lw = Math.min(8.4, hw*2*1.35), ld = lw/1.47, gx = TP.x, gz = TP.y, pg = new THREE.PlaneGeometry(lw, ld, 20, 14); pg.rotateX(-Math.PI/2); pg.rotateY(yaw); pg.translate(gx, 0, gz);
     const pa = pg.attributes.position; for (let i = 0; i < pa.count; i++) pa.setY(i, Y(pa.getX(i), pa.getZ(i)) + (onRoad(pa.getX(i), pa.getZ(i), 0.2) ? ROAD_Y : 0) + 0.05); pg.computeVertexNormals(); pg.computeBoundingSphere();
     const lm = new THREE.Mesh(pg, new THREE.MeshStandardMaterial({ map: t, transparent: true, depthWrite: false, roughness: 0.9, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 })); lm.renderOrder = 1; lm.receiveShadow = true; lm.userData.noBatch = true; G.add(lm);
-    LP.logo = { x: gx, z: gz, yaw, w: 6.8, d: 4.6 };
-    for (const t of tires) { if (t.off || t.gate || t.kind === 'person') continue; const ex = t.x - gx, ez = t.z - gz, a = Math.cos(yaw)*ex - Math.sin(yaw)*ez, b = Math.sin(yaw)*ex + Math.cos(yaw)*ez;   // (tyre stacks standing on it are cleared off)
-      if (Math.abs(a) < 3.4 + t.r && Math.abs(b) < 2.3 + t.r) { t.off = true; t.lpOff = true; if (typeof syncProp === 'function') syncProp(t); } } }
-  { const [cx, cz] = at(0, 0.5), [wx, wz] = at(0, -1.34); addStaticBox({ x: cx, z: cz, yaw, hw: 2.45, hl: 0.45, kind: 'lm' }); addStaticBox({ x: wx, z: wz, yaw, hw: 2.75, hl: 0.12, kind: 'lm' }); } for (const s of [-1, 1]) { const [x, z] = at(s*3.75, 0.7); addStaticBox({ x, z, yaw, hw: 0.4, hl: 0.3, kind: 'lm' }); } reserve('lp', [sx, sz], 5.5);
-  const [hx, hz] = at(0, -0.5), rig = makeHeviMember(0), lp = new THREE.Group(); lp.position.set(0, 1.02, 0.34); rig.add(lp); const ls = lmesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve, 0, 0, 0, lp, false); ls.rotation.x = -0.25; lp.visible = false; rig.userData.lp = lp;
+    LP.logo = { x: gx, z: gz, yaw, w: lw, d: ld }; }
+  { const [cx, cz] = at(0, 0.9), [wx, wz] = at(0, -1.88); addStaticBox({ x: cx, z: cz, yaw, hw: 3.55, hl: 0.5, kind: 'lm' }); addStaticBox({ x: wx, z: wz, yaw, hw: 3.85, hl: 0.12, kind: 'lm' }); }
+  for (const s of [-1, 1]) { const [x, z] = at(s*4.95, 1.0); addStaticBox({ x, z, yaw, hw: 0.5, hl: 0.35, kind: 'lm' }); } reserve('lp', [sx, sz], 7);
+  // Havuhelvetti's ground: banners on poles along the route both ways, two angled out beside the booth, one hung on the big pine
+  const pole = (x, z) => lmesh(lbox(0.1, 3.0, 0.1), wood, x, Y(x, z) + 1.5, z, G);
+  const banner = (x, z, yw, w, h, yb) => { const rx = Math.cos(yw), rz = -Math.sin(yw); for (const s of [-1, 1]) pole(x + rx*s*(w/2 + 0.05), z + rz*s*(w/2 + 0.05)); const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), ban); m.position.set(x, Y(x, z) + yb + h/2, z); m.rotation.y = yw; G.add(m); nearVis(m, x, z); };
+  const n = trackPoints.length; LP.banners = 0;
+  const spots = [], free = (x, z) => !onRoad(x, z, 1.8) && !BUILDINGS.some(B => inLandmark(x, z, [0, B[0], B[1], B[4], B[2], B[3]], 2.5)) && Math.hypot(x - sx, z - sz) > 7.5 && Math.hypot(x - px, z - pz) > 3 && spots.every(q => Math.hypot(q[0] - x, q[1] - z) > 7);
+  for (const st of [1, -1]) { let got = 0, j = ri.idx, acc = 0;   // two along the route each way, out behind the tyre walls, facing it (tried a little further on / further out till they fit)
+    for (let guard = 0; guard < 60 && got < 2 && acc < 40; guard++) { const a = trackPoints[(j + n) % n], b = trackPoints[(j + st + n) % n]; acc += Math.hypot(b.x - a.x, b.y - a.y); j += st; if (acc < 8) continue;
+      const q = (j % n + n) % n, P = trackPoints[q], nm = getNormal(q), sd = (nm.x*(-ux) + nm.y*(-uz)) >= 0 ? 1 : -1;
+      for (const o of [5.4, 6.8, 4.6, 8.2]) { const oo = wAt(q)*0.5 + o, x = P.x + nm.x*oo*sd, z = P.y + nm.y*oo*sd; if (!free(x, z)) continue; banner(x, z, Math.atan2(P.x - x, P.y - z), 5.0, 1.6, 1.1); spots.push([x, z]); LP.banners++; got++; acc += 4; break; } } }
+  for (const s of [-1, 1]) for (const [a, b] of [[7.4, 0.6], [7.4, -1.6], [8.6, -0.5]]) { const [x, z] = at(s*a, b); if (onRoad(x, z, 1.2) || spots.some(q => Math.hypot(q[0] - x, q[1] - z) < 5)) continue; banner(x, z, yaw + s*0.6, 4.2, 1.35, 1.2); spots.push([x, z]); LP.banners++; break; }   // angled out beside the booth
+  { const x = px + ux*0.85, z = pz + uz*0.85, m = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.05), ban); m.position.set(x, Y(x, z) + 4.2, z); m.rotation.y = yaw; G.add(m); LP.banners++; }   // (round the big pine's trunk)
+  const [hx, hz] = at(0, -0.6), rig = makeHeviMember(0), lp = new THREE.Group(); lp.position.set(0, 1.02, 0.34); rig.add(lp); const ls = lmesh(new THREE.PlaneGeometry(0.32, 0.32), sleeve, 0, 0, 0, lp, false); ls.rotation.x = -0.25; lp.visible = false; rig.userData.lp = lp;
   LP.seller = new Human({ x: hx, z: hz, yaw, rig, task: lpSellerTask() });
-  const [zx, zz] = [R[0] + ux*1.5, R[1] + uz*1.5]; LP.stall = { x: sx, z: sz, yaw, zx, zz };   // (where to stop: on the road by the stall)
+  const [zx, zz] = [R[0] + ux*1.5, R[1] + uz*1.5]; LP.stall = { x: sx, z: sz, yaw, zx, zz, lane: 4.1, front: 2.25, behind: -0.6, cw: 3.8, cf: 1.7 };   // (where to stop: on the road by the stall; lane/front/behind: his way round the counter)
   // the band in the woods behind the pine: round a beer crate, under their banner
   let cx = px - ux*8, cz = pz - uz*8; for (let k = 0; k < 12 && (onRoad(cx, cz, 3) || BUILDINGS.some(B => inLandmark(cx, cz, [0, B[0], B[1], B[4], B[2], B[3]], 4))); k++) { const a = R[2] + Math.PI + (k % 2 ? 1 : -1)*(0.4 + k*0.15); cx = px + Math.sin(a)*(8 + k*0.5); cz = pz + Math.cos(a)*(8 + k*0.5); }
   const W = new THREE.Group(); lifeGroup.add(W); nearVis(W, cx, cz); const fx = cx - px, fz = cz - pz, fl = Math.hypot(fx, fz) || 1, bx = fx/fl, bz = fz/fl, byaw = Math.atan2(-bx, -bz);   // (the banner faces the pine and the road beyond it)
@@ -5814,8 +5829,7 @@ function buildLpStall() { LP.stall = null; LP.drinkers.length = 0; LP.seller = n
   for (let k = 0; k < 7; k++) { const a = k*0.9 + 0.3, r = 0.6 + (k % 3)*0.5, x = cx + Math.sin(a)*r, z = cz + Math.cos(a)*r, b = lmesh(lcyl(0.035, 0.24, 7), lmat(0x3d5a1c, 0.25), x, Y(x, z) + 0.035, z, W); b.rotation.set(Math.PI/2, a, 0); }   // (empties in the grass)
   const bnx = cx + bx*3.2, bnz = cz + bz*3.2, rx = Math.cos(byaw), rz = -Math.sin(byaw);
   for (const s of [-1, 1]) lmesh(lbox(0.09, 2.8, 0.09), wood, bnx + rx*s*2.3, Y(bnx + rx*s*2.3, bnz + rz*s*2.3) + 1.4, bnz + rz*s*2.3, W);
-  const ban = heviCanvasMat(1024, 330, (g, w, h, img) => { g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, w, h); if (img) { const lh = h*0.96, lw = lh*img.naturalWidth/img.naturalHeight; g.drawImage(img, (w - lw)/2, (h - lh)/2, lw, lh); } });
-  ban.side = THREE.DoubleSide; const bm = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 1.42), ban); bm.position.set(bnx, Y(bnx, bnz) + 1.95, bnz); bm.rotation.y = byaw; W.add(bm);
+  const bm = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 1.42), ban); bm.position.set(bnx, Y(bnx, bnz) + 1.95, bnz); bm.rotation.y = byaw; W.add(bm);
   reserve('lpband', [cx, cz], 5);
   for (let k = 0; k < 3; k++) { const a = k*2.1 + 0.5, x = cx + Math.sin(a)*1.3, z = cz + Math.cos(a)*1.3, rg = makeHeviMember(k + 1); lmesh(lcyl(0.035, 0.24, 7), lmat(0x3d5a1c, 0.25), 0, -0.6, 0.06, rg.userData.rig.armR, false);
     LP.drinkers.push(new Human({ x, z, yaw: Math.atan2(cx - x, cz - z), rig: rg, task: lpDrinkTask(k, cx, cz) })); } }
@@ -7267,12 +7281,13 @@ function carBoxPush(x, z, r) {
 function propHitByCar(t) {
   const person = t.kind === 'person', pig = t.kind === 'pig';
   const hit = carBoxPush(t.x, t.z, person ? 0.3 : t.r); if (!hit) return;
-  const nx = hit.nx, nz = hit.nz; if (pig) { car.x -= nx*hit.ov*0.92; car.z -= nz*hit.ov*0.92; t.x += nx*hit.ov*0.08; t.z += nz*hit.ov*0.08; } else { t.x += nx*hit.ov; t.z += nz*hit.ov; }   // (a pig: 1.5 t of concrete — the car comes off it)
+  const nx = hit.nx, nz = hit.nz; if (pig) { car.x -= nx*hit.ov*0.5; car.z -= nz*hit.ov*0.5; t.x += nx*hit.ov*0.5; t.z += nz*hit.ov*0.5; } else { t.x += nx*hit.ov; t.z += nz*hit.ov; }   // (a pig: twice a tyre stack's weight — it shoves, but it costs)
   const rel = (t.vx - car.vx)*nx + (t.vz - car.vz)*nz;
   if (rel < 0) {
-    const kick = person ? 2.4 : pig ? 0.08 : 1.15;                     // heavier tire stacks: they don't fly as far (a pig hardly shifts)…
+    const kick = person ? 2.4 : pig ? 1.05 : 1.15;                     // heavier tire stacks: they don't fly as far (a pig gets going too — no pushing it along for ever — but its friction stops it in half the distance)…
     t.vx -= nx*rel*kick; t.vz -= nz*rel*kick;
-    const back = person ? 0.02 : pig ? 1.25 : 0.16; car.vx += nx*rel*back; car.vz += nz*rel*back;   // …and the car pays for hitting them (off a pig it bounces)
+    if (pig) { const fx = Math.sin(car.angle), fz = Math.cos(car.angle), sd = (fx*(t.z - car.z) - fz*(t.x - car.x)) >= 0 ? 1 : -1; t.vx += -fz*sd*(-rel)*0.6; t.vz += fx*sd*(-rel)*0.6; }   // (a pig slews off to the side it was hit on: it doesn't stay in front to be pushed along)
+    const back = person ? 0.02 : pig ? (rel < -3 ? 0.75 : 0.2) : 0.16; car.vx += nx*rel*back; car.vz += nz*rel*back;   // …and the car pays for hitting them (a pig: twice what a stack costs)
     if (person) { if (Math.hypot(car.vx, car.vz) > 3) { t.vy = Math.min(9, -rel*0.45 + 2); t.down = true; t.spin = (Math.random()-0.5)*8; propInjured(t); } else { t.vx *= 0.3; t.vz *= 0.3; } }
     else carDamage(nx, nz, pig ? -rel*1.15 : -rel);
     const now = performance.now();
@@ -7308,7 +7323,7 @@ function updateTires(dt) {
   // integrate moving props
   for (const t of movingProps) {
     const person = t.kind === 'person';
-    const fr = person ? 2.2 : t.kind === 'pig' ? 10 : 3;
+    const fr = person ? 2.2 : t.kind === 'pig' ? 6 : 3;   // (a pig slides half as far as a stack)
     t.vx *= Math.max(1 - fr*dt, 0); t.vz *= Math.max(1 - fr*dt, 0);
     if (Math.abs(t.vx) < 0.01 && Math.abs(t.vz) < 0.01) { t.vx = 0; t.vz = 0; }
     t.x += t.vx*dt; t.z += t.vz*dt;

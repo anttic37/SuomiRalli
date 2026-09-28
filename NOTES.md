@@ -591,6 +591,17 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   figures are gone; 4 Humans (makeHeviMember, 2 with red guitars) sit on the roof via h.seat {v, a, b, y: 3, tilt, yaw} — humanSync
   now honours seat.tilt/seat.yaw/P.dy — and heviRoofTask rocks them to the beat, keeping h.x/z on the bus (else 'far' hid them);
   they are v.crew, so they go with the bus. t_lp (booth facing, props on the logo, the walk), t_hevi (roofBand 4).
+- Havuhelvetti ground + heavier pigs (28.9., "logo teille päin, isompi koju, banderolleja joka suuntaan; betoniporsaat 2× painavampia
+  kuin renkaat, ettei IHAN stoppaa"): booth 8.4 × 4.4 × 3.6 m (6 posts, canopy, front banner 8.2 × 1.8 + one down each side, 7 m
+  counter with 24 LPs, 4 × 10 record wall, 2.3 m speaker stacks at a ±4.95), centre hw + 6 back from the centreline, tyres under
+  it cleared (t.lpOff); statics: counter, back wall, speakers; the seller's way round uses LP.stall.lane/front/behind/cw/cf. The
+  ground logo is now ON the route at the track point (≤ 8.4 m, ×1.35 of the width), top towards the booth. Banners (LP.banMat,
+  poles, DoubleSide): two along the route each way out behind the tyre walls (tried at 8–40 m and 4.6–8.2 m out till free: not on a
+  road/building/booth/pine, 7 m apart), one angled out at each side of the booth, one round the pine's trunk; the woods one stays.
+  Pigs (propHitByCar): split the push 50/50 with the car, kick 1.05 (it gets going — a 0.55 kick left it in front and the car pushed
+  it along the road at 13 km/h: t_lap went 150 → 217 s), a sideways slew to the side it was hit on, back 0.75 of the closing speed
+  for a real hit (> 3 m/s; 0.2 for a nudge), friction 6 (tyres 3). t_pig_hit at 15 m/s: tyre stack → 7.4–9.5 m/s kept, pig →
+  1.7–4.2 (it moves 1–4 m). t_lap back to 150 s.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
