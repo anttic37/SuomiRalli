@@ -469,6 +469,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   always land ≥ 5 m off it. ufoBoom: car < 2.2 m → wreckCar('boom'), < 7 m shoved + dented; vehicles → fire (responders via
   ufoWreck); people < 3 m knocked (→ ambulances → shot at too). Targets weighted: car 3, responders 3, cars 1.2, people 1; fire every
   0.35–1.25 s. t_s3_ufo: never woken from the route; a standing car lasts ~6–7 s with ~10 near misses.
+- UFO follow-up (28.9., "osuma ei saa tappaa kerrasta… se KUOPPA… näyttää hyvältä törmäys"): ufoHitCar — a direct hit throws the car
+  (9 m/s), spins it, knocks parts off (two carDamage hits), '👽 OSUMA! n/3'; the 3rd wrecks it (UFO_HITS, reset by ufoReset). The crash
+  site is makeCrater: a ragged lathe bowl (rim ~1 m, low where the furrow comes in, heaped opposite), a 40-row furrow along the clearest
+  of 16 directions (ufoFurrowDir, up to 30 m): dark trough, lumpy fresh-soil berms, torn turf outside, wandering a little; 34 clods;
+  a draped radial scorch decal. All vertices laid on Y(); the UFO nose-down into the far wall, the furrow behind it. t_ufo_crater.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
