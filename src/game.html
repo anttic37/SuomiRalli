@@ -4372,10 +4372,13 @@ function oppPick(others, myT, mine) {
 // ── the police's rap sheet: fires the driver set, people and animals they ran over → /api/rap (as deltas), and the list back for the paper's "Poliisi tiedottaa" ──
 const RAP = { f: 0, p: 0, a: 0, sent: { f: 0, p: 0, a: 0 }, life: { f: 0, p: 0, a: 0 }, list: null, at: -1e9, busy: false };
 try { const l = JSON.parse(localStorage.getItem('ylasto1988-rekisteri') || 'null'); if (l) for (const k of ['f', 'p', 'a']) RAP.life[k] = Math.max(0, l[k] | 0); } catch (e) {}
-function rapCount(k) { if (gameState !== State.RACING) return; RAP[k]++; RAP.life[k]++; try { localStorage.setItem('ylasto1988-rekisteri', JSON.stringify(RAP.life)); } catch (e) {} }
-function rapSend(beacon) { if (!ONLINE.api || !ONLINE.id) return; const d = { f: RAP.f - RAP.sent.f, p: RAP.p - RAP.sent.p, a: RAP.a - RAP.sent.a }; if (!d.f && !d.p && !d.a) return;
-  const body = JSON.stringify({ id: ONLINE.id, name: ONLINE.name || '', ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a }; RAP.at = -1e9;
-  try { if (beacon && navigator.sendBeacon) navigator.sendBeacon(ONLINE.api + '/rap', body); else fetch(ONLINE.api + '/rap', { method: 'POST', body, keepalive: true }).catch(() => {}); } catch (e) {} }
+function rapCount(k) { if (gameState === State.MENU) return;   // (the race, GTA, after the finish line: all of it counts)
+  RAP[k]++; RAP.life[k]++; try { localStorage.setItem('ylasto1988-rekisteri', JSON.stringify(RAP.life)); } catch (e) {} }
+function rapSend(beacon) {   // → a promise that settles when the server has it (so the paper's list, fetched after, includes it)
+  if (!ONLINE.api || !ONLINE.id) return Promise.resolve(); const d = { f: RAP.f - RAP.sent.f, p: RAP.p - RAP.sent.p, a: RAP.a - RAP.sent.a }, name = ONLINE.name || '';
+  if (!d.f && !d.p && !d.a && (!name || name === RAP.sentName || !(RAP.life.f + RAP.life.p + RAP.life.a))) return Promise.resolve();   // (nothing new — or only a name given since: then the name goes, to put it on the old rows)
+  const body = JSON.stringify({ id: ONLINE.id, name, ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a }; RAP.sentName = name; RAP.at = -1e9;
+  try { if (beacon && navigator.sendBeacon) { navigator.sendBeacon(ONLINE.api + '/rap', body); return Promise.resolve(); } return fetch(ONLINE.api + '/rap', { method: 'POST', body, keepalive: true }).catch(() => {}); } catch (e) { return Promise.resolve(); } }
 function rapFetch() { if (!ONLINE.api || RAP.busy || performance.now() - RAP.at < 60000) return; RAP.busy = true;
   fetch(ONLINE.api + '/rap', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { RAP.busy = false; if (!j || !Array.isArray(j.fires)) return; RAP.list = j; RAP.at = performance.now(); if (PAPER.open) lhRapFill(document.querySelector('#paper .pv-stage')); }).catch(() => { RAP.busy = false; }); }
 setInterval(() => rapSend(false), 30000); addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') rapSend(true); });
@@ -4396,6 +4399,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '🚨 Rekisteri: rikkomukset kirjataan kaikkialla – kisassa, GTA-tilassa ja maalin jälkeen; ne lähtevät heti maalissa ja valikkoon palatessa, lehti näyttää juuri tehdyt, ja myöhemmin annettu nimi päivittyy vanhoihin merkintöihin'],
   ['29.9.', '🚨 Lehteen Poliisi tiedottaa -sivu: eniten tulipaloja sytyttäneet ja ihmisten yli ajaneet kuskit netistä, etsintäkuulutus pahimmasta ja oma rekisterisi. Peli laskee palot, yliajot ja eläimet ja kertoo ne palvelimelle'],
   ['29.9.', '📰 Lehti tulee valmiiksi taitettuna palvelimelta (lehti/lehti.json, tehdään buildissa) – selain ei taita sitä enää itse; PDF samasta paikasta'],
   ['29.9.', '⚡ Lehti taitetaan vasta kun peli on käynnissä ja selain joutilas (tai kun lehti avataan) – alkuruutu ei odota lehteä'],
@@ -4732,7 +4736,7 @@ function lehtiLayout() { const mini = document.getElementById('lehti-mini'); if 
   const wide = s >= 0.24; document.body.classList.toggle('lh-wide', wide); mini.style.display = wide ? '' : 'none'; if (!wide) return;
   mini.style.width = (760*s).toFixed(0) + 'px'; mini.style.height = (1000*s).toFixed(0) + 'px'; if (mini.firstChild) mini.firstChild.style.transform = 'scale(' + s.toFixed(3) + ')'; }
 function paperViews() { const n = PAPER.pages.length, V = []; if (!PAPER.two) { for (let i = 0; i < n; i++) V.push([i]); return V; } V.push([0]); for (let i = 1; i < n; i += 2) V.push(i + 1 < n ? [i, i + 1] : [i]); return V; }
-function paperOpen(page) { lehtiBuild(); rapSend(false); rapFetch(); PAPER.open = true; document.getElementById('paper').classList.add('on'); paperToPage(page || 0); }
+function paperOpen(page) { lehtiBuild(); rapSend(false).then(rapFetch); PAPER.open = true; document.getElementById('paper').classList.add('on'); paperToPage(page || 0); }
 function paperClose() { PAPER.open = false; document.getElementById('paper').classList.remove('on'); }
 function paperToPage(p) { PAPER.two = innerWidth > innerHeight*1.15 && innerWidth > 760; PAPER.views = paperViews(); PAPER.v = Math.max(0, PAPER.views.findIndex(v => v.includes(p))); paperShow(); }
 function paperGo(d) { const v = PAPER.v + d; if (v < 0 || v >= PAPER.views.length) return; PAPER.v = v; paperShow(); if (audio) beep(900 + Math.random()*200, 0.04, 0.03, 'triangle'); }   // (a page rustles)
@@ -8633,14 +8637,14 @@ function resetCar() {
 }
 
 function toMenu() {   // Esc: back to the start screen (the race is dropped; Enter starts a new one)
-  gameState = State.MENU; walkIn(true); freeExit(); radioShow(); lapStarted = false; for (const k in keys) keys[k] = false;
+  gameState = State.MENU; rapSend(false); walkIn(true); freeExit(); radioShow(); lapStarted = false; for (const k in keys) keys[k] = false;
   const ov = document.getElementById('overlay'); ov.classList.remove('hidden'); ov.style.background = 'rgba(10,10,10,0.92)';
   document.getElementById('results').style.display = 'none'; document.getElementById('menu-content').style.display = '';
   const cd = document.getElementById('countdown'); cd.style.opacity = 0; ghostStartRun();
   onlineRefresh();   // (a fresh leaderboard and rivals for the next start)
 }
 function finishRace() {
-  gameState=State.FINISHED;
+  gameState=State.FINISHED; rapSend(false);
   beep(660, 0.12, 0.3); setTimeout(()=>beep(880, 0.25, 0.3), 130);
   document.getElementById('overlay').classList.remove('hidden');
   document.getElementById('overlay').style.background='rgba(10,10,10,0.92)';

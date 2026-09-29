@@ -121,8 +121,9 @@ export async function handle(req, store) {
       let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: 'bad json' }, 400); }
       const id = String(b && b.id || ''); if (!/^[a-z0-9]{8,32}$/.test(id)) return json({ error: 'id' }, 400);
       const d = {}; for (const k of ['f', 'p', 'a']) { const v = b[k] === undefined ? 0 : b[k]; if (!Number.isInteger(v) || v < 0) return json({ error: k }, 400); d[k] = Math.min(v, RAP_MAX[k]); }
-      if (!d.f && !d.p && !d.a) return json({ ok: true });
-      const name = cleanName(b.name), R = await rapGet(store), r = R.rows[id] || (R.rows[id] = { name: '', f: 0, p: 0, a: 0 });
+      const name = cleanName(b.name), R = await rapGet(store);
+      if (!d.f && !d.p && !d.a && (!R.rows[id] || !name || badName(name) || R.rows[id].name === name)) return json({ ok: true });   // (nothing new — unless it names an existing row)
+      const r = R.rows[id] || (R.rows[id] = { name: '', f: 0, p: 0, a: 0 });
       if (name && !badName(name)) r.name = name; r.f += d.f; r.p += d.p; r.a += d.a; r.d = new Date().toISOString().slice(0, 10);
       const ids = Object.keys(R.rows); if (ids.length > RAP_ROWS) { ids.sort((x, y) => (R.rows[x].f + R.rows[x].p) - (R.rows[y].f + R.rows[y].p)); for (const x of ids.slice(0, ids.length - RAP_ROWS)) delete R.rows[x]; }   // (the mildest go first)
       await store.setJSON('rap.json', R); return json({ ok: true }); }
