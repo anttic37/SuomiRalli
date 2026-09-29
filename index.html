@@ -33,40 +33,40 @@
   #radio .r-title { display: inline-block; white-space: nowrap; }
   #radio .r-title.scroll { animation: radioScroll var(--dur, 10s) ease-in-out infinite alternate; }   /* (starts readable, slides to its end and back) */
   /* the start screen's own car radio: a 1985 in-dash unit — black face, chrome knobs, amber display, rubber buttons */
-  #mradio { display: none; margin: clamp(8px, 1.6vh, 14px) auto 0; width: min(400px, 90vw); user-select: none; }
+  #mradio { display: none; margin: 8px auto 0; width: min(320px, 86vw); user-select: none; }
   #mradio.on { display: block; }
-  #mradio .mr-face { position: relative; display: grid; grid-template-columns: 42px 1fr 42px; gap: 8px; align-items: center; padding: 7px 9px 6px;
+  #mradio .mr-face { position: relative; display: grid; grid-template-columns: 32px 1fr 32px; gap: 6px; align-items: center; padding: 5px 7px 4px;
     background: linear-gradient(180deg, #2c2c30 0%, #18181b 55%, #111113 100%); border: 1px solid #45454c; border-radius: 7px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.6), 0 8px 22px rgba(0,0,0,0.65), 0 0 0 3px #0b0b0c, 0 0 0 4px #3a3a3e; }
   #mradio .mr-face::before { content: ''; position: absolute; left: 10px; right: 10px; top: 5px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent); }
-  #mradio .mr-knob { position: relative; width: 32px; height: 32px; margin: 0 auto; border-radius: 50%; cursor: pointer; border: none; padding: 0;
+  #mradio .mr-knob { position: relative; width: 24px; height: 24px; margin: 0 auto; border-radius: 50%; cursor: pointer; border: none; padding: 0;
     background: radial-gradient(circle at 34% 28%, #ffffff 0%, #c9c9ce 22%, #85858c 55%, #3c3c42 80%, #202024 100%);
     box-shadow: 0 2px 4px rgba(0,0,0,0.7), inset 0 -2px 4px rgba(0,0,0,0.45), 0 0 0 2px #0c0c0e, 0 0 0 3px #505056; transition: transform 0.25s; }
-  #mradio .mr-knob::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: repeating-conic-gradient(rgba(0,0,0,0.18) 0 4deg, rgba(255,255,255,0.10) 4deg 8deg); }
-  #mradio .mr-knob::after { content: ''; position: absolute; left: 50%; top: 3px; width: 2px; height: 8px; margin-left: -1px; border-radius: 2px; background: #e0141e; box-shadow: 0 0 4px rgba(224,20,30,0.8); }
+  #mradio .mr-knob::before { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: repeating-conic-gradient(rgba(0,0,0,0.18) 0 4deg, rgba(255,255,255,0.10) 4deg 8deg); }
+  #mradio .mr-knob::after { content: ''; position: absolute; left: 50%; top: 2px; width: 2px; height: 6px; margin-left: -1px; border-radius: 2px; background: #e0141e; box-shadow: 0 0 4px rgba(224,20,30,0.8); }
   #mradio .mr-knob:active { filter: brightness(0.9); }
-  #mradio .mr-cap { display: block; margin-top: 5px; text-align: center; font: 700 7px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.22em; color: #9a9aa2; text-transform: uppercase; }
+  #mradio .mr-cap { display: block; margin-top: 3px; text-align: center; font: 700 6px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.22em; color: #9a9aa2; text-transform: uppercase; }
   #mradio .mr-mid { min-width: 0; }
-  #mradio .mr-brand { display: flex; justify-content: space-between; align-items: baseline; margin: 0 2px 3px; font: italic 900 10px/1 "Arial Black", "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.08em; color: #d8d8dc; }
-  #mradio .mr-brand small { font: 700 7px/1 "Helvetica Neue", Arial, sans-serif; font-style: normal; letter-spacing: 0.25em; color: #7a7a82; }
+  #mradio .mr-brand { display: flex; justify-content: space-between; align-items: baseline; margin: 0 2px 2px; font: italic 900 8.5px/1 "Arial Black", "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.08em; color: #d8d8dc; }
+  #mradio .mr-brand small { display: none; font: 700 7px/1 "Helvetica Neue", Arial, sans-serif; font-style: normal; letter-spacing: 0.25em; color: #7a7a82; }
   #mradio .mr-brand .led { display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: #3a0c0c; vertical-align: 1px; }
   #mradio.play .mr-brand .led { background: #ff2a1a; box-shadow: 0 0 6px #ff3a20; }
-  #mradio .mr-lcd { position: relative; overflow: hidden; padding: 4px 7px 3px; border-radius: 3px; background: linear-gradient(#1c1508, #0e0a03); border: 1px solid #000;
-    box-shadow: inset 0 0 14px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.05); font: 700 11px/1.2 "Courier New", monospace; letter-spacing: 0.06em; color: #ffb030; text-shadow: 0 0 7px rgba(255,160,40,0.75); font-variant-numeric: tabular-nums; }
+  #mradio .mr-lcd { position: relative; overflow: hidden; padding: 3px 6px 2px; border-radius: 3px; background: linear-gradient(#1c1508, #0e0a03); border: 1px solid #000;
+    box-shadow: inset 0 0 14px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.05); font: 700 9.5px/1.2 "Courier New", monospace; letter-spacing: 0.06em; color: #ffb030; text-shadow: 0 0 7px rgba(255,160,40,0.75); font-variant-numeric: tabular-nums; }
   #mradio .mr-lcd::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0 1px, transparent 1px 3px); pointer-events: none; }
   #mradio.off .mr-lcd { color: rgba(255,176,48,0.28); text-shadow: none; }
   #mradio .mr-row { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-  #mradio .mr-freq { font-size: 16px; line-height: 1; letter-spacing: 0.02em; } #mradio .mr-band { font-size: 8px; padding: 1px 4px; border: 1px solid currentColor; border-radius: 2px; }
-  #mradio .mr-st { flex: 1; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-size: 9px; letter-spacing: 0.1em; }
+  #mradio .mr-freq { font-size: 13px; line-height: 1; letter-spacing: 0.02em; } #mradio .mr-band { font-size: 8px; padding: 1px 4px; border: 1px solid currentColor; border-radius: 2px; }
+  #mradio .mr-st { flex: 1; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-size: 8px; letter-spacing: 0.1em; }
   #mradio .mr-vol { display: flex; gap: 2px; align-items: flex-end; height: 9px; } #mradio .mr-vol i { width: 2px; background: rgba(255,176,48,0.16); } #mradio .mr-vol i.lit { background: #ffb030; box-shadow: 0 0 4px rgba(255,160,40,0.7); }
-  #mradio .mr-win { margin-top: 2px; overflow: hidden; white-space: nowrap; font-size: 10px; } #mradio .mr-title { display: inline-block; white-space: nowrap; }
+  #mradio .mr-win { margin-top: 2px; overflow: hidden; white-space: nowrap; font-size: 9px; } #mradio .mr-title { display: inline-block; white-space: nowrap; }
   #mradio .mr-title.scroll { animation: radioScroll var(--dur, 10s) ease-in-out infinite alternate; }
-  #mradio .mr-keys { display: flex; justify-content: center; gap: 6px; margin-top: 5px; }
-  #mradio .mr-keys button { min-width: 30px; padding: 3px 6px 2px; border: none; border-radius: 3px; cursor: pointer; font: 800 9px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.08em; color: #e8e8ea;
+  #mradio .mr-keys { display: flex; justify-content: center; gap: 6px; margin-top: 3px; }
+  #mradio .mr-keys button { min-width: 24px; padding: 2px 5px 1px; border: none; border-radius: 3px; cursor: pointer; font: 800 8px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.08em; color: #e8e8ea;
     background: linear-gradient(#3a3a40, #1e1e22); box-shadow: 0 2px 0 #050506, inset 0 1px 0 rgba(255,255,255,0.12); }
   #mradio .mr-keys button:active { transform: translateY(1px); box-shadow: 0 1px 0 #050506; }
   #mradio .mr-keys .grp { display: flex; flex-direction: row; align-items: center; gap: 5px; } #mradio .mr-keys .grp > div { display: flex; gap: 3px; }
-  #mradio .mr-keys .grp span { font: 700 7px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.22em; color: #7a7a82; text-transform: uppercase; }
+  #mradio .mr-keys .grp span { font: 700 6px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.22em; color: #7a7a82; text-transform: uppercase; }
   @media (max-width: 460px) { #mradio .mr-face { grid-template-columns: 1fr; } #mradio .mr-knobcell { display: none; } }
   @keyframes radioScroll { 0%, 15% { transform: translateX(0); } 85%, 100% { transform: translateX(calc(-1px*var(--shift, 0))); } }
   #radio.flash { animation: radioFlash 0.5s ease-out; } @keyframes radioFlash { from { background: #4a3410; } }
@@ -174,6 +174,51 @@
   #cluster { position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: none; width: min(280px, 40vw); aspect-ratio: 2 / 1; }
   #controls-hint { position: fixed; bottom: 24px; left: 32px; z-index: 10; pointer-events: none; display: flex; gap: 16px; opacity: 0.25; }
   .key-hint { font-size: 9px; letter-spacing: 2px; color: #888; text-transform: uppercase; }
+  /* ── Ylästön Sanomat: the paper on the start screen (left), the share QR on the right; the viewer ── */
+  #lehti-mini { position: fixed; left: 34px; top: 50%; transform: translateY(-50%) rotate(-2.5deg); z-index: 5; cursor: pointer; box-shadow: 0 18px 40px rgba(0,0,0,0.75), 0 0 0 1px #c8bfa8; transition: transform 0.2s; }
+  #lehti-mini:hover { transform: translateY(-50%) rotate(-1deg) scale(1.02); }
+  #lehti-mini .lm-scale { transform-origin: 0 0; width: 760px; height: 1000px; overflow: hidden; pointer-events: none; }
+  #lehti-mini .lm-btn { position: absolute; right: -14px; bottom: -16px; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 14px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; transform: rotate(4deg); letter-spacing: 0.04em; }
+  #lehti-btn { display: none; margin: 10px auto 0; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 16px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; cursor: pointer; }
+  body:not(.lh-wide) #lehti-btn { display: table; }
+  body.lh-wide #share { position: fixed; left: auto; right: 34px; top: 50%; margin: 0; transform: translateY(-50%) rotate(3deg); z-index: 5; }
+  #paper { position: fixed; inset: 0; z-index: 300; background: rgba(16,14,12,0.975); display: none; user-select: none; }
+  #paper.on { display: block; }
+  #paper .pv-stage { position: absolute; left: 50%; top: 50%; transform-origin: 0 0; }
+  #paper .pv-spread { display: flex; box-shadow: 0 24px 70px rgba(0,0,0,0.8); position: relative; }
+  #paper .pv-spread::after { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 44px; margin-left: -22px; background: linear-gradient(90deg, rgba(0,0,0,0), rgba(0,0,0,0.22), rgba(0,0,0,0)); pointer-events: none; }
+  #paper .pv-spread:has(> .pv-page:only-child)::after { display: none; }
+  #paper .pv-nav { position: absolute; top: 50%; margin-top: -32px; width: 56px; height: 64px; border: none; border-radius: 6px; background: rgba(255,255,255,0.1); color: #ffd23a; font: 900 34px/64px Arial, sans-serif; cursor: pointer; }
+  #paper .pv-nav:hover { background: rgba(255,255,255,0.2); } #paper .pv-nav.l { left: 14px; } #paper .pv-nav.r { right: 14px; }
+  #paper .pv-close { position: absolute; top: 10px; right: 14px; width: 44px; height: 44px; border: none; border-radius: 50%; background: #e0141e; color: #fff; font: 900 22px/44px Arial, sans-serif; cursor: pointer; z-index: 2; }
+  #paper .pv-count { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font: 700 13px "Courier New", monospace; letter-spacing: 0.2em; color: #bbb; }
+  .pv-page { width: 760px; height: 1000px; box-sizing: border-box; padding: 30px 36px 34px; position: relative; overflow: hidden; color: #1a1814; text-align: left; font-family: "Times New Roman", "Liberation Serif", "DejaVu Serif", serif;
+    background: #f1ead8; background-image: radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1px); background-size: 4px 4px; }
+  .pv-page a { color: inherit; text-decoration: none; cursor: pointer; }
+  .lh-mast { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; border-bottom: 5px double #1a1814; padding-bottom: 6px; margin-bottom: 12px; }
+  .lh-mast b { font: 900 34px/1 "Times New Roman", "Liberation Serif", serif; letter-spacing: -0.5px; } .lh-mast.big b { font-size: 64px; letter-spacing: -1.5px; width: 100%; }
+  .lh-mast .lh-red { background: #c4201a; color: #fff; font: 700 13px Arial, sans-serif; padding: 3px 9px; letter-spacing: 0.1em; } .lh-mast i { font: italic 15px serif; }
+  .lh-kick { display: inline-block; background: #c4201a; color: #fff; font: 900 17px Arial, sans-serif; padding: 3px 10px; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .pv-page h2.lh-lead, .pv-page h2.up { text-transform: uppercase; font-size: 60px; letter-spacing: -1px; }
+  .pv-page h2 { margin: 0 0 8px; font: 900 64px/0.94 "Times New Roman", "Liberation Serif", serif; letter-spacing: -1.5px; } .pv-page h2.lh-lead { font-size: 66px; } .pv-page h2.mid { font-size: 52px; }
+  .pv-page h3 { margin: 0 0 8px; font: 900 34px/0.98 "Times New Roman", "Liberation Serif", serif; }
+  .lh-lede { font: 700 20px/1.25 "Times New Roman", "Liberation Serif", serif; margin: 6px 0 12px; }
+  .lh-photo { position: relative; width: 100%; background: #cfc6b0; border: 1px solid #1a1814; overflow: hidden; }
+  .lh-photo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: sepia(0.15) contrast(1.05); opacity: 0; transition: opacity 0.15s; } .lh-photo.ok img { opacity: 1; }
+  .lh-photo .lh-miss { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 900 16px Arial, sans-serif; letter-spacing: 0.2em; color: #8a8270; } .lh-photo.ok .lh-miss { display: none; }
+  .lh-cap { font: italic 14px/1.3 serif; margin: 5px 0 12px; color: #3a3630; }
+  .lh-cols { font: 17px/1.42 "Times New Roman", "Liberation Serif", serif; text-align: justify; hyphens: auto; } .lh-cols.c2 { column-count: 2; column-gap: 20px; } .lh-cols.c3 { column-count: 3; column-gap: 18px; }
+  .lh-cols p { margin: 0 0 9px; } .lh-cols.big { font-size: 19px; line-height: 1.45; } .lh-cols.small { font-size: 12.5px; line-height: 1.32; } .lh-cols.small p { margin: 0 0 6px; }
+  .lh-box { border: 3px solid #1a1814; padding: 10px 14px; background: #fffbe8; font: 15px/1.4 Arial, sans-serif; margin-top: 12px; } .lh-box b { font: 900 17px Arial, sans-serif; display: block; margin-bottom: 4px; }
+  .lh-stamp { position: absolute; right: 44px; top: 330px; font: 900 22px Arial, sans-serif; color: #c4201a; border: 4px solid #c4201a; padding: 6px 12px; transform: rotate(-8deg); opacity: 0.85; }
+  .lh-teas { display: flex; gap: 12px; border-top: 2px solid #1a1814; padding-top: 10px; margin-top: 4px; } .lh-teas a { flex: 1; font: 13px/1.2 serif; } .lh-teas b { display: block; font: 900 17px/1.05 serif; margin-top: 4px; } .lh-teas i { font-size: 13px; color: #555; }
+  .lh-index { margin-top: 10px; border-top: 1px solid #1a1814; padding-top: 6px; column-count: 2; column-gap: 20px; font: 13px/1.5 serif; } .lh-index b { display: block; font: 900 13px Arial, sans-serif; letter-spacing: 0.1em; column-span: all; margin-bottom: 2px; }
+  .lh-index a { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .lh-index a:hover, .lh-teas a:hover b { text-decoration: underline; } .lh-index i { color: #c4201a; font-style: normal; font-weight: 700; }
+  .lh-half { height: 460px; overflow: hidden; border-bottom: 2px solid #1a1814; margin-bottom: 14px; } .lh-half:last-child { border-bottom: none; }
+  .lh-hrow { display: flex; gap: 16px; } .lh-hrow.flip { flex-direction: row-reverse; } .lh-hrow .lh-photo { flex: 1.35; } .lh-hrow .lh-cols { flex: 1; font-size: 17px; }
+  .lh-keys { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; margin: 10px 0 16px; font: 17px Arial, sans-serif; } .lh-keys div { display: flex; align-items: center; gap: 10px; }
+  .lh-keys kbd { min-width: 44px; text-align: center; padding: 4px 8px; border: 2px solid #1a1814; border-radius: 4px; background: #fffbe8; font: 700 15px "Courier New", monospace; box-shadow: 0 2px 0 #1a1814; }
+  .lh-pno { position: absolute; bottom: 10px; font: 13px serif; color: #555; } .lh-pno.l { left: 36px; } .lh-pno.r { right: 36px; }
 </style>
 </head>
 <body>
@@ -184,11 +229,9 @@
   <div id="lang"><button data-l="fi">FI</button><button data-l="en">EN</button><button data-l="no">NO</button></div>
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
-  <div id="news"><span class="star">★</span><span data-t>UUTUUS: HAVUHELVETTI – HEAVY PÄNDI PELISSÄ</span><small data-t>B = keikkabussi · levyt ison männyn luota · GTA: aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 07.49 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
-    <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
+  <div class="build-stamp">editorista 10.20 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+    <div style="text-align:center"><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -210,8 +253,9 @@
   </div>
   <div id="top10"><div class="t10-head">Ennätyslista · kaikki kuskit</div><div class="t10-loading"><span class="spin"></span>haetaan aikoja…</div><div class="t10-bar"></div><div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div><div class="t10-skel" style="width:94%"></div></div>
   <div class="deco bottom"><svg width="80" height="20" viewBox="0 0 80 20" aria-hidden="true"><path d="M8 20L17 0h8L16 20zM30 20L39 0h8L38 20zM52 20L61 0h8L60 20z" fill="#e0141e"/></svg></div>
-  <div id="changelog"></div>
+  <div id="lehti-mini"></div>
 </div>
+<div id="paper"><button class="pv-close" title="sulje (Esc)">✕</button><button class="pv-nav l" title="edellinen (←)">‹</button><button class="pv-nav r" title="seuraava (→)">›</button><div class="pv-stage"></div><div class="pv-count"></div></div>
 <div id="hud">
   <div class="hud-block"><span class="hud-label" data-t>Aika</span><span class="hud-value" id="timer">00:00.000</span><span class="hud-sub" id="best-hud"></span><span class="hud-sub" id="pizza-hud" style="color:#ffb347"></span></div>
   <div class="hud-block" style="text-align:center"><span class="hud-label" data-t>Tarkastus</span><span class="hud-value" id="cp-counter">0 / 0</span></div>
@@ -294,7 +338,7 @@ const I18N = {
   'KERRO KAVERILLE!': ['TELL A FRIEND!', 'SI DET TIL EN VENN!'], 'ota kuva ja jaa peliä': ['snap it and share the game', 'ta et bilde og del spillet'],
   'TAUKO': ['PAUSED', 'PAUSE'], 'P jatka · R uusi lähtö · Esc alkuruutu': ['P resume · R restart · Esc menu', 'P fortsett · R ny start · Esc meny'],
   '💾 PC-PELI · TOIMII 486-KONEELLA': ['💾 PC GAME · RUNS ON A 486', '💾 PC-SPILL · KJØRER PÅ EN 486'], 'ei mobiilipeli – voi kyynel 😢': ["not a mobile game – boo hoo 😢", 'ikke et mobilspill – snufs 😢'], '✔ 28.9. TESTATTU: PELI SKULAA': ['✔ TESTED 28.9.: GAME WORKS', '✔ TESTET 28.9.: SPILLET FUNKER'], '– jos ei, niin voi voi': ['– if not, oh well', '– hvis ikke, synd det'],
-  'P tauko': ['P pause', 'P pause'], 'F jalkaisin': ['F on foot', 'F til fots'], 'ulos autosta / jalkaisin': ['get out / on foot', 'gå ut / til fots'], 'JALKAISIN · F = TAKAISIN AUTOON': ['ON FOOT · F = BACK IN THE CAR', 'TIL FOTS · F = TILBAKE I BILEN'], 'tauko': ['pause', 'pause'],
+  'P tauko': ['P pause', 'P pause'], 'AVAA LEHTI': ['OPEN THE PAPER', 'ÅPNE AVISEN'], 'F jalkaisin': ['F on foot', 'F til fots'], 'ulos autosta / jalkaisin': ['get out / on foot', 'gå ut / til fots'], 'JALKAISIN · F = TAKAISIN AUTOON': ['ON FOOT · F = BACK IN THE CAR', 'TIL FOTS · F = TILBAKE I BILEN'], 'tauko': ['pause', 'pause'],
   '👽 OSUMA! {0}/{1}': ['👽 HIT! {0}/{1}', '👽 TREFF! {0}/{1}'],
   'virta': ['power', 'på/av'], 'viritys': ['tuning', 'tuning'], 'kanava': ['station', 'kanal'], 'ääni': ['volume', 'volum'],
   'paina virtaa — radio soi täälläkin': ['press power — the radio plays here too', 'trykk på — radioen spiller her også'], 'RADIO POIS': ['RADIO OFF', 'RADIO AV'],
@@ -4310,6 +4354,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '📰 Alkuruutuun Ylästön Sanomat: uusin pääjuttu etusivulla, jokaisesta ominaisuudesta juttu (pääjutut aukeamina), näppäimet ja kaikki muutokset lehdessä. Kerro kaverille oikealle, radio pienemmäksi, UUTUUS, PC-laatikko ja paikkarivi pois'],
   ['29.9.', '☢️ Kun radiossa soi koelähetys 11: ydinräjähdys – välähdys, paineaalto, 90 % kaikesta tuhoutuu, loput hiiltyy ja palaa, maa mustaksi, tuhkaa sataa, sienipilvi taivaalla. Auto lentää sivuun mutta ajo jatkuu. R palauttaa maailman'],
   ['29.9.', 'Poliisiasemalle asfalttipiha (ruudut maalattu, keltainen reunaviiva, halkeamia) ja pihalla poliisit painivat juoppojen kanssa: rimpuilua, karkaamisia, maahan taltutus – ja huutoa'],
   ['29.9.', 'Saunan savu reilusti kapeampi ja pidempi: ohut musta nauha joka nousee korkealle ja kaartuu tuulen mukana mutkitellen'],
@@ -4423,6 +4468,152 @@ const CHANGES = [
   ['26.9.', 'Palaneet autot hiiltyvät'],
   ['26.9.', 'Optimointi: puolet vähemmän piirtokutsuja'],
 ];
+// ════════ YLÄSTÖN SANOMAT — the paper in the start screen ════════
+// Every feature has a story. size: 'main' = a spread (two pages), 'page' = a page, 'half' = half a page. n: newer = bigger.
+// The newest 'main' story is always the front page's lead, and its spread comes first (pp. 2–3); then the other main stories
+// (newest first), the pages, the halves in pairs, "Näin ajat" and the CHANGES list as "Lyhyesti". Photos in lehti/ (tests make them).
+const LEHTI = [
+  { id: 'ralli', size: 'main', n: 1, kick: '🏁 RALLI', title: 'Ralli ajetaan Ylästön kaduilla', lede: 'Kesä 1988. Vanha Pökö 205, oikeat kadut, oikeat talot – ja Wihkan eilinen aika 1.29:000 lyötävänä.',
+    img: ['ralli_a.jpg', 'ralli_b.jpg'], cap: ['Lähtöruudussa Malmirajantiellä. Yleisö on tullut rengasvallien taakse jo aamusta.', 'Mutkissa renkaat lentävät – ja betoniporsaat eivät.'],
+    body: ['YLÄSTÖ. Rata kulkee Ylästön oikeita katuja pitkin, kartan mukaan tarkalleen niin kuin ne ovat. Talot ovat 1990-luvun kylästä, mäet vähän liioiteltuja.', 'Lähtölaskennan jälkeen kello käy. Seitsemän väliaikaa kertoo, oletko edellä vai jäljessä. Oikaisuista ei tule palkintoa – leikattu kurvi hylkää ajan.', 'Kolhut näkyvät pellissä, nurmella auto ui ja soralla se sutii. Rengaspinot lentävät, betoniporsaat pysäyttävät.'],
+    box: ['NÄIN LÄHDET', 'Enter = lähtö · ↑ kaasu · ↓ jarru/peruutus', '← → ohjaus · välilyönti käsijarru', 'R = uusi lähtö milloin vain'] },
+  { id: 'haamu', size: 'main', n: 2, kick: '👻 HAAMU', title: 'Aja kaveria vastaan – haamuna', lede: 'Paras aikasi ajaa vierelläsi läpikuultavana haamuna. Netin ennätyslistalla näet, kuka kylässä on nopein.',
+    img: ['haamu_a.jpg', 'haamu_b.jpg'], cap: ['Haamuauto näyttää, missä olit viime kerralla. Tässä se vie.', 'Ennätyslista päivittyy netistä – kaikki kuskit samalla listalla.'],
+    body: ['Kun ajat maaliin, aikasi tallentuu nimelläsi ennätyslistaan. Seuraavalla kierroksella nopein kuski ajaa haamuna rinnallasi.', 'Haamu ei törmää, se vain näyttää linjan. Väliajoissa näkyy vihreällä, kun olet edellä, ja punaisella, kun jäät.', 'G-näppäin piilottaa haamun, jos se hermostuttaa.'],
+    box: ['VINKKI', 'Aja haamun sisäkaarteesta ohi.', 'Väliaikojen erotus näkyy ruudun yläosassa.'] },
+  { id: 'gta', size: 'main', n: 3, kick: '🚗 GTA-TILA', title: 'Koko kylä on sinun', lede: 'Lähdössä oikea kaista vie pois radalta: ei kelloa, ei sääntöjä – vain Ylästö, bussit, pizzeria ja kaikki mitä kylässä tapahtuu.',
+    img: ['gta_a.jpg', 'gta_b.jpg'], cap: ['Bussi, mopot ja ohikulkijat liikkuvat omia reittejään.', 'Kylä ylhäältä: kadut, pihat ja pellot.'],
+    body: ['GTA-tilassa ajat vapaasti koko kylän katuverkossa. Minikartta seuraa autoa kaksinkertaisella suurennoksella, pizzeria ja ES-piste näkyvät kartalla.', 'Liikenne ajaa omia reittejään, bussit pysähtyvät, poliisit tulevat jos sotket. Havuhelvetin keikkabussi voi ilmestyä mistä vain.', 'Ja muista: jalkaisin pääsee F-näppäimellä.'],
+    box: ['NÄIN PÄÄSET', 'Aja lähdössä oikeaa kaistaa pitkin pois radalta.', 'R palauttaa lähtöön ja kisaan.'] },
+  { id: 'radio', size: 'main', n: 4, kick: '📻 RADIO', title: 'Ylästö Sound soi koko kesän', lede: 'Autoradiossa soi yli viisikymmentä raitaa: biisejä, urheilua, sääennusteita, puheohjelmia – ja outoja koelähetyksiä.',
+    img: ['radio_a.jpg', 'radio_b.jpg'], cap: ['Valikon radio: virta, viritys ja äänenvoimakkuus. Soi jo ennen lähtöä.', 'Iltalenkki Ylästössä, radio auki.'],
+    body: ['Radio soittaa pitkää listaa, jossa biisien välissä tulee urheilulähetyksiä, sääennusteita ja paikallisradion juttuja. Kierros kestää reilut kaksi tuntia.', 'E vaihtaa kanavaa, 1 ja 2 säätävät äänenvoimakkuutta. Valikossa radiota ohjataan nupeista.', 'Jos kuulet koelähetyksen numero 11… lue sivut 2–3.'],
+    box: ['NÄPPÄIMET', 'E = seuraava kanava', '1 / 2 = hiljemmalle / lujemmalle', 'B = bassoboost'] },
+  { id: 'poliisi', size: 'main', n: 5, kick: '🚨 POLIISI', title: 'Kolme kolaria – ja poliisit perään', lede: 'Ylästön poliisi laskee. Kolmannesta kolarista tai tulipalosta lähtee partio, ja se ei luovuta helposti.',
+    img: ['poliisi_a.jpg', 'poliisi_b.jpg'], cap: ['Siniset valot peilissä. Karkuun pääsee, jos ehtii tarpeeksi kauas.', 'Kiinni jäi. Konstaapeli haluaa sanoa pari sanaa.'],
+    body: ['Kolhi autoja, aja ihmisten päälle tai sytytä talo – laskuri kasvaa. Kolmannesta tapauksesta poliisiautot lähtevät perään.', 'Jos ne saavat sinut kiinni, konstaapeli nousee autosta puhuttelemaan. Jos pääset tarpeeksi kauas kymmeneksi sekunniksi, pääsit karkuun.', 'Ja jos ajat karhun yli, perään lähtee kymmenen autoa kerralla.'],
+    box: ['LASKURI', 'KOLARI 1/3 → 2/3 → 🚨', 'Karkuun: pysy yli 10 s poissa näkyvistä'] },
+  { id: 'tuli', size: 'main', n: 6, kick: '🔥 TULIPALO', title: 'Talo syttyi – palokunta paikalla', lede: 'Kova isku taloon, ja katto leimahtaa. Paloauto tulee sireenit soiden, ambulanssi hakee loukkaantuneet.',
+    img: ['tuli_a.jpg', 'tuli_b.jpg'], cap: ['Liekit nuolevat kattoa, musta savu nousee kylän yli.', 'Palomiehet letkuineen. Sammutus kestää puolisen minuuttia.'],
+    body: ['Taloon voi törmätä kovaa – ja silloin se syttyy. Tuli leviää katolle, kipinät rätisevät ja maa hehkuu oranssina palon ympärillä.', 'Hälytys menee samantien: 80-luvun punainen paloauto ajaa paikalle, kolme palomiestä vetää letkut ja sammuttaa. Loukkaantuneille tulee ambulanssi.', 'Kaikki on samaa maailmaa: jos ajat ambulanssiin, se voi syttyä, ja paikalle tulee vielä paloauto.'],
+    box: ['MUISTA', 'Tulipalot lasketaan poliisin laskuriin.', 'Hälytysajoneuvot väistävät – mutta eivät aina.'] },
+  { id: 'ufo', size: 'main', n: 7, kick: '👽 UFO', title: 'UFO kaapattu maantiellä', lede: 'Paikallinen rallikuski ajoi ufoukon yli – ja sai lentävän lautasen omakseen.',
+    img: ['ufo_a.jpg', 'ufo_b.jpg'], cap: ['Lautanen seuraa autoa 20 metrin korkeudella. Vihreä säde ulottuu maahan asti.', 'Ufoukko sädeaseineen ampuu kaikkea, mikä liikkuu.'],
+    body: ['Kylän laidoille on laskeutunut kaksi lentävää lautasta. Kun niiden luo ajaa, ne heräävät ja alkavat ampua vihreitä plasmapalloja.', 'Yhdellä ukoista on sädease. Jos ajat hänen ylitseen, UFO nousee ilmaan ja lentää siitä lähtien autosi yllä – vihreä säde alas autoon.', 'Kolme osumaa ja auto räjähtää. Jalkaisin ukot ampuvat myös kuskia.'],
+    box: ['NÄIN KAAPPAAT', '1. Aja UFOn luo (radalta pois)', '2. Aja sädeaseukon yli', '3. UFO on sinun – R palauttaa sen'] },
+  { id: 'nuke', size: 'main', n: 8, kick: '☢️ PÄÄUUTINEN', title: 'Koelähetys räjäytti kylän', lede: 'Paikallisradion koelähetys numero 11 ei ollutkaan pelkkää kohinaa. Seitsemän sekuntia sen alkamisesta taivaanranta välähti valkoiseksi.',
+    img: ['nuke_a.jpg', 'nuke_b.jpg'], cap: ['Sienipilvi nousi Ylästön ylle hetkeä ennen paineaaltoa.', 'Paineaallon jälkeen: tuhkaa, mustia runkoja ja tyhjä tie. Rallikuski jatkoi matkaa.'],
+    body: ['YLÄSTÖ. Paineaalto kulki maata pitkin 340 metriä sekunnissa. Kun se ehti kylään, yhdeksän taloa kymmenestä oli poissa. Jäljelle jäi hiiltyneitä kuoria, vinoja puunrunkoja ja palanut maa.', 'Rallikuski lensi autoineen sivuun, mutta auto lähti yhä käyntiin. – Pellit menivät, mutta ajaa voi, kuski kertoo.', 'Ambulansseja ei tullut. Taivas muuttui ruskeaksi ja ilmassa leijui tuhkaa. Kuumailmapallot poksahtivat.', 'Viranomaiset muistuttavat: R-näppäin palauttaa kylän ennalleen. Koelähetys 11 kuuluu radiossa noin kerran kahdessa tunnissa.'],
+    box: ['NÄIN SE TAPAHTUU', '1. Pidä radio päällä (E vaihtaa kanavaa)', '2. Odota, kunnes kuuluu 📡 KOELÄHETYS 11', '3. Seitsemän sekuntia… voi voi.'] },
+
+  { id: 'kyla', size: 'page', n: 10, kick: '🏡 KYLÄ', title: 'Oikea Ylästö, oikeat talot', lede: 'Kadut kartasta, talot 1990-luvun kylästä: rintamamiestaloja, kuusikymmentäluvun pitkiä taloja ja kasaritaloja pihoineen.',
+    img: ['kyla.jpg'], cap: ['Ylästö ylhäältä. Joka talolla oma piha, aita, postilaatikko ja omenapuu.'],
+    body: ['Talot on rakennettu oikeille paikoilleen, ikkunat verhoineen, ovet kadun puolelle. Pihoilla leikitään, grillataan, lakaistaan mattoja ja pelataan sulkapalloa.', 'Mäet ovat toistaiseksi kahdeksankertaisesti liioiteltuja – oikea maanmittauslaitoksen korkeusmalli on tulossa.'] },
+  { id: 'aika', size: 'page', n: 11, kick: '🌅 VUOROKAUSI', title: 'Aamu, päivä ja ilta', lede: 'Jokainen lähtö arpoo vuorokaudenajan: kostea aamu, kirkas päivä tai kultainen kesäilta.',
+    img: ['aika.jpg'], cap: ['Sama kylä kolmessa valossa: aamu, päivä, ilta.'],
+    body: ['Valo tulee eri suunnasta, varjot pitenevät ja taivas vaihtaa väriä. Illalla ikkunat hehkuvat ja saunan piipussa näkyy kiukaan loimu.'] },
+  { id: 'jalan', size: 'page', n: 12, kick: '🚶 JALKAISIN', title: 'F – ja kuski nousee autosta', lede: 'Pysähdy, paina F, ja kävele. Juokse välilyönnillä – mutta kunto loppuu, ja auton jättäminen yksin pelottaa.',
+    img: ['jalan.jpg'], cap: ['Kuski jaloittelee kylän raitilla. Auto odottaa käsijarru päällä.'],
+    body: ['Jalkaisin kuski on ihan tavallinen kyläläinen: hän törmäilee aitoihin ja kaatuu, jos joku ajaa päälle. Hän nousee kyllä itse.', 'Juokseminen väsyttää, ja yli 90 metrin päässä autosta kuski alkaa pelätä, että joku vie sen. 140 metrin jälkeen ei uskalla kauemmas.'],
+    box: ['NÄPPÄIMET', 'F = ulos / takaisin autoon', 'Nuolet = kävely · välilyönti = juoksu'] },
+  { id: 'es', size: 'page', n: 13, kick: '⚡ ES', title: 'ES-juoma: tuplanopeus 40 sekunniksi', lede: 'K-kaupan edessä on ES-piste. Pysähdy, myyjä tuo tölkin – ja auto kulkee kaksi kertaa niin kovaa.',
+    img: ['es.jpg'], cap: ['ES-kyltti K-kaupan edessä. Tanssijat houkuttelevat pysähtymään.'],
+    body: ['Nopeus tuplaantuu 40 sekunniksi. Mutta varo: kolari ES:n vaikutuksen alaisena sytyttää auton, ja kuski lentää ulos.'] },
+  { id: 'bass', size: 'page', n: 14, kick: '🔊 BASSOBOOST', title: 'B-näppäin, ja kylä hullaantuu', lede: 'Bassoboost päälle: yleisö juoksee auton ympärille, hyppii tahdissa, ja auto itse pomppii.',
+    img: ['bass.jpg'], cap: ['Bassot päälle ja katsomo tyhjeni auton ympärille.'],
+    body: ['Bassoboost muuttaa radion jumputukseksi. Katsojat ryntäävät auton ympärille, kädet ylhäällä. Auto hyppii tahdissa, ja nopeus rajoittuu, ettei kukaan jää alle.', 'Samalla kylälle ilmestyy Havuhelvetin keikkabussi.'] },
+  { id: 'hevi', size: 'page', n: 15, kick: '🤘 HAVUHELVETTI', title: 'Heavy pändi keikkabussilla', lede: 'Metsähevibändi Havuhelvetti ajaa kylällä liian kovaa, eikä mikään pysäytä sitä. Ison männyn luota saa bändin levyn.',
+    img: ['hevi.jpg'], cap: ['Havuhelvetin levykoju ison männyn juurella. Bändin jäsenet dokaavat metsässä.'],
+    body: ['Keikkabussi pauhaa ohi blast beatien ja huudon saattelemana, ja bändi soittaa katolla. Kun pysähdyt kojulle, bändin jäsen tuo levyn – ja sen jälkeen radiosta kuuluu vain Havuhelvettiä.'] },
+  { id: 'maali', size: 'page', n: 16, kick: '🏆 MAALI', title: 'Katsomot, tulostaulu ja makkara', lede: 'Maalissa on katsomot, iso tulostaulu, varikko asfalttialueella ja makkarakärry. Yleisö hurraa ohi ajaessa.',
+    img: ['maali.jpg'], cap: ['Maalisuora. Tulostaulussa näkyvät parhaat ajat.'],
+    body: ['Katsomot ovat maalissa ja K-kaupan kohdalla. Tulostaulu näyttää kärkiajat, ja varikko on asfalttialueella maalin vieressä.'] },
+  { id: 'olymp', size: 'page', n: 17, kick: '🥇 OLYMPIALAISET', title: 'Naamiaisolympialaiset kentällä', lede: 'Urheilukentän laidalla kisataan naamiaisasuissa: pikajuoksua, keihästä – ja palkintojenjakoa.',
+    img: ['olymp.jpg'], cap: ['Naamiaisasuiset urheilijat lähtöviivalla.'],
+    body: ['Kisat pyörivät koko ajan: juostaan, heitetään keihästä ja jaetaan mitalit. Yleisö seuraa kentän laidalla.'] },
+  { id: 'karhu', size: 'page', n: 18, kick: '🐻 KARHU', title: 'Karhu yliajettu – kymmenen poliisia perään', lede: 'Metsässä liikkuu karhu. Jos ajat sen yli, perään lähtee kymmenen poliisiautoa kerralla.',
+    img: ['karhu.jpg'], cap: ['Karhu metsätien laidalla.'],
+    body: ['Hirvet ja karhu kulkevat metsissä. Hirvi jähmettyy ajovaloihin, karhu ei. Karhun yliajo on vakava asia.'] },
+  { id: 'asema', size: 'page', n: 19, kick: '🚓 POLIISIASEMA', title: 'Juopot antoivat poliisille töitä', lede: 'K-kaupan lähellä on uusi poliisiasema. Asfalttipihalla nähdään painia melkein joka päivä.',
+    img: ['asema.jpg'], cap: ['Poliisiaseman piha. Kolme partioautoa ruuduissaan.'],
+    body: ['Juoppo repäisee itsensä irti ja hoippuu karkuun, mutta konstaapelit saavat hänet naama asfalttiin. Partioautoihin ei kannata ajaa – poliisi huomaa sen.'] },
+
+  { id: 'sauna', size: 'half', n: 30, kick: '🔥 SAUNA', title: 'Saunaporukka savuttaa pellolla', img: ['sauna.jpg'], body: ['Saunakärry ja vanha pakettiauto ilmestyvät joka kerta eri paikkaan. Piipusta nousee pitkä musta nauha, ja möly kuuluu kylälle asti.'] },
+  { id: 'hirvi', size: 'half', n: 31, kick: '🦌 HIRVI', title: 'Hirvi jähmettyi valoihin', img: ['hirvi.jpg'], body: ['Metsissä laiduntaa hirviä. Välillä yksi ylittää tien – ja jää tuijottamaan autoa.'] },
+  { id: 'pallot', size: 'half', n: 32, kick: '🎈 PALLOT', title: 'Kuumailmapallo poksahti', img: ['pallot.jpg'], body: ['Kaksi kuumailmapalloa lipuu kylän yllä. Alta ajaessa on 5 % mahdollisuus, että toinen poksahtaa ja kori rymähtää maahan.'] },
+  { id: 'koirat', size: 'half', n: 33, kick: '🐕 KOIRAT', title: 'Pihakoirat jahtaavat autoa', img: ['koirat.jpg'], body: ['Neljä koiraa lähtee perään haukkuen. Jos yksi jää alle, naapurit juoksevat nyrkit pystyssä perässä.'] },
+  { id: 'kaali', size: 'half', n: 34, kick: '🚜 KAALIMAA', title: 'Isäntä suuttui – traktori perään', img: ['kaali.jpg'], body: ['Kaalimaan yli ajava saa traktorin perään. Isäntä ei luovuta ennen kuin 45 sekunnin päästä.'] },
+  { id: 'heli', size: 'half', n: 35, kick: '🚁 MEDI-HELI', title: 'Lääkärihelikopteri pellolla', img: ['heli.jpg'], body: ['Medi-Heli on laskeutunut, ja ensihoitajat elvyttävät. Kopteriin voi ajaa – se toimii kuin ambulanssi.'] },
+  { id: 'kokko', size: 'half', n: 36, kick: '🔥 JUHANNUS', title: 'Kokko palaa, porukka laulaa', img: ['kokko.jpg'], body: ['Juhannuskokon ympärillä lauletaan ja otetaan. Välillä joku kaatuu naamalleen pusikkoon.'] },
+  { id: 'porsaat', size: 'half', n: 37, kick: '🧱 PORSAAT', title: 'Betoniporsas ei väistä', img: ['porsaat.jpg'], body: ['Betoniporsaat ovat kaksi kertaa rengaspinoa painavampia. Ne siirtyvät, mutta pysäyttävät.'] },
+  { id: 'posti', size: 'half', n: 38, kick: '📮 POSTI', title: 'Postiauto kiertää kylää', img: ['posti.jpg'], body: ['Postinkantaja pysähtyy laatikoille ja kiikuttaa kirjeet. Törmää, ja kirjeet lentävät pitkin tietä.'] },
+  { id: 'pizza', size: 'half', n: 39, kick: '🍕 PIZZA', title: 'Pizzalla lisävauhtia', img: ['pizza.jpg'], body: ['Pysähdy pizzerian eteen, ja kuski tuo pizzan. Hetken auto kulkee vähän kovempaa.'] },
+  { id: 'pihat', size: 'half', n: 40, kick: '🏸 PIHAT', title: 'Pihoilla riittää elämää', img: ['pihat.jpg'], body: ['Sulkapalloa, pyykkejä, keppihevosia, grillausta ja riitoja. Kun rallikuski kaahaa ohi, lakanat lähtevät lentoon.'] },
+  { id: 'renkaat', size: 'half', n: 41, kick: '🛞 YLEISÖ', title: 'Rengasvallit ja yleisö', img: ['renkaat.jpg'], body: ['Rengaspinot lentävät, yleisö hurraa ja väistää. Mutkissa jotkut seisovat tiellä – ne juoksevat kyllä pois.'] },
+];
+const PAPER = { pages: [], views: [], v: 0, open: false, two: true, wheelT: 0, tx: 0 };
+const lhEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const lhImg = (f, h, cls) => '<div class="lh-photo ' + (cls || '') + '" style="height:' + h + 'px"><img data-src="lehti/' + f + '" alt=""><span class="lh-miss">KUVA TULOSSA</span></div>';
+function lhDate() { return (CHANGES[0] ? CHANGES[0][0] : '') + '1988'; }
+function lhMast(big) { return '<div class="lh-mast' + (big ? ' big' : '') + '"><b>YLÄSTÖN SANOMAT</b><span class="lh-red">' + (big ? 'UUSIMMAT JUTUT' : 'YLÄSTÖ 1988') + '</span><i>' + lhDate() + ' · Nro ' + CHANGES.length + ' · 3,50 mk</i></div>'; }
+function lhBox(b) { return b ? '<div class="lh-box"><b>' + lhEsc(b[0]) + '</b>' + b.slice(1).map(lhEsc).join('<br>') + '</div>' : ''; }
+function lhBody(S, cols) { return '<div class="lh-cols c' + cols + '">' + S.body.map((p, i) => '<p>' + (i === 0 ? '<b>YLÄSTÖ.</b> ' + lhEsc(p.replace(/^YLÄSTÖ\.\s*/, '')) : lhEsc(p)) + '</p>').join('') + '</div>'; }
+function lhPlan() {   // the running order: lead spread, the other mains (newest first), pages, halves in pairs, how to drive, the change list
+  const by = (sz) => LEHTI.filter(s => s.size === sz).sort((a, b) => b.n - a.n), mains = by('main'), lead = mains[0], pages = [];
+  const where = {}; let pn = 2;
+  for (const s of mains) { where[s.id] = pn; pn += 2; } for (const s of by('page')) { where[s.id] = pn; pn++; } const halves = by('half'); for (let i = 0; i < halves.length; i += 2) { where[halves[i].id] = pn; if (halves[i + 1]) where[halves[i + 1].id] = pn; pn++; }
+  const keysPage = pn++, lyhPage = pn;
+  pages.push(lhFront(lead, where, keysPage, lyhPage));
+  for (const s of mains) pages.push(...lhSpread(s, s === lead));
+  for (const s of by('page')) pages.push(lhPage(s));
+  for (let i = 0; i < halves.length; i += 2) pages.push(lhHalves(halves[i], halves[i + 1]));
+  pages.push(lhKeys()); pages.push(...lhLyhyesti());
+  return pages.map((html, i) => '<div class="pv-page">' + html + '<div class="lh-pno ' + (i % 2 ? 'l' : 'r') + '">' + (i + 1) + '</div></div>'); }
+function lhFront(S, where, keysPage, lyhPage) { const t = LEHTI.filter(s => s !== S && s.size === 'main').sort((a, b) => b.n - a.n).slice(0, 3);   // (the teasers: the next main stories)
+  const idx = LEHTI.filter(s => s !== S).sort((a, b) => where[a.id] - where[b.id]).map(s => '<a data-go="' + where[s.id] + '">' + lhEsc(s.title) + ' <i>' + where[s.id] + '</i></a>').join('');
+  return lhMast(true) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="lh-lead">' + lhEsc(S.title) + '</h2>' + lhImg(S.img[0], 380) +
+    '<div class="lh-lede">' + lhEsc(S.lede) + ' <a data-go="2"><i>Sivut 2–3 ›</i></a></div>' +
+    '<div class="lh-teas">' + t.map(s => '<a data-go="' + where[s.id] + '">' + lhImg(s.img[0], 96) + '<b>' + lhEsc(s.title) + '</b><i>s. ' + where[s.id] + '</i></a>').join('') + '</div>' +
+    '<div class="lh-index"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>'; }
+function lhSpread(S, lead) {
+  return [lhMast(false) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="up">' + lhEsc(S.title) + '</h2><div class="lh-lede">' + lhEsc(S.lede) + '</div>' + lhImg(S.img[0], 560) + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>',
+    lhImg(S.img[1], 470) + '<div class="lh-cap">' + lhEsc(S.cap[1]) + '</div>' + lhBody(S, 3) + lhBox(S.box) + (lead ? '<div class="lh-stamp">PÄÄUUTINEN</div>' : '')]; }
+function lhPage(S) { return '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="mid">' + lhEsc(S.title) + '</h2><div class="lh-lede">' + lhEsc(S.lede) + '</div>' + lhImg(S.img[0], 560) + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>' + lhBody(S, 2).replace('lh-cols c2', 'lh-cols c2 big') + lhBox(S.box); }
+function lhHalves(a, b) { const one = (S, flip) => !S ? '' : '<div class="lh-half"><span class="lh-kick">' + lhEsc(S.kick) + '</span><h3>' + lhEsc(S.title) + '</h3><div class="lh-hrow' + (flip ? ' flip' : '') + '">' + lhImg(S.img[0], 300, 'h') + '<div class="lh-cols c1">' + S.body.map(p => '<p>' + lhEsc(p) + '</p>').join('') + '</div></div></div>';
+  return one(a, false) + one(b, true); }
+function lhKeys() { const K = [['Enter', 'lähtö'], ['↑', 'kaasu'], ['↓', 'jarru / peruutus'], ['← →', 'ohjaus'], ['välilyönti', 'käsijarru'], ['R', 'uusi lähtö'], ['Esc', 'alkuruutu'], ['C', 'kamera (matala / ylä)'], ['G', 'haamu päälle / pois'], ['E', 'radio: seuraava kanava'], ['1 · 2', 'radio hiljemmalle / lujemmalle'], ['B', 'bassoboost'], ['P', 'tauko'], ['F', 'ulos autosta / jalkaisin'], ['L', 'kieli (alkuruudussa)']];
+  return '<span class="lh-kick">📋 OHJEET</span><h2 class="mid">Näin ajat</h2><div class="lh-lede">Pökö 205 ajetaan näppäimistöllä. Peli on tehty tietokoneelle – kännykällä voi lukea lehteä.</div>' +
+    '<div class="lh-keys">' + K.map(([k, t]) => '<div><kbd>' + lhEsc(k) + '</kbd><span>' + lhEsc(t) + '</span></div>').join('') + '</div>' +
+    '<div class="lh-box"><b>GTA-TILA</b>Aja lähdössä oikeaa kaistaa pois radalta – koko kylä on vapaa.<br>R palauttaa kisaan.</div>' +
+    '<div class="lh-box"><b>KERRO KAVERILLE</b>suomiralli.netlify.app – QR-koodi on alkuruudussa.</div>'; }
+function lhLyhyesti() { const out = []; let cur = [], len = 0; const flush = () => { if (!cur.length) return; out.push('<span class="lh-kick">📰 LYHYESTI</span><h2 class="mid">' + (out.length ? 'Lyhyesti (jatkuu)' : 'Lyhyesti: kaikki muutokset') + '</h2><div class="lh-cols c3 small">' + cur.join('') + '</div>'); cur = []; len = 0; };
+  for (const [d, t] of CHANGES) { const L = t.length + 60; if (len + L > (out.length ? 5600 : 5000)) flush(); cur.push('<p><b>' + lhEsc(d) + '</b> ' + lhEsc(t) + '</p>'); len += L; } flush(); return out; }
+function lhLoadImgs(el) { el.querySelectorAll('img[data-src]').forEach(im => { if (im.src) return; im.onerror = () => im.parentNode.classList.add('miss'); im.onload = () => im.parentNode.classList.add('ok'); im.src = im.dataset.src; }); }
+function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER.pages = lhPlan();
+  const mini = document.getElementById('lehti-mini'); mini.innerHTML = '<div class="lm-scale">' + PAPER.pages[0] + '</div><div class="lm-btn">📰 ' + T('AVAA LEHTI') + '</div>'; lhLoadImgs(mini);
+  mini.onclick = () => paperOpen(0); const btn = document.getElementById('lehti-btn'); if (btn) btn.onclick = () => paperOpen(0);
+  const P = document.getElementById('paper'); P.querySelector('.pv-close').onclick = paperClose; P.querySelector('.pv-nav.l').onclick = () => paperGo(-1); P.querySelector('.pv-nav.r').onclick = () => paperGo(1);
+  P.addEventListener('click', (e) => { const a = e.target.closest('[data-go]'); if (a) { paperToPage(+a.dataset.go - 1); e.stopPropagation(); } else if (e.target === P) paperClose(); });
+  P.addEventListener('wheel', (e) => { e.preventDefault(); const now = performance.now(); if (now - PAPER.wheelT < 380 || Math.abs(e.deltaY) < 8) return; PAPER.wheelT = now; paperGo(e.deltaY > 0 ? 1 : -1); }, { passive: false });
+  P.addEventListener('touchstart', (e) => { PAPER.tx = e.touches[0].clientX; }, { passive: true });
+  P.addEventListener('touchend', (e) => { const dx = e.changedTouches[0].clientX - PAPER.tx; if (Math.abs(dx) > 50) paperGo(dx < 0 ? 1 : -1); }, { passive: true });
+  addEventListener('keydown', (e) => { if (!PAPER.open) return; e.stopImmediatePropagation(); if (['ArrowRight', 'PageDown', 'Space', 'ArrowDown'].includes(e.code)) { e.preventDefault(); paperGo(1); } else if (['ArrowLeft', 'PageUp', 'ArrowUp'].includes(e.code)) { e.preventDefault(); paperGo(-1); } else if (e.code === 'Escape' || e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); paperClose(); } }, true);   // (while it's open: the keys turn pages, nothing reaches the game)
+  addEventListener('resize', () => { lehtiLayout(); if (PAPER.open) paperShow(); }); lehtiLayout(); }
+function lehtiLayout() { const mini = document.getElementById('lehti-mini'); if (!mini) return; const W = innerWidth, H = innerHeight, s = Math.min(0.43, (H - 140)/1000, ((W - 800)/2 - 60)/760);
+  const wide = s >= 0.24; document.body.classList.toggle('lh-wide', wide); mini.style.display = wide ? '' : 'none'; if (!wide) return;
+  mini.style.width = (760*s).toFixed(0) + 'px'; mini.style.height = (1000*s).toFixed(0) + 'px'; mini.firstChild.style.transform = 'scale(' + s.toFixed(3) + ')'; }
+function paperViews() { const n = PAPER.pages.length, V = []; if (!PAPER.two) { for (let i = 0; i < n; i++) V.push([i]); return V; } V.push([0]); for (let i = 1; i < n; i += 2) V.push(i + 1 < n ? [i, i + 1] : [i]); return V; }
+function paperOpen(page) { PAPER.open = true; document.getElementById('paper').classList.add('on'); paperToPage(page || 0); }
+function paperClose() { PAPER.open = false; document.getElementById('paper').classList.remove('on'); }
+function paperToPage(p) { PAPER.two = innerWidth > innerHeight*1.15 && innerWidth > 760; PAPER.views = paperViews(); PAPER.v = Math.max(0, PAPER.views.findIndex(v => v.includes(p))); paperShow(); }
+function paperGo(d) { const v = PAPER.v + d; if (v < 0 || v >= PAPER.views.length) return; PAPER.v = v; paperShow(); if (audio) beep(900 + Math.random()*200, 0.04, 0.03, 'triangle'); }   // (a page rustles)
+function paperShow() { const P = document.getElementById('paper'), st = P.querySelector('.pv-stage'), two = innerWidth > innerHeight*1.15 && innerWidth > 760;
+  if (two !== PAPER.two) { const first = (PAPER.views[PAPER.v] || [0])[0]; PAPER.two = two; PAPER.views = paperViews(); PAPER.v = Math.max(0, PAPER.views.findIndex(v => v.includes(first))); }
+  const view = PAPER.views[PAPER.v], w = 760*view.length, s = Math.min((innerWidth - (two ? 150 : 24))/w, (innerHeight - 70)/1000);
+  st.innerHTML = '<div class="pv-spread">' + view.map(i => PAPER.pages[i]).join('') + '</div>'; st.style.transform = 'translate(' + (-w*s/2).toFixed(1) + 'px,' + (-1000*s/2 - 10).toFixed(1) + 'px) scale(' + s.toFixed(4) + ')'; lhLoadImgs(st);
+  P.querySelector('.pv-nav.l').style.visibility = PAPER.v > 0 ? '' : 'hidden'; P.querySelector('.pv-nav.r').style.visibility = PAPER.v < PAPER.views.length - 1 ? '' : 'hidden';
+  P.querySelector('.pv-count').textContent = 's. ' + view.map(i => i + 1).join('–') + ' / ' + PAPER.pages.length;
+  const nx = PAPER.views[PAPER.v + 1]; if (nx) { const tmp = document.createElement('div'); tmp.innerHTML = nx.map(i => PAPER.pages[i]).join(''); tmp.querySelectorAll('img[data-src]').forEach(im => { const pre = new Image(); pre.src = im.dataset.src; }); } }   // (the next spread's photos load ahead)
 function renderChangelog() { const el = document.getElementById('changelog'); if (!el) return;
   el.innerHTML = '<div class="cl-head">' + T('MUUTOKSET') + '</div><div class="cl-list"></div>'; const L = el.lastChild; CHANGES.forEach(([d, t]) => { const r = document.createElement('div'); r.className = 'cl-row'; r.title = t;   // (all of them: the box scrolls)
     r.innerHTML = '<span class="cl-d"></span><span></span>'; r.children[0].textContent = d; r.children[1].textContent = t; L.appendChild(r); }); }
@@ -8831,7 +9022,7 @@ function loop(time) {
 // INIT
 // ════════════════════════════════════════
 addEventListener('resize', () => { camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
-generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); renderChangelog(); radioLoad();   // (the ground is built by the terrain lift inside generateTrack)
+generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); renderChangelog(); lehtiInit(); radioLoad();   // (the ground is built by the terrain lift inside generateTrack)
 { const el = document.getElementById('terrain-label'); if (el) el.textContent = HEIGHT_RAW ? 'maanmittauslaitoksen korkeusmalli' : 'väliaikaiset mäet ' + PLACEHOLDER_AMP + '×'; }
 camPos.set(car.x-Math.sin(car.angle)*25, 45, car.z-Math.cos(car.angle)*25);
 camLookAt.set(car.x, Y(car.x,car.z), car.z);

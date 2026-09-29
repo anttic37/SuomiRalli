@@ -33,6 +33,7 @@ In test scripts: stub `renderer.render` while simulating, step with `loop(lastTi
   (t_lap, t_start, t_phases, t_ghost) plus the tests for what changed.
 
 ## Working rules from Antti
-- Every change gets a one-line Finnish entry at the top of `CHANGES` in src/game.html (the start screen shows them all, newest first, in a box that scrolls).
+- Every change gets a one-line Finnish entry at the top of `CHANGES` in src/game.html (shown in the start-screen paper's "Lyhyesti" pages).
+- Every new feature also gets a story in `LEHTI` (Ylästön Sanomat): size 'main' (spread) / 'page' / 'half', n bigger than the rest if it's the newest main (→ front page), and photo(s) in lehti/ taken with the test/lhrun.sh scripts.
 - Keep earlier versions safe (he asked for new versions so the old one stays intact); the flat original game is separate.
 - He plays from the published build; deliver the built game, keep the editor in sync (editor is the source of truth).

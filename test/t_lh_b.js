@@ -1,0 +1,24 @@
+startRace(false); setTimeOfDay('paiva'); step(60*4.5);
+await TRY('es', async () => { const K = LANDMARKS.find(L => L[0] === 'kauppa'), [W, D] = lmSize(K), [fx, fz] = lloc(K[1], K[2], K[3], 0, D/2 + 16); car.x = fx; car.z = fz; hold(30); const [tx, tz] = lloc(K[1], K[2], K[3], 0, D/2 + 3); await view('es', tx, Y(tx, tz) + 2, tz, fx + 4, Y(fx, fz) + 4, fz); });
+await TRY('hevi', async () => { const S = LP.stall; car.x = S.x + 20; car.z = S.z; hold(30); const [cx, cz] = lloc(S.x, S.z, S.yaw, 4, 14); await view('hevi', S.x, Y(S.x, S.z) + 2, S.z, cx, Y(cx, cz) + 4, cz); });
+await TRY('olymp', async () => { const O = X3.oly; car.x = O.x + 30; car.z = O.z; hold(60*3); await around('olymp', O.x, O.z, 20, 6, O.yaw + 0.5, 1); });
+await TRY('karhu', async () => { const h = X3.bear; car.x = h.x + 30; car.z = h.z; hold(30); await around('karhu', h.x, h.z, 8, 2.2, h.yaw + 0.8, 1); });
+await TRY('asema', async () => { const S = X3.station; car.x = S.x + 40; car.z = S.z; hold(60*3); const [cx, cz] = lloc(S.x, S.z, S.yaw, 13, 24); await view('asema', S.x, Y(S.x, S.z) + 2, S.z, cx, Y(cx, cz) + 8, cz); });
+await TRY('hirvi', async () => { const h = HUMANS.find(q => q.task && q.task.kind === 'moose' && !q.gone); car.x = h.x + 30; car.z = h.z; hold(30); await around('hirvi', h.x, h.z, 9, 2.4, h.yaw + 0.9, 1.6); });
+await TRY('heli', async () => { const V = X3.heli.v; car.x = V.x + 35; car.z = V.z; hold(60); await around('heli', V.x, V.z, 13, 3, V.yaw + 1.2, 1.2); });
+await TRY('pallot', async () => { const B = BALLOONS[0]; car.x = B.x + 30; car.z = B.z; hold(10); const gy = Y(B.x, B.z); await view('pallot', B.x, B.y + 6, B.z, B.x + 45, gy + 3, B.z + 30); });
+await TRY('kokko', async () => { setTimeOfDay('ilta'); const E = EMITTERS.find(e => e.kind === 'kokko'); car.x = E.x + 30; car.z = E.z; hold(60*3); await around('kokko', E.x, E.z, 9, 2.5, 0.7, 1.2); setTimeOfDay('paiva'); });
+await TRY('porsaat', async () => { const P = tires.filter(t => t.kind === 'pig'); const q = P[Math.floor(P.length/2)]; car.x = q.x + 20; car.z = q.z; hold(10); await around('porsaat', q.x, q.z, 7, 2.5, 0.9, 0.4); });
+await TRY('posti', async () => { const V = VEHICLES.find(v => v.kind === 'postvan'); car.x = V.x + 30; car.z = V.z; hold(60*2); await around('posti', V.x, V.z, 9, 2.5, V.yaw + 1.1, 1); });
+await TRY('pizza', async () => { const L = LANDMARKS.find(L => L[0] === 'pitseria'); car.x = L[1] + 30; car.z = L[2]; hold(30); await around('pizza', L[1], L[2], 20, 5, L[3] + 0.4, 2); });
+await TRY('pihat', async () => { const h = HUMANS.find(q => q.task && q.task.kind === 'badminton'); car.x = h.x + 30; car.z = h.z; hold(60*2); await around('pihat', h.x, h.z, 10, 3, 2.2, 1.4); });
+await TRY('kaali', async () => { const T = VEHICLES.filter(v => v.kind === 'tractor'); let best = null; for (const v of T) for (const C of CABBAGE) { const p = C.pts && C.pts[0]; if (!p) continue; const px = p.x !== undefined ? p.x : p[0], pz = p.z !== undefined ? p.z : p[1], d = Math.hypot(v.x - px, v.z - pz); if (!best || d < best.d) best = { d, v }; }
+  const v = best ? best.v : T[0]; car.x = v.x + 30; car.z = v.z; hold(30); await around('kaali', v.x, v.z, 10, 3, v.yaw + 1.0, 1.4); });
+await TRY('koirat', async () => { const D = HUMANS.find(q => q.task && q.task.kind === 'yarddog'); const i = nearIdx(D.x, D.z); put(i - 10, 14); for (let k = 0; k < 60*1.6; k++) { const a = car.angle; car.x += Math.sin(a)*14/60; car.z += Math.cos(a)*14/60; car.vx = Math.sin(a)*14; car.vz = Math.cos(a)*14; step(1); }
+  car.vx = car.vz = 0; hold(20); await view('koirat', D.x, Y(D.x, D.z) + 0.6, D.z, D.x + Math.sin(car.angle + 1.9)*6, Y(D.x, D.z) + 2, D.z + Math.cos(car.angle + 1.9)*6); });
+await TRY('ufo_b', async () => { const U = UFOS[0]; const gun = HUMANS.find(q => q.propR && q.task && q.task.kind === 'alien' && Math.hypot(q.x - U.x, q.z - U.z) < 15); car.x = gun.x + 22; car.z = gun.z + 4; car.vx = car.vz = 0; UFO_HITS.MAX = 99; hold(60*6); await around('ufo_b', gun.x, gun.z, 6, 2, Math.atan2(car.x - gun.x, car.z - gun.z) + 1.3, 1); });
+await TRY('tuli', async () => { UFO_HITS.MAX = 3; const B = STATIC_LIST.find(b => b.kind === 'house' && !b.station && Math.min(b.hw, b.hl) > 3 && Math.hypot(b.x - car.x, b.z - car.z) > 80 && Math.abs(b.x) < 300 && Math.abs(b.z) < 300 && ambPath(b.x, b.z)); car.x = B.x + 45; car.z = B.z; car.vx = car.vz = 0;
+  startFire({ house: B }); B.fire.level = 0.85; hold(60*3); await around('tuli_a', B.x, B.z, 24, 7, 0.8, 4);
+  let v = null; for (let k = 0; k < 60*120; k++) { hold(1); v = VEHICLES.find(o => o.kind === 'fire' && o.job && o.job.phase === 'spray' && o.job.t > 2); if (v) break; }
+  if (v) await view('tuli_b', (B.x + v.x)/2, Y(B.x, B.z) + 2, (B.z + v.z)/2, v.x + (v.x - B.x)*0.6 + 6, Y(v.x, v.z) + 4, v.z + (v.z - B.z)*0.6 - 6); else out.tuli_b = 'no engine'; });
+return out;

@@ -699,6 +699,18 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   v.nuked (moved 1e5 away, hidden, skipped by AI/physics), the rest charred and burning; 90 % of lifeGroup props hidden (userData.hide);
   balloons burst; ground tinted 0x7a4c3a, roads ×0.55, brown sky/fog, orange light, a brown screen tint, ash falling round the camera.
   R (worldReset → lifeExtras3Reset → nukeReset) restores everything (statics re-added, materials, setTimeOfDay). t_nuke.
+- YLÄSTÖN SANOMAT (29.9., "lehti päävalikkoon: pääominaisuus aina aukeama, uusin etusivulle, muut sivu, pienet puolikas"): LEHTI
+  (src/game.html, before renderChangelog) = one entry per feature {id, size 'main'|'page'|'half', n (newer = bigger), kick, title,
+  lede, body[], img[] (lehti/*.jpg), cap[], box}. lhPlan(): front page (newest main as the lead + the next three mains as teasers +
+  a clickable index), the lead's spread (pp. 2–3), the other mains newest first (spreads), pages, halves in pairs, "Näin ajat", and
+  CHANGES as "Lyhyesti" (paged by ~5000–5600 chars). Pages are 760×1000 HTML, scaled; viewer #paper: spreads (the front alone),
+  one page at a time on narrow/tall screens; ← → / PgUp PgDn / wheel / swipe, Esc/Enter/✕ closes; while open a capture keydown
+  handler eats every key (nothing reaches the game); photos load when shown (+ the next spread's). Start screen: #lehti-mini (the
+  real front page, scaled by lehtiLayout to fit left of the centre column; if it doesn't fit (s < 0.24) → a "📰 LEHTI" button),
+  #share fixed right-middle when body.lh-wide; #news, .subtitle, #pcnote and #changelog removed; the menu radio 320 px.
+  Photos: test/lhrun.sh t_lh_a t_lh_b (+ t_lh_d retakes, t_lh_e ghost, t_lh_c menu radio/leaderboard via serve.mjs) → s3_lh_*.png →
+  1000 px JPEGs in lehti/ (≈ 2.8 MB, published by Netlify next to index.html; the editor artifact can't show them).
+  Adding a feature from now on: add its LEHTI entry (size + n) and its photo(s); a new 'main' with the biggest n becomes the lead.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
