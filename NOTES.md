@@ -679,6 +679,7 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - Sauna smoke v2 (29.9., "pitkä ja kapea, eri sävyjä ja valo"): puffs rise 3.2–4.4 m/s, grow only to 2.6–4.4 m and live 9–14 s
   (a tall, thin plume leaning with the wind); each puff its own shade (black → grey, 30 % brownish). Light: a flickering glow sprite
   at the pipe (S.glow), sparks (emberFx) and small flame licks (fireFx); the trailer's windows glow orange (emissive).
+- Sauna plume v3: 30 puffs/s (s0 0.9 m, rise 2.9–3.5 m/s, 8–12 s) so the column has no gaps; lifeFx pool 900 → 1300.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

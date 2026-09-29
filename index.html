@@ -187,7 +187,7 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: HAVUHELVETTI – HEAVY PÄNDI PELISSÄ</span><small data-t>B = keikkabussi · levyt ison männyn luota · GTA: aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 06.38 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 07.17 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
@@ -4309,6 +4309,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'Saunan savupylväs tiheämmäksi: yhtenäinen musta patsas ilman katkoja'],
   ['29.9.', 'Saunan savu nyt pitkä ja kapea pylväs, eri sävyjä mustasta harmaaseen ja ruskeaan; piipussa kiukaan hehku, kipinöitä ja liekin nuolaisuja, saunan ikkunat hehkuvat'],
   ['29.9.', 'Saunaporukka: joka kerta eri paikassa saunakärry ja vanha pakettiauto, kiuas täysillä (paksu musta savu), seitsemän pyyhkeissä – kauhea möly ja remakka, välillä joku juoksee höyryävänä kierroksen ja auton ohi ajaessa kaikki hurraavat'],
   ['29.9.', 'Poliisiasema K-kaupan lähelle: kaksikerroksinen 80-luvun asema, POLIISI-kyltti, sininen lyhty, radiomasto, lippu, kolme poliisiautoa parkissa ja kaksi poliisia ovella (poliisiautoon ajo = poliisit huomaavat)'],
@@ -4627,7 +4628,7 @@ function batchFill() {
     if (n && ch) { /* (parked grills, bikes, poles: nothing changed, nothing uploaded) */ B.im.instanceMatrix.updateRange.count = n*16; B.im.instanceMatrix.needsUpdate = true; B.im.instanceColor.updateRange.count = n*3; B.im.instanceColor.needsUpdate = true; } }
 }
 scene.onBeforeRender = (r, sc, cam) => { batchFill(); bodyFill(cam); };
-const lifeFx = makeParticleSystem(900, false, true), waterFx = makeParticleSystem(700, false, true);
+const lifeFx = makeParticleSystem(1300, false, true), waterFx = makeParticleSystem(700, false, true);
 const WIND_YAW = 0.95;                       // flags fly towards the north-east-ish
 let crashAt = null;                          // last hard hit: { x, z, t, onRoute }
 let SIREN = null;
@@ -7536,9 +7537,9 @@ function buildSauna() { let sp = null; for (let k = 0; k < 30 && !sp; k++) { con
     if (i % 2) handProp(h, lmesh(lgeo('bottle', () => new THREE.CylinderGeometry(0.03, 0.036, 0.24, 6)), lmat(0x5a3a1a, 0.3), 0, 0, 0)); }
   const crew = HUMANS.filter(h => h.task && h.task.kind === 'sauna' && Math.hypot(h.x - S.x, h.z - S.z) < 8);
   X3.upd.push((dt) => { const d = Math.hypot(car.x - S.x, car.z - S.z); S.door = lloc(tr.x, tr.z, tr.yaw, 0.5, tr.hl + 0.6);
-    if (d < 420) { S.smokeAcc += dt*16; const [px, pz] = lloc(tr.x, tr.z, tr.yaw, -0.6, -0.9), py = tr.gy + 4.15;   // the stove: thick black smoke, day and night
+    if (d < 420) { S.smokeAcc += dt*30; const [px, pz] = lloc(tr.x, tr.z, tr.yaw, -0.6, -0.9), py = tr.gy + 4.15;   // the stove: thick black smoke, day and night
       while (S.smokeAcc > 1) { S.smokeAcc--; const wx = Math.sin(WIND_YAW)*0.7, wz = Math.cos(WIND_YAW)*0.7, sh = Math.random(), c0 = 0.03 + sh*0.09, c1 = 0.2 + sh*0.25, br = Math.random() < 0.3 ? 0.04 : 0;   // a tall, thin column: shades from pitch black to smoky grey, some brownish
-        lifeFx.emit(px + (Math.random() - 0.5)*0.12, py, pz + (Math.random() - 0.5)*0.12, wx + (Math.random() - 0.5)*0.15, 3.2 + Math.random()*1.2, wz + (Math.random() - 0.5)*0.15, 9 + Math.random()*5, 0.45, 2.6 + Math.random()*1.8, 0.9, c0 + br, c0 + br*0.5, c0, c1 + br, c1 + br*0.6, c1 + 0.02); }
+        lifeFx.emit(px + (Math.random() - 0.5)*0.12, py, pz + (Math.random() - 0.5)*0.12, wx + (Math.random() - 0.5)*0.15, 2.9 + Math.random()*0.6, wz + (Math.random() - 0.5)*0.15, 8 + Math.random()*4, 0.9, 2.8 + Math.random()*1.6, 0.8, c0 + br, c0 + br*0.5, c0, c1 + br, c1 + br*0.6, c1 + 0.02); }
       S.glowT += dt; S.glow.visible = true; S.glow.position.set(px, py + 0.25, pz); S.glow.material.opacity = 0.55 + 0.3*Math.sin(S.glowT*13)*Math.sin(S.glowT*5.3);   // the stove's glow at the pipe
       if (Math.random() < dt*3) for (let k = 0; k < 3; k++) emberFx.emit(px, py + 0.1, pz, (Math.random() - 0.5)*1.2, 3 + Math.random()*3, (Math.random() - 0.5)*1.2, 0.8 + Math.random()*0.8, 0.09, 0.03, 1, 1, 0.8, 0.4, 1, 0.35, 0.05);   // sparks up the pipe
       if (Math.random() < dt*6) fireFx.emit(px, py + 0.05, pz, 0, 1.5, 0, 0.25, 0.45, 0.15, 0.9, 1, 0.6, 0.2, 0.9, 0.25, 0.05); } else S.glow.visible = false;   // a lick of flame
