@@ -618,6 +618,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   in the grandstand lane search) → /* */. Checks: t_junctions (+ t_jn_route2 / t_jn_other: all 32 junctions from GTA height),
   t_flicker + flicker_cmp.py (each chase view rendered twice, camera nudged 2 cm: no road blotches in 16 views — only dithered
   foliage), t_roadlook in race mode, ghost times identical (129.972 / 118.157 / 144.414).
+- Menu radio smaller (29.9., "alkuruutu on aika täysi, pienennä radiota"): #mradio 560×137 → 400×86 px — knobs 54 → 32 px, keys in one row
+  (◀◀ ▶▶ KANAVA − + ÄÄNI), smaller LCD fonts. (The "76 px" knob measured before was the 54 px tune knob's rotated bounding box.)
+- Houses (29.9., "tarkista ja paranna talot"): the curtain panel was centred on walls whose long axis is local z, so those windows read as a
+  "T"; windowAt() now draws frame, glass, a glazing-bar cross, a valance, two side curtains and a sill via onWall(t, n, nAlongZ, …).
+  Gable ends get 1–2 windows (not behind the rintamamiestalo porch, porchSide). The front door goes on the long side facing the nearest
+  side-road sample, in one of six door colours (doorMats), with a narrow door window and a flat canopy. White corner boards on board-clad
+  walls. alongX is now w > d (square houses: walls consistent with the roof ridge along z). ≈ +8 % scene vertices.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

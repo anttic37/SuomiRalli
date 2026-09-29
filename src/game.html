@@ -33,40 +33,40 @@
   #radio .r-title { display: inline-block; white-space: nowrap; }
   #radio .r-title.scroll { animation: radioScroll var(--dur, 10s) ease-in-out infinite alternate; }   /* (starts readable, slides to its end and back) */
   /* the start screen's own car radio: a 1985 in-dash unit — black face, chrome knobs, amber display, rubber buttons */
-  #mradio { display: none; margin: clamp(12px, 2.4vh, 22px) auto 0; width: min(560px, 92vw); user-select: none; }
+  #mradio { display: none; margin: clamp(8px, 1.6vh, 14px) auto 0; width: min(400px, 90vw); user-select: none; }
   #mradio.on { display: block; }
-  #mradio .mr-face { position: relative; display: grid; grid-template-columns: 66px 1fr 66px; gap: 14px; align-items: center; padding: 12px 14px 10px;
+  #mradio .mr-face { position: relative; display: grid; grid-template-columns: 42px 1fr 42px; gap: 8px; align-items: center; padding: 7px 9px 6px;
     background: linear-gradient(180deg, #2c2c30 0%, #18181b 55%, #111113 100%); border: 1px solid #45454c; border-radius: 7px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -2px 0 rgba(0,0,0,0.6), 0 8px 22px rgba(0,0,0,0.65), 0 0 0 3px #0b0b0c, 0 0 0 4px #3a3a3e; }
   #mradio .mr-face::before { content: ''; position: absolute; left: 10px; right: 10px; top: 5px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent); }
-  #mradio .mr-knob { position: relative; width: 54px; height: 54px; margin: 0 auto; border-radius: 50%; cursor: pointer; border: none; padding: 0;
+  #mradio .mr-knob { position: relative; width: 32px; height: 32px; margin: 0 auto; border-radius: 50%; cursor: pointer; border: none; padding: 0;
     background: radial-gradient(circle at 34% 28%, #ffffff 0%, #c9c9ce 22%, #85858c 55%, #3c3c42 80%, #202024 100%);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.7), inset 0 -3px 5px rgba(0,0,0,0.45), 0 0 0 3px #0c0c0e, 0 0 0 4px #505056; transition: transform 0.25s; }
-  #mradio .mr-knob::before { content: ''; position: absolute; inset: 9px; border-radius: 50%; background: repeating-conic-gradient(rgba(0,0,0,0.18) 0 4deg, rgba(255,255,255,0.10) 4deg 8deg); }
-  #mradio .mr-knob::after { content: ''; position: absolute; left: 50%; top: 5px; width: 3px; height: 13px; margin-left: -1.5px; border-radius: 2px; background: #e0141e; box-shadow: 0 0 4px rgba(224,20,30,0.8); }
+    box-shadow: 0 2px 4px rgba(0,0,0,0.7), inset 0 -2px 4px rgba(0,0,0,0.45), 0 0 0 2px #0c0c0e, 0 0 0 3px #505056; transition: transform 0.25s; }
+  #mradio .mr-knob::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: repeating-conic-gradient(rgba(0,0,0,0.18) 0 4deg, rgba(255,255,255,0.10) 4deg 8deg); }
+  #mradio .mr-knob::after { content: ''; position: absolute; left: 50%; top: 3px; width: 2px; height: 8px; margin-left: -1px; border-radius: 2px; background: #e0141e; box-shadow: 0 0 4px rgba(224,20,30,0.8); }
   #mradio .mr-knob:active { filter: brightness(0.9); }
-  #mradio .mr-cap { display: block; margin-top: 7px; text-align: center; font: 700 9px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.22em; color: #9a9aa2; text-transform: uppercase; }
+  #mradio .mr-cap { display: block; margin-top: 5px; text-align: center; font: 700 7px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.22em; color: #9a9aa2; text-transform: uppercase; }
   #mradio .mr-mid { min-width: 0; }
-  #mradio .mr-brand { display: flex; justify-content: space-between; align-items: baseline; margin: 0 2px 5px; font: italic 900 12px/1 "Arial Black", "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.08em; color: #d8d8dc; }
-  #mradio .mr-brand small { font: 700 8px/1 "Helvetica Neue", Arial, sans-serif; font-style: normal; letter-spacing: 0.25em; color: #7a7a82; }
+  #mradio .mr-brand { display: flex; justify-content: space-between; align-items: baseline; margin: 0 2px 3px; font: italic 900 10px/1 "Arial Black", "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.08em; color: #d8d8dc; }
+  #mradio .mr-brand small { font: 700 7px/1 "Helvetica Neue", Arial, sans-serif; font-style: normal; letter-spacing: 0.25em; color: #7a7a82; }
   #mradio .mr-brand .led { display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: #3a0c0c; vertical-align: 1px; }
   #mradio.play .mr-brand .led { background: #ff2a1a; box-shadow: 0 0 6px #ff3a20; }
-  #mradio .mr-lcd { position: relative; overflow: hidden; padding: 7px 10px 6px; border-radius: 3px; background: linear-gradient(#1c1508, #0e0a03); border: 1px solid #000;
-    box-shadow: inset 0 0 14px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.05); font: 700 13px/1.25 "Courier New", monospace; letter-spacing: 0.06em; color: #ffb030; text-shadow: 0 0 7px rgba(255,160,40,0.75); font-variant-numeric: tabular-nums; }
+  #mradio .mr-lcd { position: relative; overflow: hidden; padding: 4px 7px 3px; border-radius: 3px; background: linear-gradient(#1c1508, #0e0a03); border: 1px solid #000;
+    box-shadow: inset 0 0 14px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.05); font: 700 11px/1.2 "Courier New", monospace; letter-spacing: 0.06em; color: #ffb030; text-shadow: 0 0 7px rgba(255,160,40,0.75); font-variant-numeric: tabular-nums; }
   #mradio .mr-lcd::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.22) 0 1px, transparent 1px 3px); pointer-events: none; }
   #mradio.off .mr-lcd { color: rgba(255,176,48,0.28); text-shadow: none; }
   #mradio .mr-row { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-  #mradio .mr-freq { font-size: 22px; line-height: 1; letter-spacing: 0.02em; } #mradio .mr-band { font-size: 10px; padding: 1px 4px; border: 1px solid currentColor; border-radius: 2px; }
-  #mradio .mr-st { flex: 1; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-size: 11px; letter-spacing: 0.12em; }
-  #mradio .mr-vol { display: flex; gap: 2px; align-items: flex-end; height: 12px; } #mradio .mr-vol i { width: 3px; background: rgba(255,176,48,0.16); } #mradio .mr-vol i.lit { background: #ffb030; box-shadow: 0 0 4px rgba(255,160,40,0.7); }
-  #mradio .mr-win { margin-top: 4px; overflow: hidden; white-space: nowrap; font-size: 12px; } #mradio .mr-title { display: inline-block; white-space: nowrap; }
+  #mradio .mr-freq { font-size: 16px; line-height: 1; letter-spacing: 0.02em; } #mradio .mr-band { font-size: 8px; padding: 1px 4px; border: 1px solid currentColor; border-radius: 2px; }
+  #mradio .mr-st { flex: 1; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; font-size: 9px; letter-spacing: 0.1em; }
+  #mradio .mr-vol { display: flex; gap: 2px; align-items: flex-end; height: 9px; } #mradio .mr-vol i { width: 2px; background: rgba(255,176,48,0.16); } #mradio .mr-vol i.lit { background: #ffb030; box-shadow: 0 0 4px rgba(255,160,40,0.7); }
+  #mradio .mr-win { margin-top: 2px; overflow: hidden; white-space: nowrap; font-size: 10px; } #mradio .mr-title { display: inline-block; white-space: nowrap; }
   #mradio .mr-title.scroll { animation: radioScroll var(--dur, 10s) ease-in-out infinite alternate; }
-  #mradio .mr-keys { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
-  #mradio .mr-keys button { min-width: 44px; padding: 5px 8px 4px; border: none; border-radius: 3px; cursor: pointer; font: 800 11px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.08em; color: #e8e8ea;
+  #mradio .mr-keys { display: flex; justify-content: center; gap: 6px; margin-top: 5px; }
+  #mradio .mr-keys button { min-width: 30px; padding: 3px 6px 2px; border: none; border-radius: 3px; cursor: pointer; font: 800 9px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.08em; color: #e8e8ea;
     background: linear-gradient(#3a3a40, #1e1e22); box-shadow: 0 2px 0 #050506, inset 0 1px 0 rgba(255,255,255,0.12); }
   #mradio .mr-keys button:active { transform: translateY(1px); box-shadow: 0 1px 0 #050506; }
-  #mradio .mr-keys .grp { display: flex; flex-direction: column; align-items: center; gap: 4px; } #mradio .mr-keys .grp > div { display: flex; gap: 4px; }
-  #mradio .mr-keys .grp span { font: 700 8px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.22em; color: #7a7a82; text-transform: uppercase; }
+  #mradio .mr-keys .grp { display: flex; flex-direction: row; align-items: center; gap: 5px; } #mradio .mr-keys .grp > div { display: flex; gap: 3px; }
+  #mradio .mr-keys .grp span { font: 700 7px/1 "Helvetica Neue", Arial, sans-serif; letter-spacing: 0.22em; color: #7a7a82; text-transform: uppercase; }
   @media (max-width: 460px) { #mradio .mr-face { grid-template-columns: 1fr; } #mradio .mr-knobcell { display: none; } }
   @keyframes radioScroll { 0%, 15% { transform: translateX(0); } 85%, 100% { transform: translateX(calc(-1px*var(--shift, 0))); } }
   #radio.flash { animation: radioFlash 0.5s ease-out; } @keyframes radioFlash { from { background: #4a3410; } }
@@ -109,7 +109,7 @@
   #pause .p-s { margin-top: 12px; font: 700 12px/1 "Courier New", monospace; letter-spacing: 0.25em; color: #bbb; text-transform: uppercase; }
   #pcnote { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; margin: clamp(10px, 2vh, 16px) auto 0; padding: 6px 14px 5px; border: 2px solid #ffd23c; border-radius: 3px;
     transform: rotate(-1.5deg); font: 700 clamp(10px, 1.4vw, 13px)/1.15 "Courier New", monospace; letter-spacing: 0.14em; color: #ffd23c; text-transform: uppercase; background: rgba(255,210,60,0.06); }
-  #okstamp { margin: 6px auto 0; font: 700 11px/1.2 "Courier New", monospace; letter-spacing: 0.08em; color: #bfbfb6; }
+  #okstamp { margin: 6px auto 0; max-width: 92vw; white-space: normal; font: 700 11px/1.2 "Courier New", monospace; letter-spacing: 0.08em; color: #bfbfb6; }
   #okstamp b { color: #5fd35f; }
   #pcnote small { font-size: 0.82em; letter-spacing: 0.1em; color: #d8d8d0; text-transform: none; }
   #share { position: absolute; top: 14px; left: 16px; z-index: 2; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; align-items: end; column-gap: 4px; transform: rotate(-3deg); pointer-events: none; }
@@ -1376,12 +1376,13 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
     matala: [0x2f3136,0x3a3a3a,0x4a3b30].map(c=>tileRoof(mat(c,0.8))),
     kasari: [0xb8452c,0x8b3a2e,0x6b4a35,0x4b4f57].map(c=>tileRoof(mat(c,0.8))),
   };
+  const doorMats = [0x5a3a22, 0x8a2a1e, 0x2f4a36, 0x6b4a2c, 0x33405a, 0x9a7a4a].map((c, k) => { const m = mat(c, 0.7); m.userData.k = k; return m; });
   const sokkeliMat = surfaceDetail(mat(0x6f6f6a, 0.95), 'brick', 0.35), trimMat = mat(0xf7f7f2, 0.8), flatRoofMat = surfaceDetail(mat(0x2b2d33, 0.8), 'grit', 0.9);
   BUILDINGS.forEach(([x,z,w,d,th], bi)=>{
     if (BUILDINGS[bi].length > 5) return;
     if (Math.min(w,d) < 2.0) return;   // sub-2 m blobs are OSM noise, not buildings
     M.begin(x, z, w/2 + 1.2, d/2 + 1.2, th);   // the whole house rises as one (incl. the door steps and the porch), onto the highest ground under it (the plinth reaches down)
-    const longW = Math.max(w,d), shortW = Math.min(w,d), alongX = w >= d, aspect = longW/shortW;
+    const longW = Math.max(w,d), shortW = Math.min(w,d), alongX = w > d, aspect = longW/shortW;   // alongX: long walls face ±z (square houses: ridge along z, like the roof)
     const y0 = Y(x,z);
     const rot = (lx, lz) => [x + Math.cos(th)*lx + Math.sin(th)*lz, z - Math.sin(th)*lx + Math.cos(th)*lz];
     if (longW < 4.5 || shortW < 3.0) {   // shed / garage
@@ -1415,6 +1416,7 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
       M.add(unitBox, 'chimney', darkMat, cwx, y0+0.3+h+rh*0.8, cwz, th, 0.5, rh*0.9+0.4, 0.5);
       if (bi % 5 === 0) CHIMNEYS.push([cwx, y0+0.3+h+rh*0.8 + (rh*0.9+0.4)/2, cwz, x, z, w/2, d/2, th]);   // some are burning something
     }
+    let porchSide = 0;
     // rintamamiestalo: knee-wall dormer look — small attic window on each gable + porch on one gable
     if (era === 'rinta') {
       for (const s of [-1, 1]) {
@@ -1425,6 +1427,7 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
       const room = (sg) => { const [ox, oz] = pOut(sg), r = roadPen(ox, oz, 1.2); return r ? -r.pen : 1; };
       let ps = (bi % 2) ? 1 : -1; if (room(ps) < 0 && room(-ps) > room(ps)) ps = -ps;   // porch on the gable away from the road
       if (room(ps) >= 0) {
+      porchSide = ps;
       const [px, pz] = pAt(ps);
       const pyaw = th + (ridgeAlongZ ? 0 : Math.PI/2);
       M.add(unitBox, 'wall_'+era+wi, eraWall[era][wi], px, y0+0.3+1.15, pz, pyaw, 1.9, 2.3, 1.5);
@@ -1432,23 +1435,45 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
       M.add(unitBox, 'door', darkMat, px, y0+0.3+1.0, pz + 0, pyaw, 0.8, 1.8, 1.62);
       }
     }
-    // windows: rinta small, matala wide, kasari medium; a door on one long side
+    // windows: rinta small, matala wide, kasari medium; the front door on the long side that faces the street
     const winW = era === 'rinta' ? 0.8 : era === 'matala' ? 1.7 : 1.2, winH = era === 'rinta' ? 0.9 : 1.1;
     const nWin = Math.max(1, Math.min(4, Math.floor(longW / (winW + 1.2))));
     const wy = y0 + 0.3 + (era === 'rinta' ? 1.5 : h*0.55);
+    // a box on a wall: t = along the wall, n = out of it (local frame), size along × height × thickness
+    const onWall = (key, m, t, n, nAlongZ, y, along, hgt, thick) => { const [px, pz] = nAlongZ ? rot(t, n) : rot(n, t); M.add(unitBox, key, m, px, y, pz, th, nAlongZ ? along : thick, hgt, nAlongZ ? thick : along); };
+    const ci = bi % curtainMats.length, wall = eraWall[era][wi], boards = !(era === 'matala' && (wi === 0 || wi === 2));
+    const windowAt = (t, n, nAlongZ, ww, wh, yy) => {   // white frame, glass, a cross of glazing bars and two curtains drawn to the sides
+      onWall('trim', trimMat, t, n, nAlongZ, yy, ww + 0.16, wh + 0.16, 0.08);
+      onWall('glass', houseGlass, t, n, nAlongZ, yy, ww, wh, 0.12);
+      onWall('trim', trimMat, t, n, nAlongZ, yy, 0.07, wh, 0.15);
+      onWall('trim', trimMat, t, n, nAlongZ, yy + wh*0.22, ww, 0.06, 0.15);
+      onWall('curtain'+ci, curtainMats[ci], t, n, nAlongZ, yy + wh*0.4, ww*0.94, wh*0.14, 0.13);
+      for (const e of [-1, 1]) onWall('curtain'+ci, curtainMats[ci], t + e*ww*0.4, n, nAlongZ, yy - wh*0.05, ww*0.13, wh*0.86, 0.13);
+      if (wh > 0.8) onWall('trim', trimMat, t, n + Math.sign(n)*0.08, nAlongZ, yy - wh/2 - 0.1, ww + 0.3, 0.07, 0.2); };   // sill
+    // which long side faces the street (nearest side-road sample)
+    let rd2 = 1e9, rdx = 0, rdz = 0; for (const q of sideRoadPts) { const dx = q.x - x, dz = q.y - z, dd = dx*dx + dz*dz; if (dd < rd2) { rd2 = dd; rdx = dx; rdz = dz; } }
+    const doorSide = (alongX ? (Math.sin(th)*rdx + Math.cos(th)*rdz) : (Math.cos(th)*rdx - Math.sin(th)*rdz)) >= 0 ? 1 : -1;
+    const doorMat = doorMats[(bi*5 + 1) % doorMats.length];
     for (const side of [-1, 1]) {
       for (let k = 0; k < nWin; k++) {
-        const u = ((k+0.5)/nWin - 0.5) * longW * 0.82;
-        const [wx, wz] = alongX ? rot(u, side*(shortW/2+0.05)) : rot(side*(shortW/2+0.05), u);
-        const isDoor = (side === 1 && k === nWin-1 && era !== 'rinta');
-        // white frame + glass
-        M.add(unitBox, 'trim', trimMat, wx, isDoor ? y0+0.3+1.0 : wy, wz, th, alongX ? (isDoor?1.0:winW+0.16) : 0.08, isDoor?2.0:winH+0.16, alongX ? 0.08 : (isDoor?1.0:winW+0.16));
-        M.add(unitBox, isDoor?'door':'glass', isDoor?darkMat:houseGlass, wx, isDoor ? y0+0.3+1.0 : wy, wz, th, alongX ? (isDoor?0.86:winW) : 0.12, isDoor?1.9:winH, alongX ? 0.12 : (isDoor?0.86:winW));
-        if (!isDoor) { const ci = bi % curtainMats.length; M.add(unitBox, 'curtain'+ci, curtainMats[ci], wx, wy + winH*0.33, wz, th, alongX ? winW*0.94 : 0.13, winH*0.26, alongX ? 0.13 : winW*0.94);   // valance
-          M.add(unitBox, 'curtain'+ci, curtainMats[ci], wx + (alongX ? Math.cos(th)*(-winW*0.4) : 0), wy, wz + (alongX ? -Math.sin(th)*(-winW*0.4) : 0), th, alongX ? winW*0.14 : 0.13, winH*0.9, alongX ? 0.13 : winW*0.14); }
-        else { const [sx2, sz2] = alongX ? rot(u, side*(shortW/2+0.45)) : rot(side*(shortW/2+0.45), u); M.add(unitBox, 'step', stepMat, sx2, y0+0.12, sz2, th, alongX ? 1.3 : 0.7, 0.24, alongX ? 0.7 : 1.3); }
+        const u = ((k+0.5)/nWin - 0.5) * longW * 0.82, n = side*(shortW/2+0.05);
+        const isDoor = side === doorSide && k === nWin-1 && era !== 'rinta';
+        if (!isDoor) { windowAt(u, n, alongX, winW, winH, wy); continue; }
+        onWall('trim', trimMat, u, n, alongX, y0+0.3+1.0, 1.0, 2.0, 0.08);
+        onWall('door'+doorMat.userData.k, doorMat, u, n, alongX, y0+0.3+0.95, 0.86, 1.9, 0.12);
+        onWall('glass', houseGlass, u, n + side*0.01, alongX, y0+0.3+1.45, 0.22, 0.6, 0.12);   // narrow door window
+        onWall('step', stepMat, u, side*(shortW/2+0.45), alongX, y0+0.12, 1.3, 0.24, 0.7);
+        onWall('roofflat', flatRoofMat, u, side*(shortW/2+0.5), alongX, y0+0.3+2.2, 1.6, 0.1, 1.0);   // small canopy over the door
       }
     }
+    // gable ends get windows too (not behind the rintamamiestalo porch)
+    const nG = shortW >= 6.5 ? 2 : 1, gW = Math.min(winW, 1.2);
+    for (const gs of [-1, 1]) {
+      if (era === 'rinta' && gs === porchSide) continue;
+      for (let k = 0; k < nG; k++) windowAt(((k+0.5)/nG - 0.5)*shortW*0.7, gs*(longW/2+0.05), !alongX, gW, winH, wy);
+    }
+    // corner boards on board-clad walls
+    if (boards) for (const [cxs, czs] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) { const [qx, qz] = rot(cxs*(w/2 + 0.02), czs*(d/2 + 0.02)); M.add(unitBox, 'trim', trimMat, qx, y0+0.3+h/2, qz, th, 0.16, h, 0.16); }
     placed.push({x,z,r:Math.max(w,d)*0.62});
   });
   M.end();
@@ -4242,6 +4267,8 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'Talot parannettu: ikkunoissa puitteet, ristikko, ikkunalauta ja verhot sivuilla (ennen verho näkyi T-kirjaimena); ikkunat myös päätyihin; ulko-ovi aina kadun puolella, värillinen ovi, oven ikkuna ja katos; valkoiset nurkkalaudat.'],
+  ['29.9.', 'Alkuruudun radio pienennetty: nupit ja napit pienemmiksi, kapeampi ja matalampi, jotta alkuruutuun mahtuu paremmin.'],
   ['28.9.', 'Risteykset korjattu: asfalttikatu ei enää jatku laattana soratien päälle vaan päättyy sen reunaan reunaa myötäillen; T-risteyksissä ei näy liittyvän kadun kiekkoa tai omaa sävyä; päittäin jatkuvat kadut kaartuvat yhtenä tienä ilman porrasta. Rata ja pito ennallaan'],
   ['28.9.', 'Havuhelvetin alue: iso koju (8 m), logo maalattu radalle kojun eteen ja banderolleja joka suuntaan (radan varsi, kojun sivut, iso mänty); betoniporsaat nyt 2× rengaspinon painoiset – liikkuvat, mutta vievät reilusti vauhtia'],
   ['28.9.', 'Havuhelvetin koju kääntyi rataan päin ja sen eteen nurmelle maalattiin iso logo; iso mänty uusiksi (kapeneva runko, juuret, oksat ja neulastupsut); keikkabussin katolla nyt oikeat ihmiset headbangaamassa'],

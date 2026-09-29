@@ -1,0 +1,3 @@
+initAudio(); renderer.render = () => {}; await new Promise(r => setTimeout(r, 1500)); const e = document.getElementById('mradio'), r = e.getBoundingClientRect();
+const kb = [...e.querySelectorAll('button')].map(b => { const q = b.getBoundingClientRect(); return (b.className || b.textContent.trim()).slice(0, 12) + ' ' + Math.round(q.width) + 'x' + Math.round(q.height); });
+await __pageshot('mr_' + innerWidth + '.png'); return { on: e.classList.contains('on'), box: [Math.round(r.width), Math.round(r.height), Math.round(r.top)], buttons: kb, docH: document.documentElement.scrollHeight, winH: innerHeight };
