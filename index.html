@@ -281,7 +281,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 21.15 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 21.51 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -3223,7 +3223,7 @@ const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WAL
   const ix = ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0) - ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0), iz = ((keys['ArrowUp'] || keys['KeyW']) ? 1 : 0) - ((keys['ArrowDown'] || keys['KeyS']) ? 1 : 0), wantRun = keys['ShiftLeft'] || keys['ShiftRight'];
   const A = W.camA, mx = Math.sin(A)*iz + Math.cos(A)*ix, mz = Math.cos(A)*iz - Math.sin(A)*ix, ml = Math.hypot(mx, mz), fwd = ml > 0.01 ? 1 : 0;
   if (fwd) h.yaw += angDiff(Math.atan2(mx, mz) - h.yaw)*Math.min(1, dt*12);   // (turns to where it goes, quickly)
-  if (keys['Space'] && !W.spPrev) walkPunch(h); W.spPrev = !!keys['Space']; if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; }
+  if (keys['Space'] && !W.spPrev && !h.down && !h.ride) walkPunch(h); W.spPrev = !!keys['Space']; if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; }
   if (W.stam < 0.02) W.puff = true; else if (W.stam > 0.35) W.puff = false;
   const run = wantRun && fwd > 0 && !W.puff, dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz), fear = Math.max(0, Math.min(1, (d - WALK_FEAR)/(WALK_MAX - WALK_FEAR)));
   W.stam = Math.max(0, Math.min(1, W.stam + (run ? -dt/6 : dt*(fwd ? 0.07 : 0.14))));
@@ -4473,6 +4473,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', '🔧 Bugitarkistus: jalkaisin ei voi lyödä maassa maaten, minikartta piirretään 30 kertaa sekunnissa, poliisi ja ennätysvauhti eivät tee turhaa työtä joka ruudulla (logiikka ~8 % kevyempi)', '00.51'],
   ['30.9.', '✉ Alkuruutuun LÄHETÄ POSTIA TEKIJÄLLE: kirje aukeaa, kirjoita terveiset ja lähetä – tekijä lukee ne ja vastaa ehkä lehdessä', '00.10'],
   ['29.9.', 'Jalkaisin nuolet vievät ruudun suuntiin, kävely nopeampaa, Shift juoksee ja välilyönti lyö – lyöty juoksee karkuun ja poliisi tulee. Ennätysvauhtiin riittää 10 %, ja katolla vilkkuu nyt oikeasti keltainen valo. Lehteen Pienet ilmoitukset: K-kauppa, pizzeria ja vihannestila', '23.47'],
   ['29.9.', 'Ennätysvauhdin merkki on nyt pieni keltainen vilkku auton katolla ja pieni 🔥 ENNÄTYSVAUHTI ruudun yläreunassa (iso teksti pois); lehden juttu päivitetty', '23.13'],
@@ -4943,7 +4944,7 @@ function splitRef() {   // whose splits to race: the nearest rival FASTER than y
   return ahead[0] || ghost || ONLINE.self || ONLINE.opp.find(o => onlineKey(o.name) === me) || null; }
 // ── record pace: at every split within 5 % of the best time's (or faster) the village clears the road — fire engines, police, ambulances
 //    and moose swerve off it and go straight into the forest (Antti, 29.9.). The best time: the board's first, your own, the local ghost. ──
-const FLOW = { on: false, n: 0 };
+const FLOW = { on: false, n: 0, hud: null };
 function flowRef() { let r = Infinity; const L = ONLINE.list && ONLINE.list[0]; if (L) r = L.t; if (bestTime < r) r = bestTime; if (ghost && ghost.time < r) r = ghost.time; return isFinite(r) ? r : 0; }
 let FLOW_FX = null;
 function flowFx(dt) {   // on record pace: a small yellow beacon flashing on the roof, and a small line at the top of the screen
@@ -4951,7 +4952,7 @@ function flowFx(dt) {   // on record pace: a small yellow beacon flashing on the
   if (!FLOW_FX && on) { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: 0xffc81e }); const b = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.3, 12), m); b.position.y = 0.15; g.add(b);
     const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xffd000, depthWrite: false, depthTest: false, transparent: true })); gl.scale.set(3.2, 3.2, 1); gl.position.y = 0.3; gl.renderOrder = 5; g.add(gl);   // a plain yellow flash drawn over the roof: seen from the camera 40 m up, in daylight too
     g.position.set(0, 1.33, -0.45); carGroup.add(g); FLOW_FX = { g, m, gl, t: 0 }; }
-  const hud = document.getElementById('flow-hud'); if (hud) hud.style.display = on ? 'block' : 'none'; if (!FLOW_FX) return;
+  if (FLOW.hud !== on) { FLOW.hud = on; const hud = document.getElementById('flow-hud'); if (hud) hud.style.display = on ? 'block' : 'none'; } if (!FLOW_FX) return;   // (the DOM only when it changes)
   FLOW_FX.g.visible = on; if (!on) return; FLOW_FX.t += dt; const lit = Math.sin(FLOW_FX.t*14) > 0;   // (≈ 2 flashes a second)
   FLOW_FX.m.color.setHex(lit ? 0xffd23a : 0x5a4208); FLOW_FX.gl.material.opacity = lit ? 0.95 : 0; }
 function flowSplit(ci, t) { const ref = splitRef(), best = flowRef(); let want = ref && ref.splits && ref.splits[ci] != null ? ref.splits[ci] : 0;
@@ -6642,8 +6643,9 @@ function policeBust(v) { POLICE.hold = 7; POLICE.caughtT = 0; policeMsg(T('🚨 
   const rig = makeAdult(0x2a3a60, 0x1c2c5a, lpick(L_HAIR), { sel: { hat: 3, top: 8, longSleeve: 1, longPants: 1, tache: Math.random() < 0.4 }, acc: 0x1c2540, shoes: 0x141414, w: 1.05 });   // cap, belt, badge
   const [x, z] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 0.4), h = new Human({ x, z, yaw: v.yaw, rig, task: officerTask(v), temp: true }); h.ao = aoAlloc(); v.pl.officer = h; }
 function policeUpdate(dt) {
-  POLICE.cars = POLICE.cars.filter(v => !v.gone); const chasing = POLICE.cars.filter(v => v.chase), hud = document.getElementById('police-hud');
-  if (hud) { const on = chasing.length > 0 || POLICE.hold > 0; if (hud.__on !== on) { hud.__on = on; hud.style.display = on ? 'block' : 'none'; } }
+  if (!POLICE.cars.length && !(POLICE.hold > 0) && !POLICE.hudOn) return;   // (nobody out: nothing to do — no arrays every frame)
+  if (POLICE.cars.some(v => v.gone)) POLICE.cars = POLICE.cars.filter(v => !v.gone); const chasing = POLICE.cars.filter(v => v.chase), hud = document.getElementById('police-hud');
+  POLICE.hudOn = chasing.length > 0 || POLICE.hold > 0; if (hud) { const on = chasing.length > 0 || POLICE.hold > 0; if (hud.__on !== on) { hud.__on = on; hud.style.display = on ? 'block' : 'none'; } }
   for (const v of POLICE.cars) if (!v.chase && !v.pl.hold) { v.pl.leaveT += dt; if (Math.hypot(v.x - car.x, v.z - car.z) > 220 || v.pl.leaveT > 50) vehicleRemove(v); }   // gone round the corner
   if (POLICE.hold > 0) { POLICE.hold -= dt; if (POLICE.hold <= 0) { POLICE.hold = 0; POLICE.n = 0; policeMsg(T('SAAT JATKAA — AJA SIIVOSTI')); } return; }
   if (!chasing.length) return;
@@ -9338,6 +9340,7 @@ function setPause(on) { if (on === PAUSE.on) return; if (on && gameState !== Sta
   if (audio && audio.ctx) { if (on) audio.ctx.suspend(); else audio.ctx.resume(); }
   if (RADIO.el) { if (on) { PAUSE.radio = !RADIO.el.paused; RADIO.el.pause(); } else if (PAUSE.radio && !RADIO.off) RADIO.el.play().catch(() => {}); } }
 document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
+let MM_TICK = 0;
 function loop(time) {
   requestAnimationFrame(loop);
   if (PAUSE.on) { lastTime = time; renderer.render(scene, camera); return; }
@@ -9365,7 +9368,7 @@ function loop(time) {
     carGroup.position.set(rx, Y(rx, rz) + BASS.hopY, rz); carGroup.rotation.y = ra; }
   U_TIME.value = performance.now()/1000; skyDome.position.copy(camera.position);
   updateMarks(dt); updateDust(dt); updateDebris(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); flowFx(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
-  if (gameState !== State.MENU) drawMinimap();
+  if (gameState !== State.MENU && (MM_TICK = (MM_TICK + 1) % 2) === 0) drawMinimap();   // (30 Hz is plenty for the map: half the 2D canvas uploads)
   renderer.render(scene, camera);
   if (rx !== null) { car.x = sx + (car.x - rx); car.z = sz + (car.z - rz); car.angle = sa + (car.angle - ra); }   // (back to the physics state, keeping any push the world gave it meanwhile)
 }

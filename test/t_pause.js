@@ -2,7 +2,7 @@
 // the GTA minimap (2×, on the car)
 initAudio = () => {}; const RR = renderer.render.bind(renderer);
 const out = {}; renderer.render = () => {}; await new Promise(r => setTimeout(r, 300)); await __pageshot('pause_menu.png');
-out.sticker = document.getElementById('pcnote').textContent.trim();
+out.sticker = (document.getElementById('pcnote') || {}).textContent || null;   // (the PC sticker left the start screen 29.9.)
 renderer.render = () => {}; startRace(false); let T0 = performance.now(); const step = (n) => { for (let i = 0; i < n; i++) { T0 += 1000/60; loop(T0); } };
 const key = (c) => { dispatchEvent(new KeyboardEvent('keydown', { code: c })); dispatchEvent(new KeyboardEvent('keyup', { code: c })); };
 step(60*6); keys.ArrowUp = true; step(60); const t0 = raceTime, w0 = worldT, x0 = car.x;

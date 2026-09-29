@@ -741,6 +741,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   in localStorage and dropped from the address bar); GET /api/posti?key=… and POST /api/postidel { key, i }. The repo is
   public, so only the key's SHA-256 is in api.mjs (POSTI_KEY); the key itself was given to Antti in the chat. To change
   it: put a new hash in POSTI_KEY. Test: t_posti.js against serve.mjs, with `const __KEY='…';` prepended. Paper: 'kirje' half (kirje.jpg).
+- Bug check + small optimisation (30.9., Antti: "pieni bugitarkistus ja optimointi"): 26 tests run (behaviour, regressions,
+  perf) — all green. Fixes: no punch while down/riding; policeUpdate returns early with nobody out (no two filter() arrays a
+  frame) and only rebuilds POLICE.cars when one is gone; flowFx touches #flow-hud only on a change; the minimap draws every
+  2nd frame (MM_TICK). t_pause no longer needs the removed #pcnote. t_logic 1.45 → 1.34 ms/frame. Note: t_fire2, t_heli,
+  t_nuke, t_walk2 need s3run.sh (s3_shot.inc's step()), t_pause / t_police the plain runall.sh.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
