@@ -625,6 +625,24 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   Gable ends get 1–2 windows (not behind the rintamamiestalo porch, porchSide). The front door goes on the long side facing the nearest
   side-road sample, in one of six door colours (doorMats), with a narrow door window and a flat canopy. White corner boards on board-clad
   walls. alongX is now w > d (square houses: walls consistent with the roof ridge along z). ≈ +8 % scene vertices.
+- SET 4 (29.9., "tehdään actionia lisää"): in src/game.html before lifeExtras3Build.
+  - Hot-air balloons (BALLOONS, buildBalloons): two, lathe envelope (16 gores, canvas texture), wicker basket, ropes, burner; 20–130 m
+    from the route, drift 0.45–0.75 m/s, 30 ± 9 m over smoothed ground (≥ 16 m), burner bursts (fireFx + roar), pilots are Humans on
+    h.seat {v: B.sv} (seat0/task0 so worldReset reseats them), task 'pilot' (one waves at the car). Car within 65 m (re-armed past
+    100 m): BALLOON_POP_P = 5 % chance one bursts (once per race): bang, envelope crumples, basket falls (≤ 16 m/s), lands (dust;
+    on the car = damage), pilots knocked (hurt → ambulance), envelope reparented flat on the ground; the basket then takes the hay
+    bale's collision numbers (imp = −rel·1.25, 0.72/0.28, carDamage −rel·0.7), sliding (exp(−2.2 dt)) instead of rolling.
+  - Medi-Heli (buildMediHeli, X3.heli): openSpot 24–70 m from the route; boxy cabin, raked screen, MEDI-HELI decals, 4-blade rotor
+    turning over slowly, tail rotor, strobe, skids, whop sound < 70 m; two static boxes. Patient (task 'patient', lying, chest bounces),
+    three medics (task 'cpr': compressions ~100/min, bag, drip held up), four onlookers (task 'heligawk'), orange pack + defib.
+  - Yard dogs: 4 (buildYardDog ×4, yards 7–16 m from the route, 110 m apart); chase when the car passes < 20 m at > 4 m/s. knocked by
+    the rally car → yelp() + dogRunOver(): up to 9 nearest people within 45 m (not animals/temp/seated/responders, MAD_SKIP) get
+    h.mad and run after the car shaking fists and shouting (madStep replaces their task for 11–16 s or until > 75 m, then walk back
+    to where they were); message '🐕 KOIRA JÄI ALLE! NAAPURIT RAIVOISSAAN'. worldReset clears h.mad.
+  - Flames: makeParticleSystem(max, additive, soft, atlas) — atlas mode uses a 4×4 procedural flame-tongue atlas (makeFlameAtlas),
+    the rot attribute carries the frame (steps on over life). fireFx and flameFx2 use it (fires, boom, kokko); new emberFx for sparks.
+    Fires: bigger tongues, 120/s, fireIgnite() whoomp burst on start, crackle bursts of sparks + pops, ground glow disc (f.floor),
+    thicker black smoke. Tests: t_set4 (balloons/heli/dogs), t_heli*, t_fire2 (close-ups).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

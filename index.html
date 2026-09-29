@@ -187,7 +187,7 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: HAVUHELVETTI – HEAVY PÄNDI PELISSÄ</span><small data-t>B = keikkabussi · levyt ison männyn luota · GTA: aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 01.13 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 05.10 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
@@ -271,6 +271,8 @@ const I18N = {
   '🚨 KIINNI! POLIISI PUHUTTELEE…': ['🚨 BUSTED! THE OFFICER WANTS A WORD…', '🚨 TATT! POLITIET VIL HA EN PRAT…'],
   'SAAT JATKAA — AJA SIIVOSTI': ['YOU MAY GO — DRIVE NICELY', 'DU KAN KJØRE VIDERE — KJØR PENT'], 'PÄÄSIT KARKUUN!': ['YOU GOT AWAY!', 'DU SLAPP UNNA!'],
   '👽 UFO AMPUI AUTON!': ['👽 THE UFO SHOT YOUR CAR!', '👽 UFOEN SKJØT BILEN!'], '⚡🔥 ES + KOLARI = TULIPALO!': ['⚡🔥 ES + CRASH = FIRE!', '⚡🔥 ES + KRASJ = BRANN!'],
+  '🎈 KUUMAILMAPALLO POKSAHTI!': ['🎈 A HOT-AIR BALLOON BURST!', '🎈 EN LUFTBALLONG SPRAKK!'],
+  '🐕 KOIRA JÄI ALLE! NAAPURIT RAIVOISSAAN': ['🐕 YOU RAN OVER A DOG! THE NEIGHBOURS ARE FURIOUS', '🐕 DU KJØRTE OVER EN HUND! NABOENE ER RASENDE'],
   '🐻 KARHU YLIAJETTU! 10 POLIISIA PERÄÄN!': ['🐻 YOU HIT A BEAR! 10 POLICE CARS AFTER YOU!', '🐻 DU KJØRTE PÅ EN BJØRN! 10 POLITIBILER ETTER DEG!'],
   '🔥 AUTO PALAA · R = UUSI LÄHTÖ': ['🔥 CAR ON FIRE · R = RESTART', '🔥 BILEN BRENNER · R = NY START'],
   '⚡ ES {0} s · 2× NOPEUS · ÄLÄ KOLAROI': ["⚡ ES {0} s · 2× SPEED · DON'T CRASH", '⚡ ES {0} s · 2× FART · IKKE KRASJ'],
@@ -4264,6 +4266,10 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'Liekit uusiksi: nuolevat liekkikielekkeet, kipinäsuihkut ja rätinä, maa hehkuu palon ympärillä, syttyessä leimahdus; paksumpi savu'],
+  ['29.9.', 'Neljä pihakoiraa lähtee auton perään kun ajat ohi (~4 auton mitan päästä) ja haukkuu – yliajo: koira vinkaisee ja naapurit lähtevät nyrkit heiluen perään'],
+  ['29.9.', 'Medi-Heli laskeutunut pellolle: roottori pyörii, ensihoitajat elvyttävät, uteliaita katsomassa'],
+  ['29.9.', 'Kaksi kuumailmapalloa lipuu hitaasti kylän yllä – 5 %:n mahis että toinen poksahtaa kun ajat alta: kori rymähtää maahan (lentäjät loukkaantuvat → ambulanssi) ja koria voi töniä kuin paalia'],
   ['29.9.', 'Talot parannettu: ikkunoissa puitteet, ristikko, ikkunalauta ja verhot sivuilla (ennen verho näkyi T-kirjaimena); ikkunat myös päätyihin; ulko-ovi aina kadun puolella, värillinen ovi, oven ikkuna ja katos; valkoiset nurkkalaudat.'],
   ['29.9.', 'Alkuruudun radio pienennetty: nupit ja napit pienemmiksi, kapeampi ja matalampi, jotta alkuruutuun mahtuu paremmin.'],
   ['28.9.', 'Risteykset korjattu: asfalttikatu ei enää jatku laattana soratien päälle vaan päättyy sen reunaan reunaa myötäillen; T-risteyksissä ei näy liittyvän kadun kiekkoa tai omaa sävyä; päittäin jatkuvat kadut kaartuvat yhtenä tienä ilman porrasta. Rata ja pito ennallaan'],
@@ -4460,7 +4466,24 @@ function makePuffTexture(soft) {
     g.putImageData(id, 0, 0); }
   return new THREE.CanvasTexture(c);
 }
-function makeParticleSystem(max, additive, soft) {
+// flame tongues: a 4×4 atlas of licking, leaning, flickering tongues (white core, soft edge) — the fire's particles step through it as they live
+let _flameAtlas = null;
+function makeFlameAtlas() { if (_flameAtlas) return _flameAtlas; const S = 128, c = document.createElement('canvas'); c.width = c.height = S*4; const g = c.getContext('2d');
+  const tongue = (ox, oy, W, Hh, ph, lean, a, noise) => { const pts = [], n = 22, edge = (sd, u) => { const w = W*Math.sin(Math.min(1, u*3.2)*Math.PI/2)*Math.pow(1 - u, 1.15)*(1 + noise*Math.sin(u*17 + ph*3 + sd)*0.18);
+      const cx = ox + S/2 + lean*S*0.22*Math.pow(u, 1.6) + Math.sin(u*Math.PI*2.2 + ph)*S*0.07*u; return [cx + sd*w*S/2, oy + S*0.97 - u*Hh*S]; };
+    for (let k = 0; k <= n; k++) pts.push(edge(-1, k/n)); for (let k = n; k >= 0; k--) pts.push(edge(1, k/n));
+    g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (const q of pts) g.lineTo(q[0], q[1]); g.closePath();
+    const gr = g.createLinearGradient(0, oy + S, 0, oy + S*(0.97 - Hh)); gr.addColorStop(0, 'rgba(255,255,255,' + a + ')'); gr.addColorStop(0.55, 'rgba(255,255,255,' + a*0.85 + ')'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fill(); };
+  for (let f = 0; f < 16; f++) { const ox = (f % 4)*S, oy = Math.floor(f/4)*S, ph = f*0.393*4, lean = Math.sin(f*1.7)*0.6;
+    g.save(); g.beginPath(); g.rect(ox, oy, S, S); g.clip(); g.filter = 'blur(3px)';
+    tongue(ox, oy, 0.62, 0.9, ph, lean, 0.45, 1);                                                     // the outer flame
+    tongue(ox - S*0.16, oy, 0.28, 0.55 + 0.2*Math.sin(f*2.3), ph + 1.3, lean - 0.4, 0.4, 1.5);         // side licks
+    tongue(ox + S*0.15, oy, 0.26, 0.5 + 0.2*Math.cos(f*1.9), ph + 2.1, lean + 0.5, 0.4, 1.5);
+    g.filter = 'blur(2px)'; tongue(ox, oy, 0.34, 0.55, ph + 0.4, lean*0.6, 0.95, 0.5);                   // the bright core
+    if (f % 3 === 0) { g.filter = 'blur(1px)'; const bx = ox + S*(0.4 + 0.2*Math.sin(f)), by = oy + S*(0.12 + 0.08*Math.cos(f*1.3)); const r = g.createRadialGradient(bx, by, 0, bx, by, S*0.07); r.addColorStop(0, 'rgba(255,255,255,0.7)'); r.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(bx - S*0.1, by - S*0.1, S*0.2, S*0.2); }   // a torn-off wisp
+    g.restore(); }
+  return (_flameAtlas = new THREE.CanvasTexture(c)); }
+function makeParticleSystem(max, additive, soft, atlas) {
   const geo = new THREE.BufferGeometry();
   const pos = new Float32Array(max*3), size = new Float32Array(max), alpha = new Float32Array(max), col = new Float32Array(max*3), rot = new Float32Array(max);
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3).setUsage(THREE.DynamicDrawUsage));
@@ -4469,9 +4492,9 @@ function makeParticleSystem(max, additive, soft) {
   geo.setAttribute('col', new THREE.BufferAttribute(col, 3).setUsage(THREE.DynamicDrawUsage));
   geo.setAttribute('rot', new THREE.BufferAttribute(rot, 1).setUsage(THREE.DynamicDrawUsage));
   const mat = new THREE.ShaderMaterial({
-    uniforms: { map: { value: makePuffTexture(soft) }, uScale: { value: 400 }, uLit: { value: soft ? 1 : 0 } },
+    uniforms: { map: { value: atlas ? makeFlameAtlas() : makePuffTexture(soft) }, uScale: { value: 400 }, uLit: { value: soft ? 1 : 0 } },
     vertexShader: 'attribute float size; attribute float alpha; attribute vec3 col; attribute float rot; varying float vA; varying vec3 vC; varying float vR; uniform float uScale; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); gl_PointSize = size*uScale/max(0.5,-mv.z); gl_Position = projectionMatrix*mv; vA = alpha; vC = col; vR = rot; }',
-    fragmentShader: 'uniform sampler2D map; uniform float uLit; varying float vA; varying vec3 vC; varying float vR; void main(){ vec2 p = gl_PointCoord - 0.5; float c = cos(vR), s = sin(vR); vec2 q = vec2(c*p.x - s*p.y, s*p.x + c*p.y) + 0.5; vec4 t = texture2D(map, q); float a = t.a*vA; if (a < 0.01) discard; float lit = mix(1.0, 1.18 - 0.42*gl_PointCoord.y, uLit); gl_FragColor = vec4(vC*t.rgb*lit, a); }',
+    fragmentShader: 'uniform sampler2D map; uniform float uLit; varying float vA; varying vec3 vC; varying float vR; void main(){ vec2 p = gl_PointCoord - 0.5; float c = cos(vR), s = sin(vR); ' + (atlas ? 'float fr = mod(floor(vR), 16.0); vec2 q = (vec2(mod(fr, 4.0), 3.0 - floor(fr/4.0)) + vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y))*0.25;' : 'vec2 q = vec2(c*p.x - s*p.y, s*p.x + c*p.y) + 0.5;') + ' vec4 t = texture2D(map, q); float a = t.a*vA; if (a < 0.01) discard; float lit = mix(1.0, 1.18 - 0.42*gl_PointCoord.y, uLit); gl_FragColor = vec4(vC*t.rgb*lit, a); }',
     transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending });
   const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = additive ? 3 : 2; scene.add(pts);
   const P = []; for (let i = 0; i < max; i++) P.push({ life: 0, max: 1, x: 0, y: -99, z: 0, vx: 0, vy: 0, vz: 0, s0: 0, s1: 0, a0: 0, r: 0, g: 0, b: 0, r1: 0, g1: 0, b1: 0, ang: 0, spin: 0 });
@@ -4489,7 +4512,7 @@ function makeParticleSystem(max, additive, soft) {
         pos[i*3] = p.x; pos[i*3+1] = p.y; pos[i*3+2] = p.z;
         size[i] = p.s0 + (p.s1 - p.s0)*Math.sqrt(k); alpha[i] = p.a0*(1-k)*(k < 0.08 ? k/0.08 : 1);
         const kc = Math.min(1, k*1.3); col[i*3] = p.r + (p.r1 - p.r)*kc; col[i*3+1] = p.g + (p.g1 - p.g)*kc; col[i*3+2] = p.b + (p.b1 - p.b)*kc;   // darkens / lightens over its life
-        p.ang += p.spin*dt; rot[i] = p.ang; }
+        p.ang += p.spin*dt; rot[i] = atlas ? p.ang*2.55 + k*9 : p.ang; }   // (flames: a frame of the atlas, stepping on as it lives)
       geo.attributes.position.needsUpdate = geo.attributes.size.needsUpdate = geo.attributes.alpha.needsUpdate = geo.attributes.col.needsUpdate = geo.attributes.rot.needsUpdate = true;
     },
     clear() { P.forEach(p => { p.life = 0; }); alpha.fill(0); size.fill(0); liveN = 0; geo.attributes.alpha.needsUpdate = geo.attributes.size.needsUpdate = true; },
@@ -5011,7 +5034,7 @@ class Human {
     if (o.inst !== undefined) this.view = { kind: 'inst', geo: o.inst, idx: -1, up: -1 };
     else { this.view = { kind: 'rig', g: o.rig }; o.rig.rotation.order = 'YXZ'; lifeGroup.add(o.rig); }
     this.look = o.rig ? o.rig.userData.look || null : o.inst !== undefined ? { kid: false, c: lookCrowd(o.inst) } : null;   // (animals and aliens: their own meshes)
-    this.bm = this.look ? new THREE.Matrix4() : null; this.bp = this.look ? new Float32Array(11) : null; this.bvis = false; this.propR = false; this.px = undefined; this.pz = 0; this.far = false; this.goal = null; this.goalT = 0; this.slide = null; this.dodge = null; this.big = false; this.ride = null; this.hoseDrop = null; this.esc = null; this.wgx = 0; this.wgz = 0; this.wbest = 0; this.wT = 0;   // (every field set here: one object shape for all, fast)
+    this.bm = this.look ? new THREE.Matrix4() : null; this.bp = this.look ? new Float32Array(11) : null; this.bvis = false; this.propR = false; this.px = undefined; this.pz = 0; this.far = false; this.goal = null; this.goalT = 0; this.slide = null; this.dodge = null; this.big = false; this.ride = null; this.hoseDrop = null; this.esc = null; this.wgx = 0; this.wgz = 0; this.wbest = 0; this.wT = 0; this.mad = null;   // (every field set here: one object shape for all, fast)
     this.settle = 2;   // (the first frames: nudged out of anything they were put down in)
     this.ao = -1; HUMANS.push(this);
   }
@@ -5127,7 +5150,7 @@ function humansUpdate(dt) {
     P.armL = P.armR = P.legs = P.legsR = null; P.armLz = P.armRz = 0; P.walk = 0; P.dy = 0;
     if (!!h.far === near) { h.far = !near; if (h.view.kind === 'rig') humanSync(h); }   // far from the car: rigged people aren't drawn
     if (h.ride) { rideStep(h, dt); humanSync(h); continue; }
-    if (!h.down && !h.inside && h.task) h.task.update(h, dt, t, near);
+    if (!h.down && !h.inside && h.mad) madStep(h, dt, t); else if (!h.down && !h.inside && h.task) h.task.update(h, dt, t, near);
     if (h.dodge) { if ((h.dodge.t -= dt) > 0 && !h.down && !h.inside && !h.seat) { h.vx = h.dodge.x; h.vz = h.dodge.z; h.yaw = Math.atan2(h.dodge.x, h.dodge.z); P.walk = 0.55; P.ph += dt*9; } else h.dodge = null; }   // out of a van's way
     if (!h.inside && !h.seat) { humanStep(h, dt); const mv = !(h.task && h.task.through) && (h.settle || h.vx || h.vz || (h.px !== undefined && (h.x !== h.px || h.z !== h.pz))) && (h.down || !h.task || !h.task.onRoad || !h.task.onRoad());   // (a moped rider moves with the moped: the road is theirs)   // (moved by velocity or placed by its task: the same rules)
       if (mv) staticNear(h.x, h.z, 1, B => { const c = boxPush(B, h.x, h.z, h.r); if (!c) return; h.x += c.nx*c.ov; h.z += c.nz*c.ov; const vn = h.vx*c.nx + h.vz*c.nz; if (vn < 0) { h.vx -= c.nx*vn*1.2; h.vz -= c.nz*vn*1.2; }
@@ -5507,7 +5530,7 @@ function balesUpdate(dt) { if (!BALES.length || !BALE.im) return;
 
 // ════════ FIRES ════════
 const FIRES = [];
-const fireFx = makeParticleSystem(900, true, false), flameFx2 = makeParticleSystem(700, false, false);
+const fireFx = makeParticleSystem(900, true, false, true), flameFx2 = makeParticleSystem(700, false, false, true), emberFx = makeParticleSystem(500, true, false);
 function startFire(o) {
   let f;
   if (o.vehicle) { const v = o.vehicle; if (v.fire) return; f = { v, x: v.x, z: v.z, yaw: v.yaw, hw: v.hw, hl: v.hl, h: v.kind === 'bus' || v.kind === 'fire' ? 2.8 : 1.5, kind: 'vehicle' }; f.y0 = () => v.gy; v.fire = f; }
@@ -5516,8 +5539,15 @@ function startFire(o) {
       B.soot.position.set(B.x, base + 0.25 + (B.wallTop - 0.25)/2, B.z); B.soot.rotation.y = B.yaw; B.soot.renderOrder = 1; lifeGroup.add(B.soot); } }
   Object.assign(f, { level: 0.35, out: false, t: 0, steam: 0, engine: null, acc: 0, eacc: 0 });
   f.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xff7a2a, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); f.glow.scale.set(f.kind === 'house' ? 13 : 6, f.kind === 'house' ? 13 : 6, 1); lifeGroup.add(f.glow);
-  FIRES.push(f); DISPATCH.fire(f);
+  f.floor = new THREE.Mesh(lgeo('fireFloor', () => new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI/2)), new THREE.MeshBasicMaterial({ map: glowTex(), color: 0xff6a20, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0 }));   // the ground lit orange round it
+  const fr = 2*Math.max(f.hw, f.hl) + (f.kind === 'house' ? 9 : 5); f.floor.scale.set(fr, 1, fr); f.floor.renderOrder = 2; lifeGroup.add(f.floor); f.crackle = 0.5;
+  fireIgnite(f); FIRES.push(f); DISPATCH.fire(f);
 }
+function fireIgnite(f) {   // it goes up with a whoomp: a burst of flame out of it, sparks, a first gout of smoke
+  const y0 = f.y0(), big = f.kind === 'house' ? 1 : 0.6;
+  for (let i = 0; i < 34*big; i++) { const [px, py, pz] = fireSpot(f, y0), a = Math.random()*6.3, sp = 1 + Math.random()*3; flameFx2.emit(px, py, pz, Math.cos(a)*sp, 2 + Math.random()*3, Math.sin(a)*sp, 0.5 + Math.random()*0.5, 1.6 + Math.random()*1.4*big, 0.5, 0.95, 1, 0.75, 0.25, 0.9, 0.2, 0.04); }
+  for (let i = 0; i < 40*big; i++) { const [px, py, pz] = fireSpot(f, y0); emberFx.emit(px, py, pz, (Math.random() - 0.5)*6, 3 + Math.random()*6, (Math.random() - 0.5)*6, 1 + Math.random()*1.5, 0.12, 0.05, 1, 1, 0.85, 0.4, 1, 0.3, 0.05); }
+  if (audio && (f.x - car.x)**2 + (f.z - car.z)**2 < 120*120) { beep(62, 0.7, 0.3, 'sawtooth'); beep(95, 0.35, 0.15, 'triangle'); } }
 // where the flames come from: out of the roof and the windows of a house, out of the body of a vehicle
 function fireSpot(f, y0) {
   const r = Math.random();
@@ -5536,17 +5566,21 @@ function firesUpdate(dt) {
       if (f.B && f.B.soot) f.B.soot.material.opacity = Math.min(0.62, f.B.soot.material.opacity + dt*f.level*0.012);
       if (f.v && !f.v.charred && f.t > 12) charVehicle(f.v, true); }
     const y0 = f.y0(), near = (f.x - car.x)**2 + (f.z - car.z)**2 < 320*320, big = f.kind === 'house' ? 1 : f.h > 2 ? 0.8 : 0.55;
-    if (near) { f.acc += dt; const rate = f.out ? (f.steam > 0 ? 7 : 0) : 95*big*(0.3 + f.level);
+    if (near) { f.acc += dt; const rate = f.out ? (f.steam > 0 ? 7 : 0) : 120*big*(0.3 + f.level);
       while (rate && f.acc > 1/rate) { f.acc -= 1/rate;
         if (f.out) { const [px, pz] = lloc(f.x, f.z, f.yaw, (Math.random() - 0.5)*2*f.hw*0.8, (Math.random() - 0.5)*2*f.hl*0.8); lifeFx.emit(px, y0 + f.h*0.8, pz, 0.3, 0.9 + Math.random()*0.5, 0.15, 4 + Math.random()*2, 0.6, 3.5, 0.35, 0.85, 0.86, 0.88, 0.95, 0.95, 0.96); continue; }   // steam
         const [px, py, pz, vx, vy, vz, sz] = fireSpot(f, y0), s = sz*(0.75 + f.level*0.7)*(0.8 + Math.random()*0.5), R = Math.random();
-        if (R < 0.42) flameFx2.emit(px, py, pz, vx + (Math.random() - 0.5)*0.6, vy + Math.random()*1.4, vz + (Math.random() - 0.5)*0.6, 0.45 + Math.random()*0.4, s*1.25, s*0.35, 0.95, 1.0, 0.55, 0.12, 0.85, 0.18, 0.04);   // the body of the flame
-        else if (R < 0.8) fireFx.emit(px, py, pz, vx + (Math.random() - 0.5)*0.5, vy + 0.4 + Math.random()*1.4, vz + (Math.random() - 0.5)*0.5, 0.35 + Math.random()*0.35, s, s*0.3, 0.95, 1.0, 0.9, 0.45, 1.0, 0.4, 0.08);    // its bright heart
-        else if (R < 0.9) fireFx.emit(px, py + 0.5, pz, (Math.random() - 0.5)*1.4, 2.5 + Math.random()*2.5, (Math.random() - 0.5)*1.4, 1.4 + Math.random()*1.2, 0.14, 0.08, 1.0, 1.0, 0.75, 0.3, 1.0, 0.35, 0.05);   // embers
-        else lifeFx.emit(px, py + 1.2, pz, 0.5 + (Math.random() - 0.5)*0.5, 1.4 + Math.random()*0.8, 0.25 + (Math.random() - 0.5)*0.5, 5 + Math.random()*3, 1.4*big + 0.4, 8*big, 0.66, 0.14, 0.13, 0.13, 0.3, 0.29, 0.3); } }   // black smoke
+        if (R < 0.42) flameFx2.emit(px, py, pz, vx + (Math.random() - 0.5)*0.6, vy + Math.random()*1.4, vz + (Math.random() - 0.5)*0.6, 0.5 + Math.random()*0.45, s*2.3, s*0.9, 0.95, 1.0, 0.55, 0.12, 0.85, 0.18, 0.04);   // the body of the flame
+        else if (R < 0.8) fireFx.emit(px, py, pz, vx + (Math.random() - 0.5)*0.5, vy + 0.4 + Math.random()*1.4, vz + (Math.random() - 0.5)*0.5, 0.35 + Math.random()*0.35, s*1.7, s*0.6, 0.95, 1.0, 0.9, 0.45, 1.0, 0.4, 0.08);    // its bright heart
+        else if (R < 0.9) emberFx.emit(px, py + 0.5, pz, (Math.random() - 0.5)*1.8, 2.5 + Math.random()*3, (Math.random() - 0.5)*1.8, 1.4 + Math.random()*1.6, 0.13, 0.05, 1.0, 1.0, 0.8, 0.35, 1.0, 0.3, 0.05);   // embers
+        else lifeFx.emit(px, py + 1.2, pz, 0.5 + (Math.random() - 0.5)*0.5, 1.4 + Math.random()*0.8, 0.25 + (Math.random() - 0.5)*0.5, 6 + Math.random()*4, 1.6*big + 0.4, 11*big, 0.7, 0.13, 0.12, 0.12, 0.34, 0.33, 0.34); } }   // black smoke, billowing up and out
+    if (near && !f.out && (f.crackle -= dt) <= 0) { f.crackle = 0.6 + Math.random()*1.8;   // a crackle: a spit of sparks up out of it, a pop
+      const [px, py, pz] = fireSpot(f, y0); for (let k = 0; k < 10 + 14*f.level; k++) emberFx.emit(px, py, pz, (Math.random() - 0.5)*5, 4 + Math.random()*7, (Math.random() - 0.5)*5, 0.9 + Math.random()*1.4, 0.11, 0.04, 1, 1, 0.9, 0.5, 1, 0.35, 0.06);
+      const dd = Math.hypot(f.x - car.x, f.z - car.z); if (audio && dd < 60) beep(900 + Math.random()*1400, 0.03, 0.05*(1 - dd/60)*f.level, 'square'); }
     if (f.out) f.steam -= dt;
+    f.floor.visible = !f.out && near; if (f.floor.visible) { f.floor.position.set(f.x, y0 + 0.12, f.z); f.floor.material.opacity = (0.25 + 0.35*f.level)*(0.8 + 0.2*Math.sin(f.t*13)*Math.sin(f.t*5.1)); }
     f.glow.visible = !f.out && near; if (f.glow.visible) { f.glow.position.set(f.x, y0 + f.h + (f.kind === 'house' ? 0.6 : 0.3), f.z); f.glow.material.opacity = 0.35 + 0.4*f.level + 0.15*Math.sin(f.t*17)*Math.sin(f.t*7.3); }
-    if (f.out && f.steam <= 0) { lifeGroup.remove(f.glow); FIRES.splice(i, 1); if (f.B) f.B.fire = null; if (f.v) f.v.fire = null; } }
+    if (f.out && f.steam <= 0) { lifeGroup.remove(f.glow); lifeGroup.remove(f.floor); FIRES.splice(i, 1); if (f.B) f.B.fire = null; if (f.v) f.v.fire = null; } }
 }
 function charVehicle(v, on) {   // burnt out: parked cars go black (their paint instance), vans, buses and the tractor char
   v.charred = on;
@@ -6474,13 +6508,14 @@ function buildMidsummer() { const sp = yardSpot('kokko', 4.2, 25, 150, 0); if (!
 function bark(h) { if (!audio || gameState === State.MENU) return; const d = Math.hypot(h.x - car.x, h.z - car.z); if (d > 45) return; const k = 0.05*(1 - d/45);
   beep(520 + Math.random()*60, 0.06, k, 'square'); setTimeout(() => beep(410, 0.09, k, 'square'), 85); }
 const yardDogTask = (D) => ({ kind: 'yarddog', update(h, dt, t) { const S = D.s, cx = car.x - h.x, cz = car.z - h.z, cd = Math.hypot(cx, cz), cs = Math.hypot(car.vx, car.vz); S.cool -= dt; h.tilt = 0;
-  if (S.m === 'idle') { if (cd < 34 && cs > 8 && S.cool <= 0) { S.m = 'chase'; S.t = 0; S.side = Math.random() < 0.5 ? 1 : -1; return; }
+  if (S.m === 'idle') { if (cd < 20 && cs > 4 && S.cool <= 0) { S.m = 'chase'; S.t = 0; S.side = Math.random() < 0.5 ? 1 : -1; return; }
     if ((S.re -= dt) <= 0) { S.re = 2 + Math.random()*4; const a = Math.random()*6.3, r = Math.random()*D.R; S.tx = D.hx + Math.sin(a)*r; S.tz = D.hz + Math.cos(a)*r; S.sit = Math.random() < 0.45; }
     if (walkTo(h, S.tx, S.tz, 1.4, dt) && S.sit) { h.pose.armL = h.pose.armR = -1.2; h.tilt = -0.3; } return; }
   if (S.m === 'chase') { S.t += dt; const [tx, tz] = lloc(car.x, car.z, car.angle, S.side*2.4, -1.0); walkTo(h, tx, tz, 9.5, dt); h.pose.walk = 0.9; h.pose.ph += dt*8;
     if ((S.bk -= dt) <= 0) { S.bk = 0.3 + Math.random()*0.35; S.bob = 0.12; bark(h); } if ((S.bob -= dt) > 0) h.tilt = -0.25;
     if (S.t > 7 || cd > 32 || Math.hypot(h.x - D.hx, h.z - D.hz) > 80) S.m = 'home'; return; }
   if (walkTo(h, D.hx, D.hz, 3.5, dt)) { S.m = 'idle'; S.cool = 10 + Math.random()*10; } },
+  knocked(h) { if (Math.hypot(h.x - car.x, h.z - car.z) < 7) dogRunOver(h, D); },
   reset(h) { Object.assign(D.s, { m: 'idle', cool: 4, re: 0, bk: 0, bob: 0 }); h.tilt = 0; } });
 const dogOwnerTask = (D) => ({ kind: 'dogowner', update(h, dt, t) { const dog = D.dog, S = D.s, st = h.st || (h.st = { lag: 0 }); h.tilt = 0;
   if (dog.down && !dog.gone) { if (walkTo(h, dog.x - 0.6, dog.z, 2.4, dt)) { h.yaw = Math.atan2(dog.x - h.x, dog.z - h.z); h.pose.legs = 1.35; h.pose.dy = -0.52; h.tilt = 0.32; h.pose.armL = h.pose.armR = -1.1; } return; }   // kneeling by the dog
@@ -6490,11 +6525,29 @@ const dogOwnerTask = (D) => ({ kind: 'dogowner', update(h, dt, t) { const dog = 
     h.pose.armR = -2.7 + Math.sin(t*11)*0.35; h.pose.armRz = 0.2; return; }
   st.lag = 0; if (!walkTo(h, D.ox, D.oz, 1.3, dt)) return; h.yaw = D.oyaw; h.pose.armR = Math.sin(t*0.5 + D.hx) > 0.8 ? -2.3 : -0.1; },   // (a smoke now and then)
   reset(h) { h.st = null; } });
-function buildYardDog() { const sp = yardSpot('yarddog', 1.5, 12, 45, 0); if (!sp) return; reserve('yarddog', sp, 3);
+function buildYardDog() { const sp = yardSpot('yarddog', 1.5, 7, 16, 110); if (!sp) return; reserve('yarddog', sp, 3);
   let op = null; for (let k = 0; k < 20 && !op; k++) { const a = Math.random()*6.3, x = sp[0] + Math.sin(a)*3, z = sp[1] + Math.cos(a)*3; if (clearSpot(x, z, 0.4)) op = [x, z]; } if (!op) op = [sp[0] + 1.5, sp[1]];
   const D = { hx: sp[0], hz: sp[1], R: 4, ox: op[0], oz: op[1], oyaw: Math.random()*6.3, s: { m: 'idle', cool: 4, re: 0, bk: 0, bob: 0, tx: sp[0], tz: sp[1] } };
   D.dog = new Human({ x: sp[0], z: sp[1], rig: makeDog(), task: yardDogTask(D), r: 0.26, animal: true });
   new Human({ x: op[0], z: op[1], yaw: D.oyaw, rig: makeAdult(lpick([0x3a3a3a, 0x2f5a3a, 0x8a2a2a, 0x3a5a8a]), lpick(L_PANTS), lpick(L_HAIR)), task: dogOwnerTask(D) }); }
+
+// run a dog over: it yelps, and everyone about (the owner kneels by it) comes after the car shaking their fists
+function yelp(h) { if (!audio) return; const d = Math.hypot(h.x - car.x, h.z - car.z); if (d > 60) return; const { ctx, master } = audio, k = 0.16*(1 - d/60);
+  for (let i = 0; i < 3; i++) { const o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime + i*0.2; o.type = 'triangle'; o.frequency.setValueAtTime(1500 - i*120, t0); o.frequency.exponentialRampToValueAtTime(520, t0 + 0.17);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(k*(1 - i*0.25), t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18); o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + 0.2); } }
+const MAD_SKIP = new Set(['dogowner', 'yarddog', 'medic', 'firefighter', 'officer', 'seated', 'cpr', 'patient', 'pilot', 'hevi']);
+function dogRunOver(dog, D) { yelp(dog);
+  const c = []; forHumansNear(dog.x, dog.z, 45, h => { if (h === dog || h.animal || h.temp || h.down || h.gone || h.inside || h.seat || h.ride || h.mad || (h.task && MAD_SKIP.has(h.task.kind))) return; c.push([Math.hypot(h.x - dog.x, h.z - dog.z), h]); });
+  c.sort((a, b) => a[0] - b[0]); const mad = c.slice(0, 9).map(e => e[1]);
+  mad.forEach((h, i) => { h.mad = { t: 0, T: 11 + Math.random()*5, lag: 0.3 + Math.random()*0.9 + i*0.12, ox: h.x, oz: h.z, back: false, sh: Math.random()*0.8, ph: Math.random()*6.3 }; });
+  if (mad.length || D) pizzaMsg(T('🐕 KOIRA JÄI ALLE! NAAPURIT RAIVOISSAAN'), true); }
+function madStep(h, dt, t) { const M = h.mad, dx = car.x - h.x, dz = car.z - h.z, d = Math.hypot(dx, dz); M.t += dt; h.tilt = 0;
+  if (M.back) { h.pose.armR = -0.2; if (walkTo(h, M.ox, M.oz, 1.8, dt) || M.t > 45) { h.mad = null; h.vx = h.vz = 0; } return; }   // back to what they were doing
+  if (M.t > M.T || d > 75 || gameState === State.MENU) { M.back = true; M.t = 0; return; }
+  h.pose.armR = -2.75 + Math.sin(t*15 + M.ph)*0.4; h.pose.armRz = 0.25; h.pose.armL = -0.6 + Math.sin(t*9 + M.ph)*0.3;   // a fist shaken at it
+  if (M.lag > 0) { M.lag -= dt; h.vx = h.vz = 0; h.yaw = Math.atan2(dx, dz); return; }
+  if (d < 3.5) { h.vx = h.vz = 0; h.yaw = Math.atan2(dx, dz); } else walkTo(h, car.x - Math.sin(car.angle)*3, car.z - Math.cos(car.angle)*3, h.kid ? 4.4 : 5.6, dt);
+  if ((M.sh -= dt) <= 0) { M.sh = 0.9 + Math.random()*1.4; if (audio && d < 50) { const k = 0.05*(1 - d/50), f0 = h.kid ? 330 : 150 + Math.random()*60; beep(f0, 0.14, k, 'sawtooth'); setTimeout(() => beep(f0*0.8, 0.2, k, 'sawtooth'), 150); } } }   // "HEI! PYSÄHDY!"
 
 // ── badminton over a string net in a yard: the shuttle flies in arcs, the other one moves under it and hits it back; now and then
 //    it's missed and lands, whoever missed goes to pick it up and serves again ──
@@ -6587,7 +6640,7 @@ function forestSpot(a, b) { for (let k = 0; k < 800; k++) { const p = trackPoint
 function boom(x, y, z, big) {   // an explosion: a ball of flame, sparks, black smoke, a thump
   const k = big ? 1 : 0.6;
   for (let i = 0; i < 70*k; i++) { const a = Math.random()*6.3, e = Math.random()*1.4, s = 3 + Math.random()*9; flameFx2.emit(x, y + 0.6, z, Math.cos(a)*Math.cos(e)*s, Math.sin(e)*s + 2, Math.sin(a)*Math.cos(e)*s, 0.5 + Math.random()*0.6, 2.2*k + Math.random(), 0.6, 1, 1, 0.7, 0.2, 0.9, 0.25, 0.05); }
-  for (let i = 0; i < 40*k; i++) { const a = Math.random()*6.3, s = 2 + Math.random()*6; fireFx.emit(x, y + 0.8, z, Math.cos(a)*s, 3 + Math.random()*6, Math.sin(a)*s, 0.8 + Math.random()*0.8, 0.25, 0.1, 1, 1, 0.8, 0.3, 1, 0.4, 0.05); }
+  for (let i = 0; i < 40*k; i++) { const a = Math.random()*6.3, s = 2 + Math.random()*6; emberFx.emit(x, y + 0.8, z, Math.cos(a)*s, 3 + Math.random()*6, Math.sin(a)*s, 0.8 + Math.random()*0.8, 0.16, 0.06, 1, 1, 0.8, 0.3, 1, 0.4, 0.05); }
   for (let i = 0; i < 30*k; i++) lifeFx.emit(x + (Math.random() - 0.5)*2, y + 1 + Math.random()*2, z + (Math.random() - 0.5)*2, (Math.random() - 0.5)*2, 1.5 + Math.random()*2, (Math.random() - 0.5)*2, 4 + Math.random()*3, 1.5, 7, 0.8, 0.12, 0.11, 0.1, 0.3, 0.29, 0.3);
   if (audio && (x - car.x)**2 + (z - car.z)**2 < 250*250) { beep(55, 0.9, 0.5, 'sawtooth'); beep(38, 1.2, 0.5, 'square'); } }
 
@@ -7171,9 +7224,128 @@ const roadieTask = () => ({ kind: 'roadie', update(h, dt, t) { const st = h.st |
   reset(h) { h.st = null; } });
 function buildRoadies() { ROADIES.pool.length = 0; for (let k = 0; k < 26; k++) { const h = new Human({ x: 0, z: 0, inst: Math.floor(Math.random()*16), task: roadieTask() }); h.inside = true; ROADIES.pool.push(h); } roadiesPlace(false); }
 
+// ════════ SET 4: two hot-air balloons drifting over (once in a while one bursts as the car comes by: the basket crashes down and then
+//          lies about like a hay bale, the two aboard hurt → ambulance), the Medi-Heli landed in a field with its crew resuscitating
+//          someone. (The yard dogs and the flames are with their own kind above.) ════════
+const BALLOONS = [], BALLOON = { popped: false };
+function balloonTex(cols) { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d');
+  for (let k = 0; k < 16; k++) { g.fillStyle = cols[k % 2]; g.fillRect(k*16, 0, 16, 128); }                  // gores
+  g.fillStyle = cols[2]; g.fillRect(0, 50, 256, 16); g.fillStyle = cols[3]; for (let k = 0; k < 16; k++) { g.beginPath(); g.moveTo(k*16, 50); g.lineTo(k*16 + 8, 36); g.lineTo(k*16 + 16, 50); g.fill(); }   // a band of zigzags
+  g.fillStyle = cols[2]; g.fillRect(0, 0, 256, 10); g.fillStyle = 'rgba(0,0,0,0.16)'; for (let k = 0; k < 16; k++) g.fillRect(k*16, 0, 1, 128);   // crown, seams
+  return new THREE.CanvasTexture(c); }
+function makeBalloon(cols) { const G = new THREE.Group(), env = new THREE.Group(); G.add(env); G.rotation.order = 'YXZ';
+  const pts = []; for (let i = 0; i <= 20; i++) { const t = i/20, sN = 0.07 + 0.93*Math.pow(t, 1.4); pts.push(new THREE.Vector2(Math.max(0.05, 6.5*Math.pow(Math.sin(Math.PI*sN), 0.75)), 14*t)); }
+  const m = new THREE.Mesh(new THREE.LatheGeometry(pts, 16), new THREE.MeshStandardMaterial({ map: balloonTex(cols), roughness: 0.75, side: THREE.DoubleSide })); m.castShadow = true; env.add(m); env.position.y = 4.4;
+  const wick = lmat(0x8a6232, 0.95), rim = lmat(0x4a3018, 0.9), steel = lmat(0x9a9aa0, 0.4);
+  lmesh(lbox(1.3, 1.05, 1.3), wick, 0, 0.52, 0, G); lmesh(lbox(1.4, 0.1, 1.4), rim, 0, 1.08, 0, G);
+  const r0 = pts[0].x/Math.SQRT2, ropes = [];
+  for (const [a, b] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const p0 = new THREE.Vector3(a*0.62, 1.1, b*0.62), p1 = new THREE.Vector3(a*r0, 4.45, b*r0), L = p0.distanceTo(p1);
+    const r = lmesh(lbox(0.03, 0.03, L), rim, (p0.x + p1.x)/2, (p0.y + p1.y)/2, (p0.z + p1.z)/2, G, false); r.lookAt(p1); ropes.push(r); }
+  lmesh(lcyl(0.24, 0.4, 8), steel, 0, 3.3, 0, G); for (const a of [-1, 1]) lmesh(lbox(0.04, 2.2, 0.04), steel, a*0.3, 2.2, 0, G, false);   // the burner on its frame
+  return { G, env, ropes }; }
+function balloonSpot() { for (let k = 0; k < 200; k++) { const p = trackPoints[Math.floor(Math.random()*trackPoints.length)], a = Math.random()*6.3, d = 20 + Math.random()*110, x = p.x + Math.sin(a)*d, z = p.y + Math.cos(a)*d;
+  if (Math.abs(x) < 420 && Math.abs(z) < 420 && BALLOONS.every(o => Math.hypot(o.x - x, o.z - z) > 180)) return [x, z]; } return [Math.random()*300 - 150, Math.random()*300 - 150]; }
+function balloonPlace(B) { const [x, z] = balloonSpot(); Object.assign(B, { x, z, hd: Math.random()*6.3, sp: 0.45 + Math.random()*0.3, gs: Y(x, z), mode: 'fly', vy: 0, ft: 0, burn: 0, bt: Math.random()*6, near: false, vx: 0, vz: 0, w: 0, moving: false, yaw: Math.random()*6.3 });
+  B.y = B.gs + 30; const M = B.M; if (M.env.parent !== M.G) M.G.add(M.env); M.env.position.set(0, 4.4, 0); M.env.rotation.set(0, 0, 0); M.env.scale.set(1, 1, 1); M.ropes.forEach(r => { r.visible = true; }); balloonSync(B); }
+function balloonSync(B) { const M = B.M; M.G.position.set(B.x, B.y, B.z); M.G.rotation.y = B.yaw; B.sv.x = B.x; B.sv.z = B.z; B.sv.yaw = B.yaw; B.sv.gy = B.y; }
+const pilotTask = (B, i) => ({ kind: 'pilot', update(h, dt, t) { h.x = B.x; h.z = B.z; h.vx = h.vz = 0;
+  if (i === 0) h.pose.armR = B.burn > 0 ? -2.9 : -0.3;   // a hand on the burner's valve
+  else { const d = Math.hypot(B.x - car.x, B.z - car.z); h.pose.armR = d < 90 ? -2.7 + Math.sin(t*7)*0.35 : -0.2; h.pose.armRz = d < 90 ? 0.3 : 0; } } });   // waves down at the car
+function buildBalloons() { BALLOONS.length = 0; BALLOON.popped = false;
+  [['#d8262c', '#f4d02a', '#2a5db0', '#f4f4f0'], ['#2a8a4a', '#f4f4f0', '#e87a1a', '#1a3a7a']].forEach((cols, k) => {
+    const M = makeBalloon(cols), B = { M, t: Math.random()*100, ph: Math.random()*6.3, sv: { x: 0, z: 0, yaw: 0, gy: 0 }, pilots: [] }; lifeGroup.add(M.G); BALLOONS.push(B); balloonPlace(B);
+    for (let i = 0; i < 2; i++) { const h = new Human({ x: B.x, z: B.z, rig: makeAdult(lpick([0xd83b2c, 0x2f7bd6, 0xf0f0f0, 0x3aa64c]), lpick(L_PANTS), lpick(L_HAIR)), task: pilotTask(B, i) });
+      h.seat = h.seat0 = { v: B.sv, a: i ? 0.3 : -0.3, b: i ? 0.15 : -0.15, y: 0.1, show: true, yaw: i ? Math.PI*0.7 : 0 }; h.task0 = h.task; B.pilots.push(h); } });
+  X3.upd.push(balloonsUpdate); X3.reset.push(() => { BALLOON.popped = false; BALLOONS.forEach(balloonPlace); }); }
+function balloonPop(B) { BALLOON.popped = true; B.mode = 'fall'; B.vy = 0; B.ft = 0;
+  const d = Math.hypot(B.x - car.x, B.z - car.z); if (audio && d < 400) { const k = Math.max(0.15, 1 - d/400); beep(140, 0.18, 0.5*k, 'square'); beep(52, 0.8, 0.45*k, 'sawtooth'); }
+  for (let i = 0; i < 26; i++) { const a = Math.random()*6.3, r = 3 + Math.random()*3; lifeFx.emit(B.x + Math.sin(a)*r, B.y + 8 + Math.random()*8, B.z + Math.cos(a)*r, Math.sin(a)*3, Math.random()*2, Math.cos(a)*3, 1.5 + Math.random(), 1, 3, 0.5, 0.9, 0.88, 0.85, 0.9, 0.9, 0.9); }
+  pizzaMsg(T('🎈 KUUMAILMAPALLO POKSAHTI!'), true); }
+function balloonLand(B) { B.mode = 'down'; const M = B.M, gy = Y(B.x, B.z); B.y = gy;
+  M.env.rotation.set(Math.PI/2 - 0.04, 0, 0.3); M.env.scale.set(1.15, 1, 0.09); M.env.position.set(0.3, 0.35, 1.2); M.ropes.forEach(r => { r.visible = false; }); balloonSync(B); M.G.updateMatrixWorld(true); lifeGroup.attach(M.env);   // the envelope lies where it fell
+  for (let i = 0; i < 30; i++) { const a = Math.random()*6.3, s = 2 + Math.random()*4; lifeFx.emit(B.x, gy + 0.4, B.z, Math.sin(a)*s, 0.6 + Math.random(), Math.cos(a)*s, 1.2 + Math.random(), 0.8, 3.2, 0.55, 0.62, 0.55, 0.42, 0.7, 0.66, 0.58); }   // dust
+  const d = Math.hypot(B.x - car.x, B.z - car.z); if (audio && d < 200) beep(48, 0.5, 0.45*(1 - d/200), 'triangle');
+  if (d < 2.6) { const nx = (B.x - car.x)/(d || 1), nz = (B.z - car.z)/(d || 1); carDamage(nx, nz, 14); car.vx *= 0.6; car.vz *= 0.6; }   // came down on the car
+  B.pilots.forEach((h, i) => { h.seat = null; const [px, pz] = lloc(B.x, B.z, B.yaw, i ? 1.1 : -1.1, 0.4); h.x = px; h.z = pz; h.hop = 0.6; knock(h, (i ? 1 : -1)*2 + (Math.random() - 0.5)*2, (Math.random() - 0.5)*3, 9); }); }
+function balloonsUpdate(dt) { for (const B of BALLOONS) { B.t += dt; const M = B.M;
+  if (B.mode === 'fly') { B.hd += Math.sin(B.t*0.03 + B.ph)*0.02*dt; if (Math.hypot(B.x, B.z) > 430) B.hd += angDiff(Math.atan2(-B.x, -B.z) - B.hd)*0.05*dt;   // back in over the village
+    B.x += Math.sin(B.hd)*B.sp*dt; B.z += Math.cos(B.hd)*B.sp*dt; B.yaw += 0.01*dt;
+    const gy = Y(B.x, B.z); B.gs += (gy - B.gs)*Math.min(1, dt*0.15); B.y = Math.max(B.gs + 30 + 9*Math.sin(B.t*0.045 + B.ph), gy + 16);
+    if ((B.bt -= dt) <= 0) { B.burn = 1.4 + Math.random()*1.2; B.bt = 7 + Math.random()*10; }
+    const d = Math.hypot(B.x - car.x, B.z - car.z);
+    if (B.burn > 0) { B.burn -= dt; if (d < 320) for (let k = 0; k < 3; k++) fireFx.emit(B.x + (Math.random() - 0.5)*0.2, B.y + 3.55, B.z + (Math.random() - 0.5)*0.2, 0, 6 + Math.random()*3, 0, 0.22 + Math.random()*0.1, 0.9, 0.5, 1, 1, 0.9, 0.55, 1, 0.45, 0.1);
+      if (audio && d < 120 && Math.random() < dt*12) beep(70 + Math.random()*25, 0.12, 0.05*(1 - d/120), 'sawtooth'); }   // the burner's roar
+    M.G.rotation.x = 0.03*Math.sin(B.t*0.53 + B.ph); M.G.rotation.z = 0.03*Math.sin(B.t*0.7);
+    if (d < 65 && !B.near) { B.near = true; if (!BALLOON.popped && gameState !== State.MENU && Math.random() < BALLOON_POP_P) balloonPop(B); } else if (d > 100) B.near = false; }
+  else if (B.mode === 'fall') { B.ft += dt; B.vy = Math.max(-16, B.vy - 9.8*dt*(B.ft < 0.5 ? 0.35 : 1)); B.y += B.vy*dt; B.x += Math.sin(B.hd)*B.sp*dt; B.yaw += 0.6*dt;
+    const k = Math.min(1, B.ft/1.4); M.env.scale.set(1 - 0.55*k + 0.1*Math.sin(B.ft*9), 1 - 0.6*k, 1 - 0.55*k + 0.1*Math.cos(B.ft*8)); M.env.rotation.z = 0.45*k*Math.sin(B.ph + B.ft); M.env.position.y = 4.4 + 2*k;   // it crumples, streaming above
+    M.G.rotation.x = 0.15*Math.sin(B.ft*5); M.G.rotation.z = 0.15*Math.cos(B.ft*4);
+    if (B.y <= Y(B.x, B.z)) balloonLand(B); }
+  else { M.G.rotation.x = M.G.rotation.z = 0;   // on the ground: the basket is a hay bale (the same weights and knocks), sliding instead of rolling
+    if (Math.abs(B.x - car.x) < 4.5 && Math.abs(B.z - car.z) < 4.5) { const hit = carBoxPush(B.x, B.z, 0.9); if (hit) { const nx = hit.nx, nz = hit.nz; B.x += nx*hit.ov*0.7; B.z += nz*hit.ov*0.7; car.x -= nx*hit.ov*0.3; car.z -= nz*hit.ov*0.3;
+      const rel = (B.vx - car.vx)*nx + (B.vz - car.vz)*nz;
+      if (rel < 0) { const imp = -rel*1.25; B.vx += nx*imp*0.72; B.vz += nz*imp*0.72; car.vx -= nx*imp*0.28; car.vz -= nz*imp*0.28; B.w += ((Math.random() - 0.5)*2)*imp*0.35; carDamage(nx, nz, -rel*0.7);
+        const now = performance.now(); if (audio && now - lastThud > 110) { lastThud = now; beep(75 + Math.random()*20, 0.14, Math.min(0.32, -rel*0.03), 'triangle'); } }
+      B.moving = true; } }
+    if (B.moving) { const f = Math.exp(-dt*2.2); B.vx *= f; B.vz *= f; B.w *= Math.exp(-dt*3); B.x += B.vx*dt; B.z += B.vz*dt; B.yaw += B.w*dt;
+      if (treeNear(B.x, B.z, 1.1)) { B.x -= B.vx*dt; B.z -= B.vz*dt; B.vx *= -0.25; B.vz *= -0.25; }
+      staticNear(B.x, B.z, 3, O => { const h = boxPush(O, B.x, B.z, 0.9); if (!h) return; B.x += h.nx*h.ov; B.z += h.nz*h.ov; const rv = B.vx*h.nx + B.vz*h.nz; if (rv < 0) { B.vx -= h.nx*rv*1.3; B.vz -= h.nz*rv*1.3; } });
+      if (Math.hypot(B.vx, B.vz) < 0.05 && Math.abs(B.w) < 0.05) { B.vx = B.vz = B.w = 0; B.moving = false; } }
+    B.y = Y(B.x, B.z); }
+  balloonSync(B); } }
+let BALLOON_POP_P = 0.05;   // the chance one bursts as the car passes under it (tests set it to 1)
+
+// ── the Medi-Heli: landed in a field, rotor turning over slowly, the crew doing CPR on someone, a few people watching ──
+let _heliSide = null;
+function heliSideTex() { if (_heliSide) return _heliSide; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
+  g.font = 'italic bold 70px Arial'; g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillStyle = '#c4201a'; g.fillText('MEDI-HELI', 256, 60); g.fillStyle = '#1a2a5a'; g.font = 'bold 22px Arial'; g.fillText('LÄÄKÄRIHELIKOPTERI', 256, 108);
+  return (_heliSide = new THREE.CanvasTexture(c)); }
+function makeMediHeli() { const G = new THREE.Group(), white = lmat(0xf2f2ee, 0.4), red = lmat(0xc4201a, 0.45), glass = lmat(0x1e2a36, 0.12), dark = lmat(0x2a2a2e, 0.6), black = lmat(0x161616, 0.7);
+  lmesh(lbox(1.7, 1.5, 3.3), white, 0, 1.4, 0, G); lmesh(lbox(1.72, 0.32, 3.32), red, 0, 1.0, 0, G);                                     // cabin, red band
+  lmesh(lbox(1.6, 0.66, 0.9), white, 0, 0.98, 2.08, G); lmesh(lbox(1.62, 0.2, 0.92), red, 0, 1.0, 2.08, G);                              // the nose
+  const scr = lmesh(lbox(1.56, 1.22, 0.06), glass, 0, 1.72, 2.07, G); scr.rotation.x = -0.785;                                               // the raked screen
+  for (const s of [-1, 1]) { lmesh(lbox(0.05, 0.8, 0.8), glass, s*0.79, 1.68, 1.95, G); lmesh(lbox(0.05, 0.75, 1.3), glass, s*0.86, 1.75, 0.55, G); }   // side windows
+  lmesh(lbox(1.1, 0.6, 1.9), white, 0, 2.43, -0.4, G); lmesh(lcyl(0.1, 0.55, 8), dark, 0, 2.95, 0, G);                                      // engine deck, mast
+  lmesh(lbox(0.44, 0.44, 5.4), white, 0, 1.95, -4.1, G); lmesh(lbox(0.46, 0.12, 5.42), red, 0, 1.78, -4.1, G);                              // tail boom
+  lmesh(lbox(0.1, 1.4, 0.9), red, 0, 2.55, -6.75, G); lmesh(lbox(1.9, 0.08, 0.55), white, 0, 1.98, -6.1, G);                                 // fin, stabiliser
+  const rotor = new THREE.Group(); rotor.position.set(0, 3.22, 0); G.add(rotor); lmesh(lcyl(0.28, 0.14, 8), dark, 0, 0, 0, rotor);
+  for (let k = 0; k < 4; k++) { const b = lmesh(lbox(0.3, 0.05, 4.9), dark, 0, 0.02, 0, rotor); b.geometry = lgeo('heliBlade', () => new THREE.BoxGeometry(0.3, 0.05, 4.9).translate(0, 0, 2.5)); b.rotation.y = k*Math.PI/2; }
+  const tail = new THREE.Group(); tail.position.set(0.12, 2.6, -6.9); G.add(tail); for (let k = 0; k < 2; k++) { const b = lmesh(lbox(0.04, 1.5, 0.14), dark, 0, 0, 0, tail, false); b.rotation.x = k*Math.PI/2; }
+  for (const s of [-1, 1]) { lmesh(lbox(0.1, 0.1, 3.5), black, s*0.95, 0.07, 0.1, G); for (const zz of [-0.7, 0.9]) { const st = lmesh(lbox(0.07, 0.62, 0.07), black, s*0.9, 0.36, zz, G); st.rotation.z = s*0.2; } }   // skids
+  const lbl = new THREE.MeshStandardMaterial({ map: heliSideTex(), transparent: true, roughness: 0.5 });
+  for (const s of [-1, 1]) { const p = new THREE.Mesh(lgeo('heliLbl', () => new THREE.PlaneGeometry(2.6, 0.65)), lbl); p.position.set(s*0.235, 2.02, -3.9); p.rotation.y = s*Math.PI/2; p.scale.set(1, 0.7, 1); G.add(p);
+    const q = new THREE.Mesh(lgeo('heliLbl', () => new THREE.PlaneGeometry(2.6, 0.65)), lbl); q.position.set(s*0.865, 1.2, -0.25); q.rotation.y = s*Math.PI/2; q.scale.set(0.95, 0.9, 1); G.add(q); }
+  const bcn = new THREE.MeshStandardMaterial({ color: 0xff2a1a, emissive: 0xff2a1a, emissiveIntensity: 0.3 }); lmesh(lbox(0.16, 0.12, 0.22), bcn, 0, 2.8, -1.2, G, false);   // anti-collision beacon
+  return { G, rotor, tail, bcn }; }
+const cprTask = (P, role) => ({ kind: 'cpr', update(h, dt, t) { h.vx = h.vz = 0;
+  if (P.patient.down || P.patient.gone) { if (walkTo(h, P.px + (role - 1)*0.8, P.pz + 1.2, 2.5, dt)) { h.yaw = Math.atan2(P.patient.x - h.x, P.patient.z - h.z); h.pose.armL = h.pose.armR = -2.4; } return; }   // (knocked flying: they get up and stare)
+  if (!walkTo(h, P.spots[role][0], P.spots[role][1], 2, dt)) return; h.yaw = P.spots[role][2];
+  if (role === 0) { const c = Math.max(0, Math.sin(t*10.5)); h.pose.legs = 1.35; h.pose.dy = -0.52; h.tilt = 0.42 + 0.14*c; h.pose.armL = h.pose.armR = -1.35; h.pose.armLz = 0.18; h.pose.armRz = -0.18; }   // compressions, ~100 a minute
+  else if (role === 1) { h.pose.legs = 1.35; h.pose.dy = -0.52; h.tilt = 0.25; const sq = (t % 5.5) < 0.9; h.pose.armL = -1.3; h.pose.armR = sq ? -1.05 : -1.4; }   // the bag every few seconds
+  else { h.tilt = 0; h.pose.armL = -2.7; h.pose.armR = -0.4 + 0.2*Math.sin(t*0.6); } } });   // the drip held up
+const patientTask = (P) => ({ kind: 'patient', update(h, dt, t) { h.vx = h.vz = 0; h.yaw = P.yaw; h.tilt = -Math.PI/2 + 0.05; h.pose.dy = 0.1 + 0.02*Math.max(0, Math.sin(t*10.5)); h.pose.armL = h.pose.armR = -0.1; h.pose.armLz = 0.25; h.pose.armRz = -0.25; } });
+const heliGawkTask = (P) => ({ kind: 'heligawk', update(h, dt, t) { h.vx = h.vz = 0; h.yaw = Math.atan2(P.px - h.x, P.pz - h.z); const k = Math.sin(t*0.4 + h.home.x);
+  h.pose.armR = k > 0.6 ? -2.2 : -0.2; h.pose.armL = k < -0.7 ? -1.2 : -0.1; if (!walkTo(h, h.home.x, h.home.z, 1.2, dt)) return; h.yaw = Math.atan2(P.px - h.x, P.pz - h.z); } });
+function buildMediHeli() { const sp = openSpot(10, 24, 70); if (!sp) return; reserve('heli', sp, 11); const [x, z] = sp, yaw = Math.random()*6.3;
+  const M = makeMediHeli(); placeAt(M.G, x, z, yaw); lifeGroup.add(M.G); nearVis(M.G, x, z); X3.heli = { x, z, yaw, M };
+  addStaticBox({ x, z, yaw, hw: 1.0, hl: 2.4, kind: 'lm' }); { const [tx, tz] = lloc(x, z, yaw, 0, -4.8); addStaticBox({ x: tx, z: tz, yaw, hw: 0.35, hl: 2.5, kind: 'lm' }); }
+  const [px, pz] = lloc(x, z, yaw, 4.2, 1.2), pyaw = yaw + Math.PI/2, fx = Math.sin(pyaw), fz = Math.cos(pyaw), rx = fz, rz = -fx;   // the patient lies at right angles to it, feet towards it… no: head away from it
+  const P = { px, pz, yaw: pyaw, spots: null, patient: null };
+  const at = (f, r) => [px + fx*f + rx*r, pz + fz*f + rz*r];
+  const chest = at(-1.2, 0), c0 = at(-1.2, 0.62), c1 = at(-2.05, 0), c2 = at(-0.6, -0.8);
+  P.spots = [[c0[0], c0[1], Math.atan2(chest[0] - c0[0], chest[1] - c0[1])], [c1[0], c1[1], Math.atan2(chest[0] - c1[0], chest[1] - c1[1])], [c2[0], c2[1], Math.atan2(chest[0] - c2[0], chest[1] - c2[1])]];
+  P.patient = new Human({ x: px, z: pz, yaw: pyaw, rig: makeAdult(lpick([0xf0f0f0, 0x2f7bd6, 0xe8c02a, 0x8a5a3c]), lpick(L_PANTS), lpick(L_HAIR)), task: patientTask(P) });
+  for (let i = 0; i < 3; i++) new Human({ x: P.spots[i][0], z: P.spots[i][1], yaw: P.spots[i][2], rig: makeCrew('medic'), task: cprTask(P, i) });
+  const kit = new THREE.Group(); lmesh(lbox(0.5, 0.3, 0.35), lmat(0xf07818, 0.6), 0, 0.15, 0, kit); lmesh(lbox(0.35, 0.22, 0.28), lmat(0xf0c020, 0.5), 0.6, 0.11, 0.1, kit);   // the pack, the defibrillator
+  { const [kx, kz] = at(-1.5, -0.75); placeAt(kit, kx, kz, pyaw); lifeGroup.add(kit); nearVis(kit, kx, kz); }
+  for (let i = 0; i < 4; i++) { const a = yaw + Math.PI/2 + (i - 1.5)*0.35, r = 8 + Math.random()*1.5; let gx = px + Math.sin(a)*r, gz = pz + Math.cos(a)*r; if (!clearSpot(gx, gz, 0.4)) continue;
+    new Human({ x: gx, z: gz, yaw: Math.atan2(px - gx, pz - gz), rig: makeAdult(lpick([0xd83b2c, 0x3aa64c, 0xf0f0f0, 0x7b3fb5]), lpick(L_PANTS), lpick(L_HAIR)), task: heliGawkTask(P) }); }
+  let bt = 0, wt = 0; X3.upd.push((dt) => { const d = Math.hypot(x - car.x, z - car.z); if (d > 260) return; M.rotor.rotation.y += dt*3.8; M.tail.rotation.x += dt*22; bt += dt; M.bcn.emissiveIntensity = (bt % 1.1) < 0.12 ? 3 : 0.2;
+    if (audio && d < 70 && (wt -= dt) <= 0) { wt = 1/2.4; beep(46, 0.16, 0.06*(1 - d/70), 'triangle'); } }); }   // a slow whop-whop
+
 function lifeExtras3Build() {
-  TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
-  buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies();
+  TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.heli = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
+  buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli();
 }
 function extras3Update(dt) { for (const f of X3.upd) f(dt); esUpdate(dt); cabbageUpdate(dt); ufoUpdate(dt); }
 function lifeExtras3Reset() { for (const f of X3.reset) f(); wreckReset(); esReset(); cabbageReset(); ufoReset(); roadiesPlace(true); }
@@ -7185,7 +7357,7 @@ function lifeExtras2Build() {
   const take = (gap) => { const s = streets.find(s => !used.some(u => Math.hypot(u.mid.x - s.mid.x, u.mid.z - s.mid.z) < gap)); if (s) used.push(s); return s; };
   for (let k = 0; k < 2; k++) { const s = take(150); if (s) buildMopeds(s); }
   for (let k = 0; k < 4; k++) { const s = take(90); if (s && buildPostman(s)) break; }
-  buildHorses(2); buildCarpets(3); buildLaundry(3); buildMidsummer(); buildYardDog(); buildYardDog(); buildBadminton(2); buildRing(); buildRing(); buildRing();
+  buildHorses(2); buildCarpets(3); buildLaundry(3); buildMidsummer(); for (let k = 0; k < 4; k++) buildYardDog(); buildBadminton(2); buildRing(); buildRing(); buildRing();
 }
 function extras2Update(dt) { for (const f of X2.upd) f(dt, worldT); flyingUpdate(dt); }
 function lifeExtras2Reset() { for (const f of X2.reset) f(); for (const F of X2.flying) lifeGroup.remove(F.m); X2.flying.length = 0; }
@@ -7287,11 +7459,11 @@ function worldReset() {
   if (BASS.on) bassToggle();   // a restart: everyone back on their feet and where they were, responders and fires gone, cars back in place
   for (let i = VEHICLES.length - 1; i >= 0; i--) { const v = VEHICLES[i]; if (v.temp) { vehicleRemove(v); continue; } v.x = v.home.x; v.z = v.home.z; v.yaw = v.home.yaw; v.vx = v.vz = v.w = v.vF = 0; v.awake = false; v.damage = 0; v.fire = null; if (v.charred) charVehicle(v, false);
     Object.assign(v.ctrl, { thr: 0, brk: 0, steer: 0, hand: !v.ai }); if (v.ai && v.ai.reset) v.ai.reset(); vehicleSync(v); }
-  for (const f of FIRES) lifeGroup.remove(f.glow); FIRES.length = 0; STATIC_LIST.forEach(b => { b.fire = null; if (b.soot) { lifeGroup.remove(b.soot); b.soot = null; } });
+  for (const f of FIRES) { lifeGroup.remove(f.glow); lifeGroup.remove(f.floor); } FIRES.length = 0; STATIC_LIST.forEach(b => { b.fire = null; if (b.soot) { lifeGroup.remove(b.soot); b.soot = null; } });
   for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i]; if (h.temp) { humanRemove(h); continue; } if (h.seat0) { h.seat = h.seat0; h.task = h.task0; }
-    h.x = h.home.x; h.z = h.home.z; h.yaw = h.home.yaw; h.vx = h.vz = h.vy = h.hop = h.tilt = h.roll = h.spin = h.sway = 0; h.down = h.hurt = h.gone = false; h.ride = null; h.pose.up = false; if (h.task && h.task.reset) h.task.reset(h); humanSync(h); }
+    h.x = h.home.x; h.z = h.home.z; h.yaw = h.home.yaw; h.vx = h.vz = h.vy = h.hop = h.tilt = h.roll = h.spin = h.sway = 0; h.down = h.hurt = h.gone = false; h.ride = null; h.mad = null; h.pose.up = false; if (h.task && h.task.reset) h.task.reset(h); humanSync(h); }
   for (const F of FIELD_GAMES) if (F.kids) { F.ball.a = F.ball.b = 0; F.ball.va = F.ball.vb = F.ball.vy = 0; F.ball.y = 0.16; }
-  pizzaReset(); lpReset(); lifeExtrasReset(); lifeExtras2Reset(); lifeExtras3Reset(); policeReset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); waterFx.clear(); sirenSet(0, 0);
+  pizzaReset(); lpReset(); lifeExtrasReset(); lifeExtras2Reset(); lifeExtras3Reset(); policeReset(); DISPATCH.queue.length = 0; crashAt = null; lifeFx.clear(); fireFx.clear(); flameFx2.clear(); emberFx.clear(); waterFx.clear(); sirenSet(0, 0);
 }
 function roadPathTo(x, z) { return ambPath(x, z); }
 
@@ -7301,7 +7473,7 @@ function sparkBurst(x, y, z, nx, nz, n, sp) { for (let k = 0; k < n; k++) { cons
 function updateSmoke(dt) {
   const racing = gameState === State.RACING, on = gameState !== State.MENU;
   // projection scale for point sizes (px per metre at 1 m)
-  const sc = (renderer.domElement.height || innerHeight) / (2*Math.tan(camera.fov*Math.PI/360)); smokeFx.mat.uniforms.uScale.value = sc; flameFx.mat.uniforms.uScale.value = sc; sparkFx.mat.uniforms.uScale.value = sc; chimneyFx.mat.uniforms.uScale.value = sc; lifeFx.mat.uniforms.uScale.value = fireFx.mat.uniforms.uScale.value = flameFx2.mat.uniforms.uScale.value = waterFx.mat.uniforms.uScale.value = sc;
+  const sc = (renderer.domElement.height || innerHeight) / (2*Math.tan(camera.fov*Math.PI/360)); smokeFx.mat.uniforms.uScale.value = sc; flameFx.mat.uniforms.uScale.value = sc; sparkFx.mat.uniforms.uScale.value = sc; chimneyFx.mat.uniforms.uScale.value = sc; lifeFx.mat.uniforms.uScale.value = fireFx.mat.uniforms.uScale.value = flameFx2.mat.uniforms.uScale.value = waterFx.mat.uniforms.uScale.value = emberFx.mat.uniforms.uScale.value = sc;
   if (on) {
     carGroup.updateMatrixWorld(); _ex.copy(EXHAUST_LOCAL); bodyGroup.localToWorld(_ex);
     const bx = -Math.sin(car.angle), bz = -Math.cos(car.angle);          // backwards
@@ -7347,7 +7519,7 @@ function updateSmoke(dt) {
     if (spd > 7) { dustAcc += Math.min(45, spd*1.2)*dt; const ca = Math.cos(car.angle), sa = Math.sin(car.angle);
       while (dustAcc >= 1) { dustAcc -= 1; const [lx, lz] = REAR_WHEELS[Math.random() < 0.5 ? 0 : 1], wx = car.x + ca*lx + sa*lz, wz = car.z - sa*lx + ca*lz, a0 = 0.36*Math.min(1, spd/20);
         smokeFx.emit(wx, ROAD_Y + 0.35 + Y(wx, wz), wz, car.vx*0.18 + (Math.random()-0.5)*1.6, 0.3 + Math.random()*0.5, car.vz*0.18 + (Math.random()-0.5)*1.6, 2.6 + Math.random()*1.8, 1.1, 6.5 + Math.random()*3.5, a0, 0.74, 0.66, 0.5, 0.82, 0.78, 0.68); } } else dustAcc = 0; }
-  smokeFx.update(dt, 0.55, 1.6); flameFx.update(dt, 0, 3); sparkFx.update(dt, -9.8, 0.6); chimneyFx.update(dt, 0.12, 0.3); lifeFx.update(dt, 0.25, 0.5); fireFx.update(dt, 1.2, 1.0); flameFx2.update(dt, 1.6, 1.2); waterFx.update(dt, -9.8, 0.2);   // sparks fall
+  smokeFx.update(dt, 0.55, 1.6); flameFx.update(dt, 0, 3); sparkFx.update(dt, -9.8, 0.6); chimneyFx.update(dt, 0.12, 0.3); lifeFx.update(dt, 0.25, 0.5); fireFx.update(dt, 1.2, 1.0); flameFx2.update(dt, 1.6, 1.2); emberFx.update(dt, 0.9, 0.7); waterFx.update(dt, -9.8, 0.2);   // sparks fall
 }
 function updateDebris(dt) {
   for (let i = 0; i < carParts.length; i++) if (carParts[i].cool > 0) carParts[i].cool -= dt;
