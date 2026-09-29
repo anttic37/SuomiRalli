@@ -653,6 +653,17 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   2.5 s still), task playerWalkTask (arrows/WASD turn + walk 2.3 m/s, space/shift run 6.2, back 1.3; tethered to 200 m of the car,
   since the village's life/visibility is keyed to the car). updateCar treats WALK.on as held (handbrake, no input). updateCamera →
   walkCamera (6.5 m behind, 3.4 up, own shadow anchor). F within 3.8 m of the car → walkIn(); startRace/toMenu walkIn(true). t_walk.
+- Walker stamina + fear (29.9., "kuski väsyy ja pelkää että auto varastetaan"): WALK.stam (run drains in ~6 s; walking +0.07/s,
+  standing +0.14/s); at 0 → puff (1.4 m/s, hands on knees, panting, can't run until > 0.35); a bar over the HUD (walkBar). Fear past
+  WALK_FEAR 90 m: walking away slows (to 40 % at the limit), sway, message; WALK_MAX 140 m hard limit with "EI USKALLA KAUEMMAS".
+- UFO gunner + hijack (29.9., "ufoukko ampuu, yliajo → ufo on sinun, malli 20 m ylös, alla auto"): each UFO has 3 aliens
+  (alienTask; k 2 has a ray gun via handProp). Awake UFO + player < 55 m: the gunner turns and fires small bolts (alienShoot: 30 m/s,
+  first two wide, spread 3.5 m at the car / 2.6 m at a walker) into the same UFO_BOLTS/ufoBoom path (car hits count toward UFO_HITS;
+  walker gets knocked, gets up). playerAt() = the walker when on foot: UFOs wake/target them too (dome less keen on walkers).
+  An alien knocked with the rally car within 7 m (not on foot, RACING) → ufoCapture(U): static box removed (staticRemove), rising
+  sweep, message; ufoCapUpdate lifts it over 3.5 s to 20 m above the car then follows (exp 5/s, leaning, spinning, bob), nearVis entry
+  follows, an additive green beam cone down to the car. The car is still the car (physics, leaderboard unchanged). ufoReset →
+  ufoCapReset puts it back on its legs and re-adds the static box. t_ufocap.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

@@ -271,6 +271,10 @@ const I18N = {
   '🚨 KIINNI! POLIISI PUHUTTELEE…': ['🚨 BUSTED! THE OFFICER WANTS A WORD…', '🚨 TATT! POLITIET VIL HA EN PRAT…'],
   'SAAT JATKAA — AJA SIIVOSTI': ['YOU MAY GO — DRIVE NICELY', 'DU KAN KJØRE VIDERE — KJØR PENT'], 'PÄÄSIT KARKUUN!': ['YOU GOT AWAY!', 'DU SLAPP UNNA!'],
   '👽 UFO AMPUI AUTON!': ['👽 THE UFO SHOT YOUR CAR!', '👽 UFOEN SKJØT BILEN!'], '⚡🔥 ES + KOLARI = TULIPALO!': ['⚡🔥 ES + CRASH = FIRE!', '⚡🔥 ES + KRASJ = BRANN!'],
+  '🛸 UFO KAAPATTU! SE ON NYT SINUN': ['🛸 UFO HIJACKED! IT’S YOURS NOW', '🛸 UFO KAPRET! DEN ER DIN NÅ'],
+  '😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!': ['😰 THE CAR’S ALL ALONE – SOMEONE COULD TAKE IT!', '😰 BILEN STÅR ALENE – NOEN KAN TA DEN!'],
+  '😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!': ['😱 TOO SCARED TO GO FURTHER – THEY’LL STEAL THE CAR!', '😱 TØR IKKE GÅ LENGRE – BILEN BLIR STJÅLET!'],
+  '😮‍💨 PUUSKUTTAA…': ['😮‍💨 OUT OF BREATH…', '😮‍💨 ANDPUSTEN…'],
   '🎈 KUUMAILMAPALLO POKSAHTI!': ['🎈 A HOT-AIR BALLOON BURST!', '🎈 EN LUFTBALLONG SPRAKK!'],
   '🐕 KOIRA JÄI ALLE! NAAPURIT RAIVOISSAAN': ['🐕 YOU RAN OVER A DOG! THE NEIGHBOURS ARE FURIOUS', '🐕 DU KJØRTE OVER EN HUND! NABOENE ER RASENDE'],
   '🐻 KARHU YLIAJETTU! 10 POLIISIA PERÄÄN!': ['🐻 YOU HIT A BEAR! 10 POLICE CARS AFTER YOU!', '🐻 DU KJØRTE PÅ EN BJØRN! 10 POLITIBILER ETTER DEG!'],
@@ -3092,19 +3096,34 @@ const car = { x:0, z:0, angle:0, vx:0, vz:0, steerSm:0, steerAngle:0, pivot:-1.3
 // ── on foot: F by the car (nearly stopped) gets the driver out — a Human like everyone else (the same body, bumps, knocks; knocked
 //    down they lie a moment and get up again, no ambulance for them). Arrows/WASD walk, space or shift runs, F by the car gets back in.
 //    The car waits with the handbrake on; the camera follows the driver; they stay within 200 m of the car (the village lives round it). ──
-const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0 };
-const playerWalkTask = () => ({ kind: 'walker', update(h, dt) { const turn = ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0) - ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0);
-  const fwd = (keys['ArrowUp'] || keys['KeyW']) ? 1 : (keys['ArrowDown'] || keys['KeyS']) ? -1 : 0, run = keys['Space'] || keys['ShiftLeft'] || keys['ShiftRight'];
-  h.yaw += turn*2.6*dt; const sp = fwd > 0 ? (run ? 6.2 : 2.3) : fwd*1.3; h.vx = Math.sin(h.yaw)*sp; h.vz = Math.cos(h.yaw)*sp; h.tilt = 0;
-  const dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz); if (d > 200) { h.x = car.x + dx/d*200; h.z = car.z + dz/d*200; } } });
+const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0, stam: 1, puff: false, pt: 0, ft: 0, saidPuff: false, saidFear: false, bar: null };
+// Stamina: running (6.2 m/s) empties it in ~6 s, then a slow, puffing walk until it's back over a third (walking or standing fills it).
+// Fear: past 90 m from the car they get nervous (slower, looking back over the shoulder); at 140 m they won't go on — it'll be stolen.
+const WALK_FEAR = 90, WALK_MAX = 140;
+function walkMsg(t, col) { const cpd = document.getElementById('checkpoint-display'); if (!cpd) return; cpd.textContent = t; cpd.style.color = col || '#ffe9a8'; cpd.style.opacity = 1; clearTimeout(walkMsg.tm); walkMsg.tm = setTimeout(() => cpd.style.opacity = 0, 1600); }
+const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WALK, turn = ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0) - ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0);
+  const fwd = (keys['ArrowUp'] || keys['KeyW']) ? 1 : (keys['ArrowDown'] || keys['KeyS']) ? -1 : 0, wantRun = keys['Space'] || keys['ShiftLeft'] || keys['ShiftRight'];
+  if (W.stam < 0.02) W.puff = true; else if (W.stam > 0.35) W.puff = false;
+  const run = wantRun && fwd > 0 && !W.puff, dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz), fear = Math.max(0, Math.min(1, (d - WALK_FEAR)/(WALK_MAX - WALK_FEAR)));
+  W.stam = Math.max(0, Math.min(1, W.stam + (run ? -dt/6 : dt*(fwd ? 0.07 : 0.14))));
+  h.yaw += turn*2.6*dt; let sp = fwd > 0 ? (run ? 6.2 : W.puff ? 1.4 : 2.3) : fwd*1.3;
+  const away = (Math.sin(h.yaw)*dx + Math.cos(h.yaw)*dz)/(d || 1)*Math.sign(sp); if (away > 0) sp *= 1 - 0.6*fear;   // (nervous: dragging their feet going further off)
+  h.vx = Math.sin(h.yaw)*sp; h.vz = Math.cos(h.yaw)*sp; h.tilt = W.puff ? 0.28 : 0;
+  if (W.puff) { h.pose.armL = h.pose.armR = -0.6; if (!fwd) h.tilt = 0.45 + 0.05*Math.sin(t*9); if ((W.pt -= dt) <= 0) { W.pt = 0.55; if (audio) beep(170 + Math.random()*40, 0.2, 0.04, 'triangle'); } }   // hands on knees, panting
+  if (W.puff && !W.saidPuff) { W.saidPuff = true; walkMsg(T('😮‍💨 PUUSKUTTAA…')); } else if (!W.puff) W.saidPuff = false;
+  if (d > WALK_FEAR) { h.sway = 0.25*Math.sin(t*2.2)*fear; if (!W.saidFear) { W.saidFear = true; walkMsg(T('😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!'), '#ffb080'); } } else { W.saidFear = false; h.sway = 0; }
+  if (d > WALK_MAX) { h.x = car.x + dx/d*WALK_MAX; h.z = car.z + dz/d*WALK_MAX; if ((W.ft -= dt) <= 0) { W.ft = 3; walkMsg(T('😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!'), '#ff8a6a'); } } },
+  reset() {} });
 function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on || POLICE.hold > 0 || Math.hypot(car.vx, car.vz) > 3) return false;
   const [x, z] = lloc(car.x, car.z, car.angle, -1.35, 0.3);
   const h = WALK.h = new Human({ x, z, yaw: car.angle - Math.PI/2, rig: makeAdult(0xf2f2ee, 0xf2f2ee, 0x5a3a1e, { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), task: playerWalkTask(), temp: true });
-  h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.downT = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
+  h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.downT = 0; WALK.stam = 1; WALK.puff = false; WALK.ft = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
   const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('JALKAISIN · F = TAKAISIN AUTOON'); cpd.style.color = '#ffe9a8'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 1800); return true; }
 function walkIn(force) { if (!WALK.on) return false; const h = WALK.h; if (!force && (h.down || Math.hypot(h.x - car.x, h.z - car.z) > 3.8)) return false;
   if (!h.gone) humanRemove(h); WALK.on = false; WALK.h = null; return true; }
-function walkUpdate(dt) { if (!WALK.on) return; const h = WALK.h; if (h.gone) { WALK.on = false; WALK.h = null; return; }
+function walkBar() { let b = WALK.bar; if (!b) { b = WALK.bar = document.createElement('div'); b.style.cssText = 'position:fixed;left:50%;bottom:118px;width:160px;height:9px;margin-left:-80px;border:1px solid rgba(255,255,255,0.55);border-radius:5px;background:rgba(0,0,0,0.45);z-index:20;display:none;overflow:hidden'; b.innerHTML = '<i style="display:block;height:100%;width:100%;background:#7ad86a"></i>'; document.body.appendChild(b); }
+  b.style.display = WALK.on ? 'block' : 'none'; if (WALK.on) { const i = b.firstChild; i.style.width = (WALK.stam*100).toFixed(0) + '%'; i.style.background = WALK.puff ? '#e86a3a' : WALK.stam < 0.3 ? '#e8c03a' : '#7ad86a'; } }
+function walkUpdate(dt) { walkBar(); if (!WALK.on) return; const h = WALK.h; if (h.gone) { WALK.on = false; WALK.h = null; return; }
   if (h.down && !h.ride && h.hop <= 0 && Math.hypot(h.vx, h.vz) < 0.4) { if ((WALK.downT += dt) > 2.5) { h.down = h.hurt = false; h.tilt = h.roll = h.spin = 0; h.vx = h.vz = 0; WALK.downT = 0; } } else WALK.downT = 0; }   // up on their feet again
 function walkCamera(dt) { const h = WALK.h, gy = Y(h.x, h.z) + h.hop; WALK.cy += angDiff(h.yaw - WALK.cy)*Math.min(1, dt*2.5); const cx = Math.sin(WALK.cy), cz = Math.cos(WALK.cy);
   camTarget.set(h.x - cx*6.5, gy + 3.4, h.z - cz*6.5); camTarget.y = Math.max(camTarget.y, Y(camTarget.x, camTarget.z) + 1.3);
@@ -4293,6 +4312,8 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'UFO:n luona ufoukko jolla on sädease – ampuu autoa tai jalkaisin kulkevaa kuskia. Aja ufoukon yli ja UFO on sinun: se nousee ja lentää 20 m auton yllä vihreä säde alas (R palauttaa)'],
+  ['29.9.', 'Jalkaisin: juokseminen väsyttää (palkki, puuskutus), ja yli 90 m päässä autosta kuski pelkää että auto varastetaan – 140 m:stä ei uskalla kauemmas'],
   ['29.9.', 'KOKEILU: F-näppäimellä kuski nousee autosta ja kävelee (nuolet, välilyönti = juoksu) – sama ihminen kuin muut: törmäilee, kaatuu jos ajetaan päälle; F auton vieressä = takaisin autoon'],
   ['29.9.', 'Medi-Heli on nyt ajoneuvo kuten ambulanssi: sitä voi töniä, siihen tulee lommoja ja kova isku sytyttää sen (paloauto tulee); malli uusiksi (punainen vatsa, raidat, pyöreä katto, kartiopuomi, ovi, jalakset)'],
   ['29.9.', 'Liekit uusiksi: nuolevat liekkikielekkeet, kipinäsuihkut ja rätinä, maa hehkuu palon ympärillä, syttyessä leimahdus; paksumpi savu'],
@@ -7136,7 +7157,7 @@ function ufoFire(U, tx, tz, tvx, tvz, spread, atCar) {   // a plasma bolt from t
   const ay = Y(ax, az) + 0.5, L = Math.hypot(ax - x0, ay - y0, az - z0) || 1;
   let B = UFO_BOLTS.find(b => !b.live); if (!B) { if (!_boltGeo) { _boltGeo = new THREE.SphereGeometry(0.42, 10, 8); _boltMat = new THREE.MeshBasicMaterial({ color: 0x9dffb0, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }); }
     B = { m: new THREE.Mesh(_boltGeo, _boltMat) }; B.m.renderOrder = 3; scene.add(B.m); UFO_BOLTS.push(B); }
-  Object.assign(B, { live: true, x: x0, y: y0, z: z0, vx: (ax - x0)/L*sp, vy: (ay - y0)/L*sp, vz: (az - z0)/L*sp, t: 0, U }); B.m.visible = true; B.m.position.set(x0, y0, z0);
+  Object.assign(B, { live: true, x: x0, y: y0, z: z0, vx: (ax - x0)/L*sp, vy: (ay - y0)/L*sp, vz: (az - z0)/L*sp, t: 0, U, small: false }); B.m.scale.setScalar(1); B.m.visible = true; B.m.position.set(x0, y0, z0);
   if (audio && (x0 - car.x)**2 + (z0 - car.z)**2 < 300*300) { beep(1300 + Math.random()*300, 0.22, 0.1, 'sawtooth'); beep(650, 0.25, 0.08, 'square'); } U.shots++; }
 function ufoWreck(v) {   // a responder shot: it burns where it is, the crew thrown about and hurt, and whoever it came for waits for the next one
   v.ufoHit = true; boom(v.x, v.gy, v.z, true); v.vx += (Math.random() - 0.5)*6; v.vz += (Math.random() - 0.5)*6; v.w += (Math.random() - 0.5)*3; v.awake = true; v.damage = 99;
@@ -7174,15 +7195,17 @@ function ufoUpdate(dt) {
   for (const B of UFO_BOLTS) { if (!B.live) continue; B.t += dt; B.x += B.vx*dt; B.y += B.vy*dt; B.z += B.vz*dt; B.m.position.set(B.x, B.y, B.z);
     fireFx.emit(B.x, B.y, B.z, (Math.random() - 0.5)*0.6, (Math.random() - 0.5)*0.6, (Math.random() - 0.5)*0.6, 0.25, 0.5, 0.1, 0.9, 0.5, 1, 0.6, 0.2, 1, 0.4);   // a green trail
     let hit = B.y <= Y(B.x, B.z) + 0.25 || B.t > 4; if (!hit && B.t > 0.15) { if (Math.hypot(car.x - B.x, car.z - B.z) < 1.5 && B.y < Y(B.x, B.z) + 2.0) hit = true;
+      else if (WALK.on && WALK.h && Math.hypot(WALK.h.x - B.x, WALK.h.z - B.z) < 0.7 && B.y < Y(B.x, B.z) + 2.0) hit = true;   // the driver on foot
       else for (const v of VEHICLES) if (!v.gone && Math.abs(v.x - B.x) < 6 && Math.abs(v.z - B.z) < 6 && B.y < v.gy + 2.5 && boxPush(v, B.x, B.z, 0.3)) { hit = true; break; } }
     if (hit) ufoBoom(B); }
-  for (const U of UFOS) { U.t += dt; U.lights.forEach((m, k) => { m.visible = Math.sin(U.t*(U.woke ? 16 : 6) + k*1.3) > -0.2; });
-    const cd = Math.hypot(car.x - U.x, car.z - U.z);
-    if (!U.woke) { if (cd < 60 && gameState === State.RACING && !WRECK.on && (FREE.on || distRoute(car.x, car.z) > 25)) ufoWake(U); else continue; }   // (only the player going out there wakes it)
+  ufoCapUpdate(dt);
+  for (const U of UFOS) { if (U.captured) continue; U.t += dt; U.lights.forEach((m, k) => { m.visible = Math.sin(U.t*(U.woke ? 16 : 6) + k*1.3) > -0.2; });
+    const Pl = playerAt(), cd = Math.hypot(Pl.x - U.x, Pl.z - U.z);
+    if (!U.woke) { if (cd < 60 && gameState === State.RACING && !WRECK.on && (FREE.on || WALK.on || distRoute(car.x, car.z) > 25)) ufoWake(U); else continue; }   // (only the player going out there wakes it)
     if ((U.cool -= dt) > 0) continue;
     // a target: the car, a gawker, a car or a responder near it — whatever, most of it goes wide
-    const T2 = []; if (!WRECK.on && gameState === State.RACING && cd < 80) T2.push([3, car.x, car.z, car.vx, car.vz, 11, true]);
-    forHumansNear(U.x, U.z, 62, h => { if (!h.down && !h.gone && !h.inside && !h.seat && !h.animal && T2.length < 30) T2.push([1, h.x, h.z, h.vx || 0, h.vz || 0, 7]); });
+    const T2 = []; if (!WRECK.on && gameState === State.RACING && cd < 80) T2.push([WALK.on ? 1.5 : 3, Pl.x, Pl.z, Pl.vx || 0, Pl.vz || 0, WALK.on ? 8 : 11, !WALK.on]);
+    forHumansNear(U.x, U.z, 62, h => { if (!h.down && !h.gone && !h.inside && !h.seat && !h.animal && !h.player && T2.length < 30) T2.push([1, h.x, h.z, h.vx || 0, h.vz || 0, 7]); });
     for (const v of VEHICLES) if (!v.gone && !v.ufoHit && Math.abs(v.x - U.x) < 80 && Math.abs(v.z - U.z) < 80 && (U.kills < 10 || !v.job)) T2.push([v.job || v.kind === 'police' ? 3 : 1.2, v.x, v.z, v.vx, v.vz, 8]);
     if (!T2.length) { U.cool = 0.5; continue; } let w = Math.random()*T2.reduce((a, q) => a + q[0], 0), q = T2[0]; for (const c of T2) { if ((w -= c[0]) <= 0) { q = c; break; } }
     U.dome.material.emissiveIntensity = 2.5; setTimeout(() => { if (U.dome) U.dome.material.emissiveIntensity = 0.6; }, 120);
@@ -7209,10 +7232,45 @@ function buildUfos() { UFOS.length = 0; UFO_GAWK.length = 0; for (const B of UFO
     for (let k = 0; k < 3; k++) { const a = k*2.1 - yaw; gL = Math.max(gL, Y(x + Math.cos(a)*3.0, z + Math.sin(a)*3.0)); }
     for (let r = 0; r <= 4.8; r += 1.2) for (let k = 0; k < 12; k++) gD = Math.max(gD, Y(x + Math.sin(k*0.52)*r, z + Math.cos(k*0.52)*r));
     const y = Math.max(gL + 1.8, gD + 1.0); M.G.position.set(x, y, z); M.G.rotation.set(0, yaw, 0); lifeGroup.add(M.G); nearVis(M.G, x, z);
-    const U = { x, z, y, lights: M.lights, dome: M.dome, t: Math.random()*5, cool: 0, kills: 0, shots: 0, woke: false }; UFOS.push(U); addStaticBox({ x, z, yaw: 0, hw: 4.0, hl: 4.0, kind: 'lm' }); reserve('ufo', sp, 13);
-    for (let k = 0; k < 2; k++) { const a = k*3 + Math.random(), ax = x + Math.sin(a)*7.5, az = z + Math.cos(a)*7.5; let ok = !onRoad(ax, az, 1); if (ok) staticNear(ax, az, 2, B => { if (ok && boxPush(B, ax, az, 0.5)) ok = false; }); if (!ok) continue;   // (not clearSpot: the UFO's own reservation would keep them off)
-      new Human({ x: ax, z: az, yaw: a, kid: true, animal: true, rig: makeAlien(), task: { kind: 'alien', update(h, dt, t) { h.vx = h.vz = 0; h.yaw += Math.sin(t*0.7 + k)*dt*0.8; h.pose.armL = -1.5 + Math.sin(t*3 + k)*0.4; if (Math.hypot(car.x - h.x, car.z - h.z) < 60) h.pose.armR = -2.8 + Math.sin(t*9)*0.3; } } }); } } }
-function ufoReset() { UFO_REDO.length = 0; UFO_HITS.n = 0; for (const B of UFO_BOLTS) { B.live = false; B.m.visible = false; } for (const h of UFO_GAWK) if (h.task && h.task.kind === 'gawk') h.task.reset(h); UFO_GAWK.length = 0;
+    const sb = { x, z, yaw: 0, hw: 4.0, hl: 4.0, kind: 'lm' }, U = { x, z, y, yaw, G: M.G, nv: NEAR_VIS[NEAR_VIS.length - 1], sb, lights: M.lights, dome: M.dome, t: Math.random()*5, cool: 0, kills: 0, shots: 0, woke: false, captured: false }; UFOS.push(U); addStaticBox(sb); reserve('ufo', sp, 13);
+    for (let k = 0; k < 3; k++) { let ax = 0, az = 0, a = 0, ok = false;   // two gawping about, the third with a ray gun
+      for (let tr = 0; tr < 12 && !ok; tr++) { a = k*2.1 + tr*0.5 + Math.random()*0.4; ax = x + Math.sin(a)*(7.5 + tr*0.3); az = z + Math.cos(a)*(7.5 + tr*0.3); ok = !onRoad(ax, az, 1); if (ok) staticNear(ax, az, 2, B => { if (ok && boxPush(B, ax, az, 0.5)) ok = false; }); }   // (not clearSpot: the UFO's own reservation would keep them off)
+      if (!ok) continue; const h = new Human({ x: ax, z: az, yaw: a, kid: true, animal: true, rig: makeAlien(), task: alienTask(U, k, k === 2) });
+      if (k === 2) { const g = new THREE.Group(); lmesh(lbox(0.06, 0.08, 0.26), lmat(0x3a3e44, 0.4), 0, 0, 0.1, g, false); lmesh(lcyl(0.035, 0.12, 6), new THREE.MeshBasicMaterial({ color: 0x9dffb0 }), 0, 0, 0.27, g, false).rotation.x = Math.PI/2; handProp(h, g).rotation.x = Math.PI/2; } } } }
+// ── the aliens: two stare about and flap; the third has a ray gun and shoots at the player (the car, or the driver on foot) as soon
+//    as they come near an awake UFO. Run one of them over with the car and the UFO is yours: it lifts off and flies along 20 m over
+//    the car (the car is still what drives — the UFO is its new body up there, a green beam down to it). R puts it back. ──
+const playerAt = () => WALK.on && WALK.h && !WALK.h.gone ? WALK.h : car;
+const UFO_CAP = { U: null, t: 0, x: 0, y: 0, z: 0, beam: null };
+const alienTask = (U, k, gun) => ({ kind: 'alien', update(h, dt, t) { h.vx = h.vz = 0; const P = playerAt(), d = Math.hypot(P.x - h.x, P.z - h.z), st = h.st || (h.st = { cool: 1.5, n: 0 });
+    if (gun && U.woke && !U.captured && d < 55 && gameState === State.RACING && !WRECK.on) { h.yaw += angDiff(Math.atan2(P.x - h.x, P.z - h.z) - h.yaw)*Math.min(1, dt*6); h.pose.armR = -1.55; h.pose.armL = -0.3;   // aimed
+      if ((st.cool -= dt) <= 0) { st.cool = 0.9 + Math.random()*1.1; alienShoot(U, h, P, st.n++ < 2); } return; }
+    h.yaw += Math.sin(t*0.7 + k)*dt*0.8; h.pose.armL = -1.5 + Math.sin(t*3 + k)*0.4; if (d < 60) h.pose.armR = -2.8 + Math.sin(t*9)*0.3; },
+  knocked(h) { if (!WALK.on && Math.hypot(h.x - car.x, h.z - car.z) < 7 && gameState === State.RACING) ufoCapture(U); },
+  reset(h) { h.st = null; } });
+function alienShoot(U, h, P, wide) {   // a small bolt from the gun: better aimed than the dome's, the first two always wide
+  const x0 = h.x + Math.sin(h.yaw)*0.4, y0 = Y(h.x, h.z) + 0.95, z0 = h.z + Math.cos(h.yaw)*0.4, sp = 30, d = Math.hypot(P.x - x0, P.z - z0), ft = d/sp, a = Math.random()*6.3, e = wide ? 3 + Math.random()*3 : (WALK.on ? 2.6 : 3.5)*Math.random();
+  const ax = P.x + (P.vx || 0)*ft + Math.sin(a)*e, az = P.z + (P.vz || 0)*ft + Math.cos(a)*e, ay = Y(ax, az) + (WALK.on ? 0.9 : 0.5), L = Math.hypot(ax - x0, ay - y0, az - z0) || 1;
+  let B = UFO_BOLTS.find(b => !b.live); if (!B) { if (!_boltGeo) { _boltGeo = new THREE.SphereGeometry(0.42, 10, 8); _boltMat = new THREE.MeshBasicMaterial({ color: 0x9dffb0, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }); }
+    B = { m: new THREE.Mesh(_boltGeo, _boltMat) }; B.m.renderOrder = 3; scene.add(B.m); UFO_BOLTS.push(B); }
+  Object.assign(B, { live: true, x: x0, y: y0, z: z0, vx: (ax - x0)/L*sp, vy: (ay - y0)/L*sp, vz: (az - z0)/L*sp, t: 0, U, small: true }); B.m.scale.setScalar(0.45); B.m.visible = true; B.m.position.set(x0, y0, z0);
+  if (audio && (x0 - car.x)**2 + (z0 - car.z)**2 < 150*150) { beep(1900 + Math.random()*400, 0.12, 0.08, 'sawtooth'); beep(950, 0.14, 0.05, 'square'); } }
+function staticRemove(b) { for (const l of STATIC.values()) { const i = l.indexOf(b); if (i >= 0) l.splice(i, 1); } const i = STATIC_LIST.indexOf(b); if (i >= 0) STATIC_LIST.splice(i, 1); }
+function ufoCapture(U) { if (UFO_CAP.U || U.captured) return; U.captured = true; UFO_CAP.U = U; UFO_CAP.t = 0; UFO_CAP.x = U.x; UFO_CAP.y = U.y; UFO_CAP.z = U.z; staticRemove(U.sb);
+  if (!UFO_CAP.beam) { const m = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 3.2, 1, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0x7affb0, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); m.renderOrder = 3; lifeGroup.add(m); UFO_CAP.beam = m; }
+  UFO_CAP.beam.visible = false; if (audio) { const { ctx, master } = audio, o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime; o.type = 'sine'; o.frequency.setValueAtTime(180, t0); o.frequency.exponentialRampToValueAtTime(1400, t0 + 2.2); g.gain.setValueAtTime(0.12, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 2.4); o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + 2.5); }
+  pizzaMsg(T('🛸 UFO KAAPATTU! SE ON NYT SINUN'), true); }
+function ufoCapUpdate(dt) { const U = UFO_CAP.U; if (!U) return; UFO_CAP.t += dt; const t = UFO_CAP.t, k = Math.min(1, t/3.5), e = k*k*(3 - 2*k);
+  const tx = car.x, tz = car.z, ty = Y(car.x, car.z) + 20 + Math.sin(t*1.3)*0.6;   // 20 m over the car, bobbing
+  if (k < 1) { const lift = UFO_CAP.y + Math.sin(k*Math.PI/2)*14; U.G.position.set(UFO_CAP.x + (tx - UFO_CAP.x)*e, Math.max(lift, UFO_CAP.y + (ty - UFO_CAP.y)*e), UFO_CAP.z + (tz - UFO_CAP.z)*e); }   // up off its legs, then across to the car
+  else { const f = 1 - Math.exp(-dt*5), P = U.G.position; P.x += (tx + car.vx*0.12 - P.x)*f; P.y += (ty - P.y)*f; P.z += (tz + car.vz*0.12 - P.z)*f; }
+  U.G.rotation.y += dt*(1.2 + Math.hypot(car.vx, car.vz)*0.05); U.G.rotation.x = Math.max(-0.25, Math.min(0.25, car.vz*0.012)); U.G.rotation.z = Math.max(-0.25, Math.min(0.25, -car.vx*0.012));   // leans into the way it goes
+  U.x = U.G.position.x; U.z = U.G.position.z; U.y = U.G.position.y; if (U.nv) { U.nv.x = U.x; U.nv.z = U.z; } U.G.visible = true;
+  const B = UFO_CAP.beam, gy = Y(car.x, car.z), top = U.G.position.y - 0.6, L = Math.max(0.5, top - gy); B.visible = k > 0.6; B.position.set((U.x + car.x)/2, gy + L/2, (U.z + car.z)/2); B.scale.set(1, L, 1); B.material.opacity = 0.1 + 0.06*Math.sin(t*9);
+  U.lights.forEach((m, i) => { m.visible = Math.sin(t*20 + i*0.9) > -0.3; }); }
+function ufoCapReset() { const U = UFO_CAP.U; if (UFO_CAP.beam) UFO_CAP.beam.visible = false; if (!U) return; UFO_CAP.U = null; U.captured = false;
+  U.x = U.sb.x; U.z = U.sb.z; U.y = UFO_CAP.y; U.G.position.set(U.x, U.y, U.z); U.G.rotation.set(0, U.yaw, 0); if (U.nv) { U.nv.x = U.x; U.nv.z = U.z; } addStaticBox(U.sb); }
+function ufoReset() { ufoCapReset(); UFO_REDO.length = 0; UFO_HITS.n = 0; for (const B of UFO_BOLTS) { B.live = false; B.m.visible = false; } for (const h of UFO_GAWK) if (h.task && h.task.kind === 'gawk') h.task.reset(h); UFO_GAWK.length = 0;
   for (const U of UFOS) { U.cool = 0; U.kills = 0; U.woke = false; U.carShots = 0; U.dome.material.emissiveIntensity = 0.6; } }
 
 // ── 9. people standing in the road at a few corners (different corners, and a different number, every race); they run for it ──
