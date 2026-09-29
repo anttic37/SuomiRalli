@@ -4,6 +4,8 @@
 //   GET  /api/struck?sig=…&k=…   → a struck-off driver's ghost, kept as evidence (where did they cut?)
 //   GET  /api/stats              → { starts, drivers }   races started and drivers (browsers) seen, all tracks
 //   POST /api/start { id }       → { starts, drivers }   one race started by browser id (a new id: one more driver)
+//   GET  /api/rap              → { fires: [{ name, n }], people: [...], animals: [...], drivers, total }   the police's rap sheet: who set most fires, ran most people over
+//   POST /api/rap { id, name, f, p, a } → { ok }   this browser's new fires / people / animals since its last report (capped)
 //   POST /api/lap  { sig, name, t, splits, s } → { saved, best, rank, list }   kept only if it beats that name's best
 // Files: top/<track>.json (the leaderboard) and ghost/<track>/<driver>.json (one per ghost). `sig` is the game's
 // trackSignature(): a changed track is a new leaderboard, the old one stays where it was.
@@ -11,7 +13,7 @@ import { getStore } from '@netlify/blobs';
 import { badName } from '../lib/badwords.mjs';
 import { TRACKS } from '../lib/tracks.mjs';
 
-export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck', '/api/stats', '/api/start'] };
+export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck', '/api/stats', '/api/start', '/api/rap'] };
 export default async (req) => handle(req, getStore({ name: 'suomiralli', consistency: 'strong' }));
 
 const MAX_ROWS = 500;
@@ -82,6 +84,11 @@ export function routeCut(s, T) {
 const STATS_SEED = { starts: 700, drivers: 45 };
 async function statsGet(store) { return (await store.get('stats.json', { type: 'json' })) || { ...STATS_SEED, since: new Date().toISOString().slice(0, 10), seeded: true }; }
 
+// the rap sheet: one file (rap.json) of every browser's totals, by browser id; the name is the one they save laps with (or none: "Tuntematon kuski")
+const RAP_MAX = { f: 40, p: 150, a: 40 }, RAP_ROWS = 3000;
+async function rapGet(store) { return (await store.get('rap.json', { type: 'json' })) || { rows: {} }; }
+function rapTop(R, k, n = 7) { return Object.values(R.rows).filter(r => r[k] > 0).sort((a, b) => b[k] - a[k]).slice(0, n).map(r => ({ name: r.name || '', n: r[k] })); }
+
 export async function handle(req, store) {
   const url = new URL(req.url), route = url.pathname.replace(/\/+$/, '').split('/').pop();
   try {
@@ -108,6 +115,17 @@ export async function handle(req, store) {
       if (!(await store.get('players/' + id + '.json', { type: 'json' }))) { await store.setJSON('players/' + id + '.json', { d: new Date().toISOString() }); st.drivers++; }
       await store.setJSON('stats.json', st); return json({ starts: st.starts, drivers: st.drivers });
     }
+    if (req.method === 'GET' && route === 'rap') { const R = await rapGet(store), rows = Object.values(R.rows);
+      return json({ fires: rapTop(R, 'f'), people: rapTop(R, 'p'), animals: rapTop(R, 'a', 3), drivers: rows.length, total: { f: rows.reduce((s, r) => s + r.f, 0), p: rows.reduce((s, r) => s + r.p, 0), a: rows.reduce((s, r) => s + r.a, 0) } }); }
+    if (req.method === 'POST' && route === 'rap') {
+      let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: 'bad json' }, 400); }
+      const id = String(b && b.id || ''); if (!/^[a-z0-9]{8,32}$/.test(id)) return json({ error: 'id' }, 400);
+      const d = {}; for (const k of ['f', 'p', 'a']) { const v = b[k] === undefined ? 0 : b[k]; if (!Number.isInteger(v) || v < 0) return json({ error: k }, 400); d[k] = Math.min(v, RAP_MAX[k]); }
+      if (!d.f && !d.p && !d.a) return json({ ok: true });
+      const name = cleanName(b.name), R = await rapGet(store), r = R.rows[id] || (R.rows[id] = { name: '', f: 0, p: 0, a: 0 });
+      if (name && !badName(name)) r.name = name; r.f += d.f; r.p += d.p; r.a += d.a; r.d = new Date().toISOString().slice(0, 10);
+      const ids = Object.keys(R.rows); if (ids.length > RAP_ROWS) { ids.sort((x, y) => (R.rows[x].f + R.rows[x].p) - (R.rows[y].f + R.rows[y].p)); for (const x of ids.slice(0, ids.length - RAP_ROWS)) delete R.rows[x]; }   // (the mildest go first)
+      await store.setJSON('rap.json', R); return json({ ok: true }); }
     if (req.method === 'POST' && route === 'lap') {
       const text = await req.text(); if (text.length > 1_500_000) return json({ error: 'too big' }, 413);
       let b; try { b = JSON.parse(text); } catch (e) { return json({ error: 'bad json' }, 400); }

@@ -232,6 +232,11 @@
   .lh-keys { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px 18px; margin: 8px 0 4px; font: 15px Arial, sans-serif; } .lh-keys div { display: flex; align-items: center; gap: 9px; }
   .lh-keys kbd { white-space: nowrap; min-width: 40px; text-align: center; padding: 4px 7px; border: 2px solid #1a1814; border-radius: 4px; background: #fffbe8; font: 700 13px "Courier New", monospace; box-shadow: 0 2px 0 #1a1814; }
   .lh-boxes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; } .lh-boxes .lh-box { font-size: 14px; }
+  .rp-want { border: 3px solid #1a1814; background: #fffbe8; padding: 10px 14px 12px; text-align: center; margin: 4px 0 14px; } .rp-wt { font: 900 24px Arial, sans-serif; letter-spacing: 0.3em; color: #c4201a; margin-bottom: 6px; }
+  .rp-wn { font: 900 38px/1.05 "Times New Roman", "Liberation Serif", serif; margin-top: 10px; letter-spacing: 0.02em; } .rp-wd { font: italic 16px/1.35 "Times New Roman", serif; margin-top: 4px; }
+  .rp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; } .rp-h { display: block; font: 900 15px Arial, sans-serif; letter-spacing: 0.1em; border-bottom: 2px solid #1a1814; padding-bottom: 4px; margin-bottom: 2px; }
+  .rp-t { width: 100%; border-collapse: collapse; font: 17px/1.3 "Times New Roman", "Liberation Serif", serif; } .rp-t td { padding: 3px 2px; border-bottom: 1px dotted #a39a86; } .rp-t .rk { width: 26px; color: #c4201a; font-weight: 700; } .rp-t .n { text-align: right; font-weight: 700; width: 44px; }
+  .rp-t .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; } .rp-own span { font-size: 16px; } .rp-note { font: italic 12.5px/1.35 serif; color: #6a6358; margin-top: 10px; }
   .lh-lyhp > .lh-in { height: 100%; display: flex; flex-direction: column; } .lh-lyhp .lh-lyh { flex: 1 1 0; min-height: 0; column-fill: auto; overflow: hidden; }
   .lh-lyh { column-count: 3; column-gap: 22px; column-rule: 1px solid rgba(26,24,20,0.28); font: 13.5px/1.38 "Times New Roman", "Liberation Serif", serif; margin-top: 4px; }
   .lh-lyh p { margin: 0 0 7px; padding-bottom: 7px; border-bottom: 1px dotted #a39a86; break-inside: avoid; } .lh-lyh b.d { color: #c4201a; font: 900 11px Arial, sans-serif; letter-spacing: 0.06em; margin-right: 2px; }
@@ -4364,6 +4369,16 @@ function oppPick(others, myT, mine) {
   if (!pick.length) pick = others.slice(0, 3);   // (already on top: the chasers)
   if (!pick.length && mine) pick = [mine];       // (alone on the board: your own best, under your name)
   return pick.sort((a, b) => b.t - a.t); }       // nearest first
+// ── the police's rap sheet: fires the driver set, people and animals they ran over → /api/rap (as deltas), and the list back for the paper's "Poliisi tiedottaa" ──
+const RAP = { f: 0, p: 0, a: 0, sent: { f: 0, p: 0, a: 0 }, life: { f: 0, p: 0, a: 0 }, list: null, at: -1e9, busy: false };
+try { const l = JSON.parse(localStorage.getItem('ylasto1988-rekisteri') || 'null'); if (l) for (const k of ['f', 'p', 'a']) RAP.life[k] = Math.max(0, l[k] | 0); } catch (e) {}
+function rapCount(k) { if (gameState !== State.RACING) return; RAP[k]++; RAP.life[k]++; try { localStorage.setItem('ylasto1988-rekisteri', JSON.stringify(RAP.life)); } catch (e) {} }
+function rapSend(beacon) { if (!ONLINE.api || !ONLINE.id) return; const d = { f: RAP.f - RAP.sent.f, p: RAP.p - RAP.sent.p, a: RAP.a - RAP.sent.a }; if (!d.f && !d.p && !d.a) return;
+  const body = JSON.stringify({ id: ONLINE.id, name: ONLINE.name || '', ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a }; RAP.at = -1e9;
+  try { if (beacon && navigator.sendBeacon) navigator.sendBeacon(ONLINE.api + '/rap', body); else fetch(ONLINE.api + '/rap', { method: 'POST', body, keepalive: true }).catch(() => {}); } catch (e) {} }
+function rapFetch() { if (!ONLINE.api || RAP.busy || performance.now() - RAP.at < 60000) return; RAP.busy = true;
+  fetch(ONLINE.api + '/rap', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { RAP.busy = false; if (!j || !Array.isArray(j.fires)) return; RAP.list = j; RAP.at = performance.now(); if (PAPER.open) lhRapFill(document.querySelector('#paper .pv-stage')); }).catch(() => { RAP.busy = false; }); }
+setInterval(() => rapSend(false), 30000); addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') rapSend(true); });
 async function onlineRefresh() {   // the leaderboard → the top 10 on the menu, then the three rivals and their ghosts
   if (!ONLINE.api || ONLINE.busy) return; ONLINE.busy = true; renderTop10(); onlineStats();   // ("haen ajajia…" while it loads)
   try { const sig = trackSignature(); try { localStorage.setItem('yl-top-sig', sig); } catch (e) {}
@@ -4381,6 +4396,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '🚨 Lehteen Poliisi tiedottaa -sivu: eniten tulipaloja sytyttäneet ja ihmisten yli ajaneet kuskit netistä, etsintäkuulutus pahimmasta ja oma rekisterisi. Peli laskee palot, yliajot ja eläimet ja kertoo ne palvelimelle'],
   ['29.9.', '📰 Lehti tulee valmiiksi taitettuna palvelimelta (lehti/lehti.json, tehdään buildissa) – selain ei taita sitä enää itse; PDF samasta paikasta'],
   ['29.9.', '⚡ Lehti taitetaan vasta kun peli on käynnissä ja selain joutilas (tai kun lehti avataan) – alkuruutu ei odota lehteä'],
   ['29.9.', '📰 Lehden taitto uusiksi: väljemmät reunat, ylätunniste joka sivulla, kuvat joustavat niin ettei mitään leikkaudu eikä jää reikiä, tavutus, anfangit, puolisivut täyttyvät, ilmoitukset aukkoihin, sisällys ohjesivulle, Lyhyesti luettavammaksi'],
@@ -4570,6 +4586,7 @@ const LEHTI = [
     img: ['asema.jpg'], cap: ['Poliisiaseman piha. Kolme partioautoa ruuduissaan.'],
     body: ['Juoppo repäisee itsensä irti ja hoippuu karkuun, mutta konstaapelit saavat hänet naama asfalttiin. Partioautoihin ei kannata ajaa – poliisi huomaa sen.'] },
 
+  { id: 'rekisteri', size: 'half', n: 43, kick: '🚨 POLIISI', title: 'Poliisi julkaisee rikosrekisterin', img: ['rekisteri.jpg'], body: ['Jokainen sytytetty talo ja jokainen yliajettu kyläläinen kirjataan. Pahimmat kuskit ovat lehden Poliisi tiedottaa -sivulla – ja pahin etsintäkuulutettuna.', 'Oman rekisterisi näet samalta sivulta.'] },
   { id: 'pdf', size: 'half', n: 42, kick: '📄 PDF', title: 'Lehti nyt myös paperilla', img: ['pdf.jpg'], body: ['Ylästön Sanomat latautuu kokonaan PDF:nä – lehden yläkulman ⬇ PDF -napista. Kaikki sivut, kuvat ja muutokset, tulostimeen tai kaverille.', 'Sisällysluettelon sivunumerot hyppäävät PDF:ssäkin oikeaan juttuun.'] },
   { id: 'sauna', size: 'half', n: 30, kick: '🔥 SAUNA', title: 'Saunaporukka savuttaa pellolla', img: ['sauna.jpg'], body: ['Saunakärry ja vanha pakettiauto ilmestyvät joka kerta eri paikkaan. Piipusta nousee pitkä musta nauha, ja möly kuuluu kylälle asti.'] },
   { id: 'hirvi', size: 'half', n: 31, kick: '🦌 HIRVI', title: 'Hirvi jähmettyi valoihin', img: ['hirvi.jpg'], body: ['Metsissä laiduntaa hirviä. Välillä yksi ylittää tien – ja jää tuijottamaan autoa.'] },
@@ -4620,13 +4637,14 @@ function lhAd(h, avoid) { let A = LH_ADS[LH_ADN++ % LH_ADS.length]; for (let k =
 function lhPlan() {   // the running order: front, lead spread, the other mains (newest first), pages, halves in pairs, how to drive + contents, the change list
   const by = (sz) => LEHTI.filter(s => s.size === sz).sort((a, b) => b.n - a.n), mains = by('main'), lead = mains[0], P = []; LH_ADN = 0;
   const where = {}; let pn = 2;
-  for (const s of mains) { where[s.id] = pn; pn += 2; } for (const s of by('page')) { where[s.id] = pn; pn++; } const halves = by('half'); for (let i = 0; i < halves.length; i += 2) { where[halves[i].id] = pn; if (halves[i + 1]) where[halves[i + 1].id] = pn; pn++; }
+  for (const s of mains) { where[s.id] = pn; pn += 2; } for (const s of by('page')) { where[s.id] = pn; pn++; } const polPage = pn++; const halves = by('half'); for (let i = 0; i < halves.length; i += 2) { where[halves[i].id] = pn; if (halves[i + 1]) where[halves[i + 1].id] = pn; pn++; }
   const keysPage = pn++, lyhPage = pn;
   P.push(lhFront(lead, where, keysPage, lyhPage));
   for (const s of mains) P.push(...lhSpread(s, s === lead, P.length + 1));
   for (const s of by('page')) P.push(lhPage(s, P.length + 1));
+  P.push(lhPolice(polPage));
   for (let i = 0; i < halves.length; i += 2) P.push(lhHalves(halves[i], halves[i + 1], P.length + 1));
-  P.push(lhKeys(where, keysPage, lyhPage, P.length + 1)); P.push(...lhLyhyesti(P.length + 1));
+  where.__pol = polPage; P.push(lhKeys(where, keysPage, lyhPage, P.length + 1)); P.push(...lhLyhyesti(P.length + 1));
   return lhFitAll(P); }
 const lhPg = (inner, cls, attrs) => '<div class="pv-page ' + cls + '"><div class="lh-in"' + (attrs || '') + '>' + inner + '</div></div>';
 function lhFront(S, where, keysPage, lyhPage) { const t = LEHTI.filter(s => s !== S && s.size === 'main').sort((a, b) => b.n - a.n).slice(0, 3);   // (the teasers: the next main stories; the contents are on the "Näin ajat" page)
@@ -4640,6 +4658,21 @@ function lhSpread(S, lead, pno) {
 function lhPage(S, pno) { return lhPg(lhFolio(lhSec(S), pno) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="mid">' + lhEsc(S.title) + '</h2><div class="lh-lede">' + lhEsc(S.lede) + '</div>' + LH_BY + lhImg(S.img[0], 460, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>' + lhBody(S, 'c2 big dc') + lhBox(S.box), 'lh-frame', lhQ(S)); }
 function lhHalves(a, b, pno) { const one = (S, flip) => '<div class="lh-half' + (flip ? ' flip' : '') + '">' + lhImg(S.img[0], 0, 'h') + '<div class="lh-htxt lh-frame"><div class="lh-in" data-noad="1"><span class="lh-kick">' + lhEsc(S.kick) + '</span><h3>' + lhEsc(S.title) + '</h3>' + lhBody(S, 'c1') + '</div></div></div>';
   return lhPg(lhFolio(lhSec(a) + (b ? ' · ' + lhSec(b) : ''), pno) + one(a, false) + (b ? one(b, true) : '<div class="lh-half">' + lhAd(null, [a.img[0]]) + '</div>'), 'lh-hp'); }   // (an odd half: the other half is an ad)
+function lhPolice(pno) {   // "Poliisi tiedottaa": the rap sheet from the server, filled in when the page is shown (the baked page holds empty rows)
+  const rows = (k) => '<table class="rp-t">' + Array.from({ length: 7 }, (_, i) => '<tr data-rp="' + k + i + '"><td class="rk">' + (i + 1) + '.</td><td class="nm">–</td><td class="n"></td></tr>').join('') + '</table>';
+  return lhPg(lhFolio('POLIISI TIEDOTTAA', pno) + '<span class="lh-kick">🚨 POLIISI TIEDOTTAA</span><h2 class="mid">Kylän vaarallisimmat kuskit</h2>' +
+    '<div class="lh-lede">Vantaan poliisi julkaisee nimet: nämä kuskit ovat sytyttäneet eniten tulipaloja ja ajaneet eniten ihmisten yli. Rekisteri päivittyy joka ajosta.</div>' +
+    '<div class="rp-want"><div class="rp-wt">ETSINTÄKUULUTUS</div>' + lhImg('poliisi_b.jpg', 200, 'fx lo') + '<div class="rp-wn" data-rp="w">–</div><div class="rp-wd" data-rp="wd">Tiedot haetaan poliisin rekisteristä…</div></div>' +
+    '<div class="rp-cols"><div><b class="rp-h">🔥 TUHOPOLTOT</b>' + rows('f') + '</div><div><b class="rp-h">🚶 YLIAJOT</b>' + rows('p') + '</div></div>' +
+    '<div class="lh-box rp-own"><b>OMA REKISTERISI</b><span data-rp="own">Ei merkintöjä.</span></div>' +
+    '<div class="rp-note">Nimi on se, jolla tallennat aikasi ennätyslistalle – ilman nimeä olet Tuntematon kuski. Rekisteri verkossa: suomiralli.netlify.app</div>', 'lh-frame', ' data-noad="1"'); }
+function lhRapFill(root) { if (!root) return; const L = RAP.list, nm = (r) => r.name || 'Tuntematon kuski', set = (k, t) => root.querySelectorAll('[data-rp="' + k + '"]').forEach(e => e.textContent = t);
+  const own = RAP.life; set('own', own.f + own.p + own.a ? own.f + ' tulipaloa · ' + own.p + ' yliajettua · ' + own.a + ' eläintä' + (own.f + own.p > 20 ? ' – poliisi tuntee sinut.' : '') : 'Puhdas kuin pulmunen. Toistaiseksi.');
+  if (!L) return; for (const k of ['f', 'p']) { const A = k === 'f' ? L.fires : L.people; for (let i = 0; i < 7; i++) root.querySelectorAll('[data-rp="' + k + i + '"]').forEach(tr => { const r = A[i]; tr.children[1].textContent = r ? nm(r) : '–'; tr.children[2].textContent = r ? r.n : ''; }); }
+  const all = {}; for (const r of L.fires) all[nm(r)] = { name: nm(r), f: r.n, p: 0 }; for (const r of L.people) (all[nm(r)] = all[nm(r)] || { name: nm(r), f: 0, p: 0 }).p = r.n;
+  const w = Object.values(all).sort((a, b) => (b.f*3 + b.p) - (a.f*3 + a.p))[0];   // (the most wanted: a fire weighs three run-overs)
+  if (w) { set('w', w.name.toUpperCase()); set('wd', w.f + ' tulipaloa, ' + w.p + ' yliajoa. Ajaa Pökö 205:llä. Ei saa lähestyä – ilmoita havainnoista poliisille.'); }
+  else { set('w', 'EI KETÄÄN'); set('wd', 'Kylä on rauhallinen. Toistaiseksi.'); } }
 function lhKeys(where, keysPage, lyhPage, pno) { const K = [['Enter', 'lähtö'], ['↑', 'kaasu'], ['↓', 'jarru / peruutus'], ['← →', 'ohjaus'], ['välilyönti', 'käsijarru'], ['R', 'uusi lähtö'], ['Esc', 'alkuruutu'], ['C', 'kamera'], ['G', 'haamu päälle / pois'], ['E', 'radio: seuraava kanava'], ['1 · 2', 'radio hiljemmalle / lujemmalle'], ['B', 'bassoboost'], ['P', 'tauko'], ['F', 'ulos autosta / jalkaisin'], ['L', 'kieli (alkuruudussa)']];
   const idx = LEHTI.slice().sort((a, b) => where[a.id] - where[b.id] || b.n - a.n).map(s => '<a data-go="' + where[s.id] + '">' + lhEsc(s.title) + ' <i>' + where[s.id] + '</i></a>').join('');
   return lhPg(lhFolio('OHJEET · SISÄLLYS', pno) + '<span class="lh-kick">📋 OHJEET</span><h2 class="mid">Näin ajat</h2><div class="lh-lede">Pökö 205 ajetaan näppäimistöllä. Peli on tehty tietokoneelle – kännykällä voi lukea lehteä.</div>' +
@@ -4647,7 +4680,7 @@ function lhKeys(where, keysPage, lyhPage, pno) { const K = [['Enter', 'lähtö']
     '<div class="lh-boxes"><div class="lh-box"><b>GTA-TILA</b>Aja lähdössä oikeaa kaistaa pois radalta – koko kylä on vapaa. R palauttaa kisaan.</div>' +
     '<div class="lh-box"><b>KERRO KAVERILLE</b>suomiralli.netlify.app – QR-koodi on alkuruudussa.</div>' +
     '<div class="lh-box"><b>LEHTI PDF:NÄ</b>Koko lehti tulostettavana: ⬇ PDF lehden yläkulmassa.</div></div>' +
-    '<div class="lh-index"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame'); }
+    '<div class="lh-index"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + where.__pol + '">Poliisi tiedottaa <i>' + where.__pol + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame'); }
 function lhLyhyesti(pno) {   // the change list, filled page by page for real: items go into fixed-height columns until a fourth column would open
   const host = document.createElement('div'); host.className = 'lh-measure'; document.body.appendChild(host); const out = [];
   const items = CHANGES.map(([d, t]) => { const e = lhEsc(t), k = e.indexOf(': '); return '<p><b class="d">' + lhEsc(d) + '</b> ' + (k > 0 && k <= 70 ? '<b>' + e.slice(0, k + 1) + '</b>' + lhHy(e.slice(k + 1)) : lhHy(e)) + '</p>'; });
@@ -4663,7 +4696,7 @@ function lhFitAll(pages) {   // lay every page out once, offscreen, and fit it t
   const out = pages.map(html => { host.innerHTML = html; const pg = host.firstChild; [pg, ...pg.querySelectorAll('.lh-frame')].filter(F => F.classList.contains('lh-frame')).forEach(lhFit); return pg.outerHTML; });
   host.remove(); return out; }
 function lhFit(F) { const inn = F.querySelector(':scope > .lh-in'); if (!inn) return; const cs = getComputedStyle(F), avail = F.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom), free = () => avail - Math.max(inn.offsetHeight, inn.scrollHeight);   // (scrollHeight: a drop cap can hang below a short story)
-  const fx = [...inn.querySelectorAll('.lh-photo.fx')], H = (p) => parseFloat(p.style.height), lo = (p) => Math.round(p.offsetWidth*0.36), hi = (p) => Math.round(p.offsetWidth*0.8);
+  const fx = [...inn.querySelectorAll('.lh-photo.fx')], H = (p) => parseFloat(p.style.height), lo = (p) => Math.round(p.offsetWidth*(p.classList.contains('lo') ? 0.26 : 0.36)), hi = (p) => Math.round(p.offsetWidth*0.8);
   const spread = (d) => { for (let k = 0; k < 4 && Math.abs(d) > 0.5; k++) { const open = fx.filter(p => d > 0 ? H(p) < hi(p) : H(p) > lo(p)); if (!open.length) break; const each = d/open.length;
     for (const p of open) { const h0 = H(p), h = Math.max(lo(p), Math.min(hi(p), h0 + each)); p.style.height = Math.round(h) + 'px'; d -= Math.round(h) - h0; } } };
   if (fx.length) spread(free());
@@ -4699,14 +4732,14 @@ function lehtiLayout() { const mini = document.getElementById('lehti-mini'); if 
   const wide = s >= 0.24; document.body.classList.toggle('lh-wide', wide); mini.style.display = wide ? '' : 'none'; if (!wide) return;
   mini.style.width = (760*s).toFixed(0) + 'px'; mini.style.height = (1000*s).toFixed(0) + 'px'; if (mini.firstChild) mini.firstChild.style.transform = 'scale(' + s.toFixed(3) + ')'; }
 function paperViews() { const n = PAPER.pages.length, V = []; if (!PAPER.two) { for (let i = 0; i < n; i++) V.push([i]); return V; } V.push([0]); for (let i = 1; i < n; i += 2) V.push(i + 1 < n ? [i, i + 1] : [i]); return V; }
-function paperOpen(page) { lehtiBuild(); PAPER.open = true; document.getElementById('paper').classList.add('on'); paperToPage(page || 0); }
+function paperOpen(page) { lehtiBuild(); rapSend(false); rapFetch(); PAPER.open = true; document.getElementById('paper').classList.add('on'); paperToPage(page || 0); }
 function paperClose() { PAPER.open = false; document.getElementById('paper').classList.remove('on'); }
 function paperToPage(p) { PAPER.two = innerWidth > innerHeight*1.15 && innerWidth > 760; PAPER.views = paperViews(); PAPER.v = Math.max(0, PAPER.views.findIndex(v => v.includes(p))); paperShow(); }
 function paperGo(d) { const v = PAPER.v + d; if (v < 0 || v >= PAPER.views.length) return; PAPER.v = v; paperShow(); if (audio) beep(900 + Math.random()*200, 0.04, 0.03, 'triangle'); }   // (a page rustles)
 function paperShow() { const P = document.getElementById('paper'), st = P.querySelector('.pv-stage'), two = innerWidth > innerHeight*1.15 && innerWidth > 760;
   if (two !== PAPER.two) { const first = (PAPER.views[PAPER.v] || [0])[0]; PAPER.two = two; PAPER.views = paperViews(); PAPER.v = Math.max(0, PAPER.views.findIndex(v => v.includes(first))); }
   const view = PAPER.views[PAPER.v], w = 760*view.length, s = Math.min((innerWidth - (two ? 150 : 24))/w, (innerHeight - 70)/1000);
-  st.innerHTML = '<div class="pv-spread">' + view.map(i => PAPER.pages[i]).join('') + '</div>'; st.style.transform = 'translate(' + (-w*s/2).toFixed(1) + 'px,' + (-1000*s/2 - 10).toFixed(1) + 'px) scale(' + s.toFixed(4) + ')'; lhLoadImgs(st);
+  st.innerHTML = '<div class="pv-spread">' + view.map(i => PAPER.pages[i]).join('') + '</div>'; st.style.transform = 'translate(' + (-w*s/2).toFixed(1) + 'px,' + (-1000*s/2 - 10).toFixed(1) + 'px) scale(' + s.toFixed(4) + ')'; lhLoadImgs(st); lhRapFill(st);
   P.querySelector('.pv-nav.l').style.visibility = PAPER.v > 0 ? '' : 'hidden'; P.querySelector('.pv-nav.r').style.visibility = PAPER.v < PAPER.views.length - 1 ? '' : 'hidden';
   P.querySelector('.pv-count').textContent = 's. ' + view.map(i => i + 1).join('–') + ' / ' + PAPER.pages.length;
   const nx = PAPER.views[PAPER.v + 1]; if (nx) { const tmp = document.createElement('div'); tmp.innerHTML = nx.map(i => PAPER.pages[i]).join(''); tmp.querySelectorAll('img[data-src]').forEach(im => { const pre = new Image(); pre.src = im.dataset.src; }); } }   // (the next spread's photos load ahead)
@@ -5415,7 +5448,7 @@ function boxHitsHumans(B, bvx, bvz, isPlayer) {
       const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), lf = (h.x - B.x)*fx + (h.z - B.z)*fz, la = (h.x - B.x)*fz - (h.z - B.z)*fx, vf = bvx*fx + bvz*fz;
       if (isPlayer && lf > B.hl*0.6 && vf > 5.5 && !h.big) knock(h, bvx, bvz, sp, { ride: { t: 0, dur: 0.45 + Math.random()*0.6, over: vf > 19, b0: 1.45, b: 1.45, a: Math.max(-0.55, Math.min(0.55, la)), vf, ang: car.angle, vx: bvx, vz: bvz, roll: 0 } });   // onto the bonnet
       else { const sd = (la >= 0 ? 1 : -1)*(0.8 + Math.random()*1.2); knock(h, bvx*0.85 + hit.nx*1.2 + fz*sd, bvz*0.85 + hit.nz*1.2 - fx*sd, sp); }   // along at about the speed of what hit them, falling off to a side
-      if (isPlayer && h.down && !h.animal) policeIncident('people');
+      if (isPlayer && h.down) rapCount(h.animal ? 'a' : 'p'); if (isPlayer && h.down && !h.animal) policeIncident('people');
       if (isPlayer) { car.vx *= 0.95; car.vz *= 0.95; const now = performance.now(); if (audio && now - lastThud > 110) { lastThud = now; beep(160 + Math.random()*60, 0.16, Math.min(0.3, sp*0.012), 'triangle'); } } }
     else if (h.down && sp > 3) { const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), sd = ((h.x - B.x)*fz - (h.z - B.z)*fx >= 0 ? 1 : -1)*2.8;   // caught again lying there: tossed aside, not bulldozed
       h.vx = bvx*0.8 + fz*sd; h.vz = bvz*0.8 - fx*sd; h.vy = Math.max(h.vy, 1.2); }
@@ -5682,10 +5715,10 @@ function collideCarWorld() {
   const P = { x: car.x, z: car.z, yaw: car.angle, hw: CAR_HW, hl: CAR_HL, vx: car.vx, vz: car.vz, mass: 1 };
   staticNear(P.x, P.z, 4, B => { const h = obbSat(P, B); if (!h) return; P.x -= h.nx*h.depth; P.z -= h.nz*h.depth; const into = P.vx*h.nx + P.vz*h.nz;
     if (into > 0) { P.vx -= h.nx*into*1.3; P.vz -= h.nz*into*1.3; carDamage(h.nx, h.nz, into); if (into > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + into*0.8), 4);
-      if (B.kind === 'house' && into >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) policeIncident('fire'); } } });
+      if (B.kind === 'house' && into >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) { rapCount('f'); policeIncident('fire'); } } } });
   for (const v of VEHICLES) { if (v.gone) continue; const R = v.hl + CAR_HL + 0.6; if (Math.abs(v.x - P.x) > R || Math.abs(v.z - P.z) > R) continue;
     const h = obbSat(P, v); if (!h) continue; const imp = resolvePair(P, v, h, 0.25); v.awake = true; v.moved = true;
-    if (imp > 0.8) { carDamage(h.nx, h.nz, imp); if (imp > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) policeIncident('fire'); else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
+    if (imp > 0.8) { carDamage(h.nx, h.nz, imp); if (imp > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
   car.x = P.x; car.z = P.z; car.vx = P.vx; car.vz = P.vz;
   boxHitsHumans(playerBox(), car.vx, car.vz, true);
 }

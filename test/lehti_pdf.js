@@ -23,6 +23,9 @@ const fs = require('fs'), path = require('path');
     await Promise.all(ims.map(im => new Promise(ok => { im.onload = () => { im.parentNode.classList.add('ok'); ok(); }; im.onerror = () => { im.parentNode.classList.add('miss'); ok(); }; im.src = im.dataset.src; })));
     for (const im of ims) { if (!im.naturalWidth) continue; const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; const g = c.getContext('2d');   // (the sepia baked into the JPEG: a CSS filter would print as a huge raw bitmap)
       g.filter = 'sepia(0.15) contrast(1.05)'; g.drawImage(im, 0, 0); await new Promise(ok => { im.onload = ok; im.src = c.toDataURL('image/jpeg', 0.86); }); }
+    document.querySelectorAll('[data-rp="w"]').forEach(e => e.textContent = 'KATSO PELISTÄ');   // (the rap sheet is live: the printed copy points to the game)
+    document.querySelectorAll('[data-rp="wd"]').forEach(e => e.textContent = 'Ajantasainen rekisteri: suomiralli.netlify.app → 📰 LEHTI → Poliisi tiedottaa.');
+    document.querySelectorAll('[data-rp="own"]').forEach(e => e.textContent = 'Oma rekisterisi näkyy pelin lehdessä.');
     await document.fonts.ready; return { pages: PAPER.pages.length, imgs: ims.length, missing: ims.filter(im => !im.naturalWidth).length };
   });
   await page.pdf({ path: out, width: '760px', height: '1000px', printBackground: true, preferCSSPageSize: true });
