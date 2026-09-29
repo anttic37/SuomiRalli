@@ -1,4 +1,5 @@
 // paper layout: every page fits its frame (nothing cut: .lh-in inside the page, half texts inside their column), no big holes; lists what filled the gaps
+lehtiBuild();
 await new Promise(r => setTimeout(r, 1500)); const host = document.createElement('div'); host.className = 'lh-measure'; document.body.appendChild(host); const rep = [], bad = [];
 PAPER.pages.forEach((h, i) => { host.innerHTML = h; const pg = host.firstChild, inn = pg.querySelector(':scope > .lh-in'), cs = getComputedStyle(pg), avail = pg.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
   const over = Math.round(inn.scrollHeight - avail), frees = [...pg.querySelectorAll('.lh-frame'), pg].filter(F => F.dataset.free != null).map(F => +F.dataset.free);

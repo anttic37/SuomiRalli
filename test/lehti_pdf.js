@@ -9,7 +9,7 @@ const fs = require('fs'), path = require('path');
   await page.route('**/three.min.js', r => r.fulfill({ body: fs.readFileSync(require.resolve('three/build/three.min.js')), contentType: 'text/javascript' }));
   await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ body: '', contentType: 'text/css' }));
   await page.goto('file://' + path.resolve(game));
-  await page.waitForFunction(() => typeof PAPER !== 'undefined' && PAPER.pages.length > 5, null, { timeout: 90000 });
+  await page.waitForFunction(() => typeof lehtiBuild === 'function' && typeof trackPoints !== 'undefined' && trackPoints.length > 10, null, { timeout: 90000 }); await page.evaluate(() => lehtiBuild());
   const n = await page.evaluate(async () => {
     window.requestAnimationFrame = () => 0;   // (the game stops: only the paper is left)
     const st = document.createElement('style'); st.textContent = '@page { size: 760px 1000px; margin: 0; } html, body { margin: 0 !important; padding: 0 !important; background: #f1ead8 !important; overflow: visible !important; height: auto !important; } body > .pv-page { break-after: page; page-break-after: always; } body > .pv-page:last-child { break-after: auto; } .lh-photo .lh-miss { display: none; } .lh-photo img { filter: none !important; transition: none !important; opacity: 1 !important; }';

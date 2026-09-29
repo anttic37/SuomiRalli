@@ -1,0 +1,3 @@
+// the paper is built off the start: not yet when the game is up, then by itself when idle; opening builds it at once
+const early = { pages: PAPER.pages.length, ready: document.getElementById('lehti-mini').classList.contains('ready') };
+await new Promise(r => setTimeout(r, 4500)); return { init: PAPER.t0 && PAPER.t0.toFixed(0), builtAt: PAPER.tb && PAPER.tb[0].toFixed(0), buildMs: PAPER.tb && PAPER.tb[1].toFixed(1), early, later: { pages: PAPER.pages.length, ready: document.getElementById('lehti-mini').classList.contains('ready'), miniImgs: document.querySelectorAll('#lehti-mini img[src]').length } };

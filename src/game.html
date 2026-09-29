@@ -175,7 +175,8 @@
   #controls-hint { position: fixed; bottom: 24px; left: 32px; z-index: 10; pointer-events: none; display: flex; gap: 16px; opacity: 0.25; }
   .key-hint { font-size: 9px; letter-spacing: 2px; color: #888; text-transform: uppercase; }
   /* ── Ylästön Sanomat: the paper on the start screen (left), the share QR on the right; the viewer ── */
-  #lehti-mini { position: fixed; left: 34px; top: 50%; transform: translateY(-50%) rotate(-2.5deg); z-index: 5; cursor: pointer; box-shadow: 0 18px 40px rgba(0,0,0,0.75), 0 0 0 1px #c8bfa8; transition: transform 0.2s; }
+  #lehti-mini { position: fixed; left: 34px; top: 50%; transform: translateY(-50%) rotate(-2.5deg); z-index: 5; cursor: pointer; box-shadow: 0 18px 40px rgba(0,0,0,0.75), 0 0 0 1px #c8bfa8; transition: transform 0.2s, opacity 0.5s; opacity: 0; contain: layout paint; }
+  #lehti-mini.ready { opacity: 1; } #lehti-mini img { filter: none; }   /* (appears once built; no per-photo filters in the small copy) */
   #lehti-mini:hover { transform: translateY(-50%) rotate(-1deg) scale(1.02); }
   #lehti-mini .lm-scale { transform-origin: 0 0; width: 760px; height: 1000px; overflow: hidden; pointer-events: none; }
   #lehti-mini .lm-btn { position: absolute; right: -14px; bottom: -16px; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 14px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; transform: rotate(4deg); letter-spacing: 0.04em; }
@@ -4380,6 +4381,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '⚡ Lehti taitetaan vasta kun peli on käynnissä ja selain joutilas (tai kun lehti avataan) – alkuruutu ei odota lehteä'],
   ['29.9.', '📰 Lehden taitto uusiksi: väljemmät reunat, ylätunniste joka sivulla, kuvat joustavat niin ettei mitään leikkaudu eikä jää reikiä, tavutus, anfangit, puolisivut täyttyvät, ilmoitukset aukkoihin, sisällys ohjesivulle, Lyhyesti luettavammaksi'],
   ['29.9.', '🖱️ Hiiren osoitin ei enää katoa lehteä selatessa'],
   ['29.9.', '📄 Ylästön Sanomat PDF:nä: ⬇ PDF -nappi lehden yläkulmassa lataa koko lehden (kaikki sivut ja kuvat, sisällysluettelo linkkeinä)'],
@@ -4673,8 +4675,10 @@ function lhFit(F) { const inn = F.querySelector(':scope > .lh-in'); if (!inn) re
   if (free() >= 150 && !inn.dataset.noad) inn.insertAdjacentHTML('beforeend', lhAd(free() - 16, [...inn.querySelectorAll('img[data-src]')].map(im => im.dataset.src.replace('lehti/', ''))));
   F.dataset.free = Math.round(free()); if (free() > 2) { const hang = inn.scrollHeight - inn.offsetHeight; inn.classList.add('even'); inn.style.height = (avail - hang) + 'px'; } }   // (kept on the page: the layout test checks nothing overflows)
 function lhLoadImgs(el) { el.querySelectorAll('img[data-src]').forEach(im => { if (im.src) return; im.onerror = () => im.parentNode.classList.add('miss'); im.onload = () => im.parentNode.classList.add('ok'); im.src = im.dataset.src; }); }
-function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER.pages = lhPlan();
-  const mini = document.getElementById('lehti-mini'); mini.innerHTML = '<div class="lm-scale">' + PAPER.pages[0] + '</div><div class="lm-btn">📰 ' + T('AVAA LEHTI') + '</div>'; lhLoadImgs(mini);
+function lehtiBuild() { if (PAPER.pages.length) return; const t = performance.now(); PAPER.pages = lhPlan(); PAPER.tb = [t, performance.now() - t];   // (the paper is laid out once, off the start: when the browser is idle after the game is up, or on the first open)
+  const mini = document.getElementById('lehti-mini'); mini.innerHTML = '<div class="lm-scale">' + PAPER.pages[0] + '</div><div class="lm-btn">📰 ' + T('AVAA LEHTI') + '</div>'; lhLoadImgs(mini); lehtiLayout(); mini.classList.add('ready'); }
+function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER.t0 = performance.now(); const mini = document.getElementById('lehti-mini');
+  setTimeout(() => (window.requestIdleCallback || ((f) => setTimeout(f, 0)))(lehtiBuild, { timeout: 2500 }), 1200);
   mini.onclick = () => paperOpen(0); const btn = document.getElementById('lehti-btn'); if (btn) btn.onclick = () => paperOpen(0);
   const P = document.getElementById('paper'); P.querySelector('.pv-close').onclick = paperClose;
   if (!/^https?:/.test(location.protocol)) P.querySelector('.pv-pdf').href = 'https://suomiralli.netlify.app/lehti/ylaston-sanomat.pdf';   // (the editor's test game has no lehti/ beside it: the published PDF) P.querySelector('.pv-nav.l').onclick = () => paperGo(-1); P.querySelector('.pv-nav.r').onclick = () => paperGo(1);
@@ -4686,9 +4690,9 @@ function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER
   addEventListener('resize', () => { lehtiLayout(); if (PAPER.open) paperShow(); }); lehtiLayout(); }
 function lehtiLayout() { const mini = document.getElementById('lehti-mini'); if (!mini) return; const W = innerWidth, H = innerHeight, s = Math.min(0.43, (H - 140)/1000, ((W - 800)/2 - 60)/760);
   const wide = s >= 0.24; document.body.classList.toggle('lh-wide', wide); mini.style.display = wide ? '' : 'none'; if (!wide) return;
-  mini.style.width = (760*s).toFixed(0) + 'px'; mini.style.height = (1000*s).toFixed(0) + 'px'; mini.firstChild.style.transform = 'scale(' + s.toFixed(3) + ')'; }
+  mini.style.width = (760*s).toFixed(0) + 'px'; mini.style.height = (1000*s).toFixed(0) + 'px'; if (mini.firstChild) mini.firstChild.style.transform = 'scale(' + s.toFixed(3) + ')'; }
 function paperViews() { const n = PAPER.pages.length, V = []; if (!PAPER.two) { for (let i = 0; i < n; i++) V.push([i]); return V; } V.push([0]); for (let i = 1; i < n; i += 2) V.push(i + 1 < n ? [i, i + 1] : [i]); return V; }
-function paperOpen(page) { PAPER.open = true; document.getElementById('paper').classList.add('on'); paperToPage(page || 0); }
+function paperOpen(page) { lehtiBuild(); PAPER.open = true; document.getElementById('paper').classList.add('on'); paperToPage(page || 0); }
 function paperClose() { PAPER.open = false; document.getElementById('paper').classList.remove('on'); }
 function paperToPage(p) { PAPER.two = innerWidth > innerHeight*1.15 && innerWidth > 760; PAPER.views = paperViews(); PAPER.v = Math.max(0, PAPER.views.findIndex(v => v.includes(p))); paperShow(); }
 function paperGo(d) { const v = PAPER.v + d; if (v < 0 || v >= PAPER.views.length) return; PAPER.v = v; paperShow(); if (audio) beep(900 + Math.random()*200, 0.04, 0.03, 'triangle'); }   // (a page rustles)
