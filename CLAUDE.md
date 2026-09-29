@@ -35,6 +35,6 @@ In test scripts: stub `renderer.render` while simulating, step with `loop(lastTi
 
 ## Working rules from Antti
 - Every change gets a one-line Finnish entry at the top of `CHANGES` in src/game.html: `['d.m.', 'text', 'hh.mm']` with the Finnish time (Europe/Helsinki) — the newest five show on the start screen with day and time, all of them in the paper's "Lyhyesti" pages.
-- Every new feature also gets a story in `LEHTI` (Ylästön Sanomat): size 'main' (spread) / 'page' / 'half', n bigger than the rest if it's the newest main (→ front page), and photo(s) in lehti/ taken with the test/lhrun.sh scripts.
+- Every new feature also gets a story in `LEHTI` (Ylästön Sanomat): size 'main' (spread) / 'page' / 'half', n bigger than the rest if it's the newest main (the front page's lead is the police rap sheet, LH_POLLEAD n 9, until a main story with n > 9 comes), and photo(s) in lehti/ taken with the test/lhrun.sh scripts (from a distance and a little from above: lh_common.inc's LH_FAR scales every view).
 - Keep earlier versions safe (he asked for new versions so the old one stays intact); the flat original game is separate.
 - He plays from the published build; deliver the built game, keep the editor in sync (editor is the source of truth).

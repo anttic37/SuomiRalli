@@ -221,6 +221,7 @@
   .lh-box { border: 3px solid #1a1814; padding: 10px 14px; background: #fffbe8; font: 15px/1.4 Arial, sans-serif; margin-top: 14px; } .lh-box b { font: 900 15px Arial, sans-serif; letter-spacing: 0.06em; display: block; margin-bottom: 4px; }
   .lh-stamp { position: absolute; right: 60px; top: 340px; font: 900 22px Arial, sans-serif; color: #c4201a; border: 4px solid #c4201a; padding: 6px 12px; transform: rotate(-8deg); opacity: 0.85; }
   .lh-teas { display: flex; gap: 16px; border-top: 2px solid #1a1814; padding-top: 12px; margin-top: 6px; } .lh-teas a { flex: 1; font: 13px/1.2 serif; } .lh-teas b { display: block; font: 700 18px/1.08 serif; margin-top: 6px; } .lh-teas i { font-size: 13px; color: #c4201a; font-style: normal; font-weight: 700; }
+  .lh-want1 { display: block; margin-top: 6px; font: 900 15px Arial, sans-serif; letter-spacing: 0.08em; color: #c4201a; text-transform: uppercase; } .lh-want1 b { color: #1a1814; }
   .lh-inside { display: flex; gap: 18px; align-items: baseline; border-top: 1px solid #1a1814; margin-top: 12px; padding-top: 7px; font: 14px serif; } .lh-inside b { font: 900 12px Arial, sans-serif; letter-spacing: 0.14em; } .lh-inside i { color: #c4201a; font-style: normal; font-weight: 700; }
   .lh-index { margin-top: 18px; border-top: 2px solid #1a1814; padding-top: 8px; column-count: 2; column-gap: 28px; column-rule: 1px solid rgba(26,24,20,0.28); font: 13.5px/1.48 serif; } .lh-index b { display: block; font: 900 13px Arial, sans-serif; letter-spacing: 0.12em; column-span: all; margin-bottom: 4px; }
   .lh-index a { display: flex; gap: 6px; white-space: nowrap; overflow: hidden; } .lh-index a::after { content: ''; order: 1; flex: 1; border-bottom: 1px dotted #8a8270; margin-bottom: 5px; } .lh-index a i { order: 2; } .lh-index a:hover, .lh-teas a:hover b, .lh-inside a:hover { text-decoration: underline; } .lh-index i { color: #c4201a; font-style: normal; font-weight: 700; }
@@ -4402,7 +4403,7 @@ function rapSend(beacon) {   // → a promise that settles when the server has i
   const body = JSON.stringify({ id: ONLINE.id, name, ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a }; RAP.sentName = name; RAP.at = -1e9;
   try { if (beacon && navigator.sendBeacon) { navigator.sendBeacon(ONLINE.api + '/rap', body); return Promise.resolve(); } return fetch(ONLINE.api + '/rap', { method: 'POST', body, keepalive: true }).catch(() => {}); } catch (e) { return Promise.resolve(); } }
 function rapFetch() { if (!ONLINE.api || RAP.busy || performance.now() - RAP.at < 60000) return; RAP.busy = true;
-  fetch(ONLINE.api + '/rap', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { RAP.busy = false; if (!j || !Array.isArray(j.fires)) return; RAP.list = j; RAP.at = performance.now(); if (PAPER.open) lhRapFill(document.querySelector('#paper .pv-stage')); }).catch(() => { RAP.busy = false; }); }
+  fetch(ONLINE.api + '/rap', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { RAP.busy = false; if (!j || !Array.isArray(j.fires)) return; RAP.list = j; RAP.at = performance.now(); lhRapFill(document.getElementById('lehti-mini')); if (PAPER.open) lhRapFill(document.querySelector('#paper .pv-stage')); }).catch(() => { RAP.busy = false; }); }
 setInterval(() => rapSend(false), 30000); addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') rapSend(true); });
 async function onlineRefresh() {   // the leaderboard → the top 10 on the menu, then the three rivals and their ghosts
   if (!ONLINE.api || ONLINE.busy) return; ONLINE.busy = true; renderTop10(); onlineStats();   // ("haen ajajia…" while it loads)
@@ -4428,6 +4429,8 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'Lehden etusivulle Kylän suurimmat rikolliset (etsintäkuulutettu nimeltä), Poliisi tiedottaa heti sivulla 2, ydinsota lehden loppupäähän; kaikki lehden kuvat uusiksi kauempaa ja yläviistosta', '22.45'],
+  ['29.9.', 'Jalkaisin kamera pysyy ylhäällä kuten ajaessa (ei enää selän takana matalalla)', '22.36'],
   ['29.9.', 'Ykkönen näkee taas oman ennätyshaamunsa radalla (se jäi pois, jos sama kierros oli myös selaimessa). 3-2-1-GO pois: auto lähtee heti, kello käynnistyy lähtöviivalla kuten ennenkin', '22.28'],
   ['29.9.', 'Alkuruutu keskelle taas (valikko oli painunut ruudun alareunaan) ja "testattu: peli skulaa" -rivi pois', '22.18'],
   ['29.9.', '🚓 Poliisiasema pois jalkapallokentän päältä: sillä on nyt oma paikkansa kentän takana metsän reunassa (puut väistävät pihaa). Uusimmat-laatikossa pelkkä teksti ja koko lista vieritettävänä', '22.02'],
@@ -4593,7 +4596,7 @@ const LEHTI = [
     img: ['ufo_a.jpg', 'ufo_b.jpg'], cap: ['Lautanen seuraa autoa 20 metrin korkeudella. Vihreä säde ulottuu maahan asti.', 'Ufoukko sädeaseineen ampuu kaikkea, mikä liikkuu.'],
     body: ['Kylän laidoille on laskeutunut kaksi lentävää lautasta. Kun niiden luo ajaa, ne heräävät ja alkavat ampua vihreitä plasmapalloja.', 'Yhdellä ukoista on sädease. Jos ajat hänen ylitseen, UFO nousee ilmaan ja lentää siitä lähtien autosi yllä – vihreä säde alas autoon.', 'Kolme osumaa ja auto räjähtää. Jalkaisin ukot ampuvat myös kuskia.'],
     box: ['NÄIN KAAPPAAT', '1. Aja UFOn luo (radalta pois)', '2. Aja sädeaseukon yli', '3. UFO on sinun – R palauttaa sen'] },
-  { id: 'nuke', size: 'main', n: 8, kick: '☢️ PÄÄUUTINEN', title: 'Ydinsota alkoi', lede: 'Kesken radiolähetyksen taivaanranta välähti valkoiseksi. Seitsemän sekuntia myöhemmin Ylästöä ei enää ollut.',
+  { id: 'nuke', size: 'main', n: 0.5, kick: '☢️ YDINSOTA', title: 'Ydinsota alkoi', lede: 'Kesken radiolähetyksen taivaanranta välähti valkoiseksi. Seitsemän sekuntia myöhemmin Ylästöä ei enää ollut.',
     img: ['nuke_a.jpg', 'nuke_b.jpg'], cap: ['Sienipilvi nousi Ylästön ylle hetkeä ennen paineaaltoa.', 'Paineaallon jälkeen: tuhkaa, mustia runkoja ja tyhjä tie. Rallikuski jatkoi matkaa.'],
     body: ['YLÄSTÖ. Paineaalto kulki maata pitkin 340 metriä sekunnissa. Kun se ehti kylään, yhdeksän taloa kymmenestä oli poissa. Jäljelle jäi hiiltyneitä kuoria, vinoja puunrunkoja ja palanut maa.', 'Rallikuski lensi autoineen sivuun, mutta auto lähti yhä käyntiin. – Pellit menivät, mutta ajaa voi, kuski kertoo.', 'Ambulansseja ei tullut. Taivas muuttui ruskeaksi ja ilmassa leijui tuhkaa. Kuumailmapallot poksahtivat.', 'Viranomaiset muistuttavat: R-näppäin palauttaa kylän ennalleen. Sota alkaa, kun radiossa kuuluu koelähetys 11 – noin kerran kahdessa tunnissa.'],
     box: ['NÄIN SE TAPAHTUU', '1. Pidä radio päällä (E vaihtaa kanavaa)', '2. Odota, kunnes kuuluu 📡 KOELÄHETYS 11', '3. Seitsemän sekuntia… voi voi.'] },
@@ -4678,22 +4681,29 @@ function lhAd(h, avoid) { let A = LH_ADS[LH_ADN++ % LH_ADS.length]; for (let k =
   const txt = '<div class="ad-txt"><div class="ad-big">' + A.big + '</div><div class="ad-small">' + lhEsc(A.small) + '</div></div>', tag = '<span class="ad-tag">ILMOITUS</span>';
   if (A.cl || !A.img || (!fill && h < 130)) return '<div class="lh-ad cl' + (fill ? ' fill' : '') + (!fill && h < 170 ? ' low' : '') + '"' + st + '>' + tag + txt + '</div>';
   return '<div class="lh-ad' + (v ? ' v' : '') + (fill ? ' fill' : '') + '"' + st + '>' + tag + '<div class="lh-photo ad-ph"><img data-src="lehti/' + A.img + '" alt=""><span class="lh-miss"></span></div>' + txt + '</div>'; }
-function lhPlan() {   // the running order: front, lead spread, the other mains (newest first), pages, halves in pairs, how to drive + contents, the change list
-  const by = (sz) => LEHTI.filter(s => s.size === sz).sort((a, b) => b.n - a.n), mains = by('main'), lead = mains[0], P = []; LH_ADN = 0;
+// the front page's lead: the police's rap sheet ("the biggest criminals", filled in live) — unless a main story is newer (n above 9)
+const LH_POLLEAD = { id: '__pol', n: 9, kick: '🚨 POLIISI TIEDOTTAA', title: 'Kylän suurimmat rikolliset', img: ['rikolliset.jpg'],
+  lede: 'Poliisi julkaisee nimet: nämä kuskit ovat sytyttäneet eniten tulipaloja ja ajaneet eniten ihmisten yli. Rekisteri päivittyy joka ajosta.' };
+function lhPlan() {   // the running order: front, (the police page and a page — the lead's), the mains as spreads (newest first), pages, halves in pairs, how to drive + contents, the change list
+  const by = (sz) => LEHTI.filter(s => s.size === sz).sort((a, b) => b.n - a.n), mains = by('main'), pages = by('page'), halves = by('half'), P = []; LH_ADN = 0;
+  const polLead = !mains.length || LH_POLLEAD.n > mains[0].n, lead = polLead ? LH_POLLEAD : mains[0], seq = [];
+  if (polLead) { seq.push(['pol']); if (pages.length) seq.push(['page', pages[0]]); }   // (police page 2, a page 3: the spreads start on a left page)
+  for (const s of mains) seq.push(['main', s]);
+  for (const s of pages) if (!(polLead && s === pages[0])) seq.push(['page', s]);
+  if (!polLead) seq.push(['pol']);
+  for (let i = 0; i < halves.length; i += 2) seq.push(['half', halves[i], halves[i + 1]]);
   const where = {}; let pn = 2;
-  for (const s of mains) { where[s.id] = pn; pn += 2; } for (const s of by('page')) { where[s.id] = pn; pn++; } const polPage = pn++; const halves = by('half'); for (let i = 0; i < halves.length; i += 2) { where[halves[i].id] = pn; if (halves[i + 1]) where[halves[i + 1].id] = pn; pn++; }
+  for (const it of seq) { if (it[0] === 'pol') where.__pol = pn++; else if (it[0] === 'main') { where[it[1].id] = pn; pn += 2; } else { where[it[1].id] = pn; if (it[2]) where[it[2].id] = pn; pn++; } }
   const keysPage = pn++, lyhPage = pn;
   P.push(lhFront(lead, where, keysPage, lyhPage));
-  for (const s of mains) P.push(...lhSpread(s, s === lead, P.length + 1));
-  for (const s of by('page')) P.push(lhPage(s, P.length + 1));
-  P.push(lhPolice(polPage));
-  for (let i = 0; i < halves.length; i += 2) P.push(lhHalves(halves[i], halves[i + 1], P.length + 1));
-  where.__pol = polPage; P.push(lhKeys(where, keysPage, lyhPage, P.length + 1)); P.push(...lhLyhyesti(P.length + 1));
+  for (const it of seq) { const no = P.length + 1; if (it[0] === 'pol') P.push(lhPolice(no)); else if (it[0] === 'main') P.push(...lhSpread(it[1], it[1] === lead, no)); else if (it[0] === 'page') P.push(lhPage(it[1], no)); else P.push(lhHalves(it[1], it[2], no)); }
+  P.push(lhKeys(where, keysPage, lyhPage, P.length + 1)); P.push(...lhLyhyesti(P.length + 1));
   return lhFitAll(P); }
 const lhPg = (inner, cls, attrs) => '<div class="pv-page ' + cls + '"><div class="lh-in"' + (attrs || '') + '>' + inner + '</div></div>';
 function lhFront(S, where, keysPage, lyhPage) { const t = LEHTI.filter(s => s !== S && s.size === 'main').sort((a, b) => b.n - a.n).slice(0, 3);   // (the teasers: the next main stories; the contents are on the "Näin ajat" page)
   return lhPg(lhMast(true) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="lh-lead">' + lhEsc(S.title) + '</h2>' + lhImg(S.img[0], 380, 'fx') +
-    '<div class="lh-lede">' + lhEsc(S.lede) + ' <a data-go="2"><i>Sivut 2–3 ›</i></a></div>' +
+    '<div class="lh-lede">' + lhEsc(S.lede) + ' <a data-go="' + (S === LH_POLLEAD ? where.__pol : 2) + '"><i>' + (S === LH_POLLEAD ? 'Sivu ' + where.__pol : 'Sivut 2–3') + ' ›</i></a>' +
+      (S === LH_POLLEAD ? '<span class="lh-want1">Etsintäkuulutettu: <b data-rp="w">–</b></span>' : '') + '</div>' +
     '<div class="lh-teas">' + t.map(s => '<a data-go="' + where[s.id] + '">' + lhImg(s.img[0], 96) + '<b>' + lhEsc(s.title) + '</b><i>s. ' + where[s.id] + '</i></a>').join('') + '</div>' +
     '<div class="lh-inside"><b>SISÄLLÄ</b><a data-go="' + keysPage + '">Kaikki jutut <i>' + keysPage + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame front', ' data-noad="1"'); }
 function lhSpread(S, lead, pno) {
@@ -4760,7 +4770,7 @@ function lehtiFetch() {   // the paper comes ready-made from the server (lehti/l
   fetch('lehti/lehti.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.key === lhKey() && Array.isArray(j.pages) && j.pages.length) lehtiSet(j.pages, 'valmis'); else lehtiBuild(); }).catch(() => lehtiBuild()); }
 function lehtiBuild() { if (PAPER.pages.length) return; const t = performance.now(); lehtiSet(lhPlan(), 'taitettu'); PAPER.tb = [t, performance.now() - t]; }   // (laid out here: off the start, or at once on the first open)
 function lehtiSet(pages, src) { if (PAPER.pages.length) return; PAPER.pages = pages; PAPER.src = src;
-  const mini = document.getElementById('lehti-mini'); mini.innerHTML = '<div class="lm-scale">' + PAPER.pages[0] + '</div><div class="lm-btn">📰 ' + T('AVAA LEHTI') + '</div>'; lhLoadImgs(mini); lehtiLayout(); mini.classList.add('ready'); }
+  const mini = document.getElementById('lehti-mini'); mini.innerHTML = '<div class="lm-scale">' + PAPER.pages[0] + '</div><div class="lm-btn">📰 ' + T('AVAA LEHTI') + '</div>'; lhLoadImgs(mini); lehtiLayout(); mini.classList.add('ready'); lhRapFill(mini); rapFetch(); }
 function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER.t0 = performance.now(); const mini = document.getElementById('lehti-mini');
   setTimeout(() => (window.requestIdleCallback || ((f) => setTimeout(f, 0)))(lehtiFetch, { timeout: 2500 }), 1200);
   mini.onclick = () => paperOpen(0); const btn = document.getElementById('lehti-btn'); if (btn) btn.onclick = () => paperOpen(0);
@@ -8988,18 +8998,19 @@ addEventListener('wheel', e => {
 
 // where the car sits on screen (high view): in the lower part, but always above the gauge cluster — a slow correction of the look-ahead
 let camAdj = 0, _clTopFrac = 1, _clT = 0; const _camV = new THREE.Vector3();
+const _camWalker = { x: 0, z: 0, angle: 0, vx: 0, vz: 0 };
 function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind the car, no speed lead — Antti asked it back (the later lead + auto look-ahead went too top-down)
-  if (WALK.on && WALK.h) { walkCamera(dt); return; }
-  const speed=Math.sqrt(car.vx*car.vx+car.vz*car.vz);
+  const C = WALK.on && WALK.h ? Object.assign(_camWalker, { x: WALK.h.x, z: WALK.h.z, angle: WALK.h.yaw, vx: WALK.h.vx || 0, vz: WALK.h.vz || 0 }) : car;   // (on foot: the same camera, high up, on the walker — Antti, 29.9.)
+  const speed=Math.sqrt(C.vx*C.vx+C.vz*C.vz);
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
   camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two views
   const h=((43+speed*0.5)*(1-camLowK) + (4.2+speed*0.04)*camLowK)*camZoom;
-  let angleDiff=car.angle-camAngle.current;
+  let angleDiff=C.angle-camAngle.current;
   while(angleDiff>Math.PI)angleDiff-=Math.PI*2; while(angleDiff<-Math.PI)angleDiff+=Math.PI*2;
   camAngle.current+=angleDiff*1.2*dt;
   const cfx=Math.sin(camAngle.current),cfz=Math.cos(camAngle.current);
   const camDist=((21+speed*0.1)*(1-camLowK) + (10.5+speed*0.1)*camLowK)*camZoom;
-  camTarget.set(car.x-cfx*camDist, Y(car.x,car.z)+h, car.z-cfz*camDist);
+  camTarget.set(C.x-cfx*camDist, Y(C.x,C.z)+h, C.z-cfz*camDist);
   camTarget.y = Math.max(camTarget.y, Y(camTarget.x, camTarget.z) + 2.2);   // never under a crest behind the car
   camPos.lerp(camTarget,1-Math.pow(0.15,dt));
   camPos.y = Math.max(camPos.y, Y(camPos.x, camPos.z) + 1.6);
@@ -9007,13 +9018,13 @@ function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind th
   // look into the drift: blend look direction toward velocity direction
   let lookAng = camAngle.current;
   if (speed > 6) {
-    const vAng = Math.atan2(car.vx, car.vz);
-    let dAng = vAng - car.angle;
+    const vAng = Math.atan2(C.vx, C.vz);
+    let dAng = vAng - C.angle;
     while (dAng > Math.PI) dAng -= Math.PI*2; while (dAng < -Math.PI) dAng += Math.PI*2;
     lookAng = camAngle.current + Math.max(-0.5, Math.min(0.5, dAng)) * 0.55;
   }
   const lfx = Math.sin(lookAng), lfz = Math.cos(lookAng);
-  const lt=new THREE.Vector3(car.x+lfx*la, Y(car.x,car.z)*(1-camLowK) + (Y(car.x+lfx*la, car.z+lfz*la) + 1.4)*camLowK, car.z+lfz*la);
+  const lt=new THREE.Vector3(C.x+lfx*la, Y(C.x,C.z)*(1-camLowK) + (Y(C.x+lfx*la, C.z+lfz*la) + 1.4)*camLowK, C.z+lfz*la);
   camLookAt.lerp(lt,1-Math.pow(0.1,dt));
   camera.position.copy(camPos); camera.lookAt(camLookAt);
   
@@ -9026,7 +9037,7 @@ function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind th
   // the anchor to the shadow-map texel grid so the map never "swims" between frames.
   {
     const texel = 200 / 4096, ahead = 30;   // the camera looks forward: keep the shadowed square mostly in front of the car
-    const ax = Math.round((car.x + Math.sin(car.angle)*ahead) / texel) * texel, az = Math.round((car.z + Math.cos(car.angle)*ahead) / texel) * texel;
+    const ax = Math.round((C.x + Math.sin(C.angle)*ahead) / texel) * texel, az = Math.round((C.z + Math.cos(C.angle)*ahead) / texel) * texel;
     if (Math.hypot(ax - lightAnchor.x, az - lightAnchor.z) > 24) {
       lightAnchor.x = ax; lightAnchor.z = az;
       dirLight.position.set(ax + SUN.x, SUN.y, az + SUN.z);
