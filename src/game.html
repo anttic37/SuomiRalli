@@ -135,13 +135,7 @@
   #overlay { cursor: default; }   /* (the pointer is hidden while driving, not on the menus) */
   /* the change list: in its own column at the bottom right when the screen is wide enough to keep it clear of the top 10,
      otherwise under the rest; either way every change, in a box that scrolls */
-  #changelog { width: min(660px, 88vw); margin: clamp(16px, 3vh, 30px) 0 auto; font-size: 11px; line-height: 1.55; color: #7a7a74; text-align: left; }
-  #changelog .cl-list { max-height: 132px; overflow-y: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: #444 transparent; }
-  #changelog .cl-list::-webkit-scrollbar { width: 6px; } #changelog .cl-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-  #changelog .cl-head { font-size: 10px; letter-spacing: 0.35em; color: #555; margin-bottom: 8px; }
-  #changelog .cl-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #changelog .cl-d { color: #4a4a46; margin-right: 8px; } #changelog .cl-row:first-child { color: #b8b8b0; }
   #overlay > .deco.bottom { margin-bottom: 0; }
-  @media (min-width: 1560px) and (min-height: 640px) { #changelog { position: absolute; right: 28px; bottom: 26px; width: 400px; margin: 0; } #changelog .cl-list { max-height: min(260px, 34vh); } #overlay > .deco.bottom { margin-bottom: auto; } }
   #top10 { margin-top: clamp(16px, 3.5vh, 34px); width: min(600px, 88vw); font-size: clamp(11px, 1.45vw, 16px); color: #f0f0ec; font-variant-numeric: tabular-nums; }
   #top10 .t10-head { font-size: clamp(9px, 1.3vw, 13px); letter-spacing: 0.4em; color: #8a8a86; text-align: center; margin-bottom: clamp(8px, 1.6vh, 16px); text-transform: uppercase; }
   #top10 .t10-row { display: flex; gap: 0.9em; padding: 0.12em 6px; align-items: baseline; } #top10 .t10-row.me .t10-name { color: #44e24a; font-weight: 700; }
@@ -183,6 +177,7 @@
   #changelog { width: min(560px, 88vw); margin: clamp(12px, 2.4vh, 24px) auto 0; font-size: 11px; line-height: 1.6; color: #7a7a74; text-align: left; }
   #changelog .cl-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 10px; letter-spacing: 0.3em; color: #666; margin-bottom: 6px; border-bottom: 1px solid #2a2a28; padding-bottom: 4px; }
   #changelog .cl-head a { letter-spacing: 0.08em; color: #c9a92c; cursor: pointer; text-decoration: none; } #changelog .cl-head a:hover { color: #ffd23a; }
+  #changelog .cl-list { max-height: 104px; overflow-y: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: #444 transparent; } #changelog .cl-list::-webkit-scrollbar { width: 6px; } #changelog .cl-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
   #changelog .cl-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #changelog .cl-d { color: #55554f; margin-right: 8px; font-variant-numeric: tabular-nums; } #changelog .cl-row:first-child { color: #c8c8c0; } #changelog .cl-row:first-child .cl-d { color: #c9a92c; }
   @media (min-width: 1560px) and (min-height: 640px) { #changelog { position: absolute; right: 30px; bottom: 26px; width: 420px; margin: 0; } }   /* (wide: the bottom-right corner, under the share QR) */
   #lehti-btn { display: table; margin: 10px auto 0; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 16px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; cursor: pointer; }
@@ -1440,6 +1435,7 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
   const placedRaw = [];
   const placed = { push(p) { placedRaw.push(p); const k = pkey(Math.floor(p.x/PCELL), Math.floor(p.z/PCELL)); let b = PG.get(k); if (!b) PG.set(k, b = []); b.push(p); }, get length() { return placedRaw.length; } };
   labelFootprints.forEach(f => placed.push({x:f.x,z:f.z,r:f.r}));
+  POLICE_SPOT = policeSpot(); if (POLICE_SPOT) { const [sx, sz, sy] = POLICE_SPOT; for (let a = -11; a <= 11; a += 2.5) for (let b = -10; b <= 14; b += 2.5) { const [x, z] = lloc(sx, sz, sy, a, b); placed.push({ x, z, r: 2.2 }); } }   // (its yard kept clear before the trees go in)
   const RG = new Map(), RC = 8, rk = (cx, cz) => cx*73856093 ^ cz*19349663;
   const rgPut = (p, isTrack) => { const k = rk(Math.floor(p.x/RC), Math.floor(p.y/RC)); let b = RG.get(k); if (!b) RG.set(k, b = []); b.push(p.x, p.y, isTrack ? 1 : 0); };
   trackPoints.forEach(p => rgPut(p, true)); sideRoadPts.forEach(p => rgPut(p, false));
@@ -4435,6 +4431,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '🚓 Poliisiasema pois jalkapallokentän päältä: sillä on nyt oma paikkansa kentän takana metsän reunassa (puut väistävät pihaa). Uusimmat-laatikossa pelkkä teksti ja koko lista vieritettävänä', '22.02'],
   ['29.9.', '🕘 Alkuruutuun takaisin pieni Uusimmat-laatikko: viisi uusinta muutosta päivän ja kellonajan kanssa, kaikki lehden Lyhyesti-sivuilla (nekin nyt kellonajan kanssa)', '21.50'],
   ['29.9.', '🎥 Kamera palautettu siihen, jolla Mane ajoi ennätyksen 1.24,804 (27.9.): auton takana, katse loivasti eteen, ei enää nopeuden mukana auton päälle nousevaa kuvakulmaa', '21.47'],
   ['29.9.', '👻 Haamut nopeammin: kerran haettu haamu muistetaan selaimessa, viimeksi nähdyt pyydetään jo latauksen alussa ja oma haamu samaan aikaan muiden kanssa – ja ajaa voi heti, haamut tulevat radalle kun ehtivät. Ykkönen näkee radalla oman ennätyksensä (nopein aika) ja kaksi lähintä takaa-ajajaa. Kylä rakentuu nopeammin (talohaku ruudukolla)', '21.39'],
@@ -4793,10 +4790,10 @@ function paperShow() { const P = document.getElementById('paper'), st = P.queryS
   P.querySelector('.pv-count').textContent = 's. ' + view.map(i => i + 1).join('–') + ' / ' + PAPER.pages.length;
   const nx = PAPER.views[PAPER.v + 1]; if (nx) { const tmp = document.createElement('div'); tmp.innerHTML = nx.map(i => PAPER.pages[i]).join(''); tmp.querySelectorAll('img[data-src]').forEach(im => { const pre = new Image(); pre.src = im.dataset.src; }); } }   // (the next spread's photos load ahead)
 function renderChangelog() { const el = document.getElementById('changelog'); if (!el) return;
-  el.innerHTML = '<div class="cl-head"><span>' + T('UUSIMMAT') + '</span><a>' + T('kaikki lehdessä ›') + '</a></div><div class="cl-list"></div>'; const L = el.lastChild;   // (the newest five, when they came; all of them in the paper's Lyhyesti)
+  el.innerHTML = '<div class="cl-head"><span>' + T('UUSIMMAT') + '</span><a>' + T('kaikki lehdessä ›') + '</a></div><div class="cl-list"></div>'; const L = el.lastChild;   // (the newest first, when they came; the paper's Lyhyesti has them too)
   el.querySelector('a').onclick = (e) => { e.stopPropagation(); lehtiBuild(); const i = PAPER.pages.findIndex(h => h.includes('LYHYESTI</span>')); paperOpen(Math.max(0, i)); };
-  CHANGES.slice(0, 5).forEach(([d, t, hm]) => { const r = document.createElement('div'); r.className = 'cl-row'; r.title = t;
-    r.innerHTML = '<span class="cl-d"></span><span></span>'; r.children[0].textContent = d + (hm ? ' klo ' + hm : ''); r.children[1].textContent = t; L.appendChild(r); }); }
+  CHANGES.forEach(([d, t, hm]) => { const r = document.createElement('div'); r.className = 'cl-row'; const tx = t.replace(/^[^A-Za-zÅÄÖåäö0-9"'(]+/u, '');   // (all of them, scrolling; text only — the leading emoji off)
+    r.title = tx; r.innerHTML = '<span class="cl-d"></span><span></span>'; r.children[0].textContent = d + (hm ? ' klo ' + hm : ''); r.children[1].textContent = tx; L.appendChild(r); }); }
 function renderTop10() { scoreboardDraw(); const el = document.getElementById('top10'); if (!el) return;
   const head = '<div class="t10-head">' + T('Ennätyslista · kaikki kuskit') + '</div>', loading = (small) => '<div class="t10-loading' + (small ? ' small' : '') + '"><span class="spin"></span>' + T(small ? 'päivitetään aikoja…' : 'haetaan aikoja…') + '</div><div class="t10-bar' + (small ? ' small' : '') + '"></div>';
   { const ov = document.getElementById('overlay'); if (ov) ov.classList.toggle('loading', !!(ONLINE.api && ONLINE.busy)); }   // (the red stripes run too while it loads)
@@ -7914,13 +7911,29 @@ function buildScuffle(x, z, nCops) { const G = { x, z, hx: x, hz: z, th: Math.ra
   G.d = new Human({ x: x + 0.4, z, rig: makeAdult(lpick([0x8a6a3a, 0x5a5a3a, 0xa03a2a, 0x6a6a6a]), lpick([0x3a3a2a, 0x2b3a63, 0x4a3a2a]), lpick([0x5a3a1e, 0x9a9a9a, 0x2a1d12]), { sel: { longSleeve: 1, longPants: 1, tache: Math.random() < 0.6 } }), task: scuffleTask(G, 0) });
   for (let k = 0; k < nCops; k++) G.cops.push(new Human({ x: x - 0.4, z: z + (k ? 0.5 : -0.5), rig: makeAdult(0x2a3a60, 0x1c2c5a, lpick(L_HAIR), { sel: { hat: 3, top: 8, longSleeve: 1, longPants: 1, tache: Math.random() < 0.4 }, acc: 0x1c2540, shoes: 0x141414, w: 1.05 }), task: scuffleTask(G, k + 1) }));
   return G; }
+// the police station has one place (Antti, 29.9.: off the football pitch — it could land on it): beside the sports field, 12 m in from its
+// end nearest the race road and 20 m out past the long side the race runs towards, facing the road; no field → the old search near the shop
+let POLICE_SPOT = null;
+function policeSpot() { const F = LANDMARKS.find(L => L[0] === 'kentta'); if (!F || !trackPoints.length) return null; const [w, d] = lmSize(F), th = F[3] || 0;
+  const ux = Math.cos(th), uz = -Math.sin(th), vx = Math.sin(th), vz = Math.cos(th), end = (s) => [F[1] + ux*s*w/2, F[2] + uz*s*w/2];
+  const sE = roadInfo(...end(1)).d2 < roadInfo(...end(-1)).d2 ? 1 : -1, ri = roadInfo(...end(sE)), dir = getDir(ri.idx), sS = dir.x*vx + dir.y*vz >= 0 ? 1 : -1;
+  const cx = F[1] + ux*sE*(w/2 - 12) + vx*sS*(d/2 + 20), cz = F[2] + uz*sE*(w/2 - 12) + vz*sS*(d/2 + 20), p = trackPoints[roadInfo(cx, cz).idx];
+  return [cx, cz, Math.atan2(p.x - cx, p.y - cz)]; }
 function buildPoliceStation() { const K = LANDMARKS.find(L => L[0] === 'kauppa'); if (!K) return; const [, kx, kz] = K; let best = null;
   const ok = (cx, cz, yaw) => { if (!clearSpot(cx, cz, 8.5) || treeNear(cx, cz, 9.5) || distRoute(cx, cz) < 14) return false;
-    for (let a = -8.5; a <= 8.5; a += 4.25) for (let b = -8; b <= 12; b += 2.5) { const [x, z] = lloc(cx, cz, yaw, a, b); if (inAnyPlot(x, z) || onRoad(x, z, 0.5) || treeNear(x, z, 1.5)) return false; } return true; };
+    for (let a = -8.5; a <= 8.5; a += 4.25) for (let b = -8; b <= 12; b += 2.5) { const [x, z] = lloc(cx, cz, yaw, a, b); if (inAnyPlot(x, z) || onRoad(x, z, 0.5) || treeNear(x, z, 1.5) || LANDMARKS.some(L => inLandmark(x, z, L, 1))) return false; } return true; };   // (never on the pitch or another landmark)
+  let moveOut = false;
+  if (POLICE_SPOT) { const [cx, cz, yaw] = POLICE_SPOT, ri = roadInfo(cx, cz);   // (its trees were kept out; spectators standing there step aside — only roads, plots, houses, cars, plans and the field matter)
+    let fine = !onRoad(cx, cz, 9) && Math.sqrt(ri.d2) >= wAt(ri.idx)/2 + 11.5 && distRoute(cx, cz) >= 14 && !inPaved(cx, cz) && !VEHICLES.some(v => Math.hypot(v.x - cx, v.z - cz) < 10.9) && !LIFE_PLAN.some(P => Math.hypot(P.x - cx, P.z - cz) < 11 + (P.r || 0));
+    if (fine) staticNear(cx, cz, 11.5, B => { if (fine && boxPush(B, cx, cz, 8.8)) fine = false; });
+    for (let a = -8.5; a <= 8.5 && fine; a += 4.25) for (let b = -8; b <= 12 && fine; b += 2.5) { const [x, z] = lloc(cx, cz, yaw, a, b); if (inAnyPlot(x, z) || onRoad(x, z, 0.5) || LANDMARKS.some(L => inLandmark(x, z, L, 1))) fine = false; }
+    if (fine) { best = POLICE_SPOT; moveOut = true; } }
   for (let k = 0; k < 900 && !best; k++) { const r = 22 + Math.min(k, 600)*0.2, a = Math.random()*6.3, cx = kx + Math.sin(a)*r, cz = kz + Math.cos(a)*r;
     let rd = 1e9, q = null; for (const p of sideRoadPts) { const d = (p.x - cx)**2 + (p.y - cz)**2; if (d < rd) { rd = d; q = p; } } if (!q || rd > 26*26) continue;   // a street to face, not too far
     const yaw = Math.atan2(q.x - cx, q.y - cz); if (ok(cx, cz, yaw)) best = [cx, cz, yaw]; }
   if (!best) return; const [cx, cz, yaw] = best; reserve('police', [cx, cz], 11);
+  if (moveOut) for (const h of HUMANS) { if (h.gone || h.seat || h.inside) continue; const dx = h.x - cx, dz = h.z - cz, a = Math.cos(yaw)*dx - Math.sin(yaw)*dz, b = Math.sin(yaw)*dx + Math.cos(yaw)*dz;   // anyone in the yard: to its road-side edge
+    if (Math.abs(a) < 10 && b > -9.5 && b < 13.5) { const [x, z] = lloc(cx, cz, yaw, a, 14 + Math.random()*1.5); h.x = h.home.x = x; h.z = h.home.z = z; } }
   const [bx, bz] = lloc(cx, cz, yaw, 0, -3), base = footprintBase(bx, bz, 6.6, 4.1, yaw) + 0.35, G = makePoliceStation(); G.position.set(bx, base, bz); G.rotation.y = yaw; lifeGroup.add(G);   // (a building: seen from anywhere, like the houses)
   addStaticBox({ x: bx, z: bz, yaw, hw: 6.5, hl: 4.0, kind: 'house', wallTop: 6.6, roofH: 0.4, station: true });
   { const m = drapePatch(cx, cz, yaw, -8.5, 8.5, -8, 12, new THREE.MeshStandardMaterial({ map: polYardTex(), roughness: 0.92, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2 }), 0.05); lifeGroup.add(m); }   // the tarmac yard
