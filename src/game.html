@@ -182,7 +182,7 @@
   #lehti-btn { display: none; margin: 10px auto 0; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 16px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; cursor: pointer; }
   body:not(.lh-wide) #lehti-btn { display: table; }
   body.lh-wide #share { position: fixed; left: auto; right: 34px; top: 50%; margin: 0; transform: translateY(-50%) rotate(3deg); z-index: 5; }
-  #paper { position: fixed; inset: 0; z-index: 300; background: rgba(16,14,12,0.975); display: none; user-select: none; }
+  #paper { position: fixed; inset: 0; z-index: 300; background: rgba(16,14,12,0.975); display: none; user-select: none; cursor: default; }   /* (body hides the pointer for driving; the paper is outside #overlay) */
   #paper.on { display: block; }
   #paper .pv-stage { position: absolute; left: 50%; top: 50%; transform-origin: 0 0; }
   #paper .pv-spread { display: flex; box-shadow: 0 24px 70px rgba(0,0,0,0.8); position: relative; }
@@ -4358,6 +4358,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '🖱️ Hiiren osoitin ei enää katoa lehteä selatessa'],
   ['29.9.', '📄 Ylästön Sanomat PDF:nä: ⬇ PDF -nappi lehden yläkulmassa lataa koko lehden (kaikki sivut ja kuvat, sisällysluettelo linkkeinä)'],
   ['29.9.', '📰 Alkuruutuun Ylästön Sanomat: uusin pääjuttu etusivulla, jokaisesta ominaisuudesta juttu (pääjutut aukeamina), näppäimet ja kaikki muutokset lehdessä. Kerro kaverille oikealle, radio pienemmäksi, UUTUUS, PC-laatikko ja paikkarivi pois'],
   ['29.9.', '☢️ Kun radiossa soi koelähetys 11: ydinräjähdys – välähdys, paineaalto, 90 % kaikesta tuhoutuu, loput hiiltyy ja palaa, maa mustaksi, tuhkaa sataa, sienipilvi taivaalla. Auto lentää sivuun mutta ajo jatkuu. R palauttaa maailman'],

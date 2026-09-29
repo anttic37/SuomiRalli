@@ -712,6 +712,7 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   1000 px JPEGs in lehti/ (≈ 2.8 MB, published by Netlify next to index.html; the editor artifact can't show them).
   Adding a feature from now on: add its LEHTI entry (size + n) and its photo(s); a new 'main' with the biggest n becomes the lead.
 - Paper as PDF (29.9.): build.py runs test/lehti_pdf.js after the build → lehti/ylaston-sanomat.pdf (39 pages, ~3.8 MB; NOPDF=1 skips it). It loads index.html, stops rAF, lays PAPER.pages one per 760×1000 page, turns data-go into #sN links (the index works inside the PDF), and bakes the photos' CSS sepia into JPEGs through a canvas (a CSS filter printed as raw bitmaps → 35 MB; needs --allow-file-access-from-files). The viewer's ⬇ PDF button links it (the published copy when not on http, e.g. the editor's test game). Story 'pdf' (half) with photo from test/t_lh_pdf.js.
+- Paper pointer fix (29.9.): body has cursor:none (driving) and #paper sits outside #overlay, so the pointer vanished while reading → #paper { cursor: default } (t_paper_cursor).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

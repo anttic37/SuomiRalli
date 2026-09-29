@@ -182,7 +182,7 @@
   #lehti-btn { display: none; margin: 10px auto 0; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 16px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; cursor: pointer; }
   body:not(.lh-wide) #lehti-btn { display: table; }
   body.lh-wide #share { position: fixed; left: auto; right: 34px; top: 50%; margin: 0; transform: translateY(-50%) rotate(3deg); z-index: 5; }
-  #paper { position: fixed; inset: 0; z-index: 300; background: rgba(16,14,12,0.975); display: none; user-select: none; }
+  #paper { position: fixed; inset: 0; z-index: 300; background: rgba(16,14,12,0.975); display: none; user-select: none; cursor: default; }   /* (body hides the pointer for driving; the paper is outside #overlay) */
   #paper.on { display: block; }
   #paper .pv-stage { position: absolute; left: 50%; top: 50%; transform-origin: 0 0; }
   #paper .pv-spread { display: flex; box-shadow: 0 24px 70px rgba(0,0,0,0.8); position: relative; }
@@ -231,7 +231,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 10.59 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div class="build-stamp">editorista 11.15 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
     <div style="text-align:center"><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
@@ -4355,6 +4355,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '🖱️ Hiiren osoitin ei enää katoa lehteä selatessa'],
   ['29.9.', '📄 Ylästön Sanomat PDF:nä: ⬇ PDF -nappi lehden yläkulmassa lataa koko lehden (kaikki sivut ja kuvat, sisällysluettelo linkkeinä)'],
   ['29.9.', '📰 Alkuruutuun Ylästön Sanomat: uusin pääjuttu etusivulla, jokaisesta ominaisuudesta juttu (pääjutut aukeamina), näppäimet ja kaikki muutokset lehdessä. Kerro kaverille oikealle, radio pienemmäksi, UUTUUS, PC-laatikko ja paikkarivi pois'],
   ['29.9.', '☢️ Kun radiossa soi koelähetys 11: ydinräjähdys – välähdys, paineaalto, 90 % kaikesta tuhoutuu, loput hiiltyy ja palaa, maa mustaksi, tuhkaa sataa, sienipilvi taivaalla. Auto lentää sivuun mutta ajo jatkuu. R palauttaa maailman'],
