@@ -391,6 +391,15 @@ applyLang();
 // world is being built (onlineRefresh takes it over if the track is the same)
 const TOP_PREFETCH = (() => { try { const sig = localStorage.getItem('yl-top-sig'); if (!sig || !/^https?:$/.test(location.protocol)) return null;
   const p = fetch('/api/top?sig=' + encodeURIComponent(sig), { cache: 'no-store' }).then(r => r.ok ? r.json() : Promise.reject(new Error(r.status))); p.catch(() => {}); return { sig, p }; } catch (e) { return null; } })();
+// the rivals' ghosts too: a ghost (driver k, time t) never changes, so the ones seen last time come from this browser's cache at once, and
+// the rest are asked for right now, while the village is built — not after it and the leaderboard (the race can start without them anyway)
+const GHOST_CACHE = { get(k, t) { try { const g = JSON.parse(localStorage.getItem('yl-g:' + k + ':' + t) || 'null'); return g && Array.isArray(g.s) ? g : null; } catch (e) { return null; } },
+  put(k, t, g) { try { const L = JSON.parse(localStorage.getItem('yl-g-keys') || '[]').filter(x => x !== k + ':' + t); L.push(k + ':' + t);
+    while (L.length > 8) { try { localStorage.removeItem('yl-g:' + L.shift()); } catch (e) {} } localStorage.setItem('yl-g:' + k + ':' + t, JSON.stringify(g)); localStorage.setItem('yl-g-keys', JSON.stringify(L)); } catch (e) {} } };   // (the last 8 kept)
+const GHOST_PREFETCH = (() => { try { const last = JSON.parse(localStorage.getItem('yl-opp-last') || 'null'); if (!last || !Array.isArray(last.list) || !/^https?:$/.test(location.protocol)) return null;
+  const P = { sig: last.sig, m: {} }; for (const r of last.list) { if (GHOST_CACHE.get(r.k, r.t)) continue;
+    const p = fetch('/api/ghost?sig=' + encodeURIComponent(last.sig) + '&k=' + encodeURIComponent(r.k), { cache: 'no-store' }).then(x => x.ok ? x.json() : Promise.reject(new Error(x.status))); p.catch(() => {}); P.m[r.k] = p; }
+  return P; } catch (e) { return null; } })();
 // ════════════════════════════════════════
 // GAME STATE
 // ════════════════════════════════════════
@@ -3573,7 +3582,8 @@ const unitHead = new THREE.IcosahedronGeometry(1, 0);
   }
 })();
 
-function buildTrackTires() {
+const NBG = { n: -1, map: new Map() }, NBG_C = 16, NBG_M = 6;   // (nearBuilding's grid of the buildings: each in every 16 m cell its rectangle + 6 m can reach — the same answer as trying them all, ~40× fewer tries)
+function buildTrackTires() { NBG.n = -1;
   tires.length = 0; CORNER_TRACTORS.length = 0;
   const n = trackPoints.length;
   
@@ -3639,7 +3649,12 @@ function buildTrackTires() {
     return true;
   }
   function gridPut(x, z, r) { const k = sKey(x, z); let b = sg.get(k); if (!b) sg.set(k, b = []); b.push([x, z, r]); }
-  function nearBuilding(x, z, m) { for (let j = 0; j < BUILDINGS.length; j++) { const B = BUILDINGS[j]; if (inLandmark(x, z, [0, B[0], B[1], B[4], B[2], B[3]], m)) return true; } return false; }   // exact rotated rectangle for every building
+  function nearBuilding(x, z, m) {
+    if (m > NBG_M) { for (let j = 0; j < BUILDINGS.length; j++) { const B = BUILDINGS[j]; if (inLandmark(x, z, [0, B[0], B[1], B[4], B[2], B[3]], m)) return true; } return false; }
+    if (NBG.n !== BUILDINGS.length) { NBG.n = BUILDINGS.length; NBG.map.clear();   // (rebuilt when one is added: a corner tractor's spot)
+      for (const B of BUILDINGS) { const L = [0, B[0], B[1], B[4], B[2], B[3]], [w, d] = lmSize(L), R = Math.hypot(w/2 + NBG_M, d/2 + NBG_M);
+        for (let cx = Math.floor((B[0] - R)/NBG_C); cx <= Math.floor((B[0] + R)/NBG_C); cx++) for (let cz = Math.floor((B[1] - R)/NBG_C); cz <= Math.floor((B[1] + R)/NBG_C); cz++) { const k = cx*73856093 ^ cz*19349663; let l = NBG.map.get(k); if (!l) NBG.map.set(k, l = []); l.push(L); } } }
+    const l = NBG.map.get(Math.floor(x/NBG_C)*73856093 ^ Math.floor(z/NBG_C)*19349663); if (!l) return false; for (const L of l) if (inLandmark(x, z, L, m)) return true; return false; }   // exact rotated rectangle for every building
   function addPig(x, z, yaw) { if (inPaved(x, z)) return; tires.push({ kind: 'pig', x, z, ox: x, oz: z, vx: 0, vz: 0, hop: 0, r: 0.64, inst: [], yaw, moving: false, tone: Math.floor(Math.random()*PIG_TONES.length) }); }
   function addPigChecked(x, z, yaw) { if (!stackFree(x, z, 0.62)) return false; addPig(x, z, yaw); gridPut(x, z, 0.62); return true; }
   function addStackChecked(x, z) {
@@ -4374,7 +4389,7 @@ async function apiGet(path) { const r = await fetch(ONLINE.api + path, { cache: 
 // from around tenth place but never more than 10 % slower than the leader, so the first run is against a decent pace
 function oppPick(others, myT, mine) {
   let pick = myT < Infinity ? others.filter(r => r.t < myT).slice(-3) : others.filter(r => r.t <= others[0].t*1.1).slice(0, 10).slice(-3);
-  if (!pick.length) pick = others.slice(0, 3);   // (already on top: the chasers)
+  if (!pick.length) pick = (mine && !(ghost && Math.abs(ghost.time - mine.t) < 0.002) ? [mine] : []).concat(others.slice(0, 2));   // (already on top: your own record on the road — the fastest time there is — and the two nearest chasers)
   if (!pick.length && mine) pick = [mine];       // (alone on the board: your own best, under your name)
   return pick.sort((a, b) => b.t - a.t); }       // nearest first
 // ── the police's rap sheet: fires the driver set, people and animals they ran over → /api/rap (as deltas), and the list back for the paper's "Poliisi tiedottaa" ──
@@ -4397,8 +4412,15 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
     if (!d) d = await apiGet('/top?sig=' + encodeURIComponent(sig)); ONLINE.ok = true; ONLINE.list = d.list || []; renderTop10();
     const me = onlineKey(ONLINE.name), mine = ONLINE.list.find(r => r.k === me), myT = ONLINE.name ? (mine ? mine.t : Infinity) : bestTime, others = ONLINE.list.filter(r => r.k !== me);   // (a known driver: the board is the truth — a local best it never took, or struck off, doesn't count)
     const pick = oppPick(others, myT, mine);
-    const got = await Promise.all(pick.map(r => apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(r.k)).catch(() => null)));
-    ONLINE.self = null; if (mine && !ghost) { const g = await apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(mine.k)).catch(() => null); if (g && Array.isArray(g.splits)) ONLINE.self = { t: g.t, splits: g.splits }; }   // (your own best from the board, for the splits, on a browser without it)
+    const memo = {}, ghostOf = (r) => memo[r.k] || (memo[r.k] = ghostGet(r));
+    const ghostGet = (r) => { const c = GHOST_CACHE.get(r.k, r.t); if (c) return Promise.resolve(c);   // (cached, or asked for at the start, or now — and kept for next time)
+      const pre = GHOST_PREFETCH && GHOST_PREFETCH.sig === sig && GHOST_PREFETCH.m[r.k]; if (pre) delete GHOST_PREFETCH.m[r.k];
+      return (pre || Promise.reject()).catch(() => null).then(g => g && Math.abs(g.t - r.t) < 0.0015 ? g : apiGet('/ghost?sig=' + encodeURIComponent(sig) + '&k=' + encodeURIComponent(r.k)))
+        .then(g => { if (g && Array.isArray(g.s) && Math.abs(g.t - r.t) < 0.0015) GHOST_CACHE.put(r.k, r.t, g); return g; }).catch(() => null); };
+    try { localStorage.setItem('yl-opp-last', JSON.stringify({ sig, list: pick.concat(mine && !ghost && !pick.includes(mine) ? [mine] : []).map(r => ({ k: r.k, t: r.t })) })); } catch (e) {}
+    const selfP = mine && !ghost ? ghostOf(mine) : Promise.resolve(null);   // (your own, alongside the rivals' — not after them)
+    const got = await Promise.all(pick.map(ghostOf));
+    ONLINE.self = null; if (mine && !ghost) { const g = await selfP; if (g && Array.isArray(g.splits)) ONLINE.self = { t: g.t, splits: g.splits }; }   // (your own best from the board, for the splits, on a browser without it)
     ONLINE.opp.forEach(o => { scene.remove(o.G); o.G.userData.label.material.map.dispose(); });
     ONLINE.opp = got.map((g, i) => g && Array.isArray(g.s) && g.s.length >= 8 ? { name: g.name, t: g.t, splits: g.splits || [], s: g.s, cursor: 0, alpha: 0,
       G: makeGhost(OPP_LOOK[i][0], OPP_LOOK[i][1], g.name, OPP_LOOK[i][2]) } : null).filter(Boolean);
@@ -4407,6 +4429,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '👻 Haamut nopeammin: kerran haettu haamu muistetaan selaimessa, viimeksi nähdyt pyydetään jo latauksen alussa ja oma haamu samaan aikaan muiden kanssa – ja ajaa voi heti, haamut tulevat radalle kun ehtivät. Ykkönen näkee radalla oman ennätyksensä (nopein aika) ja kaksi lähintä takaa-ajajaa. Kylä rakentuu nopeammin (talohaku ruudukolla)'],
   ['29.9.', '📰 Lehden sivunapit ‹ › toimivat taas hiirellä, AVAA LEHTI -tarra näkyy kokonaan pikkulehden päällä, ja räjähdys on nyt suoraan: ☢️ YDINSOTA ALKOI (ei koeräjäytys)'],
   ['29.9.', '🔧 Alkuruutu ei enää hypi: Kerro kaverille -QR on heti oikealla paikallaan (ennen ensin vasemmassa yläkulmassa)'],
   ['29.9.', '🧱 Betoniporsaat kauas: mutkien sisäreunoilla ja sivuteiden suilla on nyt renkaita, porsaat vasta 8 m niiden takana – reunan hipaisu ei enää pilaa kisaa'],
@@ -8601,6 +8624,7 @@ function updateAudio(dt) {
 // ════════════════════════════════════════
 const keys = {};
 addEventListener('keydown', e => {
+  if (!BOOTED) return;   // (the village isn't there yet: an early Enter would start a race on nothing)
   if (e.target && e.target.tagName === 'INPUT') {   // typing a name: no driving, no restart
     if (e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); onlineSubmit(); } else if (e.code === 'Escape') e.target.blur();
     return; }
@@ -9208,12 +9232,18 @@ function loop(time) {
 // INIT
 // ════════════════════════════════════════
 addEventListener('resize', () => { camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
-generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); renderChangelog(); lehtiInit(); radioLoad();   // (the ground is built by the terrain lift inside generateTrack)
-{ const el = document.getElementById('terrain-label'); if (el) el.textContent = HEIGHT_RAW ? 'maanmittauslaitoksen korkeusmalli' : 'väliaikaiset mäet ' + PLACEHOLDER_AMP + '×'; }
-camPos.set(car.x-Math.sin(car.angle)*25, 45, car.z-Math.cos(car.angle)*25);
-camLookAt.set(car.x, Y(car.x,car.z), car.z);
-camera.position.copy(camPos);
-requestAnimationFrame(loop);
+// the village is built only once the browser has painted the start screen and sent the requests queued above (the leaderboard, the
+// rivals' ghosts): a script that runs on for seconds holds both back — the page stayed blank and the fetches only left after the build
+let BOOTED = false;
+function boot() { if (BOOTED) return; BOOTED = true;
+  generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); renderChangelog(); lehtiInit(); radioLoad();   // (the ground is built by the terrain lift inside generateTrack)
+  { const el = document.getElementById('terrain-label'); if (el) el.textContent = HEIGHT_RAW ? 'maanmittauslaitoksen korkeusmalli' : 'väliaikaiset mäet ' + PLACEHOLDER_AMP + '×'; }
+  camPos.set(car.x-Math.sin(car.angle)*25, 45, car.z-Math.cos(car.angle)*25);
+  camLookAt.set(car.x, Y(car.x,car.z), car.z);
+  camera.position.copy(camPos);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(() => setTimeout(boot, 0)); setTimeout(boot, 120);   // (the timer: a background tab gets no frames)
 </script>
 </body>
 </html>
