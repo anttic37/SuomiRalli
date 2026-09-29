@@ -193,33 +193,55 @@
   #paper .pv-close { position: absolute; top: 10px; right: 14px; width: 44px; height: 44px; border: none; border-radius: 50%; background: #e0141e; color: #fff; font: 900 22px/44px Arial, sans-serif; cursor: pointer; z-index: 2; }
   #paper .pv-pdf { position: absolute; top: 10px; right: 68px; height: 44px; padding: 0 14px; border-radius: 22px; background: #ffd23a; color: #111; font: 900 15px/44px Arial, sans-serif; letter-spacing: 0.04em; text-decoration: none; z-index: 2; } #paper .pv-pdf:hover { background: #ffe27a; }
   #paper .pv-count { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font: 700 13px "Courier New", monospace; letter-spacing: 0.2em; color: #bbb; }
-  .pv-page { width: 760px; height: 1000px; box-sizing: border-box; padding: 30px 36px 34px; position: relative; overflow: hidden; color: #1a1814; text-align: left; font-family: "Times New Roman", "Liberation Serif", "DejaVu Serif", serif;
+  .pv-page { width: 760px; height: 1000px; box-sizing: border-box; padding: 40px 50px 44px; position: relative; overflow: hidden; color: #1a1814; text-align: left; font-family: "Times New Roman", "Liberation Serif", "DejaVu Serif", serif;
     background: #f1ead8; background-image: radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1px); background-size: 4px 4px; }
   .pv-page a { color: inherit; text-decoration: none; cursor: pointer; }
-  .lh-mast { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; border-bottom: 5px double #1a1814; padding-bottom: 6px; margin-bottom: 12px; }
-  .lh-mast b { font: 900 34px/1 "Times New Roman", "Liberation Serif", serif; letter-spacing: -0.5px; } .lh-mast.big b { font-size: 64px; letter-spacing: -1.5px; width: 100%; }
+  .lh-measure { position: fixed; left: -20000px; top: 0; visibility: hidden; pointer-events: none; }
+  .lh-folio { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid #1a1814; padding-bottom: 5px; margin-bottom: 18px; font: 700 11px Arial, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: #3a3630; }
+  .lh-folio.r { flex-direction: row-reverse; } .lh-folio b { font: 900 16px "Times New Roman", "Liberation Serif", serif; letter-spacing: 0; color: #1a1814; } .lh-folio .pn { font: 900 20px "Times New Roman", "Liberation Serif", serif; letter-spacing: 0; color: #1a1814; }
+  .lh-folio .sec { color: #c4201a; } .lh-folio i { margin-left: auto; font: italic 13px "Times New Roman", serif; letter-spacing: 0; text-transform: none; } .lh-folio.r i { margin-left: 0; margin-right: auto; }
+  .lh-mast { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; border-bottom: 5px double #1a1814; padding-bottom: 6px; margin-bottom: 14px; }
+  .lh-mast b { font: 900 34px/1 "Times New Roman", "Liberation Serif", serif; letter-spacing: -0.5px; } .lh-mast.big b { font-size: 62px; letter-spacing: -1.5px; width: 100%; text-align: center; }
   .lh-mast .lh-red { background: #c4201a; color: #fff; font: 700 13px Arial, sans-serif; padding: 3px 9px; letter-spacing: 0.1em; } .lh-mast i { font: italic 15px serif; }
-  .lh-kick { display: inline-block; background: #c4201a; color: #fff; font: 900 17px Arial, sans-serif; padding: 3px 10px; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .lh-kick { display: inline-block; background: #c4201a; color: #fff; font: 900 15px Arial, sans-serif; padding: 3px 10px; letter-spacing: 0.1em; margin-bottom: 8px; }
   .pv-page h2.lh-lead, .pv-page h2.up { text-transform: uppercase; font-size: 60px; letter-spacing: -1px; }
-  .pv-page h2 { margin: 0 0 8px; font: 900 64px/0.94 "Times New Roman", "Liberation Serif", serif; letter-spacing: -1.5px; } .pv-page h2.lh-lead { font-size: 66px; } .pv-page h2.mid { font-size: 52px; }
-  .pv-page h3 { margin: 0 0 8px; font: 900 34px/0.98 "Times New Roman", "Liberation Serif", serif; }
-  .lh-lede { font: 700 20px/1.25 "Times New Roman", "Liberation Serif", serif; margin: 6px 0 12px; }
-  .lh-photo { position: relative; width: 100%; background: #cfc6b0; border: 1px solid #1a1814; overflow: hidden; }
+  .pv-page h2 { margin: 0 0 10px; font: 900 64px/0.94 "Times New Roman", "Liberation Serif", serif; letter-spacing: -1.5px; } .pv-page h2.lh-lead { font-size: 68px; } .pv-page h2.mid { font: 700 50px/1 "Times New Roman", "Liberation Serif", serif; letter-spacing: -1px; }
+  .pv-page h3 { margin: 0 0 10px; font: 700 32px/1.02 "Times New Roman", "Liberation Serif", serif; letter-spacing: -0.5px; }
+  .lh-lede { font: 700 20px/1.3 "Times New Roman", "Liberation Serif", serif; margin: 4px 0 10px; }
+  .lh-by { font: 700 10.5px Arial, sans-serif; letter-spacing: 0.16em; text-transform: uppercase; color: #6a6358; margin: 0 0 14px; }
+  .lh-photo { position: relative; width: 100%; background: #cfc6b0; border: 1px solid #1a1814; overflow: hidden; box-sizing: border-box; }
   .lh-photo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: sepia(0.15) contrast(1.05); opacity: 0; transition: opacity 0.15s; } .lh-photo.ok img { opacity: 1; }
   .lh-photo .lh-miss { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 900 16px Arial, sans-serif; letter-spacing: 0.2em; color: #8a8270; } .lh-photo.ok .lh-miss { display: none; }
-  .lh-cap { font: italic 14px/1.3 serif; margin: 5px 0 12px; color: #3a3630; }
-  .lh-cols { font: 17px/1.42 "Times New Roman", "Liberation Serif", serif; text-align: justify; hyphens: auto; } .lh-cols.c2 { column-count: 2; column-gap: 20px; } .lh-cols.c3 { column-count: 3; column-gap: 18px; }
-  .lh-cols p { margin: 0 0 9px; } .lh-cols.big { font-size: 19px; line-height: 1.45; } .lh-cols.small { font-size: 12.5px; line-height: 1.32; } .lh-cols.small p { margin: 0 0 6px; }
-  .lh-box { border: 3px solid #1a1814; padding: 10px 14px; background: #fffbe8; font: 15px/1.4 Arial, sans-serif; margin-top: 12px; } .lh-box b { font: 900 17px Arial, sans-serif; display: block; margin-bottom: 4px; }
-  .lh-stamp { position: absolute; right: 44px; top: 330px; font: 900 22px Arial, sans-serif; color: #c4201a; border: 4px solid #c4201a; padding: 6px 12px; transform: rotate(-8deg); opacity: 0.85; }
-  .lh-teas { display: flex; gap: 12px; border-top: 2px solid #1a1814; padding-top: 10px; margin-top: 4px; } .lh-teas a { flex: 1; font: 13px/1.2 serif; } .lh-teas b { display: block; font: 900 17px/1.05 serif; margin-top: 4px; } .lh-teas i { font-size: 13px; color: #555; }
-  .lh-index { margin-top: 10px; border-top: 1px solid #1a1814; padding-top: 6px; column-count: 2; column-gap: 20px; font: 13px/1.5 serif; } .lh-index b { display: block; font: 900 13px Arial, sans-serif; letter-spacing: 0.1em; column-span: all; margin-bottom: 2px; }
-  .lh-index a { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .lh-index a:hover, .lh-teas a:hover b { text-decoration: underline; } .lh-index i { color: #c4201a; font-style: normal; font-weight: 700; }
-  .lh-half { height: 460px; overflow: hidden; border-bottom: 2px solid #1a1814; margin-bottom: 14px; } .lh-half:last-child { border-bottom: none; }
-  .lh-hrow { display: flex; gap: 16px; } .lh-hrow.flip { flex-direction: row-reverse; } .lh-hrow .lh-photo { flex: 1.35; } .lh-hrow .lh-cols { flex: 1; font-size: 17px; }
-  .lh-keys { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; margin: 10px 0 16px; font: 17px Arial, sans-serif; } .lh-keys div { display: flex; align-items: center; gap: 10px; }
-  .lh-keys kbd { min-width: 44px; text-align: center; padding: 4px 8px; border: 2px solid #1a1814; border-radius: 4px; background: #fffbe8; font: 700 15px "Courier New", monospace; box-shadow: 0 2px 0 #1a1814; }
-  .lh-pno { position: absolute; bottom: 10px; font: 13px serif; color: #555; } .lh-pno.l { left: 36px; } .lh-pno.r { right: 36px; }
+  .lh-cap { font: italic 14px/1.35 serif; margin: 6px 0 16px; color: #3a3630; } .lh-cap::after { content: ' Kuva: YS'; font: 700 9.5px Arial, sans-serif; letter-spacing: 0.14em; font-style: normal; color: #8a8270; }
+  .lh-cols { font: 17px/1.45 "Times New Roman", "Liberation Serif", serif; text-align: justify; } .lh-cols.c2 { column-count: 2; column-gap: 28px; column-rule: 1px solid rgba(26,24,20,0.28); } .lh-cols.c3 { column-count: 3; column-gap: 24px; column-rule: 1px solid rgba(26,24,20,0.28); }
+  .lh-cols p { margin: 0 0 8px; } .lh-cols p:last-child, .lh-in > :last-child { margin-bottom: 0; } .lh-cols.big { font-size: 18.5px; line-height: 1.48; }
+  .lh-cols.dc > p:first-child::first-letter { float: left; font: 900 62px/0.8 "Times New Roman", "Liberation Serif", serif; margin: 5px 7px 0 0; color: #1a1814; }
+  .tight .lh-cols, .tight .lh-cols.big { font-size: 16px; line-height: 1.4; } .tighter .lh-cols, .tighter .lh-cols.big { font-size: 15px; line-height: 1.36; } .tighter .lh-cap { margin-bottom: 10px; }
+  .lh-pull { margin: 8px 30px 4px; padding: 12px 0 10px; border-top: 3px solid #c4201a; border-bottom: 1px solid #1a1814; font: italic 700 25px/1.2 "Times New Roman", "Liberation Serif", serif; text-align: center; }
+  .lh-box { border: 3px solid #1a1814; padding: 10px 14px; background: #fffbe8; font: 15px/1.4 Arial, sans-serif; margin-top: 14px; } .lh-box b { font: 900 15px Arial, sans-serif; letter-spacing: 0.06em; display: block; margin-bottom: 4px; }
+  .lh-stamp { position: absolute; right: 60px; top: 340px; font: 900 22px Arial, sans-serif; color: #c4201a; border: 4px solid #c4201a; padding: 6px 12px; transform: rotate(-8deg); opacity: 0.85; }
+  .lh-teas { display: flex; gap: 16px; border-top: 2px solid #1a1814; padding-top: 12px; margin-top: 6px; } .lh-teas a { flex: 1; font: 13px/1.2 serif; } .lh-teas b { display: block; font: 700 18px/1.08 serif; margin-top: 6px; } .lh-teas i { font-size: 13px; color: #c4201a; font-style: normal; font-weight: 700; }
+  .lh-inside { display: flex; gap: 18px; align-items: baseline; border-top: 1px solid #1a1814; margin-top: 12px; padding-top: 7px; font: 14px serif; } .lh-inside b { font: 900 12px Arial, sans-serif; letter-spacing: 0.14em; } .lh-inside i { color: #c4201a; font-style: normal; font-weight: 700; }
+  .lh-index { margin-top: 18px; border-top: 2px solid #1a1814; padding-top: 8px; column-count: 2; column-gap: 28px; column-rule: 1px solid rgba(26,24,20,0.28); font: 13.5px/1.48 serif; } .lh-index b { display: block; font: 900 13px Arial, sans-serif; letter-spacing: 0.12em; column-span: all; margin-bottom: 4px; }
+  .lh-index a { display: flex; gap: 6px; white-space: nowrap; overflow: hidden; } .lh-index a::after { content: ''; order: 1; flex: 1; border-bottom: 1px dotted #8a8270; margin-bottom: 5px; } .lh-index a i { order: 2; } .lh-index a:hover, .lh-teas a:hover b, .lh-inside a:hover { text-decoration: underline; } .lh-index i { color: #c4201a; font-style: normal; font-weight: 700; }
+  .lh-in.even { display: flex; flex-direction: column; justify-content: space-between; } .lh-in.even > .lh-kick, .lh-lyhp > .lh-in > .lh-kick { align-self: flex-start; }   /* (a small leftover goes evenly into the gaps, not as a hole at the bottom) */
+  .lh-hp > .lh-in { height: 100%; display: flex; flex-direction: column; }
+  .lh-half { flex: 1 1 0; min-height: 0; display: flex; gap: 22px; } .lh-half.flip { flex-direction: row-reverse; } .lh-half + .lh-half { border-top: 2px solid #1a1814; padding-top: 18px; margin-top: 18px; }
+  .lh-half > .lh-photo { flex: 1.55 1 0; height: auto !important; } .lh-htxt { flex: 1 1 0; min-width: 0; overflow: hidden; } .lh-htxt .lh-cols { font-size: 19px; line-height: 1.5; } .lh-htxt h3 { font-size: 38px; }
+  .lh-keys { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px 18px; margin: 8px 0 4px; font: 15px Arial, sans-serif; } .lh-keys div { display: flex; align-items: center; gap: 9px; }
+  .lh-keys kbd { white-space: nowrap; min-width: 40px; text-align: center; padding: 4px 7px; border: 2px solid #1a1814; border-radius: 4px; background: #fffbe8; font: 700 13px "Courier New", monospace; box-shadow: 0 2px 0 #1a1814; }
+  .lh-boxes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; } .lh-boxes .lh-box { font-size: 14px; }
+  .lh-lyhp > .lh-in { height: 100%; display: flex; flex-direction: column; } .lh-lyhp .lh-lyh { flex: 1 1 0; min-height: 0; column-fill: auto; overflow: hidden; }
+  .lh-lyh { column-count: 3; column-gap: 22px; column-rule: 1px solid rgba(26,24,20,0.28); font: 13.5px/1.38 "Times New Roman", "Liberation Serif", serif; margin-top: 4px; }
+  .lh-lyh p { margin: 0 0 7px; padding-bottom: 7px; border-bottom: 1px dotted #a39a86; break-inside: avoid; } .lh-lyh b.d { color: #c4201a; font: 900 11px Arial, sans-serif; letter-spacing: 0.06em; margin-right: 2px; }
+  .lh-ad { position: relative; display: flex; border: 3px solid #1a1814; background: #fffbe8; margin-top: 16px; overflow: hidden; box-sizing: border-box; } .lh-ad.v, .lh-ad.fill { flex-direction: column; } .lh-ad.fill { height: 100%; margin-top: 0; flex: 1; }
+  .lh-half > .lh-ad.fill { flex: 1 1 0; }
+  .lh-ad .ad-tag { position: absolute; top: 0; right: 0; z-index: 1; background: #1a1814; color: #f1ead8; font: 700 9.5px Arial, sans-serif; letter-spacing: 0.2em; padding: 2px 7px; }
+  .lh-ad .ad-ph { border: none; border-right: 3px solid #1a1814; width: 42%; height: auto; flex: none; } .lh-ad.v .ad-ph, .lh-ad.fill .ad-ph { width: 100%; flex: 1 1 0; min-height: 0; border-right: none; border-bottom: 3px solid #1a1814; }
+  .lh-ad .ad-txt { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 12px 18px; text-align: center; } .lh-ad.v .ad-txt, .lh-ad.fill .ad-txt { flex: none; }
+  .lh-ad .ad-big { font: 900 42px/0.95 "Arial Black", Arial, sans-serif; letter-spacing: -1px; color: #c4201a; } .lh-ad .ad-small { font: 700 15px/1.3 Arial, sans-serif; margin-top: 7px; }
+  .lh-ad.cl { background: #f7f1e0; border: 2px solid #1a1814; outline: 1px solid #1a1814; outline-offset: -7px; } .lh-ad.cl .ad-big { font: 900 34px/1 "Times New Roman", serif; color: #1a1814; letter-spacing: 0.08em; } .lh-ad.cl .ad-small { font: 18px/1.35 "Times New Roman", serif; max-width: 480px; margin: 8px auto 0; }
+  .lh-ad.low .ad-big { font-size: 26px; } .lh-ad.low .ad-small { font-size: 14px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -231,7 +253,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 11.15 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div class="build-stamp">editorista 11.41 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
     <div style="text-align:center"><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
@@ -4355,6 +4377,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '📰 Lehden taitto uusiksi: väljemmät reunat, ylätunniste joka sivulla, kuvat joustavat niin ettei mitään leikkaudu eikä jää reikiä, tavutus, anfangit, puolisivut täyttyvät, ilmoitukset aukkoihin, sisällys ohjesivulle, Lyhyesti luettavammaksi'],
   ['29.9.', '🖱️ Hiiren osoitin ei enää katoa lehteä selatessa'],
   ['29.9.', '📄 Ylästön Sanomat PDF:nä: ⬇ PDF -nappi lehden yläkulmassa lataa koko lehden (kaikki sivut ja kuvat, sisällysluettelo linkkeinä)'],
   ['29.9.', '📰 Alkuruutuun Ylästön Sanomat: uusin pääjuttu etusivulla, jokaisesta ominaisuudesta juttu (pääjutut aukeamina), näppäimet ja kaikki muutokset lehdessä. Kerro kaverille oikealle, radio pienemmäksi, UUTUUS, PC-laatikko ja paikkarivi pois'],
@@ -4557,42 +4580,95 @@ const LEHTI = [
 ];
 const PAPER = { pages: [], views: [], v: 0, open: false, two: true, wheelT: 0, tx: 0 };
 const lhEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const lhHy = (s) => s.replace(/[A-Za-zÅÄÖåäö]{6,}/g, (w) => { const V = /[aeiouyåäö]/i; let o = '', last = 0;   // Finnish soft hyphens (a break goes before a consonant that starts a syllable: ral·li·kus·ki), so justified columns don't open rivers
+  for (let i = 2; i <= w.length - 2; i++) if (!V.test(w[i]) && V.test(w[i + 1]) && V.test(w.slice(last, i)) && i - last >= 2) { o += w.slice(last, i) + '­'; last = i; } return o + w.slice(last); });
 const lhImg = (f, h, cls) => '<div class="lh-photo ' + (cls || '') + '" style="height:' + h + 'px"><img data-src="lehti/' + f + '" alt=""><span class="lh-miss">KUVA TULOSSA</span></div>';
+const LH_KK = ['tammikuuta', 'helmikuuta', 'maaliskuuta', 'huhtikuuta', 'toukokuuta', 'kesäkuuta', 'heinäkuuta', 'elokuuta', 'syyskuuta', 'lokakuuta', 'marraskuuta', 'joulukuuta'];
 function lhDate() { return (CHANGES[0] ? CHANGES[0][0] : '') + '1988'; }
+function lhDay() { const m = /(\d+)\.(\d+)\./.exec(CHANGES[0] ? CHANGES[0][0] : '') || [0, 1, 6], d = new Date(1988, m[2] - 1, +m[1]);   // (the folio's date: "torstaina 29. syyskuuta 1988")
+  return ['sunnuntaina', 'maanantaina', 'tiistaina', 'keskiviikkona', 'torstaina', 'perjantaina', 'lauantaina'][d.getDay()] + ' ' + m[1] + '. ' + LH_KK[m[2] - 1] + ' 1988'; }
 function lhMast(big) { return '<div class="lh-mast' + (big ? ' big' : '') + '"><b>YLÄSTÖN SANOMAT</b><span class="lh-red">' + (big ? 'UUSIMMAT JUTUT' : 'YLÄSTÖ 1988') + '</span><i>' + lhDate() + ' · Nro ' + CHANGES.length + ' · 3,50 mk</i></div>'; }
+const lhSec = (S) => lhEsc(S.kick.replace(/^[^A-Za-zÅÄÖåäö]+/, ''));   // (the section in the folio: the kicker without its emoji)
+function lhFolio(sec, pno) { return '<div class="lh-folio' + (pno % 2 ? ' r' : '') + '"><span class="pn">' + pno + '</span><b>YLÄSTÖN SANOMAT</b><span class="sec">' + sec + '</span><i>' + lhDay() + '</i></div>'; }
 function lhBox(b) { return b ? '<div class="lh-box"><b>' + lhEsc(b[0]) + '</b>' + b.slice(1).map(lhEsc).join('<br>') + '</div>' : ''; }
-function lhBody(S, cols) { return '<div class="lh-cols c' + cols + '">' + S.body.map((p, i) => '<p>' + (i === 0 ? '<b>YLÄSTÖ.</b> ' + lhEsc(p.replace(/^YLÄSTÖ\.\s*/, '')) : lhEsc(p)) + '</p>').join('') + '</div>'; }
-function lhPlan() {   // the running order: lead spread, the other mains (newest first), pages, halves in pairs, how to drive, the change list
-  const by = (sz) => LEHTI.filter(s => s.size === sz).sort((a, b) => b.n - a.n), mains = by('main'), lead = mains[0], pages = [];
+function lhBody(S, cls) { return '<div class="lh-cols ' + cls + '">' + S.body.map((p, i) => '<p>' + (i === 0 ? '<b>YLÄSTÖ.</b> ' + lhHy(lhEsc(p.replace(/^YLÄSTÖ\.\s*/, ''))) : lhHy(lhEsc(p))) + '</p>').join('') + '</div>'; }
+const LH_BY = '<div class="lh-by">Teksti ja kuvat: Ylästön Sanomat</div>';
+function lhQuote(S) { if (S.quote) return S.quote; const c = S.body.join(' ').replace(/^YLÄSTÖ\.\s*/, '').split(/(?<=[.!?])\s+/).filter(t => t.length >= 40 && t.length <= 115);   // (the pull quote: a mid-length sentence from the story)
+  return c[1] || c[0] || ''; }
+const lhQ = (S) => ' data-q="' + lhEsc(lhQuote(S)).replace(/"/g, '&quot;') + '"';
+const LH_ADS = [   // the paper's ads: they fill what the stories leave (an odd half page, a hole under a short story)
+  { img: 'sauna.jpg', big: 'SAUNOKAA!<br>AJAKAA!', small: 'Saunaseura Löylynlyömät · saunakärry pellolla joka ilta · oma vihta mukaan' },
+  { img: 'ufo_b.jpg', big: 'KAAPPAA UFO!', small: 'Aja ufoukon yli – alus on sinun. Ylästön Ufokerho ry' },
+  { cl: 1, big: 'MYYDÄÄN', small: 'Pökö 205 -86, pieniä kolhuja, rengasvallit nähnyt. Hp. 18 000 mk tai vaihto traktoriin. Puh. 822 1988 iltaisin.' },
+  { img: 'radio_b.jpg', big: 'KOELÄHETYS 11', small: 'ÄLÄ KUUNTELE. Radio Ylästö 98,4 FM – kaikki muut kanavat ovat turvallisia' },
+  { img: 'es.jpg', big: 'ES 2,90 mk', small: 'K-kauppa Ylästö · kylmänä kassalta · tuplavauhti 40 sekunniksi' },
+  { img: 'pizza.jpg', big: 'PIZZAA PERILLE!', small: 'Pizzeria Ylästö · lähetti löytää sinut ajon aikana · +10 % vauhtia' },
+  { cl: 1, big: 'KADONNUT', small: 'Kuumailmapallon kori, pajua, Ylästön yllä. Löytäjä palkitaan. Ilmailukerho Ylätuuli.' },
+];
+let LH_ADN = 0;
+function lhAd(h, avoid) { let A = LH_ADS[LH_ADN++ % LH_ADS.length]; for (let k = 0; k < LH_ADS.length && avoid && A.img && avoid.includes(A.img); k++) A = LH_ADS[LH_ADN++ % LH_ADS.length];   // (not the photo of the story beside it)
+  const fill = h == null, v = fill || h >= 300, st = fill ? '' : ' style="height:' + Math.floor(h) + 'px"';
+  const txt = '<div class="ad-txt"><div class="ad-big">' + A.big + '</div><div class="ad-small">' + lhEsc(A.small) + '</div></div>', tag = '<span class="ad-tag">ILMOITUS</span>';
+  if (A.cl || !A.img || (!fill && h < 130)) return '<div class="lh-ad cl' + (fill ? ' fill' : '') + (!fill && h < 170 ? ' low' : '') + '"' + st + '>' + tag + txt + '</div>';
+  return '<div class="lh-ad' + (v ? ' v' : '') + (fill ? ' fill' : '') + '"' + st + '>' + tag + '<div class="lh-photo ad-ph"><img data-src="lehti/' + A.img + '" alt=""><span class="lh-miss"></span></div>' + txt + '</div>'; }
+function lhPlan() {   // the running order: front, lead spread, the other mains (newest first), pages, halves in pairs, how to drive + contents, the change list
+  const by = (sz) => LEHTI.filter(s => s.size === sz).sort((a, b) => b.n - a.n), mains = by('main'), lead = mains[0], P = []; LH_ADN = 0;
   const where = {}; let pn = 2;
   for (const s of mains) { where[s.id] = pn; pn += 2; } for (const s of by('page')) { where[s.id] = pn; pn++; } const halves = by('half'); for (let i = 0; i < halves.length; i += 2) { where[halves[i].id] = pn; if (halves[i + 1]) where[halves[i + 1].id] = pn; pn++; }
   const keysPage = pn++, lyhPage = pn;
-  pages.push(lhFront(lead, where, keysPage, lyhPage));
-  for (const s of mains) pages.push(...lhSpread(s, s === lead));
-  for (const s of by('page')) pages.push(lhPage(s));
-  for (let i = 0; i < halves.length; i += 2) pages.push(lhHalves(halves[i], halves[i + 1]));
-  pages.push(lhKeys()); pages.push(...lhLyhyesti());
-  return pages.map((html, i) => '<div class="pv-page">' + html + '<div class="lh-pno ' + (i % 2 ? 'l' : 'r') + '">' + (i + 1) + '</div></div>'); }
-function lhFront(S, where, keysPage, lyhPage) { const t = LEHTI.filter(s => s !== S && s.size === 'main').sort((a, b) => b.n - a.n).slice(0, 3);   // (the teasers: the next main stories)
-  const idx = LEHTI.filter(s => s !== S).sort((a, b) => where[a.id] - where[b.id]).map(s => '<a data-go="' + where[s.id] + '">' + lhEsc(s.title) + ' <i>' + where[s.id] + '</i></a>').join('');
-  return lhMast(true) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="lh-lead">' + lhEsc(S.title) + '</h2>' + lhImg(S.img[0], 380) +
+  P.push(lhFront(lead, where, keysPage, lyhPage));
+  for (const s of mains) P.push(...lhSpread(s, s === lead, P.length + 1));
+  for (const s of by('page')) P.push(lhPage(s, P.length + 1));
+  for (let i = 0; i < halves.length; i += 2) P.push(lhHalves(halves[i], halves[i + 1], P.length + 1));
+  P.push(lhKeys(where, keysPage, lyhPage, P.length + 1)); P.push(...lhLyhyesti(P.length + 1));
+  return lhFitAll(P); }
+const lhPg = (inner, cls, attrs) => '<div class="pv-page ' + cls + '"><div class="lh-in"' + (attrs || '') + '>' + inner + '</div></div>';
+function lhFront(S, where, keysPage, lyhPage) { const t = LEHTI.filter(s => s !== S && s.size === 'main').sort((a, b) => b.n - a.n).slice(0, 3);   // (the teasers: the next main stories; the contents are on the "Näin ajat" page)
+  return lhPg(lhMast(true) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="lh-lead">' + lhEsc(S.title) + '</h2>' + lhImg(S.img[0], 380, 'fx') +
     '<div class="lh-lede">' + lhEsc(S.lede) + ' <a data-go="2"><i>Sivut 2–3 ›</i></a></div>' +
     '<div class="lh-teas">' + t.map(s => '<a data-go="' + where[s.id] + '">' + lhImg(s.img[0], 96) + '<b>' + lhEsc(s.title) + '</b><i>s. ' + where[s.id] + '</i></a>').join('') + '</div>' +
-    '<div class="lh-index"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>'; }
-function lhSpread(S, lead) {
-  return [lhMast(false) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="up">' + lhEsc(S.title) + '</h2><div class="lh-lede">' + lhEsc(S.lede) + '</div>' + lhImg(S.img[0], 560) + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>',
-    lhImg(S.img[1], 470) + '<div class="lh-cap">' + lhEsc(S.cap[1]) + '</div>' + lhBody(S, 3) + lhBox(S.box) + (lead ? '<div class="lh-stamp">PÄÄUUTINEN</div>' : '')]; }
-function lhPage(S) { return '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="mid">' + lhEsc(S.title) + '</h2><div class="lh-lede">' + lhEsc(S.lede) + '</div>' + lhImg(S.img[0], 560) + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>' + lhBody(S, 2).replace('lh-cols c2', 'lh-cols c2 big') + lhBox(S.box); }
-function lhHalves(a, b) { const one = (S, flip) => !S ? '' : '<div class="lh-half"><span class="lh-kick">' + lhEsc(S.kick) + '</span><h3>' + lhEsc(S.title) + '</h3><div class="lh-hrow' + (flip ? ' flip' : '') + '">' + lhImg(S.img[0], 300, 'h') + '<div class="lh-cols c1">' + S.body.map(p => '<p>' + lhEsc(p) + '</p>').join('') + '</div></div></div>';
-  return one(a, false) + one(b, true); }
-function lhKeys() { const K = [['Enter', 'lähtö'], ['↑', 'kaasu'], ['↓', 'jarru / peruutus'], ['← →', 'ohjaus'], ['välilyönti', 'käsijarru'], ['R', 'uusi lähtö'], ['Esc', 'alkuruutu'], ['C', 'kamera (matala / ylä)'], ['G', 'haamu päälle / pois'], ['E', 'radio: seuraava kanava'], ['1 · 2', 'radio hiljemmalle / lujemmalle'], ['B', 'bassoboost'], ['P', 'tauko'], ['F', 'ulos autosta / jalkaisin'], ['L', 'kieli (alkuruudussa)']];
-  return '<span class="lh-kick">📋 OHJEET</span><h2 class="mid">Näin ajat</h2><div class="lh-lede">Pökö 205 ajetaan näppäimistöllä. Peli on tehty tietokoneelle – kännykällä voi lukea lehteä.</div>' +
+    '<div class="lh-inside"><b>SISÄLLÄ</b><a data-go="' + keysPage + '">Kaikki jutut <i>' + keysPage + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame front', ' data-noad="1"'); }
+function lhSpread(S, lead, pno) {
+  return [lhPg(lhFolio(lhSec(S), pno) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="up">' + lhEsc(S.title) + '</h2><div class="lh-lede">' + lhEsc(S.lede) + '</div>' + LH_BY + lhImg(S.img[0], 520, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>', 'lh-frame'),
+    lhPg(lhFolio(lhSec(S), pno + 1) + lhImg(S.img[1], 470, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[1]) + '</div>' + lhBody(S, 'c3 dc') + lhBox(S.box) + (lead ? '<div class="lh-stamp">PÄÄUUTINEN</div>' : ''), 'lh-frame', lhQ(S))]; }
+function lhPage(S, pno) { return lhPg(lhFolio(lhSec(S), pno) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="mid">' + lhEsc(S.title) + '</h2><div class="lh-lede">' + lhEsc(S.lede) + '</div>' + LH_BY + lhImg(S.img[0], 460, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>' + lhBody(S, 'c2 big dc') + lhBox(S.box), 'lh-frame', lhQ(S)); }
+function lhHalves(a, b, pno) { const one = (S, flip) => '<div class="lh-half' + (flip ? ' flip' : '') + '">' + lhImg(S.img[0], 0, 'h') + '<div class="lh-htxt lh-frame"><div class="lh-in" data-noad="1"><span class="lh-kick">' + lhEsc(S.kick) + '</span><h3>' + lhEsc(S.title) + '</h3>' + lhBody(S, 'c1') + '</div></div></div>';
+  return lhPg(lhFolio(lhSec(a) + (b ? ' · ' + lhSec(b) : ''), pno) + one(a, false) + (b ? one(b, true) : '<div class="lh-half">' + lhAd(null, [a.img[0]]) + '</div>'), 'lh-hp'); }   // (an odd half: the other half is an ad)
+function lhKeys(where, keysPage, lyhPage, pno) { const K = [['Enter', 'lähtö'], ['↑', 'kaasu'], ['↓', 'jarru / peruutus'], ['← →', 'ohjaus'], ['välilyönti', 'käsijarru'], ['R', 'uusi lähtö'], ['Esc', 'alkuruutu'], ['C', 'kamera'], ['G', 'haamu päälle / pois'], ['E', 'radio: seuraava kanava'], ['1 · 2', 'radio hiljemmalle / lujemmalle'], ['B', 'bassoboost'], ['P', 'tauko'], ['F', 'ulos autosta / jalkaisin'], ['L', 'kieli (alkuruudussa)']];
+  const idx = LEHTI.slice().sort((a, b) => where[a.id] - where[b.id] || b.n - a.n).map(s => '<a data-go="' + where[s.id] + '">' + lhEsc(s.title) + ' <i>' + where[s.id] + '</i></a>').join('');
+  return lhPg(lhFolio('OHJEET · SISÄLLYS', pno) + '<span class="lh-kick">📋 OHJEET</span><h2 class="mid">Näin ajat</h2><div class="lh-lede">Pökö 205 ajetaan näppäimistöllä. Peli on tehty tietokoneelle – kännykällä voi lukea lehteä.</div>' +
     '<div class="lh-keys">' + K.map(([k, t]) => '<div><kbd>' + lhEsc(k) + '</kbd><span>' + lhEsc(t) + '</span></div>').join('') + '</div>' +
-    '<div class="lh-box"><b>GTA-TILA</b>Aja lähdössä oikeaa kaistaa pois radalta – koko kylä on vapaa.<br>R palauttaa kisaan.</div>' +
+    '<div class="lh-boxes"><div class="lh-box"><b>GTA-TILA</b>Aja lähdössä oikeaa kaistaa pois radalta – koko kylä on vapaa. R palauttaa kisaan.</div>' +
     '<div class="lh-box"><b>KERRO KAVERILLE</b>suomiralli.netlify.app – QR-koodi on alkuruudussa.</div>' +
-    '<div class="lh-box"><b>LEHTI PDF:NÄ</b>Koko lehti tulostettavana: ⬇ PDF lehden yläkulmassa.</div>'; }
-function lhLyhyesti() { const out = []; let cur = [], len = 0; const flush = () => { if (!cur.length) return; out.push('<span class="lh-kick">📰 LYHYESTI</span><h2 class="mid">' + (out.length ? 'Lyhyesti (jatkuu)' : 'Lyhyesti: kaikki muutokset') + '</h2><div class="lh-cols c3 small">' + cur.join('') + '</div>'); cur = []; len = 0; };
-  for (const [d, t] of CHANGES) { const L = t.length + 60; if (len + L > (out.length ? 5600 : 5000)) flush(); cur.push('<p><b>' + lhEsc(d) + '</b> ' + lhEsc(t) + '</p>'); len += L; } flush(); return out; }
+    '<div class="lh-box"><b>LEHTI PDF:NÄ</b>Koko lehti tulostettavana: ⬇ PDF lehden yläkulmassa.</div></div>' +
+    '<div class="lh-index"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame'); }
+function lhLyhyesti(pno) {   // the change list, filled page by page for real: items go into fixed-height columns until a fourth column would open
+  const host = document.createElement('div'); host.className = 'lh-measure'; document.body.appendChild(host); const out = [];
+  const items = CHANGES.map(([d, t]) => { const e = lhEsc(t), k = e.indexOf(': '); return '<p><b class="d">' + lhEsc(d) + '</b> ' + (k > 0 && k <= 70 ? '<b>' + e.slice(0, k + 1) + '</b>' + lhHy(e.slice(k + 1)) : lhHy(e)) + '</p>'; });
+  const page = (n, body, last) => lhPg(lhFolio('LYHYESTI', n) + '<span class="lh-kick">📰 LYHYESTI</span><h2 class="mid">' + (n > pno ? 'Lyhyesti (jatkuu)' : 'Lyhyesti: kaikki muutokset') + '</h2><div class="lh-lyh' + (last ? ' bal' : '') + '">' + body + '</div>', last ? 'lh-frame' : 'lh-lyhp');
+  let cur = [], i = 0;
+  while (i < items.length) { host.innerHTML = page(pno + out.length, '', false); const L = host.querySelector('.lh-lyh'); cur = [];
+    while (i < items.length) { L.insertAdjacentHTML('beforeend', items[i]); if (L.scrollWidth > L.clientWidth + 2 && cur.length) { L.lastChild.remove(); break; } cur.push(items[i++]); }
+    if (i >= items.length) { out.push(page(pno + out.length, cur.join(''), true)); break; }   // (the last page balances its columns; an ad takes the rest)
+    out.push(page(pno + out.length, cur.join(''), false)); }
+  host.remove(); return out; }
+function lhFitAll(pages) {   // lay every page out once, offscreen, and fit it to its frame: flexible photos (.fx) grow or shrink, then a pull quote or an ad fills what is left – nothing is cut, no holes
+  const host = document.createElement('div'); host.className = 'lh-measure'; document.body.appendChild(host);
+  const out = pages.map(html => { host.innerHTML = html; const pg = host.firstChild; [pg, ...pg.querySelectorAll('.lh-frame')].filter(F => F.classList.contains('lh-frame')).forEach(lhFit); return pg.outerHTML; });
+  host.remove(); return out; }
+function lhFit(F) { const inn = F.querySelector(':scope > .lh-in'); if (!inn) return; const cs = getComputedStyle(F), avail = F.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom), free = () => avail - Math.max(inn.offsetHeight, inn.scrollHeight);   // (scrollHeight: a drop cap can hang below a short story)
+  const fx = [...inn.querySelectorAll('.lh-photo.fx')], H = (p) => parseFloat(p.style.height), lo = (p) => Math.round(p.offsetWidth*0.36), hi = (p) => Math.round(p.offsetWidth*0.8);
+  const spread = (d) => { for (let k = 0; k < 4 && Math.abs(d) > 0.5; k++) { const open = fx.filter(p => d > 0 ? H(p) < hi(p) : H(p) > lo(p)); if (!open.length) break; const each = d/open.length;
+    for (const p of open) { const h0 = H(p), h = Math.max(lo(p), Math.min(hi(p), h0 + each)); p.style.height = Math.round(h) + 'px'; d -= Math.round(h) - h0; } } };
+  if (fx.length) spread(free());
+  if (F.classList.contains('lh-htxt')) { const h3 = inn.querySelector('h3'), c = inn.querySelector('.lh-cols'), wide = () => h3.scrollWidth > h3.clientWidth + 1;   // (a half's text column: the headline grows as far as its longest word allows, then the text, until the column is full)
+    const grow = (el, base, lo, hi, ok) => { let k = 1; const set = () => el.style.fontSize = (base*k).toFixed(1) + 'px'; while (k < hi && free() > 24 && ok()) { k += 0.04; set(); } if (free() < 0 || !ok()) { k -= 0.04; set(); } while (!ok() && k > lo) { k -= 0.04; set(); } };
+    grow(h3, 38, 0.6, 1.45, () => !wide()); grow(c, 19, 0.85, 1.25, () => true); }
+  if (free() < -1) { inn.classList.add('tight'); if (fx.length) spread(free()); }
+  if (free() < -1) { inn.classList.add('tighter'); if (fx.length) spread(free()); }
+  if (free() >= 80 && inn.dataset.q) { const q = document.createElement('div'); q.className = 'lh-pull'; q.textContent = '”' + inn.dataset.q + '”'; const c = inn.querySelector('.lh-cols'); if (c) c.after(q); else inn.appendChild(q); if (free() < 0) q.remove(); }
+  if (free() >= 150 && !inn.dataset.noad) inn.insertAdjacentHTML('beforeend', lhAd(free() - 16, [...inn.querySelectorAll('img[data-src]')].map(im => im.dataset.src.replace('lehti/', ''))));
+  F.dataset.free = Math.round(free()); if (free() > 2) { const hang = inn.scrollHeight - inn.offsetHeight; inn.classList.add('even'); inn.style.height = (avail - hang) + 'px'; } }   // (kept on the page: the layout test checks nothing overflows)
 function lhLoadImgs(el) { el.querySelectorAll('img[data-src]').forEach(im => { if (im.src) return; im.onerror = () => im.parentNode.classList.add('miss'); im.onload = () => im.parentNode.classList.add('ok'); im.src = im.dataset.src; }); }
 function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER.pages = lhPlan();
   const mini = document.getElementById('lehti-mini'); mini.innerHTML = '<div class="lm-scale">' + PAPER.pages[0] + '</div><div class="lm-btn">📰 ' + T('AVAA LEHTI') + '</div>'; lhLoadImgs(mini);

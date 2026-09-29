@@ -13,7 +13,7 @@ const fs = require('fs'), path = require('path');
   const n = await page.evaluate(async () => {
     window.requestAnimationFrame = () => 0;   // (the game stops: only the paper is left)
     const st = document.createElement('style'); st.textContent = '@page { size: 760px 1000px; margin: 0; } html, body { margin: 0 !important; padding: 0 !important; background: #f1ead8 !important; overflow: visible !important; height: auto !important; } body > .pv-page { break-after: page; page-break-after: always; } body > .pv-page:last-child { break-after: auto; } .lh-photo .lh-miss { display: none; } .lh-photo img { filter: none !important; transition: none !important; opacity: 1 !important; }';
-    document.body.innerHTML = PAPER.pages.map((h, i) => h.replace('<div class="pv-page">', '<div class="pv-page" id="s' + (i + 1) + '">')).join('');
+    document.body.innerHTML = PAPER.pages.join(''); document.querySelectorAll('body > .pv-page').forEach((p, i) => p.id = 's' + (i + 1));
     document.head.appendChild(st); document.body.className = '';
     document.querySelectorAll('[data-go]').forEach(a => a.setAttribute('href', '#s' + a.dataset.go));
     const ims = [...document.querySelectorAll('img[data-src]')];
