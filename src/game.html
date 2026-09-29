@@ -3693,12 +3693,18 @@ function buildTrackTires() {
                 let prev = at(k0 - 1), acc = 0;
                 for (let k = k0 - 1; k <= k1 + 1; k++) { const cur = at(k), L = Math.hypot(cur[0] - prev[0], cur[1] - prev[1]); let t = 0;
                   while (acc + (L - t) >= 1.32) { t += 1.32 - acc; acc = 0; const x = prev[0] + (cur[0] - prev[0])*t/L, z = prev[1] + (cur[1] - prev[1])*t/L, r = roadInfo(x, z);
-                    if (r.d2 < (wAt(r.idx)*0.5 + off1 - 0.4)**2 || onRoad(x, z, 1.0)) continue; addPigChecked(x, z, Math.atan2(cur[0] - prev[0], cur[1] - prev[1])); }   // (a street through the corner stays open)
+                    if (r.d2 < (wAt(r.idx)*0.5 + off1 - 0.4)**2 || onRoad(x, z, 1.0)) continue; addStackChecked(x, z); }   // (a street through the corner stays open)   (tyres at the kerb now: clipping the inside costs a stack, not the race)
+                  acc += L - t; prev = cur; }
+                const atF = (k) => { const q = (k%n+n)%n, p = trackPoints[q], nm = getNormal(q), o = (wAt(q)*0.5 + off1 + 8)*s; return [p.x + nm.x*o, p.y + nm.y*o]; };   // and the pigs 8 m further in, behind the tyres
+                prev = atF(k0 - 1); acc = 0;
+                for (let k = k0 - 1; k <= k1 + 1; k++) { const cur = atF(k), L = Math.hypot(cur[0] - prev[0], cur[1] - prev[1]); let t = 0;
+                  while (acc + (L - t) >= 1.32) { t += 1.32 - acc; acc = 0; const x = prev[0] + (cur[0] - prev[0])*t/L, z = prev[1] + (cur[1] - prev[1])*t/L, r = roadInfo(x, z);
+                    if (r.d2 < (wAt(r.idx)*0.5 + off1 + 7.6)**2 || onRoad(x, z, 1.0) || nearBuilding(x, z, 0.8)) continue; addPigChecked(x, z, Math.atan2(cur[0] - prev[0], cur[1] - prev[1])); }
                   acc += L - t; prev = cur; } } }
             for (const C of cuts) { if (!isOpen(C)) continue;   /* (only what the kerb row left open, e.g. past a street mouth) */ stackCol = cuts.indexOf(C) % 2 ? 1 : 2;
               const yawC = Math.atan2(C.B[0] - C.A[0], C.B[1] - C.A[1]);   // concrete pigs end to end across it (they were tyre stacks: a lot of tyres)
               for (let t = 0.8; t < C.L; t += 1.32) { const x = C.A[0] + (C.B[0] - C.A[0])*t/C.L, z = C.A[1] + (C.B[1] - C.A[1])*t/C.L, r = roadInfo(x, z);
-                if (r.d2 < (wAt(r.idx)*0.5 + 2.3)**2 || onRoad(x, z, 1.0)) continue; addPigChecked(x, z, yawC); } }   // (a street through the corner stays open)
+                if (r.d2 < (wAt(r.idx)*0.5 + 2.3)**2 || onRoad(x, z, 1.0)) continue; if (r.d2 < (wAt(r.idx)*0.5 + off1 + 7.6)**2) addStackChecked(x, z); else addPigChecked(x, z, yawC); } }   // (a street through the corner stays open; near the road tyres, pigs only well back)
             stackH = 2; stackCol = -1; }
         }
         if (am > 0.42) {   // sharp corner: a small cluster of stacks in the inside corner
@@ -3725,7 +3731,8 @@ function buildTrackTires() {
   function wallAt(idx, side) {
     if (walls.some(w => w.side === side && Math.min(Math.abs(w.idx-idx), n-Math.abs(w.idx-idx)) < 8)) return;
     walls.push({ idx, side, off1 });
-    rowAlong(idx - 4, idx + 4, (off1 + 0.4)*side, 1.32, 0, false, true);   // a row of concrete pigs across the mouth (was two rows of stacks)
+    rowAlong(idx - 4, idx + 4, (off1 + 0.4)*side, 1.32, 0, false);   // tyres across the mouth: a car that runs wide hits these first and gets through
+    rowAlong(idx - 3, idx + 3, (off1 + 8.4)*side, 1.32, 0, false, true);   // the concrete pigs well back behind them (they were at the kerb: one touch and the race was gone)
   }
   sideRoads.forEach(R => {
     // mouth candidates: street points near the route but OUTSIDE its curb (on-route points have lat ≈ 0 and never qualify)
@@ -4399,6 +4406,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '🧱 Betoniporsaat kauas: mutkien sisäreunoilla ja sivuteiden suilla on nyt renkaita, porsaat vasta 8 m niiden takana – reunan hipaisu ei enää pilaa kisaa'],
   ['29.9.', '⚙️ Lisää kevennystä: vain liikkuneiden kappaleiden matriisit lasketaan (ennen kaikki 6600 joka ruutu), liikkumattomia ei kopioida instansseihin, kaikenkokoiset laatikot ja lieriöt piirretään yhdellä kutsulla – piirtokutsuja ~820 → ~570'],
   ['29.9.', '🧈 Nykiminen pois: auto piirretään fysiikka-askelten väliin (120 Hz fysiikka ei enää nyi 60/144 Hz näytöllä), savut ja liekit eivät tee roskaa (ei keräyspätkiä), kaukaiset ihmiset päivitetään harvemmin – logiikka ~25 % kevyempi'],
   ['29.9.', '🚨 Rekisteri: rikkomukset kirjataan kaikkialla – kisassa, GTA-tilassa ja maalin jälkeen; ne lähtevät heti maalissa ja valikkoon palatessa, lehti näyttää juuri tehdyt, ja myöhemmin annettu nimi päivittyy vanhoihin merkintöihin'],
