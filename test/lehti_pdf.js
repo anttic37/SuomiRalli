@@ -1,4 +1,5 @@
 // The paper as a PDF: load the built game, lay every page of Ylästön Sanomat (PAPER.pages) one per PDF page, print → lehti/ylaston-sanomat.pdf
+// Also writes lehti/lehti.json (the laid-out pages + a key of the paper's content) beside it.
 // usage: node lehti_pdf.js ../index.html ../lehti/ylaston-sanomat.pdf   (build.py runs it; the page links "s. 12" jump inside the PDF)
 const { chromium } = require('playwright-core');
 const fs = require('fs'), path = require('path');
@@ -10,6 +11,8 @@ const fs = require('fs'), path = require('path');
   await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ body: '', contentType: 'text/css' }));
   await page.goto('file://' + path.resolve(game));
   await page.waitForFunction(() => typeof lehtiBuild === 'function' && typeof trackPoints !== 'undefined' && trackPoints.length > 10, null, { timeout: 90000 }); await page.evaluate(() => lehtiBuild());
+  const baked = await page.evaluate(() => JSON.stringify({ key: lhKey(), pages: PAPER.pages }));   // the fitted pages as the game shows them → lehti/lehti.json, which the published game fetches instead of laying the paper out itself
+  fs.writeFileSync(path.join(path.dirname(out), 'lehti.json'), baked);
   const n = await page.evaluate(async () => {
     window.requestAnimationFrame = () => 0;   // (the game stops: only the paper is left)
     const st = document.createElement('style'); st.textContent = '@page { size: 760px 1000px; margin: 0; } html, body { margin: 0 !important; padding: 0 !important; background: #f1ead8 !important; overflow: visible !important; height: auto !important; } body > .pv-page { break-after: page; page-break-after: always; } body > .pv-page:last-child { break-after: auto; } .lh-photo .lh-miss { display: none; } .lh-photo img { filter: none !important; transition: none !important; opacity: 1 !important; }';
@@ -23,6 +26,6 @@ const fs = require('fs'), path = require('path');
     await document.fonts.ready; return { pages: PAPER.pages.length, imgs: ims.length, missing: ims.filter(im => !im.naturalWidth).length };
   });
   await page.pdf({ path: out, width: '760px', height: '1000px', printBackground: true, preferCSSPageSize: true });
-  console.log('paper pdf:', n.pages, 'pages,', n.imgs, 'photos' + (n.missing ? ', MISSING ' + n.missing : '') + ',', (fs.statSync(out).size/1e6).toFixed(1), 'MB');
+  console.log('paper json:', (baked.length/1e3).toFixed(0), 'kB; pdf:', n.pages, 'pages,', n.imgs, 'photos' + (n.missing ? ', MISSING ' + n.missing : '') + ',', (fs.statSync(out).size/1e6).toFixed(1), 'MB');
   await browser.close();
 })().catch(e => { console.error('PDF', e.message); process.exit(1); });

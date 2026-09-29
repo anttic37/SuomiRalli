@@ -4381,6 +4381,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '📰 Lehti tulee valmiiksi taitettuna palvelimelta (lehti/lehti.json, tehdään buildissa) – selain ei taita sitä enää itse; PDF samasta paikasta'],
   ['29.9.', '⚡ Lehti taitetaan vasta kun peli on käynnissä ja selain joutilas (tai kun lehti avataan) – alkuruutu ei odota lehteä'],
   ['29.9.', '📰 Lehden taitto uusiksi: väljemmät reunat, ylätunniste joka sivulla, kuvat joustavat niin ettei mitään leikkaudu eikä jää reikiä, tavutus, anfangit, puolisivut täyttyvät, ilmoitukset aukkoihin, sisällys ohjesivulle, Lyhyesti luettavammaksi'],
   ['29.9.', '🖱️ Hiiren osoitin ei enää katoa lehteä selatessa'],
@@ -4675,10 +4676,16 @@ function lhFit(F) { const inn = F.querySelector(':scope > .lh-in'); if (!inn) re
   if (free() >= 150 && !inn.dataset.noad) inn.insertAdjacentHTML('beforeend', lhAd(free() - 16, [...inn.querySelectorAll('img[data-src]')].map(im => im.dataset.src.replace('lehti/', ''))));
   F.dataset.free = Math.round(free()); if (free() > 2) { const hang = inn.scrollHeight - inn.offsetHeight; inn.classList.add('even'); inn.style.height = (avail - hang) + 'px'; } }   // (kept on the page: the layout test checks nothing overflows)
 function lhLoadImgs(el) { el.querySelectorAll('img[data-src]').forEach(im => { if (im.src) return; im.onerror = () => im.parentNode.classList.add('miss'); im.onload = () => im.parentNode.classList.add('ok'); im.src = im.dataset.src; }); }
-function lehtiBuild() { if (PAPER.pages.length) return; const t = performance.now(); PAPER.pages = lhPlan(); PAPER.tb = [t, performance.now() - t];   // (the paper is laid out once, off the start: when the browser is idle after the game is up, or on the first open)
+function lhKey() { const str = JSON.stringify([LEHTI, CHANGES, LH_ADS]); let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 0x01000193);   // (which paper this is: the baked pages must be of this very game)
+  return (h >>> 0).toString(16); }
+function lehtiFetch() {   // the paper comes ready-made from the server (lehti/lehti.json, laid out by build.py); laid out here only if that's missing or of another version
+  if (PAPER.pages.length) return; if (!/^https?:/.test(location.protocol)) return lehtiBuild();
+  fetch('lehti/lehti.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.key === lhKey() && Array.isArray(j.pages) && j.pages.length) lehtiSet(j.pages, 'valmis'); else lehtiBuild(); }).catch(() => lehtiBuild()); }
+function lehtiBuild() { if (PAPER.pages.length) return; const t = performance.now(); lehtiSet(lhPlan(), 'taitettu'); PAPER.tb = [t, performance.now() - t]; }   // (laid out here: off the start, or at once on the first open)
+function lehtiSet(pages, src) { if (PAPER.pages.length) return; PAPER.pages = pages; PAPER.src = src;
   const mini = document.getElementById('lehti-mini'); mini.innerHTML = '<div class="lm-scale">' + PAPER.pages[0] + '</div><div class="lm-btn">📰 ' + T('AVAA LEHTI') + '</div>'; lhLoadImgs(mini); lehtiLayout(); mini.classList.add('ready'); }
 function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER.t0 = performance.now(); const mini = document.getElementById('lehti-mini');
-  setTimeout(() => (window.requestIdleCallback || ((f) => setTimeout(f, 0)))(lehtiBuild, { timeout: 2500 }), 1200);
+  setTimeout(() => (window.requestIdleCallback || ((f) => setTimeout(f, 0)))(lehtiFetch, { timeout: 2500 }), 1200);
   mini.onclick = () => paperOpen(0); const btn = document.getElementById('lehti-btn'); if (btn) btn.onclick = () => paperOpen(0);
   const P = document.getElementById('paper'); P.querySelector('.pv-close').onclick = paperClose;
   if (!/^https?:/.test(location.protocol)) P.querySelector('.pv-pdf').href = 'https://suomiralli.netlify.app/lehti/ylaston-sanomat.pdf';   // (the editor's test game has no lehti/ beside it: the published PDF) P.querySelector('.pv-nav.l').onclick = () => paperGo(-1); P.querySelector('.pv-nav.r').onclick = () => paperGo(1);
