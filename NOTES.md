@@ -746,6 +746,30 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   frame) and only rebuilds POLICE.cars when one is gone; flowFx touches #flow-hud only on a change; the minimap draws every
   2nd frame (MM_TICK). t_pause no longer needs the removed #pcnote. t_logic 1.45 → 1.34 ms/frame. Note: t_fire2, t_heli,
   t_nuke, t_walk2 need s3run.sh (s3_shot.inc's step()), t_pause / t_police the plain runall.sh.
+- Six small pick-me-ups (30.9., Antti picked 1 2 3 7 9 10 of ten ideas), all on existing systems:
+  - Radio rumours: radioNewsTick (setInterval 1 s, not per frame) puts RADIO.news on both radio displays for 9 s every 30 s
+    (first after 12 s): leaderboard, today's times, stats, rap totals, rapWanted(), RAP.kind (the kindest), this session's
+    counts, FLOW.n, or NEWS_GOSSIP. rapWanted(k) is now shared by the paper, the radio and the posters.
+  - Wanted posters: buildRoadside collects its power poles → posterBuild: two InstancedMeshes (every other pole), two canvas
+    textures drawn by posterDraw(k) from rapWanted(k); posterRefresh() on every rap fetch. POSTERS.at = the poles.
+  - Moped boys: on FLOW, a moped within 30 m of the car at > 12 m/s gives chase (S.chase) along TRAIL (the car's own track, a
+    crumb every 3 m, ring of 1024; a jump > 40 m bumps TRAIL.gen and chasers give up / go straight home) at ~55–60 km/h; after
+    16 s / 130 m / FLOW gone the first to give up (MOPO.ditched) lies in the ditch 4.5 s, then all ride back along the crumbs
+    to their lane. h.mS / h.mM on the moped humans (tests). t_mopo.
+  - Hitchhiker (HITCH, buildHitch): on the right verge 110–260 route points before the K-shop, cardboard sign (canvas); stop
+    within 9 m → walks to the passenger door → h.inside (aboard; hitchUpdate runs it, the task isn't run for someone inside);
+    minimap blinks the K-shop; stop within 34 m of the shop → out, waves, rapCount('h'). Speeding past → a fist.
+    Rap sheet: new field h (client RAP.h, server RAP_MAX.h 10, GET /api/rap → kind: top 5). #hitch-hud. t_hitch.
+  - Letters in the paper: posti.html gets an answer box + "Julkaise lehdessä" per letter → POST /api/postireply
+    { key, i, reply, pub }; GET /api/postipub (public, printed ones, newest 8) → MAILPUB, fetched with the rap sheet;
+    lhMail = "Lukijoiden kirjeet" page after the ads (kirje.jpg + 3 slots, filled by lhMailFill inside lhRapFill; the
+    baked page/PDF shows the invitation box). LH_VER in lhKey: bump it when layout code changes pages. t_mailpub (serve.mjs).
+  - Abducting UFO (ABD, buildAbd): from 40–80 s into a race, a moose 50–230 m ahead → a third UFO (makeUfo) comes down
+    over it (4 s), beams it up (5.6 s: h.abd holds it in mooseTask, h.hop rises, then h.inside), flies off; next in 70–130 s.
+    The car in the beam: ABD.carY (added to the car's drawn height beside BASS.hopY) up to 3.5 m and it slows; out of it, it
+    drops. Moose reset clears abd/inside. t_abd.
+  - Photos: t_lh_k (liftari, juliste, mopot, ufo_hirvi via lhrun.sh), t_lh_l (menu radio page shot scaled 2.6×, cropped
+    1000×625 round the radio → huhu.jpg). Stories liftari/ufo_hirvi (page), mopot/juliste/huhu (half), kirje updated.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

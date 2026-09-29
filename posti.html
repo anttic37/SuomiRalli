@@ -26,6 +26,11 @@
   .letter .txt { white-space: pre-wrap; overflow-wrap: anywhere; font: 19px/30px "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive; }
   .letter .del { position: absolute; top: 10px; right: 12px; font: 12px Arial, sans-serif; background: none; border: 1px solid var(--soft); color: var(--soft); padding: 2px 8px; cursor: pointer; }
   .letter .del:hover { color: var(--red); border-color: var(--red); }
+  .letter .ans { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--soft); }
+  .letter .ans textarea { display: block; width: 100%; min-height: 60px; resize: vertical; font: 16px/1.4 Georgia, serif; padding: 6px 8px; border: 1px solid var(--soft); background: rgba(255,255,255,0.55); color: var(--ink); }
+  .letter .ans .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 6px; font: 13px Arial, sans-serif; color: var(--soft); }
+  .letter .ans .save { font: 700 13px Arial, sans-serif; background: var(--ink); color: var(--paper); border: 0; padding: 6px 12px; cursor: pointer; }
+  .letter .pubbed { background: #2a6a2a; color: #fff; font: 700 11px Arial, sans-serif; padding: 2px 6px; letter-spacing: 0.08em; }
 </style>
 </head>
 <body>
@@ -52,9 +57,13 @@ async function load() {
   const { list } = await r.json(), seen = +(store.get('posti-seen') || 0), fresh = list.filter((m) => m.i > seen).length;
   $('count').textContent = list.length + ' kirjettä' + (fresh ? ' · ' + fresh + ' uutta' : '');
   $('msg').textContent = list.length ? '' : 'Ei vielä postia.';
-  $('list').innerHTML = list.map((m) => '<div class="letter" data-i="' + m.i + '"><div class="hd"><span class="from">' + esc(m.name || 'Nimetön') + '</span><span>' + when(m.d) + '</span><span>' + (FLAG[m.lang] || '') + '</span><span>#' + m.i + '</span>' + (m.i > seen ? '<span class="new">UUSI</span>' : '') + '</div><div class="txt">' + esc(m.text) + '</div><button class="del" title="heitä roskiin">roskiin</button></div>').join('');
+  $('list').innerHTML = list.map((m) => '<div class="letter" data-i="' + m.i + '"><div class="hd"><span class="from">' + esc(m.name || 'Nimetön') + '</span><span>' + when(m.d) + '</span><span>' + (FLAG[m.lang] || '') + '</span><span>#' + m.i + '</span>' + (m.i > seen ? '<span class="new">UUSI</span>' : '') + (m.pub ? '<span class="pubbed">LEHDESSÄ</span>' : '') + '</div><div class="txt">' + esc(m.text) + '</div><button class="del" title="heitä roskiin">roskiin</button>' +
+    '<div class="ans"><textarea placeholder="Vastauksesi lehteen (ei pakko)…" maxlength="2000">' + esc(m.reply || '') + '</textarea><div class="row"><label><input type="checkbox" class="pub"' + (m.pub ? ' checked' : '') + '> Julkaise lehdessä (kirje + vastaus)</label><button class="save">Tallenna</button><span class="st"></span></div></div></div>').join('');
   if (list.length) store.set('posti-seen', String(Math.max(...list.map((m) => m.i))));
 }
+$('list').addEventListener('click', async (e) => { const b = e.target.closest('.save'); if (!b) return; const el = b.closest('.letter'), st = el.querySelector('.st'); st.textContent = 'tallennetaan…';
+  const r = await fetch('/api/postireply', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ key: KEY, i: +el.dataset.i, reply: el.querySelector('.ans textarea').value, pub: el.querySelector('.pub').checked }) }).catch(() => null);
+  st.textContent = r && r.ok ? (el.querySelector('.pub').checked ? '✔ tallennettu – näkyy lehdessä' : '✔ tallennettu') : 'ei onnistunut'; });
 $('list').onclick = async (e) => { const b = e.target.closest('.del'); if (!b) return; const el = b.closest('.letter'); if (!confirm('Heitetäänkö kirje #' + el.dataset.i + ' roskiin?')) return;
   const r = await fetch('/api/postidel', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ key: KEY, i: +el.dataset.i }) }); if (r.ok) el.remove(); };
 $('go').onclick = () => { KEY = $('key').value.trim(); load(); };

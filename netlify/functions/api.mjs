@@ -4,11 +4,13 @@
 //   GET  /api/struck?sig=…&k=…   → a struck-off driver's ghost, kept as evidence (where did they cut?)
 //   GET  /api/stats              → { starts, drivers }   races started and drivers (browsers) seen, all tracks
 //   POST /api/start { id }       → { starts, drivers }   one race started by browser id (a new id: one more driver)
-//   GET  /api/rap              → { fires: [{ name, n }], people: [...], animals: [...], drivers, total }   the police's rap sheet: who set most fires, ran most people over
-//   POST /api/rap { id, name, f, p, a } → { ok }   this browser's new fires / people / animals since its last report (capped)
+//   GET  /api/rap              → { fires: [{ name, n }], people: [...], animals: [...], kind: [...], drivers, total }   (kind: rides given to hitchhikers)   the police's rap sheet: who set most fires, ran most people over
+//   POST /api/rap { id, name, f, p, a, h } → { ok }   this browser's new fires / people / animals since its last report (capped)
 //   POST /api/posti { id, name, text, lang } → { ok }   a letter to the maker (the start screen's "lähetä postia tekijälle")
 //   GET  /api/posti?key=…        → { list: [{ i, d, name, text, lang }] }   newest first — only with Antti's key (posti.html reads them)
 //   POST /api/postidel { key, i } → { ok }   throw one letter away
+//   POST /api/postireply { key, i, reply, pub } → { ok }   Antti's answer to a letter, and whether the paper prints the pair
+//   GET  /api/postipub           → { list: [{ name, text, reply, d }] }   the printed letters, newest first (the paper's "Lukijoiden kirjeet")
 //   POST /api/lap  { sig, name, t, splits, s } → { saved, best, rank, list }   kept only if it beats that name's best
 // Files: top/<track>.json (the leaderboard) and ghost/<track>/<driver>.json (one per ghost). `sig` is the game's
 // trackSignature(): a changed track is a new leaderboard, the old one stays where it was.
@@ -16,7 +18,7 @@ import { getStore } from '@netlify/blobs';
 import { badName } from '../lib/badwords.mjs';
 import { TRACKS } from '../lib/tracks.mjs';
 
-export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck', '/api/stats', '/api/start', '/api/rap', '/api/posti', '/api/postidel'] };
+export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck', '/api/stats', '/api/start', '/api/rap', '/api/posti', '/api/postidel', '/api/postireply', '/api/postipub'] };
 export default async (req) => handle(req, getStore({ name: 'suomiralli', consistency: 'strong' }));
 
 const MAX_ROWS = 500;
@@ -88,9 +90,9 @@ const STATS_SEED = { starts: 700, drivers: 45 };
 async function statsGet(store) { return (await store.get('stats.json', { type: 'json' })) || { ...STATS_SEED, since: new Date().toISOString().slice(0, 10), seeded: true }; }
 
 // the rap sheet: one file (rap.json) of every browser's totals, by browser id; the name is the one they save laps with (or none: "Tuntematon kuski")
-const RAP_MAX = { f: 40, p: 150, a: 40 }, RAP_ROWS = 3000;
+const RAP_MAX = { f: 40, p: 150, a: 40, h: 10 }, RAP_ROWS = 3000;
 async function rapGet(store) { return (await store.get('rap.json', { type: 'json' })) || { rows: {} }; }
-function rapTop(R, k, n = 7) { return Object.values(R.rows).filter(r => r[k] > 0).sort((a, b) => b[k] - a[k]).slice(0, n).map(r => ({ name: r.name || '', n: r[k] })); }
+function rapTop(R, k, n = 7) { return Object.values(R.rows).filter(r => (r[k] || 0) > 0).sort((a, b) => b[k] - a[k]).slice(0, n).map(r => ({ name: r.name || '', n: r[k] })); }
 
 // the letters: one file (posti.json). The key to read them is Antti's; only its SHA-256 is here (the repo is public).
 const POSTI_KEY = 'f1a4832e387580090ccb28372706b7133127f5c11502be342c0e2305f729ce96', POSTI_MAX = 3000, POSTI_LEN = 2000;
@@ -124,15 +126,15 @@ export async function handle(req, store) {
       await store.setJSON('stats.json', st); return json({ starts: st.starts, drivers: st.drivers });
     }
     if (req.method === 'GET' && route === 'rap') { const R = await rapGet(store), rows = Object.values(R.rows);
-      return json({ fires: rapTop(R, 'f'), people: rapTop(R, 'p'), animals: rapTop(R, 'a', 3), drivers: rows.length, total: { f: rows.reduce((s, r) => s + r.f, 0), p: rows.reduce((s, r) => s + r.p, 0), a: rows.reduce((s, r) => s + r.a, 0) } }); }
+      return json({ fires: rapTop(R, 'f'), people: rapTop(R, 'p'), animals: rapTop(R, 'a', 3), kind: rapTop(R, 'h', 5), drivers: rows.length, total: { f: rows.reduce((s, r) => s + r.f, 0), p: rows.reduce((s, r) => s + r.p, 0), a: rows.reduce((s, r) => s + r.a, 0), h: rows.reduce((s, r) => s + (r.h || 0), 0) } }); }
     if (req.method === 'POST' && route === 'rap') {
       let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: 'bad json' }, 400); }
       const id = String(b && b.id || ''); if (!/^[a-z0-9]{8,32}$/.test(id)) return json({ error: 'id' }, 400);
-      const d = {}; for (const k of ['f', 'p', 'a']) { const v = b[k] === undefined ? 0 : b[k]; if (!Number.isInteger(v) || v < 0) return json({ error: k }, 400); d[k] = Math.min(v, RAP_MAX[k]); }
+      const d = {}; for (const k of ['f', 'p', 'a', 'h']) { const v = b[k] === undefined ? 0 : b[k]; if (!Number.isInteger(v) || v < 0) return json({ error: k }, 400); d[k] = Math.min(v, RAP_MAX[k]); }
       const name = cleanName(b.name), R = await rapGet(store);
-      if (!d.f && !d.p && !d.a && (!R.rows[id] || !name || badName(name) || R.rows[id].name === name)) return json({ ok: true });   // (nothing new — unless it names an existing row)
-      const r = R.rows[id] || (R.rows[id] = { name: '', f: 0, p: 0, a: 0 });
-      if (name && !badName(name)) r.name = name; r.f += d.f; r.p += d.p; r.a += d.a; r.d = new Date().toISOString().slice(0, 10);
+      if (!d.f && !d.p && !d.a && !d.h && (!R.rows[id] || !name || badName(name) || R.rows[id].name === name)) return json({ ok: true });   // (nothing new — unless it names an existing row)
+      const r = R.rows[id] || (R.rows[id] = { name: '', f: 0, p: 0, a: 0, h: 0 });
+      if (name && !badName(name)) r.name = name; r.f += d.f; r.p += d.p; r.a += d.a; r.h = (r.h || 0) + d.h; r.d = new Date().toISOString().slice(0, 10);
       const ids = Object.keys(R.rows); if (ids.length > RAP_ROWS) { ids.sort((x, y) => (R.rows[x].f + R.rows[x].p) - (R.rows[y].f + R.rows[y].p)); for (const x of ids.slice(0, ids.length - RAP_ROWS)) delete R.rows[x]; }   // (the mildest go first)
       await store.setJSON('rap.json', R); return json({ ok: true }); }
     if (req.method === 'GET' && route === 'posti') { if (!(await keyOk(url.searchParams.get('key')))) return json({ error: 'key' }, 403);
@@ -147,6 +149,14 @@ export async function handle(req, store) {
       if (recent >= 5) return json({ error: 'slow down' }, 429);   // (five letters in ten minutes from one browser is plenty)
       P.n++; P.list.push({ i: P.n, id, d: new Date().toISOString(), name: String(b.name || '').normalize('NFC').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 40), text, lang: /^(fi|en|no)$/.test(b.lang) ? b.lang : 'fi' });
       if (P.list.length > POSTI_MAX) P.list = P.list.slice(-POSTI_MAX);
+      await store.setJSON('posti.json', P); return json({ ok: true }); }
+    if (req.method === 'GET' && route === 'postipub') { const P = await postiGet(store);
+      return json({ list: P.list.filter(m => m.pub).reverse().slice(0, 8).map(m => ({ name: m.name, text: m.text, reply: m.reply || '', d: String(m.rd || m.d).slice(0, 10) })) }); }
+    if (req.method === 'POST' && route === 'postireply') {
+      let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: 'bad json' }, 400); }
+      if (!(await keyOk(b && b.key))) return json({ error: 'key' }, 403);
+      const P = await postiGet(store), m = P.list.find(m => m.i === b.i); if (!m) return json({ error: 'none' }, 404);
+      m.reply = String(b.reply || '').normalize('NFC').replace(/\r/g, '').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').trim().slice(0, POSTI_LEN); m.pub = !!b.pub; m.rd = new Date().toISOString();
       await store.setJSON('posti.json', P); return json({ ok: true }); }
     if (req.method === 'POST' && route === 'postidel') {
       let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: 'bad json' }, 400); }
