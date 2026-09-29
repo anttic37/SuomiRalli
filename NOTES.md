@@ -643,6 +643,16 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
     the rot attribute carries the frame (steps on over life). fireFx and flameFx2 use it (fires, boom, kokko); new emberFx for sparks.
     Fires: bigger tongues, 120/s, fireIgnite() whoomp burst on start, crackle bursts of sparks + pops, ground glow disc (f.floor),
     thicker black smoke. Tests: t_set4 (balloons/heli/dogs), t_heli*, t_fire2 (close-ups).
+- Medi-Heli as a Vehicle (29.9., "mediheliä päin pitäisi voida ajaa kuin ambulanssia, samat säännöt"): kind 'heli' (VSPEC mass 2.4,
+  always parked), hw 1.0 / hl 4.9, the model built round the box middle (inner group z +2.3); the static boxes are gone. Hits go
+  through collideCarWorld → resolvePair/vehicleHit (≥ 11 impulse or 15 damage → fire → fire engine), charVehicle chars it, the rotor
+  stops when burning; worldReset puts it back. New model: red belly + blue pinstripe, rounded roof, raked screen, chin windows,
+  sliding-door seams, exhausts, tapered boom, end plates, drooping blades, skid toes, cross tubes, landing light, star of life decal.
+- On foot (29.9., "testi että hahmo voisi poistua autosta"): WALK { on, h } before updateCar. F (RACING, < 3 m/s, not wrecked or
+  pulled over) → walkOut(): a temp Human with the driver's look (h.player: always 'near', no ambulance when knocked — up again after
+  2.5 s still), task playerWalkTask (arrows/WASD turn + walk 2.3 m/s, space/shift run 6.2, back 1.3; tethered to 200 m of the car,
+  since the village's life/visibility is keyed to the car). updateCar treats WALK.on as held (handbrake, no input). updateCamera →
+  walkCamera (6.5 m behind, 3.4 up, own shadow anchor). F within 3.8 m of the car → walkIn(); startRace/toMenu walkIn(true). t_walk.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

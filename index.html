@@ -187,10 +187,10 @@
   <div id="news"><span class="star">★</span><span data-t>UUTUUS: HAVUHELVETTI – HEAVY PÄNDI PELISSÄ</span><small data-t>B = keikkabussi · levyt ison männyn luota · GTA: aja lähdössä oikeaa kaistaa</small></div>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div class="subtitle">Ylästö<span class="sl">/</span><b>Vantaa</b><span class="sl">/</span><b data-t>Kesä 1988</b></div>
-  <div class="build-stamp">editorista 05.10 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
+  <div class="build-stamp">editorista 05.35 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div>
     <div style="text-align:center"><div id="pcnote"><span data-t>💾 PC-PELI · TOIMII 486-KONEELLA</span><small data-t>ei mobiilipeli – voi kyynel 😢</small></div><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
-    <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span></div>
+    <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
       <div class="mr-knobcell"><button class="mr-knob" id="mr-power" title="virta · rulla: ääni"></button><span class="mr-cap" data-t>virta</span></div>
       <div class="mr-mid"><div class="mr-brand"><span><i class="led"></i>YLÄSTÖ SOUND</span><small>CR-85 · FM STEREO</small></div>
@@ -228,7 +228,7 @@
 <canvas id="minimap"></canvas>
 <div id="controls-hint">
   <span class="key-hint" data-t>↑ kaasu</span><span class="key-hint" data-t>↓ jarru / peruutus</span>
-  <span class="key-hint" data-t>← → ohjaus</span><span class="key-hint" data-t>välilyönti käsijarru</span><span class="key-hint" data-t>R uusi lähtö</span><span class="key-hint" data-t>Esc alkuruutu</span><span class="key-hint" data-t>G haamu</span><span class="key-hint" data-t>C kamera</span><span class="key-hint" id="radio-key" style="display:none" data-t>E radio · 1/2 ääni</span><span class="key-hint" data-t>B bassoboost</span><span class="key-hint" data-t>P tauko</span>
+  <span class="key-hint" data-t>← → ohjaus</span><span class="key-hint" data-t>välilyönti käsijarru</span><span class="key-hint" data-t>R uusi lähtö</span><span class="key-hint" data-t>Esc alkuruutu</span><span class="key-hint" data-t>G haamu</span><span class="key-hint" data-t>C kamera</span><span class="key-hint" id="radio-key" style="display:none" data-t>E radio · 1/2 ääni</span><span class="key-hint" data-t>B bassoboost</span><span class="key-hint" data-t>P tauko</span><span class="key-hint" data-t>F jalkaisin</span>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -289,7 +289,7 @@ const I18N = {
   'KERRO KAVERILLE!': ['TELL A FRIEND!', 'SI DET TIL EN VENN!'], 'ota kuva ja jaa peliä': ['snap it and share the game', 'ta et bilde og del spillet'],
   'TAUKO': ['PAUSED', 'PAUSE'], 'P jatka · R uusi lähtö · Esc alkuruutu': ['P resume · R restart · Esc menu', 'P fortsett · R ny start · Esc meny'],
   '💾 PC-PELI · TOIMII 486-KONEELLA': ['💾 PC GAME · RUNS ON A 486', '💾 PC-SPILL · KJØRER PÅ EN 486'], 'ei mobiilipeli – voi kyynel 😢': ["not a mobile game – boo hoo 😢", 'ikke et mobilspill – snufs 😢'], '✔ 28.9. TESTATTU: PELI SKULAA': ['✔ TESTED 28.9.: GAME WORKS', '✔ TESTET 28.9.: SPILLET FUNKER'], '– jos ei, niin voi voi': ['– if not, oh well', '– hvis ikke, synd det'],
-  'P tauko': ['P pause', 'P pause'], 'tauko': ['pause', 'pause'],
+  'P tauko': ['P pause', 'P pause'], 'F jalkaisin': ['F on foot', 'F til fots'], 'ulos autosta / jalkaisin': ['get out / on foot', 'gå ut / til fots'], 'JALKAISIN · F = TAKAISIN AUTOON': ['ON FOOT · F = BACK IN THE CAR', 'TIL FOTS · F = TILBAKE I BILEN'], 'tauko': ['pause', 'pause'],
   '👽 OSUMA! {0}/{1}': ['👽 HIT! {0}/{1}', '👽 TREFF! {0}/{1}'],
   'virta': ['power', 'på/av'], 'viritys': ['tuning', 'tuning'], 'kanava': ['station', 'kanal'], 'ääni': ['volume', 'volum'],
   'paina virtaa — radio soi täälläkin': ['press power — the radio plays here too', 'trykk på — radioen spiller her også'], 'RADIO POIS': ['RADIO OFF', 'RADIO AV'],
@@ -3086,8 +3086,32 @@ const DRIVE = {
 const car = { x:0, z:0, angle:0, vx:0, vz:0, steerSm:0, steerAngle:0, pivot:-1.3, hbPrev:0, tiltP:0, tiltR:0,
               speed:0, maxSlip:0, drifting:false, onTrack:true, throttle:0 };
 
+// ── on foot: F by the car (nearly stopped) gets the driver out — a Human like everyone else (the same body, bumps, knocks; knocked
+//    down they lie a moment and get up again, no ambulance for them). Arrows/WASD walk, space or shift runs, F by the car gets back in.
+//    The car waits with the handbrake on; the camera follows the driver; they stay within 200 m of the car (the village lives round it). ──
+const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0 };
+const playerWalkTask = () => ({ kind: 'walker', update(h, dt) { const turn = ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0) - ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0);
+  const fwd = (keys['ArrowUp'] || keys['KeyW']) ? 1 : (keys['ArrowDown'] || keys['KeyS']) ? -1 : 0, run = keys['Space'] || keys['ShiftLeft'] || keys['ShiftRight'];
+  h.yaw += turn*2.6*dt; const sp = fwd > 0 ? (run ? 6.2 : 2.3) : fwd*1.3; h.vx = Math.sin(h.yaw)*sp; h.vz = Math.cos(h.yaw)*sp; h.tilt = 0;
+  const dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz); if (d > 200) { h.x = car.x + dx/d*200; h.z = car.z + dz/d*200; } } });
+function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on || POLICE.hold > 0 || Math.hypot(car.vx, car.vz) > 3) return false;
+  const [x, z] = lloc(car.x, car.z, car.angle, -1.35, 0.3);
+  const h = WALK.h = new Human({ x, z, yaw: car.angle - Math.PI/2, rig: makeAdult(0xf2f2ee, 0xf2f2ee, 0x5a3a1e, { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), task: playerWalkTask(), temp: true });
+  h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.downT = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
+  const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('JALKAISIN · F = TAKAISIN AUTOON'); cpd.style.color = '#ffe9a8'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 1800); return true; }
+function walkIn(force) { if (!WALK.on) return false; const h = WALK.h; if (!force && (h.down || Math.hypot(h.x - car.x, h.z - car.z) > 3.8)) return false;
+  if (!h.gone) humanRemove(h); WALK.on = false; WALK.h = null; return true; }
+function walkUpdate(dt) { if (!WALK.on) return; const h = WALK.h; if (h.gone) { WALK.on = false; WALK.h = null; return; }
+  if (h.down && !h.ride && h.hop <= 0 && Math.hypot(h.vx, h.vz) < 0.4) { if ((WALK.downT += dt) > 2.5) { h.down = h.hurt = false; h.tilt = h.roll = h.spin = 0; h.vx = h.vz = 0; WALK.downT = 0; } } else WALK.downT = 0; }   // up on their feet again
+function walkCamera(dt) { const h = WALK.h, gy = Y(h.x, h.z) + h.hop; WALK.cy += angDiff(h.yaw - WALK.cy)*Math.min(1, dt*2.5); const cx = Math.sin(WALK.cy), cz = Math.cos(WALK.cy);
+  camTarget.set(h.x - cx*6.5, gy + 3.4, h.z - cz*6.5); camTarget.y = Math.max(camTarget.y, Y(camTarget.x, camTarget.z) + 1.3);
+  camPos.lerp(camTarget, 1 - Math.pow(0.02, dt)); camPos.y = Math.max(camPos.y, Y(camPos.x, camPos.z) + 1.0);
+  camLookAt.lerp(_camV.set(h.x + cx*4, gy + 1.3, h.z + cz*4), 1 - Math.pow(0.005, dt)); camera.position.copy(camPos); camera.lookAt(camLookAt);
+  camera.fov += (58 - camera.fov)*Math.min(2*dt, 1); camera.updateProjectionMatrix();
+  const texel = 200/4096, ax = Math.round(h.x/texel)*texel, az = Math.round(h.z/texel)*texel;
+  if (Math.hypot(ax - lightAnchor.x, az - lightAnchor.z) > 24) { lightAnchor.x = ax; lightAnchor.z = az; const ay = Y(ax, az); dirLight.position.set(ax + SUN.x, SUN.y + ay, az + SUN.z); dirLight.target.position.set(ax, ay, az); dirLight.target.updateMatrixWorld(); } }
 function updateCar(dt, live = true) {
-  const held = POLICE.hold > 0 || WRECK.on; if (held) live = false;   // pulled over: the police have it
+  const held = POLICE.hold > 0 || WRECK.on || WALK.on; if (held) live = false;   // pulled over: the police have it
   const throttle = live && (keys['ArrowUp'] || keys['KeyW']) ? 1 : 0;
   const brake = live && (keys['ArrowDown'] || keys['KeyS']) ? 1 : 0;   /* (not while held: the brake at a standstill is reverse) */
   const steerInput = live ? (((keys['ArrowLeft']||keys['KeyA'])?1:0) - ((keys['ArrowRight']||keys['KeyD'])?1:0)) : 0;
@@ -4266,6 +4290,8 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'KOKEILU: F-näppäimellä kuski nousee autosta ja kävelee (nuolet, välilyönti = juoksu) – sama ihminen kuin muut: törmäilee, kaatuu jos ajetaan päälle; F auton vieressä = takaisin autoon'],
+  ['29.9.', 'Medi-Heli on nyt ajoneuvo kuten ambulanssi: sitä voi töniä, siihen tulee lommoja ja kova isku sytyttää sen (paloauto tulee); malli uusiksi (punainen vatsa, raidat, pyöreä katto, kartiopuomi, ovi, jalakset)'],
   ['29.9.', 'Liekit uusiksi: nuolevat liekkikielekkeet, kipinäsuihkut ja rätinä, maa hehkuu palon ympärillä, syttyessä leimahdus; paksumpi savu'],
   ['29.9.', 'Neljä pihakoiraa lähtee auton perään kun ajat ohi (~4 auton mitan päästä) ja haukkuu – yliajo: koira vinkaisee ja naapurit lähtevät nyrkit heiluen perään'],
   ['29.9.', 'Medi-Heli laskeutunut pellolle: roottori pyörii, ensihoitajat elvyttävät, uteliaita katsomassa'],
@@ -5034,7 +5060,7 @@ class Human {
     if (o.inst !== undefined) this.view = { kind: 'inst', geo: o.inst, idx: -1, up: -1 };
     else { this.view = { kind: 'rig', g: o.rig }; o.rig.rotation.order = 'YXZ'; lifeGroup.add(o.rig); }
     this.look = o.rig ? o.rig.userData.look || null : o.inst !== undefined ? { kid: false, c: lookCrowd(o.inst) } : null;   // (animals and aliens: their own meshes)
-    this.bm = this.look ? new THREE.Matrix4() : null; this.bp = this.look ? new Float32Array(11) : null; this.bvis = false; this.propR = false; this.px = undefined; this.pz = 0; this.far = false; this.goal = null; this.goalT = 0; this.slide = null; this.dodge = null; this.big = false; this.ride = null; this.hoseDrop = null; this.esc = null; this.wgx = 0; this.wgz = 0; this.wbest = 0; this.wT = 0; this.mad = null;   // (every field set here: one object shape for all, fast)
+    this.bm = this.look ? new THREE.Matrix4() : null; this.bp = this.look ? new Float32Array(11) : null; this.bvis = false; this.propR = false; this.px = undefined; this.pz = 0; this.far = false; this.goal = null; this.goalT = 0; this.slide = null; this.dodge = null; this.big = false; this.ride = null; this.hoseDrop = null; this.esc = null; this.wgx = 0; this.wgz = 0; this.wbest = 0; this.wT = 0; this.mad = null; this.player = false;   // (every field set here: one object shape for all, fast)
     this.settle = 2;   // (the first frames: nudged out of anything they were put down in)
     this.ao = -1; HUMANS.push(this);
   }
@@ -5047,7 +5073,7 @@ function knock(h, vx, vz, power, o) {
   h.down = true; h.vx = vx; h.vz = vz; h.pose.up = false; h.roll = 0;
   if (o && o.ride) { h.ride = o.ride; h.vy = 0; h.spin = 0; } else { h.vy = Math.min(4, 1.2 + power*0.1); h.spin = (Math.random() - 0.5)*5; }
   if (h.task && h.task.knocked) h.task.knocked(h);
-  if (!h.hurt) { h.hurt = true; if (!h.animal) DISPATCH.hurt(h); }   // (a knocked-over dog gets no ambulance)
+  if (!h.hurt) { h.hurt = true; if (!h.animal && !h.player) DISPATCH.hurt(h); }   // (a knocked-over dog gets no ambulance)
   return true;
 }
 function humanStep(h, dt) {   // body physics shared by everyone
@@ -5146,7 +5172,7 @@ function humansUpdate(dt) {
   for (const h of HUMANS) { if (h.gone || h.inside || h.seat || h.ride) continue; const k = hkey(h.x, h.z); let l = HGRID.get(k); if (!l) HGRID.set(k, l = []); if (!l.length) HGRID_USED.push(l); l.push(h); }
   const t = worldT;
   for (const h of HUMANS) { if (h.gone) continue;
-    const dx = h.x - car.x, dz = h.z - car.z, near = dx*dx + dz*dz < 240*240, P = h.pose;
+    const dx = h.x - car.x, dz = h.z - car.z, near = h.player || dx*dx + dz*dz < 240*240, P = h.pose;
     P.armL = P.armR = P.legs = P.legsR = null; P.armLz = P.armRz = 0; P.walk = 0; P.dy = 0;
     if (!!h.far === near) { h.far = !near; if (h.view.kind === 'rig') humanSync(h); }   // far from the car: rigged people aren't drawn
     if (h.ride) { rideStep(h, dt); humanSync(h); continue; }
@@ -5292,6 +5318,7 @@ const VSPEC = {   // mass (the rally car = 1), engine m/s², brakes m/s², top s
   car:       { mass: 1.15, accel: 5.0, brake: 8,   vmax: 18, wb: 2.5,  steer: 0.6,  lat: 8.0, yawK: 6 },
   bus:       { mass: 12,   accel: 3.0, brake: 5,   vmax: 14, wb: 5.4,  steer: 0.5,  lat: 6.0, yawK: 4 },
   tractor:   { mass: 3.2,  accel: 3.0, brake: 5,   vmax: 7,  wb: 1.9,  steer: 0.7,  lat: 9.0, yawK: 7 },
+  heli:      { mass: 2.4,  accel: 0,   brake: 8,   vmax: 0,  wb: 3.5,  steer: 0,    lat: 9.0, yawK: 6 },   // (the Medi-Heli: parked, skids down)
   ambulance: { mass: 2.3,  accel: 5.2, brake: 7.5, vmax: 17, wb: 2.95, steer: 0.58, lat: 7.5, yawK: 6 },
   fire:      { mass: 8,    accel: 4.2, brake: 6,   vmax: 13, wb: 4.7,  steer: 0.55, lat: 6.5, yawK: 5 },
   police:    { mass: 1.4,  accel: 12,  brake: 10,  vmax: 50, wb: 2.65, steer: 0.6,  lat: 13,  yawK: 8, drag: 0.004 },   // (a tuned V8 with the air cut: ~115 km/h through the village)
@@ -5533,7 +5560,7 @@ const FIRES = [];
 const fireFx = makeParticleSystem(900, true, false, true), flameFx2 = makeParticleSystem(700, false, false, true), emberFx = makeParticleSystem(500, true, false);
 function startFire(o) {
   let f;
-  if (o.vehicle) { const v = o.vehicle; if (v.fire) return; f = { v, x: v.x, z: v.z, yaw: v.yaw, hw: v.hw, hl: v.hl, h: v.kind === 'bus' || v.kind === 'fire' ? 2.8 : 1.5, kind: 'vehicle' }; f.y0 = () => v.gy; v.fire = f; }
+  if (o.vehicle) { const v = o.vehicle; if (v.fire) return; f = { v, x: v.x, z: v.z, yaw: v.yaw, hw: v.hw, hl: v.hl, h: v.kind === 'bus' || v.kind === 'fire' || v.kind === 'heli' ? 2.8 : 1.5, kind: 'vehicle' }; f.y0 = () => v.gy; v.fire = f; }
   else { const B = o.house; if (B.fire) return; const base = footprintBase(B.x, B.z, B.hw + 1.2, B.hl + 1.2, B.yaw); f = { B, x: B.x, z: B.z, yaw: B.yaw, hw: B.hw, hl: B.hl, h: B.wallTop + B.roofH, kind: 'house' }; f.y0 = () => base; B.fire = f;
     if (!B.soot) { B.soot = new THREE.Mesh(lbox(B.hw*2 + 0.14, B.wallTop - 0.25, B.hl*2 + 0.14), new THREE.MeshBasicMaterial({ color: 0x0c0906, transparent: true, opacity: 0, depthWrite: false }));   // walls blacken as it burns
       B.soot.position.set(B.x, base + 0.25 + (B.wallTop - 0.25)/2, B.z); B.soot.rotation.y = B.yaw; B.soot.renderOrder = 1; lifeGroup.add(B.soot); } }
@@ -7298,24 +7325,39 @@ let BALLOON_POP_P = 0.05;   // the chance one bursts as the car passes under it 
 // ── the Medi-Heli: landed in a field, rotor turning over slowly, the crew doing CPR on someone, a few people watching ──
 let _heliSide = null;
 function heliSideTex() { if (_heliSide) return _heliSide; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
-  g.font = 'italic bold 70px Arial'; g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillStyle = '#c4201a'; g.fillText('MEDI-HELI', 256, 60); g.fillStyle = '#1a2a5a'; g.font = 'bold 22px Arial'; g.fillText('LÄÄKÄRIHELIKOPTERI', 256, 108);
+  g.font = 'italic bold 66px Arial'; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillStyle = '#c4201a'; g.fillText('MEDI-HELI', 118, 56); g.fillStyle = '#1a2a5a'; g.font = 'bold 21px Arial'; g.fillText('LÄÄKÄRIHELIKOPTERI', 122, 104);
+  g.save(); g.translate(58, 64); g.fillStyle = '#1f4fb0'; for (let k = 0; k < 3; k++) { g.rotate(Math.PI/3); g.fillRect(-11, -46, 22, 92); }   // star of life
+  g.fillStyle = '#f4f4f0'; g.fillRect(-3, -30, 6, 60); g.beginPath(); g.arc(0, -30, 5, 0, 6.3); g.fill(); g.restore();
   return (_heliSide = new THREE.CanvasTexture(c)); }
-function makeMediHeli() { const G = new THREE.Group(), white = lmat(0xf2f2ee, 0.4), red = lmat(0xc4201a, 0.45), glass = lmat(0x1e2a36, 0.12), dark = lmat(0x2a2a2e, 0.6), black = lmat(0x161616, 0.7);
-  lmesh(lbox(1.7, 1.5, 3.3), white, 0, 1.4, 0, G); lmesh(lbox(1.72, 0.32, 3.32), red, 0, 1.0, 0, G);                                     // cabin, red band
-  lmesh(lbox(1.6, 0.66, 0.9), white, 0, 0.98, 2.08, G); lmesh(lbox(1.62, 0.2, 0.92), red, 0, 1.0, 2.08, G);                              // the nose
-  const scr = lmesh(lbox(1.56, 1.22, 0.06), glass, 0, 1.72, 2.07, G); scr.rotation.x = -0.785;                                               // the raked screen
-  for (const s of [-1, 1]) { lmesh(lbox(0.05, 0.8, 0.8), glass, s*0.79, 1.68, 1.95, G); lmesh(lbox(0.05, 0.75, 1.3), glass, s*0.86, 1.75, 0.55, G); }   // side windows
-  lmesh(lbox(1.1, 0.6, 1.9), white, 0, 2.43, -0.4, G); lmesh(lcyl(0.1, 0.55, 8), dark, 0, 2.95, 0, G);                                      // engine deck, mast
-  lmesh(lbox(0.44, 0.44, 5.4), white, 0, 1.95, -4.1, G); lmesh(lbox(0.46, 0.12, 5.42), red, 0, 1.78, -4.1, G);                              // tail boom
-  lmesh(lbox(0.1, 1.4, 0.9), red, 0, 2.55, -6.75, G); lmesh(lbox(1.9, 0.08, 0.55), white, 0, 1.98, -6.1, G);                                 // fin, stabiliser
-  const rotor = new THREE.Group(); rotor.position.set(0, 3.22, 0); G.add(rotor); lmesh(lcyl(0.28, 0.14, 8), dark, 0, 0, 0, rotor);
-  for (let k = 0; k < 4; k++) { const b = lmesh(lbox(0.3, 0.05, 4.9), dark, 0, 0.02, 0, rotor); b.geometry = lgeo('heliBlade', () => new THREE.BoxGeometry(0.3, 0.05, 4.9).translate(0, 0, 2.5)); b.rotation.y = k*Math.PI/2; }
-  const tail = new THREE.Group(); tail.position.set(0.12, 2.6, -6.9); G.add(tail); for (let k = 0; k < 2; k++) { const b = lmesh(lbox(0.04, 1.5, 0.14), dark, 0, 0, 0, tail, false); b.rotation.x = k*Math.PI/2; }
-  for (const s of [-1, 1]) { lmesh(lbox(0.1, 0.1, 3.5), black, s*0.95, 0.07, 0.1, G); for (const zz of [-0.7, 0.9]) { const st = lmesh(lbox(0.07, 0.62, 0.07), black, s*0.9, 0.36, zz, G); st.rotation.z = s*0.2; } }   // skids
+// 1980s rescue helicopter (a BO-105-ish twin): white with a red belly and stripes, rounded cabin, big screen, sliding door, twin
+// exhausts, tapered tail boom, fin with end plates, four-blade rotor, skids with turned-up toes. Built round its middle (the Vehicle box).
+function makeMediHeli() { const G = new THREE.Group(), B = new THREE.Group(); B.position.z = 2.3; G.add(B);
+  const white = lmat(0xf2f2ee, 0.4), red = lmat(0xc4201a, 0.45), blue = lmat(0x1f3f8a, 0.5), glass = lmat(0x1e2a36, 0.12), dark = lmat(0x2a2a2e, 0.6), black = lmat(0x161616, 0.7), steel = lmat(0x8a8a90, 0.35);
+  const M = (geo, m, x, y, z, sh) => lmesh(geo, m, x, y, z, B, sh);
+  M(lbox(1.7, 1.25, 3.1), white, 0, 1.52, 0); M(lbox(1.72, 0.5, 3.12), red, 0, 0.72, 0); M(lbox(1.73, 0.08, 3.13), blue, 0, 1.0, 0);            // cabin: white over a red belly, blue pinstripe
+  const roof = M(lgeo('heliRoof', () => new THREE.CylinderGeometry(0.85, 0.85, 3.1, 12, 1, false, -Math.PI/2, Math.PI)), white, 0, 2.14, 0); roof.rotation.x = Math.PI/2; roof.scale.set(1, 1, 0.42);   // rounded roof
+  M(lbox(1.6, 0.62, 0.95), red, 0, 0.78, 2.0); M(lbox(1.5, 0.5, 0.5), white, 0, 1.3, 2.25);                                                   // chin, nose
+  const scr = M(lbox(1.56, 1.25, 0.06), glass, 0, 1.78, 2.08); scr.rotation.x = -0.7;                                                        // the big raked screen
+  for (const sd of [-1, 1]) { M(lbox(0.05, 0.85, 0.8), glass, sd*0.79, 1.72, 1.95); M(lbox(0.05, 0.36, 0.5), glass, sd*0.77, 0.86, 2.05);      // side screens, chin windows
+    M(lbox(0.05, 0.8, 1.2), glass, sd*0.86, 1.72, 0.55); M(lbox(0.06, 1.3, 0.04), dark, sd*0.86, 1.4, -0.2); M(lbox(0.06, 1.3, 0.04), dark, sd*0.86, 1.4, 1.3);   // door window, door seams
+    M(lbox(0.06, 0.05, 0.3), steel, sd*0.88, 1.2, 0.2, false); M(lbox(0.35, 0.05, 0.9), black, sd*0.95, 0.42, 0.55, false);                   // handle, step
+    const ex = M(lcyl(0.1, 0.5, 8), dark, sd*0.35, 2.62, -1.25); ex.rotation.x = 1.9; }                                                     // exhausts
+  M(lbox(1.2, 0.62, 2.1), white, 0, 2.55, -0.45); M(lbox(1.22, 0.06, 2.12), red, 0, 2.3, -0.45);                                              // engine deck
+  M(lcyl(0.1, 0.5, 8), dark, 0, 3.05, 0); M(lbox(0.04, 0.5, 0.04), dark, 0, 2.2, 1.6, false);                                                // mast, aerial
+  const boom = M(lgeo('heliBoom', () => new THREE.CylinderGeometry(0.16, 0.34, 5.6, 10)), white, 0, 2.0, -4.2); boom.rotation.x = Math.PI/2;   // the tapered tail boom
+  const bs = M(lgeo('heliBoomS', () => new THREE.CylinderGeometry(0.17, 0.35, 2.6, 10)), red, 0, 2.0, -2.9); bs.rotation.x = Math.PI/2;
+  M(lbox(0.1, 1.45, 1.0), red, 0, 2.6, -6.85); M(lbox(1.9, 0.08, 0.55), white, 0, 2.0, -6.2); for (const sd of [-1, 1]) M(lbox(0.06, 0.55, 0.45), red, sd*0.95, 2.1, -6.2);   // fin, stabiliser, end plates
+  const rotor = new THREE.Group(); rotor.position.set(0, 3.32, 0); B.add(rotor); lmesh(lcyl(0.3, 0.16, 10), dark, 0, 0, 0, rotor); lmesh(lcyl(0.08, 0.3, 6), steel, 0, 0.2, 0, rotor);
+  for (let k = 0; k < 4; k++) { const b = lmesh(lgeo('heliBlade', () => new THREE.BoxGeometry(0.3, 0.05, 4.9).translate(0, 0, 2.55)), dark, 0, 0.02, 0, rotor); b.rotation.order = 'YXZ'; b.rotation.y = k*Math.PI/2; b.rotation.x = 0.035; }   // (drooping a little at rest)
+  const tail = new THREE.Group(); tail.position.set(0.13, 2.7, -6.95); B.add(tail); lmesh(lcyl(0.08, 0.12, 6), dark, 0, 0, 0, tail, false).rotation.z = Math.PI/2; for (let k = 0; k < 2; k++) { const b = lmesh(lbox(0.04, 1.5, 0.14), dark, 0.05, 0, 0, tail, false); b.rotation.x = k*Math.PI/2; }
+  for (const sd of [-1, 1]) { M(lbox(0.1, 0.1, 3.2), black, sd*0.98, 0.07, 0.2); const toe = M(lbox(0.1, 0.1, 0.5), black, sd*0.98, 0.16, 1.95); toe.rotation.x = -0.6;   // skids, their turned-up toes
+    for (const zz of [-0.8, 1.1]) { const st = M(lbox(0.08, 0.62, 0.08), steel, sd*0.9, 0.36, zz); st.rotation.z = sd*0.22; } }
+  for (const zz of [-0.8, 1.1]) M(lbox(1.9, 0.07, 0.07), steel, 0, 0.62, zz, false);                                                        // cross tubes
+  const lamp = new THREE.MeshStandardMaterial({ color: 0xfff2c8, emissive: 0xfff2c8, emissiveIntensity: 0.4 }); lmesh(lbox(0.22, 0.1, 0.1), lamp, 0, 0.5, 2.4, B, false);   // landing light
   const lbl = new THREE.MeshStandardMaterial({ map: heliSideTex(), transparent: true, roughness: 0.5 });
-  for (const s of [-1, 1]) { const p = new THREE.Mesh(lgeo('heliLbl', () => new THREE.PlaneGeometry(2.6, 0.65)), lbl); p.position.set(s*0.235, 2.02, -3.9); p.rotation.y = s*Math.PI/2; p.scale.set(1, 0.7, 1); G.add(p);
-    const q = new THREE.Mesh(lgeo('heliLbl', () => new THREE.PlaneGeometry(2.6, 0.65)), lbl); q.position.set(s*0.865, 1.2, -0.25); q.rotation.y = s*Math.PI/2; q.scale.set(0.95, 0.9, 1); G.add(q); }
-  const bcn = new THREE.MeshStandardMaterial({ color: 0xff2a1a, emissive: 0xff2a1a, emissiveIntensity: 0.3 }); lmesh(lbox(0.16, 0.12, 0.22), bcn, 0, 2.8, -1.2, G, false);   // anti-collision beacon
+  for (const sd of [-1, 1]) { const p = new THREE.Mesh(lgeo('heliLbl', () => new THREE.PlaneGeometry(2.6, 0.65)), lbl); p.position.set(sd*0.3, 2.05, -3.6); p.rotation.y = sd*Math.PI/2; p.scale.set(0.95, 0.72, 1); B.add(p);
+    const q = new THREE.Mesh(lgeo('heliLbl', () => new THREE.PlaneGeometry(2.6, 0.65)), lbl); q.position.set(sd*0.875, 1.2, -1.0); q.rotation.y = sd*Math.PI/2; q.scale.set(0.8, 0.8, 1); B.add(q); }
+  const bcn = new THREE.MeshStandardMaterial({ color: 0xff2a1a, emissive: 0xff2a1a, emissiveIntensity: 0.3 }); lmesh(lbox(0.16, 0.12, 0.22), bcn, 0, 2.9, -1.4, B, false);   // anti-collision beacon
   return { G, rotor, tail, bcn }; }
 const cprTask = (P, role) => ({ kind: 'cpr', update(h, dt, t) { h.vx = h.vz = 0;
   if (P.patient.down || P.patient.gone) { if (walkTo(h, P.px + (role - 1)*0.8, P.pz + 1.2, 2.5, dt)) { h.yaw = Math.atan2(P.patient.x - h.x, P.patient.z - h.z); h.pose.armL = h.pose.armR = -2.4; } return; }   // (knocked flying: they get up and stare)
@@ -7327,8 +7369,8 @@ const patientTask = (P) => ({ kind: 'patient', update(h, dt, t) { h.vx = h.vz = 
 const heliGawkTask = (P) => ({ kind: 'heligawk', update(h, dt, t) { h.vx = h.vz = 0; h.yaw = Math.atan2(P.px - h.x, P.pz - h.z); const k = Math.sin(t*0.4 + h.home.x);
   h.pose.armR = k > 0.6 ? -2.2 : -0.2; h.pose.armL = k < -0.7 ? -1.2 : -0.1; if (!walkTo(h, h.home.x, h.home.z, 1.2, dt)) return; h.yaw = Math.atan2(P.px - h.x, P.pz - h.z); } });
 function buildMediHeli() { const sp = openSpot(10, 24, 70); if (!sp) return; reserve('heli', sp, 11); const [x, z] = sp, yaw = Math.random()*6.3;
-  const M = makeMediHeli(); placeAt(M.G, x, z, yaw); lifeGroup.add(M.G); nearVis(M.G, x, z); X3.heli = { x, z, yaw, M };
-  addStaticBox({ x, z, yaw, hw: 1.0, hl: 2.4, kind: 'lm' }); { const [tx, tz] = lloc(x, z, yaw, 0, -4.8); addStaticBox({ x: tx, z: tz, yaw, hw: 0.35, hl: 2.5, kind: 'lm' }); }
+  const M = makeMediHeli(); lifeGroup.add(M.G); const [vx0, vz0] = lloc(x, z, yaw, 0, -2.3);   // a Vehicle like the ambulance: shoved, dented, set burning by the same rules
+  const V = new Vehicle({ kind: 'heli', x: vx0, z: vz0, yaw, hw: 1.0, hl: 4.9, view: { kind: 'mesh', g: M.G }, axle: [0.95, 4.0, 0.9] }); X3.heli = { x, z, yaw, M, v: V };
   const [px, pz] = lloc(x, z, yaw, 4.2, 1.2), pyaw = yaw + Math.PI/2, fx = Math.sin(pyaw), fz = Math.cos(pyaw), rx = fz, rz = -fx;   // the patient lies at right angles to it, feet towards it… no: head away from it
   const P = { px, pz, yaw: pyaw, spots: null, patient: null };
   const at = (f, r) => [px + fx*f + rx*r, pz + fz*f + rz*r];
@@ -7340,7 +7382,7 @@ function buildMediHeli() { const sp = openSpot(10, 24, 70); if (!sp) return; res
   { const [kx, kz] = at(-1.5, -0.75); placeAt(kit, kx, kz, pyaw); lifeGroup.add(kit); nearVis(kit, kx, kz); }
   for (let i = 0; i < 4; i++) { const a = yaw + Math.PI/2 + (i - 1.5)*0.35, r = 8 + Math.random()*1.5; let gx = px + Math.sin(a)*r, gz = pz + Math.cos(a)*r; if (!clearSpot(gx, gz, 0.4)) continue;
     new Human({ x: gx, z: gz, yaw: Math.atan2(px - gx, pz - gz), rig: makeAdult(lpick([0xd83b2c, 0x3aa64c, 0xf0f0f0, 0x7b3fb5]), lpick(L_PANTS), lpick(L_HAIR)), task: heliGawkTask(P) }); }
-  let bt = 0, wt = 0; X3.upd.push((dt) => { const d = Math.hypot(x - car.x, z - car.z); if (d > 260) return; M.rotor.rotation.y += dt*3.8; M.tail.rotation.x += dt*22; bt += dt; M.bcn.emissiveIntensity = (bt % 1.1) < 0.12 ? 3 : 0.2;
+  let bt = 0, wt = 0; X3.upd.push((dt) => { const d = Math.hypot(V.x - car.x, V.z - car.z); if (d > 260 || V.fire || V.charred) return; M.rotor.rotation.y += dt*3.8; M.tail.rotation.x += dt*22; bt += dt; M.bcn.emissiveIntensity = (bt % 1.1) < 0.12 ? 3 : 0.2;
     if (audio && d < 70 && (wt -= dt) <= 0) { wt = 1/2.4; beep(46, 0.16, 0.06*(1 - d/70), 'triangle'); } }); }   // a slow whop-whop
 
 function lifeExtras3Build() {
@@ -7450,7 +7492,7 @@ function emittersUpdate(dt) {
 function worldUpdate(dt) {
   worldT += dt;
   carStillT = Math.hypot(car.vx, car.vz) < 1.5 && gameState === State.RACING ? carStillT + dt : 0;
-  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); lpUpdate(dt); queueUpdate(dt); extras2Update(dt); extras3Update(dt); policeUpdate(dt); bassUpdate(dt); heviUpdate(dt); humansUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
+  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); lpUpdate(dt); queueUpdate(dt); extras2Update(dt); extras3Update(dt); policeUpdate(dt); bassUpdate(dt); heviUpdate(dt); humansUpdate(dt); walkUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
   let siren = 0; for (const v of VEHICLES) if ((v.job && v.job.phase === 'drive') || v.chase) siren = Math.max(siren, Math.max(0, 1 - Math.hypot(v.x - car.x, v.z - car.z)/240));
   sirenSet(siren, dt);
 }
@@ -7924,6 +7966,7 @@ addEventListener('keydown', e => {
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
   if (e.code==='KeyE' && !e.repeat) { initAudio(); radioNext(); }   // (in the menu too: the radio there)
   if (e.code==='KeyB' && !e.repeat && gameState !== State.MENU) { initAudio(); bassToggle(); }
+  if (e.code==='KeyF' && !e.repeat) { if (WALK.on) walkIn(); else walkOut(); }   // out of the car / back in
   if (e.code==='Digit1' || e.code==='Numpad1') radioVol(-1);   // radio quieter / louder
   if (e.code==='Digit2' || e.code==='Numpad2') radioVol(1);
   if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = T(camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'); cpd.style.color='#ffe9a8'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0, 900); }
@@ -7938,7 +7981,7 @@ function startRace(newTrack) {
   if (newTrack) generateTrack();
   resetCar();
   checkpoints.forEach(cp=>cp.passed=false);
-  freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
+  walkIn(true); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
   checkpointsPassed=0; raceTime=0; prevFinishS=null; prevCpS=null; onlineStart();
   gameState = State.COUNTDOWN;
   countdownT = 3.0; radioStart(); countdownLast = -1;
@@ -7988,7 +8031,7 @@ function resetCar() {
 }
 
 function toMenu() {   // Esc: back to the start screen (the race is dropped; Enter starts a new one)
-  gameState = State.MENU; freeExit(); radioShow(); lapStarted = false; for (const k in keys) keys[k] = false;
+  gameState = State.MENU; walkIn(true); freeExit(); radioShow(); lapStarted = false; for (const k in keys) keys[k] = false;
   const ov = document.getElementById('overlay'); ov.classList.remove('hidden'); ov.style.background = 'rgba(10,10,10,0.92)';
   document.getElementById('results').style.display = 'none'; document.getElementById('menu-content').style.display = '';
   const cd = document.getElementById('countdown'); cd.style.opacity = 0; ghostStartRun();
@@ -8248,6 +8291,7 @@ addEventListener('wheel', e => {
 // where the car sits on screen (high view): in the lower part, but always above the gauge cluster — a slow correction of the look-ahead
 let camAdj = 0, _clTopFrac = 1, _clT = 0; const _camV = new THREE.Vector3();
 function updateCamera(dt) {
+  if (WALK.on && WALK.h) { walkCamera(dt); return; }
   const speed=Math.sqrt(car.vx*car.vx+car.vz*car.vz);
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
   camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two views
@@ -8489,7 +8533,7 @@ function loop(time) {
     // hot path so there is no hitch on the first real frame at GO.
     acc += dt;
     const live = gameState === State.RACING;
-    while (acc >= PHYS_DT) { updateCar(PHYS_DT, live); updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
+    while (acc >= PHYS_DT) { updateCar(PHYS_DT, live); if (WALK.on) { car.x = WALK.cx; car.z = WALK.cz; car.angle = WALK.ca; car.vx = car.vz = car.speed = 0; }   /* (parked: it stays put, on any slope) */ updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
     if (live) updateCheckpoints(dt);
   } else {
     acc = 0;
