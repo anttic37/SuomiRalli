@@ -1,0 +1,1 @@
+renderer.render = renderer.render; await new Promise(r => setTimeout(r, 2500)); await __pageshot('menu_' + innerWidth + '.png'); return { w: innerWidth, h: innerHeight, scrollH: document.documentElement.scrollHeight };
