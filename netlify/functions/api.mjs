@@ -6,6 +6,9 @@
 //   POST /api/start { id }       → { starts, drivers }   one race started by browser id (a new id: one more driver)
 //   GET  /api/rap              → { fires: [{ name, n }], people: [...], animals: [...], drivers, total }   the police's rap sheet: who set most fires, ran most people over
 //   POST /api/rap { id, name, f, p, a } → { ok }   this browser's new fires / people / animals since its last report (capped)
+//   POST /api/posti { id, name, text, lang } → { ok }   a letter to the maker (the start screen's "lähetä postia tekijälle")
+//   GET  /api/posti?key=…        → { list: [{ i, d, name, text, lang }] }   newest first — only with Antti's key (posti.html reads them)
+//   POST /api/postidel { key, i } → { ok }   throw one letter away
 //   POST /api/lap  { sig, name, t, splits, s } → { saved, best, rank, list }   kept only if it beats that name's best
 // Files: top/<track>.json (the leaderboard) and ghost/<track>/<driver>.json (one per ghost). `sig` is the game's
 // trackSignature(): a changed track is a new leaderboard, the old one stays where it was.
@@ -13,7 +16,7 @@ import { getStore } from '@netlify/blobs';
 import { badName } from '../lib/badwords.mjs';
 import { TRACKS } from '../lib/tracks.mjs';
 
-export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck', '/api/stats', '/api/start', '/api/rap'] };
+export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck', '/api/stats', '/api/start', '/api/rap', '/api/posti', '/api/postidel'] };
 export default async (req) => handle(req, getStore({ name: 'suomiralli', consistency: 'strong' }));
 
 const MAX_ROWS = 500;
@@ -89,6 +92,11 @@ const RAP_MAX = { f: 40, p: 150, a: 40 }, RAP_ROWS = 3000;
 async function rapGet(store) { return (await store.get('rap.json', { type: 'json' })) || { rows: {} }; }
 function rapTop(R, k, n = 7) { return Object.values(R.rows).filter(r => r[k] > 0).sort((a, b) => b[k] - a[k]).slice(0, n).map(r => ({ name: r.name || '', n: r[k] })); }
 
+// the letters: one file (posti.json). The key to read them is Antti's; only its SHA-256 is here (the repo is public).
+const POSTI_KEY = 'f1a4832e387580090ccb28372706b7133127f5c11502be342c0e2305f729ce96', POSTI_MAX = 3000, POSTI_LEN = 2000;
+const keyOk = async (k) => { if (typeof k !== 'string' || !k || k.length > 100) return false; const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(k)); return Array.from(new Uint8Array(h), (v) => v.toString(16).padStart(2, '0')).join('') === POSTI_KEY; };
+async function postiGet(store) { return (await store.get('posti.json', { type: 'json' })) || { n: 0, list: [] }; }
+
 export async function handle(req, store) {
   const url = new URL(req.url), route = url.pathname.replace(/\/+$/, '').split('/').pop();
   try {
@@ -127,6 +135,24 @@ export async function handle(req, store) {
       if (name && !badName(name)) r.name = name; r.f += d.f; r.p += d.p; r.a += d.a; r.d = new Date().toISOString().slice(0, 10);
       const ids = Object.keys(R.rows); if (ids.length > RAP_ROWS) { ids.sort((x, y) => (R.rows[x].f + R.rows[x].p) - (R.rows[y].f + R.rows[y].p)); for (const x of ids.slice(0, ids.length - RAP_ROWS)) delete R.rows[x]; }   // (the mildest go first)
       await store.setJSON('rap.json', R); return json({ ok: true }); }
+    if (req.method === 'GET' && route === 'posti') { if (!(await keyOk(url.searchParams.get('key')))) return json({ error: 'key' }, 403);
+      const P = await postiGet(store); return json({ list: P.list.slice().reverse().map(({ id, ...m }) => m) }); }
+    if (req.method === 'POST' && route === 'posti') {
+      const text0 = await req.text(); if (text0.length > 20000) return json({ error: 'too big' }, 413);
+      let b; try { b = JSON.parse(text0); } catch (e) { return json({ error: 'bad json' }, 400); }
+      const id = String(b && b.id || ''); if (!/^[a-z0-9]{8,32}$/.test(id)) return json({ error: 'id' }, 400);
+      const text = String(b.text || '').normalize('NFC').replace(/\r/g, '').replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').replace(/\n{4,}/g, '\n\n\n').trim().slice(0, POSTI_LEN);
+      if (text.length < 2) return json({ error: 'empty' }, 400);
+      const P = await postiGet(store), now = Date.now(), recent = P.list.filter(m => m.id === id && now - Date.parse(m.d) < 10*60e3).length;
+      if (recent >= 5) return json({ error: 'slow down' }, 429);   // (five letters in ten minutes from one browser is plenty)
+      P.n++; P.list.push({ i: P.n, id, d: new Date().toISOString(), name: String(b.name || '').normalize('NFC').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, 40), text, lang: /^(fi|en|no)$/.test(b.lang) ? b.lang : 'fi' });
+      if (P.list.length > POSTI_MAX) P.list = P.list.slice(-POSTI_MAX);
+      await store.setJSON('posti.json', P); return json({ ok: true }); }
+    if (req.method === 'POST' && route === 'postidel') {
+      let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: 'bad json' }, 400); }
+      if (!(await keyOk(b && b.key))) return json({ error: 'key' }, 403);
+      const P = await postiGet(store), n = P.list.length; P.list = P.list.filter(m => m.i !== b.i); if (P.list.length !== n) await store.setJSON('posti.json', P);
+      return json({ ok: true }); }
     if (req.method === 'POST' && route === 'lap') {
       const text = await req.text(); if (text.length > 1_500_000) return json({ error: 'too big' }, 413);
       let b; try { b = JSON.parse(text); } catch (e) { return json({ error: 'bad json' }, 400); }

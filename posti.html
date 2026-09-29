@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Tekijän posti · YLÄSTÖ 1988</title>
+<style>
+  :root { --paper: #f4ecd8; --ink: #1a1814; --red: #c8161d; --line: #d9ccae; --soft: #6b6152; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #2a2622; color: var(--ink); font: 17px/1.5 Georgia, "Times New Roman", serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 60px; }
+  header { background: var(--paper); padding: 18px 22px 12px; border-bottom: 3px double var(--ink); }
+  header h1 { margin: 0; font: 900 clamp(28px, 6vw, 44px)/1 "Times New Roman", serif; letter-spacing: -0.01em; }
+  header .sub { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; margin-top: 8px; font: 13px Arial, sans-serif; color: var(--soft); }
+  header button { font: 700 13px Arial, sans-serif; background: var(--ink); color: var(--paper); border: 0; padding: 6px 12px; cursor: pointer; }
+  #login { background: var(--paper); padding: 22px; display: none; }
+  #login input { font: 16px Arial, sans-serif; padding: 8px 10px; width: min(320px, 100%); border: 2px solid var(--ink); }
+  #login button { font: 700 15px Arial, sans-serif; padding: 9px 16px; background: var(--red); color: #fff; border: 0; cursor: pointer; margin-left: 6px; }
+  #msg { font: 14px Arial, sans-serif; color: #e8dcc0; margin: 14px 0; }
+  .letter { position: relative; background: var(--paper) repeating-linear-gradient(transparent 0 29px, var(--line) 29px 30px); background-position: 0 58px; margin: 18px 0; padding: 16px 22px 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.45); }
+  .letter:nth-child(odd) { transform: rotate(-0.4deg); } .letter:nth-child(even) { transform: rotate(0.4deg); }
+  .letter .hd { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; font: 13px Arial, sans-serif; color: var(--soft); margin-bottom: 8px; }
+  .letter .from { font: 700 17px Georgia, serif; color: var(--ink); }
+  .letter .new { background: var(--red); color: #fff; font: 700 11px Arial, sans-serif; padding: 2px 6px; letter-spacing: 0.08em; }
+  .letter .txt { white-space: pre-wrap; overflow-wrap: anywhere; font: 19px/30px "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive; }
+  .letter .del { position: absolute; top: 10px; right: 12px; font: 12px Arial, sans-serif; background: none; border: 1px solid var(--soft); color: var(--soft); padding: 2px 8px; cursor: pointer; }
+  .letter .del:hover { color: var(--red); border-color: var(--red); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>✉ Tekijän posti</h1><div class="sub"><span id="count">YLÄSTÖ 1988 · pelaajien kirjeet</span><span><button id="reload">↻ Päivitä</button> <button id="logout">Kirjaudu ulos</button></span></div></header>
+  <div id="login"><p>Kirjoita postiavain:</p><input id="key" type="password" autocomplete="current-password"><button id="go">Avaa</button></div>
+  <div id="msg"></div>
+  <div id="list"></div>
+</div>
+<script>
+const $ = (id) => document.getElementById(id), esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }, del(k) { try { localStorage.removeItem(k); } catch (e) {} } };
+let KEY = new URLSearchParams(location.search).get('key') || store.get('posti-key') || '';
+if (location.search) history.replaceState(null, '', location.pathname);   // (the key out of the address bar)
+const FLAG = { fi: '🇫🇮', en: '🇬🇧', no: '🇳🇴' };
+const when = (d) => new Date(d).toLocaleString('fi-FI', { timeZone: 'Europe/Helsinki', weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+async function load() {
+  if (!KEY) { $('login').style.display = 'block'; return; }
+  $('msg').textContent = 'haetaan kirjeitä…';
+  let r; try { r = await fetch('/api/posti?key=' + encodeURIComponent(KEY), { cache: 'no-store' }); } catch (e) { $('msg').textContent = 'ei yhteyttä'; return; }
+  if (r.status === 403) { store.del('posti-key'); KEY = ''; $('msg').textContent = 'väärä avain'; $('login').style.display = 'block'; return; }
+  if (!r.ok) { $('msg').textContent = 'haku ei onnistunut (' + r.status + ')'; return; }
+  store.set('posti-key', KEY); $('login').style.display = 'none';
+  const { list } = await r.json(), seen = +(store.get('posti-seen') || 0), fresh = list.filter((m) => m.i > seen).length;
+  $('count').textContent = list.length + ' kirjettä' + (fresh ? ' · ' + fresh + ' uutta' : '');
+  $('msg').textContent = list.length ? '' : 'Ei vielä postia.';
+  $('list').innerHTML = list.map((m) => '<div class="letter" data-i="' + m.i + '"><div class="hd"><span class="from">' + esc(m.name || 'Nimetön') + '</span><span>' + when(m.d) + '</span><span>' + (FLAG[m.lang] || '') + '</span><span>#' + m.i + '</span>' + (m.i > seen ? '<span class="new">UUSI</span>' : '') + '</div><div class="txt">' + esc(m.text) + '</div><button class="del" title="heitä roskiin">roskiin</button></div>').join('');
+  if (list.length) store.set('posti-seen', String(Math.max(...list.map((m) => m.i))));
+}
+$('list').onclick = async (e) => { const b = e.target.closest('.del'); if (!b) return; const el = b.closest('.letter'); if (!confirm('Heitetäänkö kirje #' + el.dataset.i + ' roskiin?')) return;
+  const r = await fetch('/api/postidel', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ key: KEY, i: +el.dataset.i }) }); if (r.ok) el.remove(); };
+$('go').onclick = () => { KEY = $('key').value.trim(); load(); };
+$('key').onkeydown = (e) => { if (e.key === 'Enter') $('go').onclick(); };
+$('reload').onclick = load;
+$('logout').onclick = () => { store.del('posti-key'); KEY = ''; $('list').innerHTML = ''; $('count').textContent = ''; load(); };
+load();
+</script>
+</body>
+</html>

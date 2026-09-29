@@ -179,6 +179,25 @@
   #changelog .cl-list { max-height: 104px; overflow-y: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: #444 transparent; } #changelog .cl-list::-webkit-scrollbar { width: 6px; } #changelog .cl-list::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
   #changelog .cl-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } #changelog .cl-d { color: #55554f; margin-right: 8px; font-variant-numeric: tabular-nums; } #changelog .cl-row:first-child { color: #c8c8c0; } #changelog .cl-row:first-child .cl-d { color: #c9a92c; }
   @media (min-width: 1560px) and (min-height: 640px) { #changelog { position: absolute; right: 30px; bottom: 26px; width: 420px; margin: 0; } }   /* (wide: the bottom-right corner, under the share QR) */
+  #posti-btn { display: table; margin: 12px auto 0; background: #fbf7ec; color: #1a3a8a; font: 900 14px Arial, sans-serif; letter-spacing: 0.04em; padding: 7px 16px; border: 5px solid transparent; border-image: repeating-linear-gradient(-45deg, #d2202a 0 8px, #fbf7ec 8px 12px, #1f4fb4 12px 20px, #fbf7ec 20px 24px) 6; box-shadow: 2px 3px 0 rgba(0,0,0,0.6); cursor: pointer; transform: rotate(-1.5deg); }
+  #posti-btn:hover { transform: rotate(0deg) scale(1.04); }
+  #posti { position: fixed; inset: 0; z-index: 310; cursor: default; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(10,8,6,0.72); }
+  #posti.on { display: flex; }
+  #posti .po-letter { position: relative; width: min(560px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: #f7f0dc repeating-linear-gradient(transparent 0 27px, #d9ccae 27px 28px); padding: 22px 26px 18px; box-shadow: 0 14px 40px rgba(0,0,0,0.7); transform: rotate(-1deg); color: #1a1814; font: 16px Georgia, serif; animation: po-in 0.35s ease-out; }
+  @keyframes po-in { from { transform: translateY(40px) rotate(-6deg); opacity: 0; } }
+  #posti .po-letter.sent { transition: transform 0.7s ease-in, opacity 0.7s ease-in; transform: translate(40vw, -60vh) rotate(25deg) scale(0.4); opacity: 0; }
+  #posti .po-close { position: absolute; top: 6px; left: 8px; background: none; border: 0; font: 20px Arial, sans-serif; color: #6b6152; cursor: pointer; }
+  #posti .po-stamp { float: right; margin: 0 0 8px 12px; width: 74px; height: 88px; background: #c8161d; color: #fff; outline: 3px dotted #f7f0dc; outline-offset: -3px; border: 4px solid #f7f0dc; box-shadow: 0 0 0 1px #c8161d; display: flex; flex-direction: column; align-items: center; justify-content: center; font: 900 11px/1.1 Arial, sans-serif; text-align: center; transform: rotate(4deg); }
+  #posti .po-stamp b { font-size: 30px; line-height: 1; }
+  #posti h3 { margin: 6px 0 2px; font: 900 26px/1.1 "Times New Roman", serif; }
+  #posti .po-to { font: italic 14px Georgia, serif; color: #6b6152; margin-bottom: 12px; }
+  #posti textarea { display: block; width: 100%; height: 196px; resize: vertical; background: transparent; border: 0; border-left: 2px solid rgba(200,22,29,0.35); padding: 4px 8px; font: 18px/28px "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive; color: #13305e; outline: none; }
+  #posti .po-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 12px; }
+  #posti input { flex: 1 1 180px; min-width: 0; background: rgba(255,255,255,0.6); border: 0; border-bottom: 2px solid #1a1814; padding: 6px 8px; font: 16px "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive; color: #13305e; outline: none; }
+  #posti .po-send { background: #c8161d; color: #fff; border: 0; font: 900 15px Arial, sans-serif; letter-spacing: 0.06em; padding: 10px 18px; cursor: pointer; box-shadow: 2px 3px 0 #1a1814; }
+  #posti .po-send:disabled { opacity: 0.6; cursor: default; }
+  #posti .po-st { min-height: 20px; margin-top: 8px; font: 700 13px Arial, sans-serif; color: #8a1a10; }
+  #posti .po-hint { font: 12px Arial, sans-serif; color: #6b6152; margin-top: 4px; }
   #lehti-btn { display: table; margin: 10px auto 0; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 16px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; cursor: pointer; }
   /* wide enough for the paper on the left (the same limit as lehtiLayout's s ≥ 0.24: W ≥ 1285, H ≥ 380): decided by CSS from the first paint,
      not when the script gets there after the village is built — the QR used to sit top-left first and then jump right */
@@ -262,7 +281,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -288,6 +307,11 @@
   <div id="lehti-mini"></div>
 </div>
 <div id="paper"><button class="pv-close" title="sulje (Esc)">✕</button><a class="pv-pdf" href="lehti/ylaston-sanomat.pdf" download="Ylaston-Sanomat.pdf" target="_blank" title="koko lehti PDF:nä">⬇ PDF</a><button class="pv-nav l" title="edellinen (←)">‹</button><button class="pv-nav r" title="seuraava (→)">›</button><div class="pv-stage"></div><div class="pv-count"></div></div>
+<div id="posti"><div class="po-letter"><button class="po-close" title="sulje (Esc)">✕</button><div class="po-stamp"><b>✉</b>YLÄSTÖ<br>1988<br>1 mk</div>
+  <h3 data-t>Postia tekijälle</h3><div class="po-to" data-t>Antti, Ylästö. Terveiset, kehut, haukut ja toiveet – vastaan ehkä lehdessä.</div>
+  <textarea id="po-text" maxlength="2000" spellcheck="false"></textarea>
+  <div class="po-row"><input id="po-name" maxlength="40" autocomplete="off" spellcheck="false"><button class="po-send" data-t>LÄHETÄ ✉</button></div>
+  <div class="po-hint" data-t>Esc sulkee · Ctrl+Enter lähettää</div><div class="po-st"></div></div></div>
 <div id="hud">
   <div class="hud-block"><span class="hud-label" data-t>Aika</span><span class="hud-value" id="timer">00:00.000</span><span class="hud-sub" id="best-hud"></span><span class="hud-sub" id="pizza-hud" style="color:#ffb347"></span></div>
   <div class="hud-block" style="text-align:center"><span class="hud-label" data-t>Tarkastus</span><span class="hud-value" id="cp-counter">0 / 0</span></div>
@@ -369,6 +393,13 @@ const I18N = {
   'R uusi lähtö · Esc': ['R restart · Esc', 'R ny start · Esc'], 'OIKAISU – KIERROS EI KELPAA': ["SHORTCUT – THE LAP DOESN'T COUNT", 'SNARVEI – RUNDEN TELLER IKKE'],
   'AIKA KÄY': ['CLOCK RUNNING', 'KLOKKA GÅR'], 'FINAL — FIND FINISH': ['FINAL — FIND FINISH', 'SISTE — FINN MÅL'], 'CHECKPOINT {0}': ['CHECKPOINT {0}', 'SJEKKPUNKT {0}'],
   'KISA': ['RACE', 'LØP'],
+  '✉ LÄHETÄ POSTIA TEKIJÄLLE': ['✉ WRITE TO THE MAKER', '✉ SKRIV TIL SKAPEREN'], 'Postia tekijälle': ['A letter to the maker', 'Brev til skaperen'],
+  'Antti, Ylästö. Terveiset, kehut, haukut ja toiveet – vastaan ehkä lehdessä.': ['Antti, Ylästö. Greetings, praise, rants and wishes – I might answer in the paper.', 'Antti, Ylästö. Hilsener, ros, ris og ønsker – kanskje svarer jeg i avisen.'],
+  'LÄHETÄ ✉': ['SEND ✉', 'SEND ✉'], 'Esc sulkee · Ctrl+Enter lähettää': ['Esc closes · Ctrl+Enter sends', 'Esc lukker · Ctrl+Enter sender'],
+  'Terveisiä Ylästöön…': ['Greetings to Ylästö…', 'Hilsen til Ylästö…'], 'nimesi (ei pakko)': ['your name (optional)', 'navnet ditt (valgfritt)'],
+  'kirjoita jotain ensin': ['write something first', 'skriv noe først'], 'lähetetään…': ['sending…', 'sender…'],
+  '✉ Kirje lähti! Kiitos.': ['✉ Letter sent! Thanks.', '✉ Brevet er sendt! Takk.'], 'ei lähtenyt ({0}) – yritä uudestaan': ['not sent ({0}) – try again', 'ikke sendt ({0}) – prøv igjen'],
+  'hitaammin – posti kulkee Ylästössä hitaasti': ['slow down – the post is slow in Ylästö', 'rolig – posten går sakte i Ylästö'], 'posti toimii vain netissä (suomiralli.netlify.app)': ['the post only works online (suomiralli.netlify.app)', 'posten virker bare på nett (suomiralli.netlify.app)'],
   'KERRO KAVERILLE!': ['TELL A FRIEND!', 'SI DET TIL EN VENN!'], 'ota kuva ja jaa peliä': ['snap it and share the game', 'ta et bilde og del spillet'],
   'TAUKO': ['PAUSED', 'PAUSE'], 'P jatka · R uusi lähtö · Esc alkuruutu': ['P resume · R restart · Esc menu', 'P fortsett · R ny start · Esc meny'],
   '💾 PC-PELI · TOIMII 486-KONEELLA': ['💾 PC GAME · RUNS ON A 486', '💾 PC-SPILL · KJØRER PÅ EN 486'], 'ei mobiilipeli – voi kyynel 😢': ["not a mobile game – boo hoo 😢", 'ikke et mobilspill – snufs 😢'], '✔ 28.9. TESTATTU: PELI SKULAA': ['✔ TESTED 28.9.: GAME WORKS', '✔ TESTET 28.9.: SPILLET FUNKER'], '– jos ei, niin voi voi': ['– if not, oh well', '– hvis ikke, synd det'],
@@ -384,6 +415,7 @@ let STATS_LAST = null;
 function applyLang() { document.documentElement.lang = LANG === 'no' ? 'nb' : LANG;
   document.querySelectorAll('[data-t]').forEach(el => { if (el.dataset.fi === undefined) el.dataset.fi = el.textContent; const t = T(el.dataset.fi); if (el.textContent !== t) el.textContent = t; });
   const inp = document.getElementById('name-input'); if (inp) inp.placeholder = T('nimesi');
+  const pt = document.getElementById('po-text'), pn = document.getElementById('po-name'); if (pt) { pt.placeholder = T('Terveisiä Ylästöön…'); pn.placeholder = T('nimesi (ei pakko)'); }
   document.querySelectorAll('#lang button').forEach(b => b.classList.toggle('on', b.dataset.l === LANG)); }
 function setLang(l) { if (!LANGS.includes(l)) return; LANG = l; try { localStorage.setItem('ylasto1988-kieli', l); } catch (e) {}
   applyLang(); if (typeof renderTop10 === 'function') renderTop10(); if (typeof renderChangelog === 'function') renderChangelog(); if (STATS_LAST) statsShow(STATS_LAST);
@@ -4444,6 +4476,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', '✉ Alkuruutuun LÄHETÄ POSTIA TEKIJÄLLE: kirje aukeaa, kirjoita terveiset ja lähetä – tekijä lukee ne ja vastaa ehkä lehdessä', '00.10'],
   ['29.9.', 'Jalkaisin nuolet vievät ruudun suuntiin, kävely nopeampaa, Shift juoksee ja välilyönti lyö – lyöty juoksee karkuun ja poliisi tulee. Ennätysvauhtiin riittää 10 %, ja katolla vilkkuu nyt oikeasti keltainen valo. Lehteen Pienet ilmoitukset: K-kauppa, pizzeria ja vihannestila', '23.47'],
   ['29.9.', 'Ennätysvauhdin merkki on nyt pieni keltainen vilkku auton katolla ja pieni 🔥 ENNÄTYSVAUHTI ruudun yläreunassa (iso teksti pois); lehden juttu päivitetty', '23.13'],
   ['29.9.', '🔥 Ennätysvauhti: kun väliajat ovat korkeintaan 5 % parhaan ajan perässä (tai edellä), paloautot, poliisit, ambulanssit ja hirvet väistävät – suoraan metsään. Lehteen oma sivu', '23.02'],
@@ -4655,6 +4688,7 @@ const LEHTI = [
     img: ['asema.jpg'], cap: ['Poliisiaseman piha. Kolme partioautoa ruuduissaan.'],
     body: ['Juoppo repäisee itsensä irti ja hoippuu karkuun, mutta konstaapelit saavat hänet naama asfalttiin. Partioautoihin ei kannata ajaa – poliisi huomaa sen.'] },
 
+  { id: 'kirje', size: 'half', n: 44, kick: '✉ POSTI', title: 'Kirjoita tekijälle', img: ['kirje.jpg'], body: ['Alkuruudun LÄHETÄ POSTIA TEKIJÄLLE avaa kirjepaperin: terveiset, kehut, haukut ja toiveet suoraan tekijälle.', '– Luen jokaisen. Parhaisiin vastaan tässä lehdessä, jos jaksan, lupaa Antti.'] },
   { id: 'rekisteri', size: 'half', n: 43, kick: '🚨 POLIISI', title: 'Poliisi julkaisee rikosrekisterin', img: ['rekisteri.jpg'], body: ['Jokainen sytytetty talo ja jokainen yliajettu kyläläinen kirjataan. Pahimmat kuskit ovat lehden Poliisi tiedottaa -sivulla – ja pahin etsintäkuulutettuna.', 'Oman rekisterisi näet samalta sivulta.'] },
   { id: 'pdf', size: 'half', n: 42, kick: '📄 PDF', title: 'Lehti nyt myös paperilla', img: ['pdf.jpg'], body: ['Ylästön Sanomat latautuu kokonaan PDF:nä – lehden yläkulman ⬇ PDF -napista. Kaikki sivut, kuvat ja muutokset, tulostimeen tai kaverille.', 'Sisällysluettelon sivunumerot hyppäävät PDF:ssäkin oikeaan juttuun.'] },
   { id: 'sauna', size: 'half', n: 30, kick: '🔥 SAUNA', title: 'Saunaporukka savuttaa pellolla', img: ['sauna.jpg'], body: ['Saunakärry ja vanha pakettiauto ilmestyvät joka kerta eri paikkaan. Piipusta nousee pitkä musta nauha, ja möly kuuluu kylälle asti.'] },
@@ -4824,6 +4858,27 @@ function lehtiLayout() { const mini = document.getElementById('lehti-mini'); if 
   const wide = matchMedia('(min-width: 1285px) and (min-height: 380px)').matches; document.body.classList.toggle('lh-wide', wide); mini.style.display = wide ? '' : 'none'; if (!wide) return;   // (the same test as the CSS: s ≥ 0.24)
   mini.style.width = (760*s).toFixed(0) + 'px'; mini.style.height = (1000*s).toFixed(0) + 'px'; if (mini.firstChild) mini.firstChild.style.transform = 'scale(' + s.toFixed(3) + ')'; }
 function paperViews() { const n = PAPER.pages.length, V = []; if (!PAPER.two) { for (let i = 0; i < n; i++) V.push([i]); return V; } V.push([0]); for (let i = 1; i < n; i += 2) V.push(i + 1 < n ? [i, i + 1] : [i]); return V; }
+// the post to the maker: a letter from the start screen → /api/posti (Antti reads them on posti.html)
+const POSTI = { open: false, busy: false };
+function postiInit() { const P = document.getElementById('posti'); if (!P) return;
+  document.getElementById('posti-btn').onclick = postiOpen; P.querySelector('.po-close').onclick = postiClose; P.querySelector('.po-send').onclick = postiSend;
+  P.addEventListener('mousedown', (e) => { if (e.target === P) postiClose(); });
+  addEventListener('keydown', (e) => { if (!POSTI.open) return; e.stopImmediatePropagation();   // (while it's open: typing is typing, nothing reaches the game)
+    if (e.code === 'Escape') { e.preventDefault(); postiClose(); } else if ((e.code === 'Enter' || e.code === 'NumpadEnter') && (e.ctrlKey || e.metaKey || e.target.id === 'po-name')) { e.preventDefault(); postiSend(); } }, true);
+  addEventListener('keyup', (e) => { if (POSTI.open) e.stopImmediatePropagation(); }, true); }
+function postiOpen() { const P = document.getElementById('posti'), L = P.querySelector('.po-letter'); L.classList.remove('sent'); P.querySelector('.po-st').textContent = ONLINE.api ? '' : T('posti toimii vain netissä (suomiralli.netlify.app)');
+  const pn = document.getElementById('po-name'); if (!pn.value) pn.value = ONLINE.name || ''; for (const k in keys) keys[k] = false;
+  POSTI.open = true; P.classList.add('on'); setTimeout(() => document.getElementById('po-text').focus(), 30); }
+function postiClose() { POSTI.open = false; document.getElementById('posti').classList.remove('on'); document.activeElement && document.activeElement.blur && document.activeElement.blur(); }
+async function postiSend() { if (POSTI.busy) return; const P = document.getElementById('posti'), st = P.querySelector('.po-st'), ta = document.getElementById('po-text'), text = ta.value.trim();
+  if (text.length < 2) { st.textContent = T('kirjoita jotain ensin'); ta.focus(); return; }
+  if (!ONLINE.api) { st.textContent = T('posti toimii vain netissä (suomiralli.netlify.app)'); return; }
+  POSTI.busy = true; const btn = P.querySelector('.po-send'); btn.disabled = true; st.textContent = T('lähetetään…');
+  try { const r = await fetch(ONLINE.api + '/posti', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: ONLINE.id, name: document.getElementById('po-name').value.trim(), text, lang: LANG }) });
+    if (r.status === 429) throw new Error('slow'); if (!r.ok) throw new Error(String(r.status));
+    ta.value = ''; st.textContent = T('✉ Kirje lähti! Kiitos.'); P.querySelector('.po-letter').classList.add('sent'); setTimeout(() => { if (POSTI.open) postiClose(); }, 900);
+  } catch (e) { st.textContent = e.message === 'slow' ? T('hitaammin – posti kulkee Ylästössä hitaasti') : T('ei lähtenyt ({0}) – yritä uudestaan', e.message); }
+  POSTI.busy = false; btn.disabled = false; }
 function paperOpen(page) { lehtiBuild(); rapSend(false).then(rapFetch); PAPER.open = true; document.getElementById('paper').classList.add('on'); paperToPage(page || 0); }
 function paperClose() { PAPER.open = false; document.getElementById('paper').classList.remove('on'); }
 function paperToPage(p) { PAPER.two = innerWidth > innerHeight*1.15 && innerWidth > 760; PAPER.views = paperViews(); PAPER.v = Math.max(0, PAPER.views.findIndex(v => v.includes(p))); paperShow(); }
@@ -9326,7 +9381,7 @@ addEventListener('resize', () => { camera.aspect=innerWidth/innerHeight; camera.
 // rivals' ghosts): a script that runs on for seconds holds both back — the page stayed blank and the fetches only left after the build
 let BOOTED = false;
 function boot() { if (BOOTED) return; BOOTED = true;
-  generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); renderChangelog(); lehtiInit(); radioLoad();   // (the ground is built by the terrain lift inside generateTrack)
+  generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); renderChangelog(); lehtiInit(); postiInit(); radioLoad();   // (the ground is built by the terrain lift inside generateTrack)
   { const el = document.getElementById('terrain-label'); if (el) el.textContent = HEIGHT_RAW ? 'maanmittauslaitoksen korkeusmalli' : 'väliaikaiset mäet ' + PLACEHOLDER_AMP + '×'; }
   camPos.set(car.x-Math.sin(car.angle)*25, 45, car.z-Math.cos(car.angle)*25);
   camLookAt.set(car.x, Y(car.x,car.z), car.z);

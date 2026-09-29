@@ -733,6 +733,14 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - Record pace (29.9., Antti): FLOW.on is decided at every split (flowSplit from ghostSplit): within 5 % of the reference split (splitRef's, scaled to the best time if that rival is slower; else best × (ci+1)/(checkpoints+1)) or faster. While on, fire engines, ambulances and police within 75 m ahead of the car get v.dodge (4–6 s: flat out, steerToward a point 90 m to their side, the AI suspended) — straight into the forest; moose within 60 m ahead bolt 70 m sideways (and don't freeze in the lights). "🔥 ENNÄTYSVAUHTI – KYLÄ VÄISTÄÄ!" when it comes on. Story 'vauhti' (page, n 50: page 3 right after the police page), photo t_lh_j. t_flow checks the 5 % line and the swerves.
 - Record pace sign (29.9., Antti): no big pizzaMsg — flowFx() shows #flow-hud (small yellow "🔥 ENNÄTYSVAUHTI" at the top) and a small beacon on the roof (a yellow cylinder + an additive glow sprite, flashing ~2/s) while FLOW is on and racing. t_flowfx.
 - Walking v2 + punch + ads page (29.9., Antti): on foot the arrows move you in screen directions (WALK.camA: the camera angle when you get out, held while walking; the walker turns to its way), walk 3.6 m/s, Shift runs (stamina), Space punches (walkPunch: the one in front within 1.9 m gets h.dodge 5 m/s away for ~4 s, "👊 PAM!", and at most every 12 s policeSpawn(1) + "🚨 JOKU SOITTI POLIISIT!"). t_walk3. Record pace now within 10 %; the beacon glow had never shown — a mid-line comment had swallowed its g.add(gl) — now a plain yellow sprite over the roof (depthTest off). "Pienet ilmoitukset" page (lhAdsPage, after the halves, in the contents) with absurd ads for the K-shop, the pizzeria, the vegetable farm and classifieds (also in LH_ADS).
+- Post to the maker (30.9., Antti: "lähetä postia tekijälle … näytä mistä voi lukea ne"): start-screen button #posti-btn
+  (airmail-striped) opens #posti, a lined letter (textarea + optional name, prefilled with the saved driver name). While it's
+  open a capture keydown listener swallows every key (Esc closes, Ctrl+Enter or Enter in the name field sends). POST /api/posti
+  { id, name, text ≤2000, lang } → posti.json in the blob store (last 3000 kept; 5 per browser per 10 min, then 429).
+  Antti reads them at https://suomiralli.netlify.app/posti.html — the page asks for the post key (or ?key=…, then remembered
+  in localStorage and dropped from the address bar); GET /api/posti?key=… and POST /api/postidel { key, i }. The repo is
+  public, so only the key's SHA-256 is in api.mjs (POSTI_KEY); the key itself was given to Antti in the chat. To change
+  it: put a new hash in POSTI_KEY. Test: t_posti.js against serve.mjs, with `const __KEY='…';` prepended. Paper: 'kirje' half (kirje.jpg).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
