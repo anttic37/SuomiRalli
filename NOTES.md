@@ -680,6 +680,9 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   (a tall, thin plume leaning with the wind); each puff its own shade (black → grey, 30 % brownish). Light: a flickering glow sprite
   at the pipe (S.glow), sparks (emberFx) and small flame licks (fireFx); the trailer's windows glow orange (emissive).
 - Sauna plume v3: 30 puffs/s (s0 0.9 m, rise 2.9–3.5 m/s, 8–12 s) so the column has no gaps; lifeFx pool 900 → 1300.
+- Sauna plume v4 ("paljon kapeampi ja pidempi", with a sketch): its own particle system saunaFx (900, no rise, drag 0.02) so the
+  wind carries it: 34 puffs/s, 0.42 → 1.7–2.6 m, up 3.0–3.4 m/s for 16–22 s (≈ 55 m tall), drifting 1.1 ± 0.35 m/s with the wind
+  and a slow sideways meander (the ribbon bends and wiggles like the sketch).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
