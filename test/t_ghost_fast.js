@@ -15,4 +15,6 @@ let calls = 0; const f0 = window.fetch; window.fetch = (u, o) => { if (String(u)
 await onlineRefresh(); const first = { opp: ONLINE.opp.map(o => o.name + ' ' + o.t), ghostCalls: calls, cached: Object.keys(localStorage).filter(k => /^yl-g:/.test(k)).length, last: localStorage.getItem('yl-opp-last') && JSON.parse(localStorage.getItem('yl-opp-last')).list.map(r => r.k).join(','), self: !!ONLINE.self };
 calls = 0; await onlineRefresh(); const second = { opp: ONLINE.opp.map(o => o.name), ghostCalls: calls };
 ONLINE.name = 'Juha'; calls = 0; await onlineRefresh(); const juha = { opp: ONLINE.opp.map(o => o.name), ghostCalls: calls };
-window.fetch = f0; return { first, second, juha };
+// the leader who also has that lap as the local ghost (online the local ghost isn't drawn): their record still comes on the road
+ONLINE.name = 'Wihka'; ghost = { time: 140.0005, splits: [], s: lap(140).s }; await onlineRefresh(); const leaderLocal = { opp: ONLINE.opp.map(o => o.name) };
+ghost = null; window.fetch = f0; return { first, second, juha, leaderLocal };

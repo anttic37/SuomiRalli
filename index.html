@@ -258,7 +258,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 19.21 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div class="build-stamp">editorista 19.31 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4385,7 +4385,7 @@ async function apiGet(path) { const r = await fetch(ONLINE.api + path, { cache: 
 // from around tenth place but never more than 10 % slower than the leader, so the first run is against a decent pace
 function oppPick(others, myT, mine) {
   let pick = myT < Infinity ? others.filter(r => r.t < myT).slice(-3) : others.filter(r => r.t <= others[0].t*1.1).slice(0, 10).slice(-3);
-  if (!pick.length) pick = (mine && !(ghost && Math.abs(ghost.time - mine.t) < 0.002) ? [mine] : []).concat(others.slice(0, 2));   // (already on top: your own record on the road — the fastest time there is — and the two nearest chasers)
+  if (!pick.length) pick = (mine ? [mine] : []).concat(others.slice(0, 2));   // (online the local ghost isn't drawn: the leader's own record always comes from the board)   // (already on top: your own record on the road — the fastest time there is — and the two nearest chasers)
   if (!pick.length && mine) pick = [mine];       // (alone on the board: your own best, under your name)
   return pick.sort((a, b) => b.t - a.t); }       // nearest first
 // ── the police's rap sheet: fires the driver set, people and animals they ran over → /api/rap (as deltas), and the list back for the paper's "Poliisi tiedottaa" ──
@@ -4425,6 +4425,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'Ykkönen näkee taas oman ennätyshaamunsa radalla (se jäi pois, jos sama kierros oli myös selaimessa). 3-2-1-GO pois: auto lähtee heti, kello käynnistyy lähtöviivalla kuten ennenkin', '22.28'],
   ['29.9.', 'Alkuruutu keskelle taas (valikko oli painunut ruudun alareunaan) ja "testattu: peli skulaa" -rivi pois', '22.18'],
   ['29.9.', '🚓 Poliisiasema pois jalkapallokentän päältä: sillä on nyt oma paikkansa kentän takana metsän reunassa (puut väistävät pihaa). Uusimmat-laatikossa pelkkä teksti ja koko lista vieritettävänä', '22.02'],
   ['29.9.', '🕘 Alkuruutuun takaisin pieni Uusimmat-laatikko: viisi uusinta muutosta päivän ja kellonajan kanssa, kaikki lehden Lyhyesti-sivuilla (nekin nyt kellonajan kanssa)', '21.50'],
@@ -8677,8 +8678,8 @@ function startRace(newTrack) {
   checkpoints.forEach(cp=>cp.passed=false);
   walkIn(true); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
   checkpointsPassed=0; raceTime=0; prevFinishS=null; prevCpS=null; onlineStart();
-  gameState = State.COUNTDOWN;
-  countdownT = 3.0; radioStart(); countdownLast = -1;
+  gameState = State.RACING; raceTime = 0;   // (no 3-2-1-GO: the clock starts at the line anyway — Antti, 29.9.)
+  countdownT = 0; radioStart(); countdownLast = -1; document.getElementById('countdown').style.opacity = 0;
   document.getElementById('overlay').classList.add('hidden');
   document.getElementById('results').style.display='none';
   clearMarks();
