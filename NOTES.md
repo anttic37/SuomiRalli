@@ -683,6 +683,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - Sauna plume v4 ("paljon kapeampi ja pidempi", with a sketch): its own particle system saunaFx (900, no rise, drag 0.02) so the
   wind carries it: 34 puffs/s, 0.42 → 1.7–2.6 m, up 3.0–3.4 m/s for 16–22 s (≈ 55 m tall), drifting 1.1 ± 0.35 m/s with the wind
   and a slow sideways meander (the ribbon bends and wiggles like the sketch).
+- Police station yard (29.9., "asfalttipiha, poliisit tappelee juoppojen kanssa pihassa"): drapePatch() lays a 1 m grid over the
+  terrain (Y + 0.05, polygonOffset) round the station, a = −8.5…8.5, b = −8…12, textured by polYardTex (grit, cracks, painted bays,
+  yellow street-edge line, POLIISI AJONEUVOT). Two scuffles (buildScuffle: a drunk + 2 or 1 officers, task 'scuffle'): 'grab' —
+  circling, the drunk flailing, the police shoving; 'loose' — he tears off staggering 4 m, they run him down; 'pin' — face down,
+  officers kneeling on him 4–8 s; then up and again. Shouting (saunaShout) < 60 m. Knock any of them and that scuffle stops.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
