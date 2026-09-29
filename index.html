@@ -175,11 +175,11 @@
   #controls-hint { position: fixed; bottom: 24px; left: 32px; z-index: 10; pointer-events: none; display: flex; gap: 16px; opacity: 0.25; }
   .key-hint { font-size: 9px; letter-spacing: 2px; color: #888; text-transform: uppercase; }
   /* ── Ylästön Sanomat: the paper on the start screen (left), the share QR on the right; the viewer ── */
-  #lehti-mini { position: fixed; left: 34px; top: 50%; transform: translateY(-50%) rotate(-2.5deg); z-index: 5; cursor: pointer; box-shadow: 0 18px 40px rgba(0,0,0,0.75), 0 0 0 1px #c8bfa8; transition: transform 0.2s, opacity 0.5s; opacity: 0; contain: layout paint; }
+  #lehti-mini { position: fixed; left: 34px; top: 50%; transform: translateY(-50%) rotate(-2.5deg); z-index: 5; cursor: pointer; box-shadow: 0 18px 40px rgba(0,0,0,0.75), 0 0 0 1px #c8bfa8; transition: transform 0.2s, opacity 0.5s; opacity: 0; contain: layout; }
   #lehti-mini.ready { opacity: 1; } #lehti-mini img { filter: none; }   /* (appears once built; no per-photo filters in the small copy) */
   #lehti-mini:hover { transform: translateY(-50%) rotate(-1deg) scale(1.02); }
   #lehti-mini .lm-scale { transform-origin: 0 0; width: 760px; height: 1000px; overflow: hidden; pointer-events: none; }
-  #lehti-mini .lm-btn { position: absolute; right: -14px; bottom: -16px; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 14px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; transform: rotate(4deg); letter-spacing: 0.04em; }
+  #lehti-mini .lm-btn { position: absolute; left: 50%; bottom: 12%; background: #ffd23a; color: #111; font: 900 18px Arial, sans-serif; padding: 10px 18px; border: 3px solid #111; box-shadow: 4px 5px 0 #000, 0 8px 22px rgba(0,0,0,0.55); transform: translateX(-50%) rotate(-5deg); letter-spacing: 0.05em; white-space: nowrap; }   /* (on the paper like an ad sticker: fully in view) */
   #lehti-btn { display: table; margin: 10px auto 0; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 16px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; cursor: pointer; }
   /* wide enough for the paper on the left (the same limit as lehtiLayout's s ≥ 0.24: W ≥ 1285, H ≥ 380): decided by CSS from the first paint,
      not when the script gets there after the village is built — the QR used to sit top-left first and then jump right */
@@ -260,7 +260,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 17.52 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div class="build-stamp">editorista 18.07 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
     <div style="text-align:center"><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
@@ -349,7 +349,7 @@ const I18N = {
   '😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!': ['😰 THE CAR’S ALL ALONE – SOMEONE COULD TAKE IT!', '😰 BILEN STÅR ALENE – NOEN KAN TA DEN!'],
   '😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!': ['😱 TOO SCARED TO GO FURTHER – THEY’LL STEAL THE CAR!', '😱 TØR IKKE GÅ LENGRE – BILEN BLIR STJÅLET!'],
   '😮‍💨 PUUSKUTTAA…': ['😮‍💨 OUT OF BREATH…', '😮‍💨 ANDPUSTEN…'],
-  '☢️ YDINRÄJÄHDYS!': ['☢️ NUCLEAR BLAST!', '☢️ ATOMEKSPLOSJON!'],
+  '☢️ YDINSOTA ALKOI!': ['☢️ NUCLEAR WAR HAS BEGUN!', '☢️ ATOMKRIGEN HAR BEGYNT!'],
   '🎈 KUUMAILMAPALLO POKSAHTI!': ['🎈 A HOT-AIR BALLOON BURST!', '🎈 EN LUFTBALLONG SPRAKK!'],
   '🐕 KOIRA JÄI ALLE! NAAPURIT RAIVOISSAAN': ['🐕 YOU RAN OVER A DOG! THE NEIGHBOURS ARE FURIOUS', '🐕 DU KJØRTE OVER EN HUND! NABOENE ER RASENDE'],
   '🐻 KARHU YLIAJETTU! 10 POLIISIA PERÄÄN!': ['🐻 YOU HIT A BEAR! 10 POLICE CARS AFTER YOU!', '🐻 DU KJØRTE PÅ EN BJØRN! 10 POLITIBILER ETTER DEG!'],
@@ -4404,6 +4404,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '📰 Lehden sivunapit ‹ › toimivat taas hiirellä, AVAA LEHTI -tarra näkyy kokonaan pikkulehden päällä, ja räjähdys on nyt suoraan: ☢️ YDINSOTA ALKOI (ei koeräjäytys)'],
   ['29.9.', '🔧 Alkuruutu ei enää hypi: Kerro kaverille -QR on heti oikealla paikallaan (ennen ensin vasemmassa yläkulmassa)'],
   ['29.9.', '🧱 Betoniporsaat kauas: mutkien sisäreunoilla ja sivuteiden suilla on nyt renkaita, porsaat vasta 8 m niiden takana – reunan hipaisu ei enää pilaa kisaa'],
   ['29.9.', '⚙️ Lisää kevennystä: vain liikkuneiden kappaleiden matriisit lasketaan (ennen kaikki 6600 joka ruutu), liikkumattomia ei kopioida instansseihin, kaikenkokoiset laatikot ja lieriöt piirretään yhdellä kutsulla – piirtokutsuja ~820 → ~570'],
@@ -4562,9 +4563,9 @@ const LEHTI = [
     img: ['ufo_a.jpg', 'ufo_b.jpg'], cap: ['Lautanen seuraa autoa 20 metrin korkeudella. Vihreä säde ulottuu maahan asti.', 'Ufoukko sädeaseineen ampuu kaikkea, mikä liikkuu.'],
     body: ['Kylän laidoille on laskeutunut kaksi lentävää lautasta. Kun niiden luo ajaa, ne heräävät ja alkavat ampua vihreitä plasmapalloja.', 'Yhdellä ukoista on sädease. Jos ajat hänen ylitseen, UFO nousee ilmaan ja lentää siitä lähtien autosi yllä – vihreä säde alas autoon.', 'Kolme osumaa ja auto räjähtää. Jalkaisin ukot ampuvat myös kuskia.'],
     box: ['NÄIN KAAPPAAT', '1. Aja UFOn luo (radalta pois)', '2. Aja sädeaseukon yli', '3. UFO on sinun – R palauttaa sen'] },
-  { id: 'nuke', size: 'main', n: 8, kick: '☢️ PÄÄUUTINEN', title: 'Koelähetys räjäytti kylän', lede: 'Paikallisradion koelähetys numero 11 ei ollutkaan pelkkää kohinaa. Seitsemän sekuntia sen alkamisesta taivaanranta välähti valkoiseksi.',
+  { id: 'nuke', size: 'main', n: 8, kick: '☢️ PÄÄUUTINEN', title: 'Ydinsota alkoi', lede: 'Kesken radiolähetyksen taivaanranta välähti valkoiseksi. Seitsemän sekuntia myöhemmin Ylästöä ei enää ollut.',
     img: ['nuke_a.jpg', 'nuke_b.jpg'], cap: ['Sienipilvi nousi Ylästön ylle hetkeä ennen paineaaltoa.', 'Paineaallon jälkeen: tuhkaa, mustia runkoja ja tyhjä tie. Rallikuski jatkoi matkaa.'],
-    body: ['YLÄSTÖ. Paineaalto kulki maata pitkin 340 metriä sekunnissa. Kun se ehti kylään, yhdeksän taloa kymmenestä oli poissa. Jäljelle jäi hiiltyneitä kuoria, vinoja puunrunkoja ja palanut maa.', 'Rallikuski lensi autoineen sivuun, mutta auto lähti yhä käyntiin. – Pellit menivät, mutta ajaa voi, kuski kertoo.', 'Ambulansseja ei tullut. Taivas muuttui ruskeaksi ja ilmassa leijui tuhkaa. Kuumailmapallot poksahtivat.', 'Viranomaiset muistuttavat: R-näppäin palauttaa kylän ennalleen. Koelähetys 11 kuuluu radiossa noin kerran kahdessa tunnissa.'],
+    body: ['YLÄSTÖ. Paineaalto kulki maata pitkin 340 metriä sekunnissa. Kun se ehti kylään, yhdeksän taloa kymmenestä oli poissa. Jäljelle jäi hiiltyneitä kuoria, vinoja puunrunkoja ja palanut maa.', 'Rallikuski lensi autoineen sivuun, mutta auto lähti yhä käyntiin. – Pellit menivät, mutta ajaa voi, kuski kertoo.', 'Ambulansseja ei tullut. Taivas muuttui ruskeaksi ja ilmassa leijui tuhkaa. Kuumailmapallot poksahtivat.', 'Viranomaiset muistuttavat: R-näppäin palauttaa kylän ennalleen. Sota alkaa, kun radiossa kuuluu koelähetys 11 – noin kerran kahdessa tunnissa.'],
     box: ['NÄIN SE TAPAHTUU', '1. Pidä radio päällä (E vaihtaa kanavaa)', '2. Odota, kunnes kuuluu 📡 KOELÄHETYS 11', '3. Seitsemän sekuntia… voi voi.'] },
 
   { id: 'kyla', size: 'page', n: 10, kick: '🏡 KYLÄ', title: 'Oikea Ylästö, oikeat talot', lede: 'Kadut kartasta, talot 1990-luvun kylästä: rintamamiestaloja, kuusikymmentäluvun pitkiä taloja ja kasaritaloja pihoineen.',
@@ -4734,7 +4735,8 @@ function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER
   setTimeout(() => (window.requestIdleCallback || ((f) => setTimeout(f, 0)))(lehtiFetch, { timeout: 2500 }), 1200);
   mini.onclick = () => paperOpen(0); const btn = document.getElementById('lehti-btn'); if (btn) btn.onclick = () => paperOpen(0);
   const P = document.getElementById('paper'); P.querySelector('.pv-close').onclick = paperClose;
-  if (!/^https?:/.test(location.protocol)) P.querySelector('.pv-pdf').href = 'https://suomiralli.netlify.app/lehti/ylaston-sanomat.pdf';   // (the editor's test game has no lehti/ beside it: the published PDF) P.querySelector('.pv-nav.l').onclick = () => paperGo(-1); P.querySelector('.pv-nav.r').onclick = () => paperGo(1);
+  if (!/^https?:/.test(location.protocol)) P.querySelector('.pv-pdf').href = 'https://suomiralli.netlify.app/lehti/ylaston-sanomat.pdf';   // (the editor's test game has no lehti/ beside it: the published PDF)
+  P.querySelector('.pv-nav.l').onclick = () => paperGo(-1); P.querySelector('.pv-nav.r').onclick = () => paperGo(1);
   P.addEventListener('click', (e) => { const a = e.target.closest('[data-go]'); if (a) { paperToPage(+a.dataset.go - 1); e.stopPropagation(); } else if (e.target === P) paperClose(); });
   P.addEventListener('wheel', (e) => { e.preventDefault(); const now = performance.now(); if (now - PAPER.wheelT < 380 || Math.abs(e.deltaY) < 8) return; PAPER.wheelT = now; paperGo(e.deltaY > 0 ? 1 : -1); }, { passive: false });
   P.addEventListener('touchstart', (e) => { PAPER.tx = e.touches[0].clientX; }, { passive: true });
@@ -7981,7 +7983,7 @@ function nukeBoom() { NUKE.on = true; NUKE.t = 0; NUKE.hit = false; const a = Ma
   if (!NUKE.ring) { NUKE.ring = new THREE.Mesh(new THREE.RingGeometry(0.92, 1, 64).rotateX(-Math.PI/2), new THREE.MeshBasicMaterial({ color: 0xc8a878, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide, fog: false })); NUKE.ring.renderOrder = 3; scene.add(NUKE.ring); }
   NUKE.ring.visible = true;
   if (audio) { beep(38, 5, 0.6, 'sawtooth'); beep(55, 3.5, 0.5, 'square'); beep(27, 7, 0.5, 'triangle'); }
-  pizzaMsg(T('☢️ YDINRÄJÄHDYS!'), true); }
+  pizzaMsg(T('☢️ YDINSOTA ALKOI!'), true); }
 function nukeHit() { NUKE.hit = true; const S = NUKE.saved = { stat: [], veh: [], life: [], mats: [], sky: null };
   // the blast: the car flung away from it, dented all over, still going
   const dx = car.x - NUKE.gx, dz = car.z - NUKE.gz, l = Math.hypot(dx, dz) || 1, nx = dx/l, nz = dz/l; car.vx += nx*24; car.vz += nz*24; car.angle += (Math.random() - 0.5)*1.6;
