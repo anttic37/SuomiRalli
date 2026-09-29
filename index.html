@@ -259,7 +259,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 13.17 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div class="build-stamp">editorista 13.46 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
     <div style="text-align:center"><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
@@ -4396,6 +4396,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '🧈 Nykiminen pois: auto piirretään fysiikka-askelten väliin (120 Hz fysiikka ei enää nyi 60/144 Hz näytöllä), savut ja liekit eivät tee roskaa (ei keräyspätkiä), kaukaiset ihmiset päivitetään harvemmin – logiikka ~25 % kevyempi'],
   ['29.9.', '🚨 Rekisteri: rikkomukset kirjataan kaikkialla – kisassa, GTA-tilassa ja maalin jälkeen; ne lähtevät heti maalissa ja valikkoon palatessa, lehti näyttää juuri tehdyt, ja myöhemmin annettu nimi päivittyy vanhoihin merkintöihin'],
   ['29.9.', '🚨 Lehteen Poliisi tiedottaa -sivu: eniten tulipaloja sytyttäneet ja ihmisten yli ajaneet kuskit netistä, etsintäkuulutus pahimmasta ja oma rekisterisi. Peli laskee palot, yliajot ja eläimet ja kertoo ne palvelimelle'],
   ['29.9.', '📰 Lehti tulee valmiiksi taitettuna palvelimelta (lehti/lehti.json, tehdään buildissa) – selain ei taita sitä enää itse; PDF samasta paikasta'],
@@ -4876,14 +4877,15 @@ function makeParticleSystem(max, additive, soft, atlas) {
   const P = []; for (let i = 0; i < max; i++) P.push({ life: 0, max: 1, x: 0, y: -99, z: 0, vx: 0, vy: 0, vz: 0, s0: 0, s1: 0, a0: 0, r: 0, g: 0, b: 0, r1: 0, g1: 0, b1: 0, ang: 0, spin: 0 });
   let next = 0, liveN = 0, dirty = false;   // (nothing alive and nothing changed: no loop, no upload)
   return {
-    emit(x, y, z, vx, vy, vz, life, s0, s1, a0, r, g, b, r1, g1, b1) { const p = P[next++ % max]; if (!(p.life > 0)) liveN++; dirty = true; Object.assign(p, { life, max: life, x, y, z, vx, vy, vz, s0, s1, a0, r, g, b, r1: r1 === undefined ? r : r1, g1: g1 === undefined ? g : g1, b1: b1 === undefined ? b : b1, ang: Math.random()*6.3, spin: (Math.random() - 0.5)*1.6 }); },
+    emit(x, y, z, vx, vy, vz, life, s0, s1, a0, r, g, b, r1, g1, b1) { const p = P[next++ % max]; if (!(p.life > 0)) liveN++; dirty = true; p.life = p.max = life; p.x = x; p.y = y; p.z = z; p.vx = vx; p.vy = vy; p.vz = vz; p.s0 = s0; p.s1 = s1; p.a0 = a0; p.r = r; p.g = g; p.b = b;   // (fields set in place: no object per particle, no garbage for the collector to stop the game over)
+      p.r1 = r1 === undefined ? r : r1; p.g1 = g1 === undefined ? g : g1; p.b1 = b1 === undefined ? b : b1; p.ang = Math.random()*6.3; p.spin = (Math.random() - 0.5)*1.6; },
     update(dt, rise, dragK) {
-      if (!liveN && !dirty) return; dirty = false;
+      if (!liveN && !dirty) return; dirty = false; const dr = Math.exp(-dt*dragK);
       for (let i = 0; i < max; i++) { const p = P[i];
         if (p.life <= 0) continue;
         p.life -= dt; if (p.life <= 0) { alpha[i] = 0; size[i] = 0; liveN--; continue; }
         const k = 1 - p.life/p.max;
-        const dr = Math.exp(-dt*dragK); p.vx *= dr; p.vz *= dr; p.vy = p.vy*dr + rise*dt;
+        p.vx *= dr; p.vz *= dr; p.vy = p.vy*dr + rise*dt;
         p.x += p.vx*dt; p.y += p.vy*dt; p.z += p.vz*dt;
         pos[i*3] = p.x; pos[i*3+1] = p.y; pos[i*3+2] = p.z;
         size[i] = p.s0 + (p.s1 - p.s0)*Math.sqrt(k); alpha[i] = p.a0*(1-k)*(k < 0.08 ? k/0.08 : 1);
@@ -5517,14 +5519,17 @@ function humanBump(h) {   // (within 130 m of the car, and once when put down: f
 function humanRemove(h) { h.gone = true; humanSync(h); if (h.view.kind === 'rig') lifeGroup.remove(h.view.g); if (h.ao >= 0) { CROWD.ao.setMatrixAt(h.ao, _hzero); CROWD.aoFree.push(h.ao); h.ao = -1; } const i = HUMANS.indexOf(h); if (i >= 0) HUMANS.splice(i, 1); }
 let carStillT = 0;
 function activeCrash() { return crashAt && worldT - crashAt.t < 16 && Math.hypot(car.x - crashAt.x, car.z - crashAt.z) < 20 ? crashAt : null; }
-function humansUpdate(dt) {
+let HFRAME = 0;
+function humansUpdate(dt0) { HFRAME++;
   for (const l of HGRID_USED) l.length = 0; HGRID_USED.length = 0;   // (the cell lists are reused frame to frame)
   for (const h of HUMANS) { if (h.gone || h.inside || h.seat || h.ride) continue; const k = hkey(h.x, h.z); let l = HGRID.get(k); if (!l) HGRID.set(k, l = []); if (!l.length) HGRID_USED.push(l); l.push(h); }
   const t = worldT;
-  for (const h of HUMANS) { if (h.gone) continue;
-    const dx = h.x - car.x, dz = h.z - car.z, near = h.player || dx*dx + dz*dz < 240*240, P = h.pose;
-    P.armL = P.armR = P.legs = P.legsR = null; P.armLz = P.armRz = 0; P.walk = 0; P.dy = 0;
+  for (let i = 0; i < HUMANS.length; i++) { const h = HUMANS[i]; if (h.gone) continue;
+    const dx = h.x - car.x, dz = h.z - car.z, d2 = dx*dx + dz*dz, near = h.player || d2 < 240*240, P = h.pose; let dt = dt0;
     if (!!h.far === near) { h.far = !near; if (h.view.kind === 'rig') humanSync(h); }   // far from the car: rigged people aren't drawn
+    if (d2 > 70*70 && !h.player && !h.down && !h.ride && !h.mad && !h.dodge && !h.settle && !(h.hop > 0) && !h.vy) {   // (level of detail: 70–150 m every 2nd frame, to 240 m every 3rd, beyond that every 6th, with the time saved up — nobody notices a far walker at 30 or 10 Hz)
+      const every = d2 > 240*240 ? 6 : d2 > 150*150 ? 3 : 2; h.lodAcc = (h.lodAcc || 0) + dt0; if ((HFRAME + i) % every) continue; dt = Math.min(h.lodAcc, 0.12); h.lodAcc = 0; } else h.lodAcc = 0;
+    P.armL = P.armR = P.legs = P.legsR = null; P.armLz = P.armRz = 0; P.walk = 0; P.dy = 0;
     if (h.ride) { rideStep(h, dt); humanSync(h); continue; }
     if (!h.down && !h.inside && h.mad) madStep(h, dt, t); else if (!h.down && !h.inside && h.task) h.task.update(h, dt, t, near);
     if (h.dodge) { if ((h.dodge.t -= dt) > 0 && !h.down && !h.inside && !h.seat) { h.vx = h.dodge.x; h.vz = h.dodge.z; h.yaw = Math.atan2(h.dodge.x, h.dodge.z); P.walk = 0.55; P.ph += dt*9; } else h.dodge = null; }   // out of a van's way
@@ -9114,6 +9119,7 @@ function adaptResolution(raw) {
   if (next !== RES.dpr) { RES.dpr = next; RES.good = 0; RES.cool = 3; renderer.setPixelRatio(next); }
 }
 const PHYS_DT = 1/120;
+const RI = { x: 0, z: 0, a: 0 };   // the car before the last physics step: it is drawn between that and now (acc/PHYS_DT of the way), so the 120 Hz steps don't judder on a 60 or 144 Hz screen
 let lastTime = 0, acc = 0;
 // P: pause (in a race or GTA mode; also when the tab is left) — the world stops, the sound stops, the radio waits
 const PAUSE = { on: false, radio: false };
@@ -9136,16 +9142,22 @@ function loop(time) {
     // hot path so there is no hitch on the first real frame at GO.
     acc += dt;
     const live = gameState === State.RACING;
-    while (acc >= PHYS_DT) { updateCar(PHYS_DT, live); if (WALK.on) { car.x = WALK.cx; car.z = WALK.cz; car.angle = WALK.ca; car.vx = car.vz = car.speed = 0; }   /* (parked: it stays put, on any slope) */ updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
+    while (acc >= PHYS_DT) { RI.x = car.x; RI.z = car.z; RI.a = car.angle; updateCar(PHYS_DT, live); if (WALK.on) { car.x = WALK.cx; car.z = WALK.cz; car.angle = WALK.ca; car.vx = car.vz = car.speed = 0; }   /* (parked: it stays put, on any slope) */ updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
     if (live) updateCheckpoints(dt);
   } else {
     acc = 0;
   }
   
+  let rx = null, rz = 0, ra = 0; const sx = car.x, sz = car.z, sa = car.angle;
+  if ((gameState === State.RACING || gameState === State.COUNTDOWN) && !WALK.on && (car.x - RI.x)**2 + (car.z - RI.z)**2 < 25) {   // (a reset or a teleport: no blending across it)
+    const al = Math.min(1, acc/PHYS_DT); let da = car.angle - RI.a; while (da > Math.PI) da -= 2*Math.PI; while (da < -Math.PI) da += 2*Math.PI;
+    rx = RI.x + (car.x - RI.x)*al; rz = RI.z + (car.z - RI.z)*al; ra = RI.a + da*al; car.x = rx; car.z = rz; car.angle = ra;
+    carGroup.position.set(rx, Y(rx, rz) + BASS.hopY, rz); carGroup.rotation.y = ra; }
   U_TIME.value = performance.now()/1000; skyDome.position.copy(camera.position);
   updateMarks(dt); updateDust(dt); updateDebris(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
   if (gameState !== State.MENU) drawMinimap();
   renderer.render(scene, camera);
+  if (rx !== null) { car.x = sx + (car.x - rx); car.z = sz + (car.z - rz); car.angle = sa + (car.angle - ra); }   // (back to the physics state, keeping any push the world gave it meanwhile)
 }
 
 // ════════════════════════════════════════
