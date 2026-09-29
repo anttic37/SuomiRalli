@@ -664,6 +664,18 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   sweep, message; ufoCapUpdate lifts it over 3.5 s to 20 m above the car then follows (exp 5/s, leaning, spinning, bob), nearVis entry
   follows, an additive green beam cone down to the car. The car is still the car (physics, leaderboard unchanged). ufoReset →
   ufoCapReset puts it back on its legs and re-adds the static box. t_ufocap.
+- Police station (29.9., "poliisiasema K-kaupan lähelle, poliisiautoja parkissa"): buildPoliceStation (first in lifeExtras3Build):
+  a spot 22–140 m from the K-shop facing the nearest side street (≤ 26 m), clearSpot 8.5 + no trees/plots/roads over the 16×18 m
+  lot, ≥ 14 m off the route. makePoliceStation: 13×8 m two storeys, ribbon windows, canopy, glass doors, roof sign (polSignTex),
+  blue lamp, radio mast, flag, parking lines. Static box kind 'house' (wallTop 6.6: rammed hard it burns like a house, station: true).
+  Three Vehicles kind 'policeP' (makePoliceCar, beacons off, parked nose-in); ramming one (impulse > 3) → policeIncident('crash').
+  Two officers (task 'copchat': face the car when it's near, a finger raised at a speeder).
+- Sauna party (29.9., "saunaporukka sauna-auton kanssa, möly, paksu musta savu"): buildSauna — openSpot 22–110 m (no trees, not in a
+  yard), a new place every page load; van + sauna trailer are Vehicles (kind 'car', mass 1.6/1.3); props (crate, bench, bucket,
+  ghetto blaster); seven Humans in towels (skin top, towel shorts, barefoot, bottles) with saunaTask: ring round the fire, swigs,
+  whoops, hops; one at a time goes in (inside) 7–16 s, comes out steaming (steamPuff) and runs a yelling lap; car < 40 m at speed →
+  all cheer and jump. Stove pipe: 16 black puffs/s (lifeFx, 7–11 s, to 9–13 m) while the car is < 420 m. saunaShout(): sawtooth
+  "HUUU/JEEE" sweeps and ha-ha-ha bursts, more often the more are up, < 90 m. X3.reset brings anyone inside back out.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

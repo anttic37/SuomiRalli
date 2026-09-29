@@ -4312,6 +4312,8 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'Saunaporukka: joka kerta eri paikassa saunakärry ja vanha pakettiauto, kiuas täysillä (paksu musta savu), seitsemän pyyhkeissä – kauhea möly ja remakka, välillä joku juoksee höyryävänä kierroksen ja auton ohi ajaessa kaikki hurraavat'],
+  ['29.9.', 'Poliisiasema K-kaupan lähelle: kaksikerroksinen 80-luvun asema, POLIISI-kyltti, sininen lyhty, radiomasto, lippu, kolme poliisiautoa parkissa ja kaksi poliisia ovella (poliisiautoon ajo = poliisit huomaavat)'],
   ['29.9.', 'UFO:n luona ufoukko jolla on sädease – ampuu autoa tai jalkaisin kulkevaa kuskia. Aja ufoukon yli ja UFO on sinun: se nousee ja lentää 20 m auton yllä vihreä säde alas (R palauttaa)'],
   ['29.9.', 'Jalkaisin: juokseminen väsyttää (palkki, puuskutus), ja yli 90 m päässä autosta kuski pelkää että auto varastetaan – 140 m:stä ei uskalla kauemmas'],
   ['29.9.', 'KOKEILU: F-näppäimellä kuski nousee autosta ja kävelee (nuolet, välilyönti = juoksu) – sama ihminen kuin muut: törmäilee, kaatuu jos ajetaan päälle; F auton vieressä = takaisin autoon'],
@@ -5393,7 +5395,7 @@ function collideCarWorld() {
       if (B.kind === 'house' && into >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) policeIncident('fire'); } } });
   for (const v of VEHICLES) { if (v.gone) continue; const R = v.hl + CAR_HL + 0.6; if (Math.abs(v.x - P.x) > R || Math.abs(v.z - P.z) > R) continue;
     const h = obbSat(P, v); if (!h) continue; const imp = resolvePair(P, v, h, 0.25); v.awake = true; v.moved = true;
-    if (imp > 0.8) { carDamage(h.nx, h.nz, imp); if (imp > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) policeIncident('fire'); } }
+    if (imp > 0.8) { carDamage(h.nx, h.nz, imp); if (imp > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) policeIncident('fire'); else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
   car.x = P.x; car.z = P.z; car.vx = P.vx; car.vz = P.vz;
   boxHitsHumans(playerBox(), car.vx, car.vz, true);
 }
@@ -7446,9 +7448,105 @@ function buildMediHeli() { const sp = openSpot(10, 24, 70); if (!sp) return; res
   let bt = 0, wt = 0; X3.upd.push((dt) => { const d = Math.hypot(V.x - car.x, V.z - car.z); if (d > 260 || V.fire || V.charred) return; M.rotor.rotation.y += dt*3.8; M.tail.rotation.x += dt*22; bt += dt; M.bcn.emissiveIntensity = (bt % 1.1) < 0.12 ? 3 : 0.2;
     if (audio && d < 70 && (wt -= dt) <= 0) { wt = 1/2.4; beep(46, 0.16, 0.06*(1 - d/70), 'triangle'); } }); }   // a slow whop-whop
 
+// ── the police station by the K-shop: an 80s two-storey block, POLIISI on the roof, the blue lamp by the door, a radio mast, a flag;
+//    three patrol cars parked in front (Vehicles like any other: shove one hard and the police come). The building is a house for
+//    the rules (ram it hard enough and it burns). ──
+let _polSign = null;
+function polSignTex() { if (_polSign) return _polSign; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#16389a'; g.fillRect(0, 0, 512, 128); g.strokeStyle = '#f4f4f0'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 116); g.font = 'bold 86px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f4f4f0'; g.fillText('POLIISI', 256, 68);
+  return (_polSign = new THREE.CanvasTexture(c)); }
+function makePoliceStation() { const G = new THREE.Group(), wall = lmat(0xc9c2b2, 0.9), band = lmat(0x8a8478, 0.9), glass = lmat(0x1e2a36, 0.15), dark = lmat(0x2b2d33, 0.8), white = lmat(0xf2f2ee, 0.5), steel = lmat(0x9a9aa0, 0.4);
+  const B = (w, h, d, m, x, y, z, sh) => lmesh(lbox(w, h, d), m, x, y, z, G, sh);
+  B(13.2, 0.9, 8.2, band, 0, 0.0, 0); B(13, 6.2, 8, wall, 0, 3.5, 0); B(13.4, 0.4, 8.4, dark, 0, 6.75, 0); B(13.4, 0.18, 8.4, white, 0, 6.5, 0);   // plinth, walls, flat roof and its fascia
+  for (const y of [2.05, 4.75]) for (const s of [-1, 1]) { B(11.6, 1.15, 0.1, glass, 0, y, s*4.02, false); B(11.8, 0.1, 0.16, white, 0, y - 0.62, s*4.05, false); for (let k = -5; k <= 5; k += 1.45) B(0.08, 1.15, 0.13, white, k, y, s*4.04, false); }   // ribbon windows, sills, mullions
+  for (const s of [-1, 1]) for (const y of [2.05, 4.75]) for (const zz of [-2, 2]) B(0.1, 1.1, 1.3, glass, s*6.52, y, zz, false);
+  B(4.4, 0.22, 2.2, dark, -3.2, 3.05, 5.1); for (const s of [-1, 1]) B(0.14, 2.9, 0.14, steel, -3.2 + s*2.0, 1.55, 6.05);                         // entrance canopy
+  B(1.9, 2.4, 0.12, glass, -3.2, 1.55, 4.03, false); B(2.1, 0.1, 0.16, steel, -3.2, 2.8, 4.05, false); B(3.2, 0.3, 1.4, band, -3.2, 0.3, 4.8);   // glass doors, step
+  const sign = new THREE.Mesh(lgeo('polSign', () => new THREE.PlaneGeometry(5.2, 1.3)), new THREE.MeshStandardMaterial({ map: polSignTex(), roughness: 0.5, emissive: 0x16389a, emissiveIntensity: 0.25 })); sign.position.set(1.5, 7.7, 4.0); G.add(sign);
+  B(5.4, 1.4, 0.12, dark, 1.5, 7.7, 3.93); for (const s of [-1, 1]) B(0.12, 1.0, 0.12, steel, 1.5 + s*2.3, 7.0, 3.9);                            // the roof sign on its legs
+  const lamp = new THREE.MeshStandardMaterial({ color: 0x3a6aff, emissive: 0x3a6aff, emissiveIntensity: 1.2, roughness: 0.3 }); lmesh(lbox(0.5, 0.5, 0.5), lamp, -5.8, 3.3, 4.3, G, false); B(0.1, 0.5, 0.4, steel, -5.8, 3.3, 4.05, false);   // the blue lamp
+  lmesh(lcyl(0.07, 9, 6), steel, 5.2, 11.3, -2.5, G); for (let k = 0; k < 4; k++) B(0.9, 0.05, 0.05, steel, 5.2, 8 + k*2, -2.5, false);           // radio mast
+  lmesh(lcyl(0.05, 8, 6), white, -6.2, 4, 6.6, G); const fl = B(1.5, 0.95, 0.03, white, -5.4, 7.4, 6.6, false); B(1.5, 0.22, 0.04, lmat(0x1f4fb0, 0.6), -5.4, 7.4, 6.6, false); B(0.22, 0.95, 0.04, lmat(0x1f4fb0, 0.6), -5.9, 7.4, 6.6, false);   // the flag
+  for (let k = 0; k < 4; k++) B(0.12, 0.02, 4.8, white, -1.2 + k*3, 0.02, 9.2, false);                                                          // parking lines
+  return G; }
+function buildPoliceStation() { const K = LANDMARKS.find(L => L[0] === 'kauppa'); if (!K) return; const [, kx, kz] = K; let best = null;
+  const ok = (cx, cz, yaw) => { if (!clearSpot(cx, cz, 8.5) || treeNear(cx, cz, 9.5) || distRoute(cx, cz) < 14) return false;
+    for (let a = -8; a <= 8; a += 4) for (let b = -6; b <= 12; b += 3) { const [x, z] = lloc(cx, cz, yaw, a, b); if (inAnyPlot(x, z) || onRoad(x, z, 0.5) || treeNear(x, z, 1.5)) return false; } return true; };
+  for (let k = 0; k < 900 && !best; k++) { const r = 22 + Math.min(k, 600)*0.2, a = Math.random()*6.3, cx = kx + Math.sin(a)*r, cz = kz + Math.cos(a)*r;
+    let rd = 1e9, q = null; for (const p of sideRoadPts) { const d = (p.x - cx)**2 + (p.y - cz)**2; if (d < rd) { rd = d; q = p; } } if (!q || rd > 26*26) continue;   // a street to face, not too far
+    const yaw = Math.atan2(q.x - cx, q.y - cz); if (ok(cx, cz, yaw)) best = [cx, cz, yaw]; }
+  if (!best) return; const [cx, cz, yaw] = best; reserve('police', [cx, cz], 11);
+  const [bx, bz] = lloc(cx, cz, yaw, 0, -3), base = footprintBase(bx, bz, 6.6, 4.1, yaw) + 0.35, G = makePoliceStation(); G.position.set(bx, base, bz); G.rotation.y = yaw; lifeGroup.add(G);   // (a building: seen from anywhere, like the houses)
+  addStaticBox({ x: bx, z: bz, yaw, hw: 6.5, hl: 4.0, kind: 'house', wallTop: 6.6, roofH: 0.4, station: true });
+  for (let k = 0; k < 3; k++) { const [px, pz] = lloc(cx, cz, yaw, -1.2 + 1.5 + k*3 - 1.5, 6.2), M = makePoliceCar(); M.glows.forEach(g => { g.visible = false; }); lifeGroup.add(M.G);   // nose in, towards the door
+    new Vehicle({ kind: 'policeP', x: px, z: pz, yaw: yaw + Math.PI, hw: 0.9, hl: 2.4, view: { kind: 'mesh', g: M.G }, axle: [0.8, 1.4, -1.35] }); }
+  for (let i = 0; i < 2; i++) { const [ox, oz] = lloc(cx, cz, yaw, -3.2 + (i ? 1.0 : -0.9), 2.6 + i*0.3), rig = makeAdult(0x2a3a60, 0x1c2c5a, lpick(L_HAIR), { sel: { hat: 3, top: 8, longSleeve: 1, longPants: 1, tache: i === 0 }, acc: 0x1c2540, shoes: 0x141414, w: 1.05 });
+    new Human({ x: ox, z: oz, yaw: yaw + (i ? -1.9 : 1.9), rig, task: { kind: 'copchat', update(h, dt, t) { h.vx = h.vz = 0; if (!walkTo(h, h.home.x, h.home.z, 1.2, dt)) return; const d = Math.hypot(car.x - h.x, car.z - h.z);
+      h.yaw = d < 30 ? Math.atan2(car.x - h.x, car.z - h.z) : h.home.yaw; h.pose.armR = d < 30 && Math.hypot(car.vx, car.vz) > 12 ? -2.6 + Math.sin(t*6)*0.3 : Math.sin(t*0.9 + i*2) > 0.6 ? -1.6 : -0.15; h.pose.armL = -0.2; } } }); }   // (speeding past: a warning finger)
+  X3.station = { x: bx, z: bz, yaw }; }
+
+// ── the sauna party: somewhere different every time — a sauna trailer behind an old van, the stove going flat out (thick black smoke
+//    out of the pipe), seven in towels, beer, shouting and roaring; now and then one goes in, comes out steaming and runs a lap
+//    yelling. The car coming by: they all cheer it on. ──
+function makeSaunaVan() { const G = new THREE.Group(), paint = lmat(lpick([0xc8742a, 0x8a5a2a, 0xd8c890, 0x5a7a4a]), 0.5), white = lmat(0xeae4d4, 0.5), glass = lmat(0x1e2a36, 0.15), black = lmat(0x141414, 0.8), hub = lmat(0xb8b8b8, 0.35);
+  G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z, rx) => { const me = lmesh(lbox(w, h, d), m, x, y, z, G); if (rx) me.rotation.x = rx; return me; };
+  B(1.9, 1.55, 4.5, paint, 0, 1.25, 0); B(1.92, 0.5, 4.52, white, 0, 1.75, 0); B(1.7, 0.55, 0.06, glass, 0, 1.65, 2.26, -0.2);
+  for (const s of [-1, 1]) { B(0.05, 0.5, 0.9, glass, s*0.96, 1.72, 1.6); B(0.05, 0.45, 2.2, glass, s*0.96, 1.72, -0.6); }
+  B(1.96, 0.18, 0.18, black, 0, 0.55, 2.3); B(1.96, 0.18, 0.18, black, 0, 0.55, -2.3);
+  for (const s of [-1, 1]) for (const zz of [1.45, -1.5]) { const w = lmesh(ltyre(0.34, 0.22), black, s*0.85, 0.34, zz, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.17, 0.23, 10), hub, s*0.85, 0.34, zz, G, false); h.rotation.z = Math.PI/2; }
+  return G; }
+function makeSaunaTrailer() { const G = new THREE.Group(), wood = lmat(0x9a6a3c, 0.9), dark = lmat(0x5a3a22, 0.9), roof = lmat(0x3a3a3a, 0.8), black = lmat(0x141414, 0.8), glass = lmat(0x2a2016, 0.3);
+  G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z) => lmesh(lbox(w, h, d), m, x, y, z, G);
+  B(2.2, 2.1, 3.4, wood, 0, 1.75, 0); for (let k = 0; k < 7; k++) B(2.24, 0.04, 3.44, dark, 0, 0.8 + k*0.3, 0);                                  // log-look cabin
+  const r = lmesh(gableGeo, roof, 0, 2.8, 0, G); r.scale.set(2.6, 0.7, 3.8); B(0.8, 1.7, 0.06, dark, 0.5, 1.6, 1.72); B(0.4, 0.3, 0.06, glass, -0.55, 2.0, 1.72);   // roof, door, window
+  B(2.3, 0.15, 3.3, black, 0, 0.62, 0); B(0.1, 0.1, 1.6, black, 0, 0.55, 2.4);                                                                   // chassis, drawbar
+  for (const s of [-1, 1]) { const w = lmesh(ltyre(0.3, 0.2), black, s*1.15, 0.3, -0.3, G); w.rotation.z = Math.PI/2; }
+  lmesh(lcyl(0.1, 1.5, 8), black, -0.6, 3.3, -0.9, G); lmesh(lcyl(0.16, 0.12, 8), black, -0.6, 4.05, -0.9, G);                                  // the stove pipe
+  return G; }
+function saunaShout(d) { if (!audio || d > 90) return; const { ctx, master } = audio, k = 0.11*(1 - d/90), t0 = ctx.currentTime, r = Math.random();
+  if (r < 0.25) { for (let i = 0; i < 4; i++) beep(260 - i*25, 0.07, k*0.8, 'sawtooth'); return; }   // (ha-ha-ha-haa)
+  const o = ctx.createOscillator(), g = ctx.createGain(), f0 = 130 + Math.random()*160, dur = 0.25 + Math.random()*0.5; o.type = 'sawtooth';
+  o.frequency.setValueAtTime(f0, t0); o.frequency.linearRampToValueAtTime(f0*(1.3 + Math.random()*0.5), t0 + dur*0.4); o.frequency.linearRampToValueAtTime(f0*0.8, t0 + dur);   // "HUUUU!" "JEEEE!"
+  g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(k, t0 + 0.04); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + dur + 0.05); }
+const saunaTask = (S, i) => ({ kind: 'sauna', update(h, dt, t) { const st = h.st || (h.st = { m: 'hang', a: i*0.9 + Math.random()*0.4, r: 3.2 + Math.random()*1.2, tt: 6 + Math.random()*20, ph: Math.random()*6.3 });
+    const d = Math.hypot(car.x - h.x, car.z - h.z), cs = Math.hypot(car.vx, car.vz); h.tilt = 0;
+    if (st.m === 'go') { if (walkTo(h, S.door[0], S.door[1], 1.8, dt)) { st.m = 'in'; st.tt = 7 + Math.random()*9; h.inside = true; humanSync(h); } return; }
+    if (st.m === 'in') return;   // (the update doesn't run inside: see the party's own clock)
+    if (st.m === 'lap') { st.la += dt*0.9; const x = S.x + Math.sin(st.la)*8, z = S.z + Math.cos(st.la)*8; walkTo(h, x, z, 5, dt); h.pose.armL = h.pose.armR = -2.8 + Math.sin(t*12)*0.3;
+      if (Math.random() < dt*2) steamPuff(h.x, Y(h.x, h.z) + 1.5, h.z); if (st.la > st.l1) { st.m = 'hang'; st.tt = 15 + Math.random()*25; } return; }
+    const gx = S.x + Math.sin(st.a)*st.r, gz = S.z + Math.cos(st.a)*st.r;
+    if (!walkTo(h, gx, gz, 1.5, dt)) return;
+    if (d < 40 && cs > 4) { h.yaw = Math.atan2(car.x - h.x, car.z - h.z); h.pose.armL = h.pose.armR = -2.8 + Math.sin(t*10 + st.ph)*0.3; if (!(h.hop > 0) && Math.random() < dt*2.5) h.vy = 2.4; return; }   // the car! cheer it on
+    h.yaw = Math.atan2(S.x - h.x, S.z - h.z) + Math.sin(t*0.8 + st.ph)*0.6; h.sway = 0.2*Math.sin(t*1.9 + st.ph);
+    const k = Math.sin(t*1.3 + st.ph); h.pose.armR = k > 0.55 ? -2.5 : k < -0.7 ? -2.9 + Math.sin(t*9)*0.3 : -1.0; h.pose.armL = Math.sin(t*0.7 + st.ph*2) > 0.8 ? -2.8 : -0.3;   // swig, whoop, wave
+    if (!(h.hop > 0) && Math.random() < dt*0.25) h.vy = 2;
+    if ((st.tt -= dt) <= 0 && !S.inside) { st.m = 'go'; S.inside = h; } },
+  reset(h) { h.st = null; h.sway = 0; } });
+function steamPuff(x, y, z) { lifeFx.emit(x, y, z, (Math.random() - 0.5)*0.5, 0.8 + Math.random()*0.5, (Math.random() - 0.5)*0.5, 1.6 + Math.random(), 0.5, 1.8, 0.45, 0.92, 0.92, 0.94, 0.95, 0.95, 0.96); }
+function buildSauna() { let sp = null; for (let k = 0; k < 30 && !sp; k++) { const p = openSpot(8, 22, 110); if (p && !treeNear(p[0], p[1], 7) && !inAnyPlot(p[0], p[1])) sp = p; } if (!sp) sp = openSpot(8, 22, 140); if (!sp) return;
+  reserve('sauna', sp, 9); const [x, z] = sp, yaw = Math.random()*6.3;
+  const [vx, vz] = lloc(x, z, yaw, -2.2, 3.4), [tx, tz] = lloc(x, z, yaw, -2.2, -1.4);
+  const van = new Vehicle({ kind: 'car', x: vx, z: vz, yaw, hw: 0.98, hl: 2.35, view: { kind: 'mesh', g: makeSaunaVan() }, axle: [0.85, 1.45, -1.5], mass: 1.6 }); lifeGroup.add(van.view.g); vehicleSync(van);
+  const tr = new Vehicle({ kind: 'car', x: tx, z: tz, yaw, hw: 1.15, hl: 1.75, view: { kind: 'mesh', g: makeSaunaTrailer() }, axle: [1.1, 1.2, -1.2], mass: 1.3 }); lifeGroup.add(tr.view.g); vehicleSync(tr);
+  const S = { x: x + Math.cos(yaw)*1.8, z: z - Math.sin(yaw)*1.8, tr, inside: null, inT: 0, shoutT: 0, smokeAcc: 0 }; S.door = [0, 0];
+  const props = new THREE.Group(); lmesh(lbox(0.42, 0.28, 0.3), lmat(0xe0b020, 0.6), 0.6, 0.14, 0.8, props); lmesh(lbox(1.8, 0.07, 0.38), lmat(0x8a6a44, 0.9), -0.4, 0.45, -1.4, props); for (const s of [-0.7, 0.7]) lmesh(lbox(0.08, 0.42, 0.34), lmat(0x6a4a30, 0.9), -0.4 + s, 0.21, -1.4, props);
+  lmesh(lcyl(0.28, 0.35, 10), lmat(0x3a6ab0, 0.6), 1.3, 0.18, -0.6, props); lmesh(lbox(0.5, 0.3, 0.2), lmat(0x1c1c1c, 0.5), 0.2, 0.15, 1.6, props);   // crate, bench, bucket, the ghetto blaster
+  placeAt(props, S.x, S.z, yaw); lifeGroup.add(props); nearVis(props, S.x, S.z);
+  const skin = [0xe8b795, 0xf0c8a8, 0xd8a47e], towel = [0xf4f4f0, 0x2a5db0, 0xd83b2c, 0xf0c02a, 0x3aa64c];
+  for (let i = 0; i < 7; i++) { const a = i*0.9, h = new Human({ x: S.x + Math.sin(a)*3.5, z: S.z + Math.cos(a)*3.5, yaw: a + Math.PI, rig: makeAdult(lpick(skin), lpick(towel), lpick(L_HAIR), { sel: { longPants: 0 }, shoes: lpick(skin) }), task: saunaTask(S, i) });
+    if (i % 2) handProp(h, lmesh(lgeo('bottle', () => new THREE.CylinderGeometry(0.03, 0.036, 0.24, 6)), lmat(0x5a3a1a, 0.3), 0, 0, 0)); }
+  const crew = HUMANS.filter(h => h.task && h.task.kind === 'sauna' && Math.hypot(h.x - S.x, h.z - S.z) < 8);
+  X3.upd.push((dt) => { const d = Math.hypot(car.x - S.x, car.z - S.z); S.door = lloc(tr.x, tr.z, tr.yaw, 0.5, tr.hl + 0.6);
+    if (d < 420) { S.smokeAcc += dt*16; const [px, pz] = lloc(tr.x, tr.z, tr.yaw, -0.6, -0.9), py = tr.gy + 4.15;   // the stove: thick black smoke, day and night
+      while (S.smokeAcc > 1) { S.smokeAcc--; const wx = Math.sin(WIND_YAW)*0.9, wz = Math.cos(WIND_YAW)*0.9; lifeFx.emit(px + (Math.random() - 0.5)*0.2, py, pz + (Math.random() - 0.5)*0.2, wx + (Math.random() - 0.5)*0.4, 1.5 + Math.random()*0.8, wz + (Math.random() - 0.5)*0.4, 7 + Math.random()*4, 0.6, 9 + Math.random()*4, 0.85, 0.05, 0.05, 0.05, 0.22, 0.21, 0.22); } }
+    if (S.inside) { const h = S.inside; if (h.down || h.gone) S.inside = null; else if (h.inside && (S.inT += dt) > (h.st ? h.st.tt : 8)) {   // out, steaming, off round the field yelling
+        S.inT = 0; h.inside = false; h.x = S.door[0]; h.z = S.door[1]; h.st.m = 'lap'; h.st.la = Math.atan2(h.x - S.x, h.z - S.z); h.st.l1 = h.st.la + 6.3; for (let k = 0; k < 10; k++) steamPuff(h.x, Y(h.x, h.z) + 1 + Math.random(), h.z); saunaShout(d*0.5); S.inside = null; humanSync(h); } }
+    if (d < 90 && (S.shoutT -= dt) <= 0) { const up = crew.filter(h => !h.down && !h.gone && !h.inside).length; S.shoutT = up ? (0.15 + Math.random()*0.5)*7/(up + 1) : 9; if (up) saunaShout(d); } });   // the din: louder the more of them are up
+  X3.reset.push(() => { S.inside = null; S.inT = 0; crew.forEach(h => { if (h.inside) { h.inside = false; humanSync(h); } }); }); X3.sauna = S; }
+
 function lifeExtras3Build() {
-  TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.heli = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
-  buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli();
+  TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.heli = null; X3.station = null; X3.sauna = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
+  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna();
 }
 function extras3Update(dt) { for (const f of X3.upd) f(dt); esUpdate(dt); cabbageUpdate(dt); ufoUpdate(dt); }
 function lifeExtras3Reset() { for (const f of X3.reset) f(); wreckReset(); esReset(); cabbageReset(); ufoReset(); roadiesPlace(true); }
