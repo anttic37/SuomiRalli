@@ -191,6 +191,7 @@
   #paper .pv-nav { position: absolute; top: 50%; margin-top: -32px; width: 56px; height: 64px; border: none; border-radius: 6px; background: rgba(255,255,255,0.1); color: #ffd23a; font: 900 34px/64px Arial, sans-serif; cursor: pointer; }
   #paper .pv-nav:hover { background: rgba(255,255,255,0.2); } #paper .pv-nav.l { left: 14px; } #paper .pv-nav.r { right: 14px; }
   #paper .pv-close { position: absolute; top: 10px; right: 14px; width: 44px; height: 44px; border: none; border-radius: 50%; background: #e0141e; color: #fff; font: 900 22px/44px Arial, sans-serif; cursor: pointer; z-index: 2; }
+  #paper .pv-pdf { position: absolute; top: 10px; right: 68px; height: 44px; padding: 0 14px; border-radius: 22px; background: #ffd23a; color: #111; font: 900 15px/44px Arial, sans-serif; letter-spacing: 0.04em; text-decoration: none; z-index: 2; } #paper .pv-pdf:hover { background: #ffe27a; }
   #paper .pv-count { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font: 700 13px "Courier New", monospace; letter-spacing: 0.2em; color: #bbb; }
   .pv-page { width: 760px; height: 1000px; box-sizing: border-box; padding: 30px 36px 34px; position: relative; overflow: hidden; color: #1a1814; text-align: left; font-family: "Times New Roman", "Liberation Serif", "DejaVu Serif", serif;
     background: #f1ead8; background-image: radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1px); background-size: 4px 4px; }
@@ -230,7 +231,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 10.20 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div class="build-stamp">editorista 10.59 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
     <div style="text-align:center"><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
@@ -255,7 +256,7 @@
   <div class="deco bottom"><svg width="80" height="20" viewBox="0 0 80 20" aria-hidden="true"><path d="M8 20L17 0h8L16 20zM30 20L39 0h8L38 20zM52 20L61 0h8L60 20z" fill="#e0141e"/></svg></div>
   <div id="lehti-mini"></div>
 </div>
-<div id="paper"><button class="pv-close" title="sulje (Esc)">✕</button><button class="pv-nav l" title="edellinen (←)">‹</button><button class="pv-nav r" title="seuraava (→)">›</button><div class="pv-stage"></div><div class="pv-count"></div></div>
+<div id="paper"><button class="pv-close" title="sulje (Esc)">✕</button><a class="pv-pdf" href="lehti/ylaston-sanomat.pdf" download="Ylaston-Sanomat.pdf" target="_blank" title="koko lehti PDF:nä">⬇ PDF</a><button class="pv-nav l" title="edellinen (←)">‹</button><button class="pv-nav r" title="seuraava (→)">›</button><div class="pv-stage"></div><div class="pv-count"></div></div>
 <div id="hud">
   <div class="hud-block"><span class="hud-label" data-t>Aika</span><span class="hud-value" id="timer">00:00.000</span><span class="hud-sub" id="best-hud"></span><span class="hud-sub" id="pizza-hud" style="color:#ffb347"></span></div>
   <div class="hud-block" style="text-align:center"><span class="hud-label" data-t>Tarkastus</span><span class="hud-value" id="cp-counter">0 / 0</span></div>
@@ -4354,6 +4355,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '📄 Ylästön Sanomat PDF:nä: ⬇ PDF -nappi lehden yläkulmassa lataa koko lehden (kaikki sivut ja kuvat, sisällysluettelo linkkeinä)'],
   ['29.9.', '📰 Alkuruutuun Ylästön Sanomat: uusin pääjuttu etusivulla, jokaisesta ominaisuudesta juttu (pääjutut aukeamina), näppäimet ja kaikki muutokset lehdessä. Kerro kaverille oikealle, radio pienemmäksi, UUTUUS, PC-laatikko ja paikkarivi pois'],
   ['29.9.', '☢️ Kun radiossa soi koelähetys 11: ydinräjähdys – välähdys, paineaalto, 90 % kaikesta tuhoutuu, loput hiiltyy ja palaa, maa mustaksi, tuhkaa sataa, sienipilvi taivaalla. Auto lentää sivuun mutta ajo jatkuu. R palauttaa maailman'],
   ['29.9.', 'Poliisiasemalle asfalttipiha (ruudut maalattu, keltainen reunaviiva, halkeamia) ja pihalla poliisit painivat juoppojen kanssa: rimpuilua, karkaamisia, maahan taltutus – ja huutoa'],
@@ -4538,6 +4540,7 @@ const LEHTI = [
     img: ['asema.jpg'], cap: ['Poliisiaseman piha. Kolme partioautoa ruuduissaan.'],
     body: ['Juoppo repäisee itsensä irti ja hoippuu karkuun, mutta konstaapelit saavat hänet naama asfalttiin. Partioautoihin ei kannata ajaa – poliisi huomaa sen.'] },
 
+  { id: 'pdf', size: 'half', n: 42, kick: '📄 PDF', title: 'Lehti nyt myös paperilla', img: ['pdf.jpg'], body: ['Ylästön Sanomat latautuu kokonaan PDF:nä – lehden yläkulman ⬇ PDF -napista. Kaikki sivut, kuvat ja muutokset, tulostimeen tai kaverille.', 'Sisällysluettelon sivunumerot hyppäävät PDF:ssäkin oikeaan juttuun.'] },
   { id: 'sauna', size: 'half', n: 30, kick: '🔥 SAUNA', title: 'Saunaporukka savuttaa pellolla', img: ['sauna.jpg'], body: ['Saunakärry ja vanha pakettiauto ilmestyvät joka kerta eri paikkaan. Piipusta nousee pitkä musta nauha, ja möly kuuluu kylälle asti.'] },
   { id: 'hirvi', size: 'half', n: 31, kick: '🦌 HIRVI', title: 'Hirvi jähmettyi valoihin', img: ['hirvi.jpg'], body: ['Metsissä laiduntaa hirviä. Välillä yksi ylittää tien – ja jää tuijottamaan autoa.'] },
   { id: 'pallot', size: 'half', n: 32, kick: '🎈 PALLOT', title: 'Kuumailmapallo poksahti', img: ['pallot.jpg'], body: ['Kaksi kuumailmapalloa lipuu kylän yllä. Alta ajaessa on 5 % mahdollisuus, että toinen poksahtaa ja kori rymähtää maahan.'] },
@@ -4585,14 +4588,16 @@ function lhKeys() { const K = [['Enter', 'lähtö'], ['↑', 'kaasu'], ['↓', '
   return '<span class="lh-kick">📋 OHJEET</span><h2 class="mid">Näin ajat</h2><div class="lh-lede">Pökö 205 ajetaan näppäimistöllä. Peli on tehty tietokoneelle – kännykällä voi lukea lehteä.</div>' +
     '<div class="lh-keys">' + K.map(([k, t]) => '<div><kbd>' + lhEsc(k) + '</kbd><span>' + lhEsc(t) + '</span></div>').join('') + '</div>' +
     '<div class="lh-box"><b>GTA-TILA</b>Aja lähdössä oikeaa kaistaa pois radalta – koko kylä on vapaa.<br>R palauttaa kisaan.</div>' +
-    '<div class="lh-box"><b>KERRO KAVERILLE</b>suomiralli.netlify.app – QR-koodi on alkuruudussa.</div>'; }
+    '<div class="lh-box"><b>KERRO KAVERILLE</b>suomiralli.netlify.app – QR-koodi on alkuruudussa.</div>' +
+    '<div class="lh-box"><b>LEHTI PDF:NÄ</b>Koko lehti tulostettavana: ⬇ PDF lehden yläkulmassa.</div>'; }
 function lhLyhyesti() { const out = []; let cur = [], len = 0; const flush = () => { if (!cur.length) return; out.push('<span class="lh-kick">📰 LYHYESTI</span><h2 class="mid">' + (out.length ? 'Lyhyesti (jatkuu)' : 'Lyhyesti: kaikki muutokset') + '</h2><div class="lh-cols c3 small">' + cur.join('') + '</div>'); cur = []; len = 0; };
   for (const [d, t] of CHANGES) { const L = t.length + 60; if (len + L > (out.length ? 5600 : 5000)) flush(); cur.push('<p><b>' + lhEsc(d) + '</b> ' + lhEsc(t) + '</p>'); len += L; } flush(); return out; }
 function lhLoadImgs(el) { el.querySelectorAll('img[data-src]').forEach(im => { if (im.src) return; im.onerror = () => im.parentNode.classList.add('miss'); im.onload = () => im.parentNode.classList.add('ok'); im.src = im.dataset.src; }); }
 function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER.pages = lhPlan();
   const mini = document.getElementById('lehti-mini'); mini.innerHTML = '<div class="lm-scale">' + PAPER.pages[0] + '</div><div class="lm-btn">📰 ' + T('AVAA LEHTI') + '</div>'; lhLoadImgs(mini);
   mini.onclick = () => paperOpen(0); const btn = document.getElementById('lehti-btn'); if (btn) btn.onclick = () => paperOpen(0);
-  const P = document.getElementById('paper'); P.querySelector('.pv-close').onclick = paperClose; P.querySelector('.pv-nav.l').onclick = () => paperGo(-1); P.querySelector('.pv-nav.r').onclick = () => paperGo(1);
+  const P = document.getElementById('paper'); P.querySelector('.pv-close').onclick = paperClose;
+  if (!/^https?:/.test(location.protocol)) P.querySelector('.pv-pdf').href = 'https://suomiralli.netlify.app/lehti/ylaston-sanomat.pdf';   // (the editor's test game has no lehti/ beside it: the published PDF) P.querySelector('.pv-nav.l').onclick = () => paperGo(-1); P.querySelector('.pv-nav.r').onclick = () => paperGo(1);
   P.addEventListener('click', (e) => { const a = e.target.closest('[data-go]'); if (a) { paperToPage(+a.dataset.go - 1); e.stopPropagation(); } else if (e.target === P) paperClose(); });
   P.addEventListener('wheel', (e) => { e.preventDefault(); const now = performance.now(); if (now - PAPER.wheelT < 380 || Math.abs(e.deltaY) < 8) return; PAPER.wheelT = now; paperGo(e.deltaY > 0 ? 1 : -1); }, { passive: false });
   P.addEventListener('touchstart', (e) => { PAPER.tx = e.touches[0].clientX; }, { passive: true });
