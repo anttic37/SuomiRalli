@@ -224,7 +224,7 @@
   .lh-teas { display: flex; gap: 16px; border-top: 2px solid #1a1814; padding-top: 12px; margin-top: 6px; } .lh-teas a { flex: 1; font: 13px/1.2 serif; } .lh-teas b { display: block; font: 700 18px/1.08 serif; margin-top: 6px; } .lh-teas i { font-size: 13px; color: #c4201a; font-style: normal; font-weight: 700; }
   .lh-want1 { display: block; margin-top: 6px; font: 900 15px Arial, sans-serif; letter-spacing: 0.08em; color: #c4201a; text-transform: uppercase; } .lh-want1 b { color: #1a1814; }
   .lh-inside { display: flex; gap: 18px; align-items: baseline; border-top: 1px solid #1a1814; margin-top: 12px; padding-top: 7px; font: 14px serif; } .lh-inside b { font: 900 12px Arial, sans-serif; letter-spacing: 0.14em; } .lh-inside i { color: #c4201a; font-style: normal; font-weight: 700; }
-  .lh-index { margin-top: 18px; border-top: 2px solid #1a1814; padding-top: 8px; column-count: 2; column-gap: 28px; column-rule: 1px solid rgba(26,24,20,0.28); font: 13.5px/1.48 serif; } .lh-index b { display: block; font: 900 13px Arial, sans-serif; letter-spacing: 0.12em; column-span: all; margin-bottom: 4px; }
+  .lh-index { margin-top: 18px; border-top: 2px solid #1a1814; padding-top: 8px; column-count: 2; column-gap: 28px; column-rule: 1px solid rgba(26,24,20,0.28); font: 13px/1.42 serif; } .lh-index b { display: block; font: 900 13px Arial, sans-serif; letter-spacing: 0.12em; column-span: all; margin-bottom: 4px; }
   .lh-index a { display: flex; gap: 6px; white-space: nowrap; overflow: hidden; } .lh-index a::after { content: ''; order: 1; flex: 1; border-bottom: 1px dotted #8a8270; margin-bottom: 5px; } .lh-index a i { order: 2; } .lh-index a:hover, .lh-teas a:hover b, .lh-inside a:hover { text-decoration: underline; } .lh-index i { color: #c4201a; font-style: normal; font-weight: 700; }
   .lh-in.even { display: flex; flex-direction: column; justify-content: space-between; } .lh-in.even > .lh-kick, .lh-lyhp > .lh-in > .lh-kick { align-self: flex-start; }   /* (a small leftover goes evenly into the gaps, not as a hole at the bottom) */
   .lh-hp > .lh-in { height: 100%; display: flex; flex-direction: column; }
@@ -238,6 +238,8 @@
   .rp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; } .rp-h { display: block; font: 900 15px Arial, sans-serif; letter-spacing: 0.1em; border-bottom: 2px solid #1a1814; padding-bottom: 4px; margin-bottom: 2px; }
   .rp-t { width: 100%; border-collapse: collapse; font: 17px/1.3 "Times New Roman", "Liberation Serif", serif; } .rp-t td { padding: 3px 2px; border-bottom: 1px dotted #a39a86; } .rp-t .rk { width: 26px; color: #c4201a; font-weight: 700; } .rp-t .n { text-align: right; font-weight: 700; width: 44px; }
   .rp-t .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; } .rp-own span { font-size: 16px; } .rp-note { font: italic 12.5px/1.35 serif; color: #6a6358; margin-top: 10px; }
+  .lh-adgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; } .lh-adcol { display: flex; flex-direction: column; gap: 6px; } .lh-adgrid .ad-big { font-size: 30px; } .lh-adgrid .lh-ad.cl .ad-big, .lh-adrow .lh-ad.cl .ad-big { font-size: 17px; letter-spacing: 0.1em; } .lh-adgrid .lh-ad.cl .ad-small, .lh-adrow .lh-ad.cl .ad-small { font-size: 13px; line-height: 1.3; margin-top: 2px; } .lh-adgrid .cl .ad-txt, .lh-adrow .cl .ad-txt { padding: 6px 12px; } .lh-adgrid .cl .ad-tag, .lh-adrow .cl .ad-tag { display: none; }
+  .lh-adrow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
   .lh-lyhp > .lh-in { height: 100%; display: flex; flex-direction: column; } .lh-lyhp .lh-lyh { flex: 1 1 0; min-height: 0; column-fill: auto; overflow: hidden; }
   .lh-lyh { column-count: 3; column-gap: 22px; column-rule: 1px solid rgba(26,24,20,0.28); font: 13.5px/1.38 "Times New Roman", "Liberation Serif", serif; margin-top: 4px; }
   .lh-lyh p { margin: 0 0 7px; padding-bottom: 7px; border-bottom: 1px dotted #a39a86; break-inside: avoid; } .lh-lyh b.d { color: #c4201a; font: 900 11px Arial, sans-serif; letter-spacing: 0.06em; margin-right: 2px; }
@@ -350,6 +352,7 @@ const I18N = {
   '😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!': ['😱 TOO SCARED TO GO FURTHER – THEY’LL STEAL THE CAR!', '😱 TØR IKKE GÅ LENGRE – BILEN BLIR STJÅLET!'],
   '😮‍💨 PUUSKUTTAA…': ['😮‍💨 OUT OF BREATH…', '😮‍💨 ANDPUSTEN…'],
   '🔥 ENNÄTYSVAUHTI': ['🔥 RECORD PACE', '🔥 REKORDFART'],
+  'JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ': ['ON FOOT · F = BACK IN THE CAR · SPACE = PUNCH', 'TIL FOTS · F = TILBAKE I BILEN · MELLOMROM = SLÅ'], '👊 PAM!': ['👊 POW!', '👊 PANG!'], '🚨 JOKU SOITTI POLIISIT!': ['🚨 SOMEONE CALLED THE POLICE!', '🚨 NOEN RINGTE POLITIET!'],
   '☢️ YDINSOTA ALKOI!': ['☢️ NUCLEAR WAR HAS BEGUN!', '☢️ ATOMKRIGEN HAR BEGYNT!'],
   '🎈 KUUMAILMAPALLO POKSAHTI!': ['🎈 A HOT-AIR BALLOON BURST!', '🎈 EN LUFTBALLONG SPRAKK!'],
   '🐕 KOIRA JÄI ALLE! NAAPURIT RAIVOISSAAN': ['🐕 YOU RAN OVER A DOG! THE NEIGHBOURS ARE FURIOUS', '🐕 DU KJØRTE OVER EN HUND! NABOENE ER RASENDE'],
@@ -3187,24 +3190,34 @@ const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0, stam: 1
 // Fear: past 90 m from the car they get nervous (slower, looking back over the shoulder); at 140 m they won't go on — it'll be stolen.
 const WALK_FEAR = 90, WALK_MAX = 140;
 function walkMsg(t, col) { const cpd = document.getElementById('checkpoint-display'); if (!cpd) return; cpd.textContent = t; cpd.style.color = col || '#ffe9a8'; cpd.style.opacity = 1; clearTimeout(walkMsg.tm); walkMsg.tm = setTimeout(() => cpd.style.opacity = 0, 1600); }
-const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WALK, turn = ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0) - ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0);
-  const fwd = (keys['ArrowUp'] || keys['KeyW']) ? 1 : (keys['ArrowDown'] || keys['KeyS']) ? -1 : 0, wantRun = keys['Space'] || keys['ShiftLeft'] || keys['ShiftRight'];
+const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WALK;   // the arrows move you the way they point on the screen (the camera holds still while you walk), Shift runs, Space punches
+  const ix = ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0) - ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0), iz = ((keys['ArrowUp'] || keys['KeyW']) ? 1 : 0) - ((keys['ArrowDown'] || keys['KeyS']) ? 1 : 0), wantRun = keys['ShiftLeft'] || keys['ShiftRight'];
+  const A = W.camA, mx = Math.sin(A)*iz + Math.cos(A)*ix, mz = Math.cos(A)*iz - Math.sin(A)*ix, ml = Math.hypot(mx, mz), fwd = ml > 0.01 ? 1 : 0;
+  if (fwd) h.yaw += angDiff(Math.atan2(mx, mz) - h.yaw)*Math.min(1, dt*12);   // (turns to where it goes, quickly)
+  if (keys['Space'] && !W.spPrev) walkPunch(h); W.spPrev = !!keys['Space']; if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; }
   if (W.stam < 0.02) W.puff = true; else if (W.stam > 0.35) W.puff = false;
   const run = wantRun && fwd > 0 && !W.puff, dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz), fear = Math.max(0, Math.min(1, (d - WALK_FEAR)/(WALK_MAX - WALK_FEAR)));
   W.stam = Math.max(0, Math.min(1, W.stam + (run ? -dt/6 : dt*(fwd ? 0.07 : 0.14))));
-  h.yaw += turn*2.6*dt; let sp = fwd > 0 ? (run ? 6.2 : W.puff ? 1.4 : 2.3) : fwd*1.3;
-  const away = (Math.sin(h.yaw)*dx + Math.cos(h.yaw)*dz)/(d || 1)*Math.sign(sp); if (away > 0) sp *= 1 - 0.6*fear;   // (nervous: dragging their feet going further off)
+  let sp = fwd ? (run ? 6.8 : W.puff ? 1.6 : 3.6) : 0;
+  const away = (Math.sin(h.yaw)*dx + Math.cos(h.yaw)*dz)/(d || 1); if (away > 0 && sp) sp *= 1 - 0.6*fear;   // (nervous: dragging their feet going further off)
   h.vx = Math.sin(h.yaw)*sp; h.vz = Math.cos(h.yaw)*sp; h.tilt = W.puff ? 0.28 : 0;
   if (W.puff) { h.pose.armL = h.pose.armR = -0.6; if (!fwd) h.tilt = 0.45 + 0.05*Math.sin(t*9); if ((W.pt -= dt) <= 0) { W.pt = 0.55; if (audio) beep(170 + Math.random()*40, 0.2, 0.04, 'triangle'); } }   // hands on knees, panting
   if (W.puff && !W.saidPuff) { W.saidPuff = true; walkMsg(T('😮‍💨 PUUSKUTTAA…')); } else if (!W.puff) W.saidPuff = false;
   if (d > WALK_FEAR) { h.sway = 0.25*Math.sin(t*2.2)*fear; if (!W.saidFear) { W.saidFear = true; walkMsg(T('😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!'), '#ffb080'); } } else { W.saidFear = false; h.sway = 0; }
   if (d > WALK_MAX) { h.x = car.x + dx/d*WALK_MAX; h.z = car.z + dz/d*WALK_MAX; if ((W.ft -= dt) <= 0) { W.ft = 3; walkMsg(T('😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!'), '#ff8a6a'); } } },
   reset() {} });
+function walkPunch(h) {   // a swing at whoever stands in front: they run off, and someone calls the police
+  WALK.punchT = 0.3; const fx = Math.sin(h.yaw), fz = Math.cos(h.yaw); let best = null, bd = 1.9;
+  forHumansNear(h.x, h.z, 2, o => { if (o === h || o.gone || o.down || o.seat || o.inside || o.ride) return; const dx = o.x - h.x, dz = o.z - h.z, d = Math.hypot(dx, dz); if (d < bd && (dx*fx + dz*fz)/(d || 1) > 0.25) { bd = d; best = o; } });
+  if (audio) beep(best ? 140 : 300, best ? 0.12 : 0.06, best ? 0.25 : 0.05, best ? 'square' : 'triangle'); if (!best) return;
+  const dx = best.x - h.x, dz = best.z - h.z, l = Math.hypot(dx, dz) || 1; best.dodge = { t: 3.5 + Math.random()*1.5, x: dx/l*5, z: dz/l*5 };   // (off at a run, away from you)
+  walkMsg(T('👊 PAM!'), '#ffd23a');
+  if (!best.animal && worldT - (WALK.copT || -99) > 12) { WALK.copT = worldT; policeSpawn(1); policeMsg(T('🚨 JOKU SOITTI POLIISIT!'), true); } }
 function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on || POLICE.hold > 0 || Math.hypot(car.vx, car.vz) > 3) return false;
   const [x, z] = lloc(car.x, car.z, car.angle, -1.35, 0.3);
   const h = WALK.h = new Human({ x, z, yaw: car.angle - Math.PI/2, rig: makeAdult(0xf2f2ee, 0xf2f2ee, 0x5a3a1e, { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), task: playerWalkTask(), temp: true });
-  h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.downT = 0; WALK.stam = 1; WALK.puff = false; WALK.ft = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
-  const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('JALKAISIN · F = TAKAISIN AUTOON'); cpd.style.color = '#ffe9a8'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 1800); return true; }
+  h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.camA = camAngle.current; WALK.spPrev = true; WALK.punchT = 0; WALK.downT = 0; WALK.stam = 1; WALK.puff = false; WALK.ft = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
+  const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ'); cpd.style.color = '#ffe9a8'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 1800); return true; }
 function walkIn(force) { if (!WALK.on) return false; const h = WALK.h; if (!force && (h.down || Math.hypot(h.x - car.x, h.z - car.z) > 3.8)) return false;
   if (!h.gone) humanRemove(h); WALK.on = false; WALK.h = null; return true; }
 function walkBar() { let b = WALK.bar; if (!b) { b = WALK.bar = document.createElement('div'); b.style.cssText = 'position:fixed;left:50%;bottom:118px;width:160px;height:9px;margin-left:-80px;border:1px solid rgba(255,255,255,0.55);border-radius:5px;background:rgba(0,0,0,0.45);z-index:20;display:none;overflow:hidden'; b.innerHTML = '<i style="display:block;height:100%;width:100%;background:#7ad86a"></i>'; document.body.appendChild(b); }
@@ -4431,6 +4444,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'Jalkaisin nuolet vievät ruudun suuntiin, kävely nopeampaa, Shift juoksee ja välilyönti lyö – lyöty juoksee karkuun ja poliisi tulee. Ennätysvauhtiin riittää 10 %, ja katolla vilkkuu nyt oikeasti keltainen valo. Lehteen Pienet ilmoitukset: K-kauppa, pizzeria ja vihannestila', '23.47'],
   ['29.9.', 'Ennätysvauhdin merkki on nyt pieni keltainen vilkku auton katolla ja pieni 🔥 ENNÄTYSVAUHTI ruudun yläreunassa (iso teksti pois); lehden juttu päivitetty', '23.13'],
   ['29.9.', '🔥 Ennätysvauhti: kun väliajat ovat korkeintaan 5 % parhaan ajan perässä (tai edellä), paloautot, poliisit, ambulanssit ja hirvet väistävät – suoraan metsään. Lehteen oma sivu', '23.02'],
   ['29.9.', 'Lehden etusivulle Kylän suurimmat rikolliset (etsintäkuulutettu nimeltä), Poliisi tiedottaa heti sivulla 2, ydinsota lehden loppupäähän; kaikki lehden kuvat uusiksi kauempaa ja yläviistosta', '22.45'],
@@ -4607,18 +4621,18 @@ const LEHTI = [
 
   { id: 'vauhti', size: 'page', n: 50, kick: '🔥 ENNÄTYSVAUHTI', title: 'Ennätysvauhti – koko kylä väistää', lede: 'Kun kuski ajaa ennätyksen tahtia, katolla vilkkuu keltainen valo – ja paloautot, poliisit, ambulanssit ja hirvet kaartavat tieltä suoraan metsään.',
     img: ['vauhti.jpg'], cap: ['Poliisiauto valitsi metsän. Rallikuski jatkoi ennätysvauhtia.'],
-    body: ['YLÄSTÖ. Väliajoilla kello kertoo, oletko ennätyksen tahdissa. Viisi prosenttia perässä riittää – tai parempi.', 'Silloin auton katolle syttyy pieni keltainen vilkku ja ruudun yläreunaan tulee 🔥 ENNÄTYSVAUHTI. Kylä tietää, kenen tie tämä on. Hälytysajoneuvot kääntävät rattia ja painavat kaasun pohjaan, eivätkä ne katso eteensä. Hirvi ei jähmety valoihin, vaan loikkaa kuusikkoon.', '– Ajoin paloautolla suoraan metsään. En tiedä miksi, sanoo nimettömänä pysyvä palomies.'],
-    box: ['NÄIN SE TOIMII', 'Väliajoilla verrataan parhaaseen aikaan', 'Alle 5 % perässä: keltainen vilkku katolle', 'Edessä olevat väistävät metsään'] },
+    body: ['YLÄSTÖ. Väliajoilla kello kertoo, oletko ennätyksen tahdissa. Kymmenen prosenttia perässä riittää – tai parempi.', 'Silloin auton katolle syttyy pieni keltainen vilkku ja ruudun yläreunaan tulee 🔥 ENNÄTYSVAUHTI. Kylä tietää, kenen tie tämä on. Hälytysajoneuvot kääntävät rattia ja painavat kaasun pohjaan, eivätkä ne katso eteensä. Hirvi ei jähmety valoihin, vaan loikkaa kuusikkoon.', '– Ajoin paloautolla suoraan metsään. En tiedä miksi, sanoo nimettömänä pysyvä palomies.'],
+    box: ['NÄIN SE TOIMII', 'Väliajoilla verrataan parhaaseen aikaan', 'Alle 10 % perässä: keltainen vilkku katolle', 'Edessä olevat väistävät metsään'] },
   { id: 'kyla', size: 'page', n: 10, kick: '🏡 KYLÄ', title: 'Oikea Ylästö, oikeat talot', lede: 'Kadut kartasta, talot 1990-luvun kylästä: rintamamiestaloja, kuusikymmentäluvun pitkiä taloja ja kasaritaloja pihoineen.',
     img: ['kyla.jpg'], cap: ['Ylästö ylhäältä. Joka talolla oma piha, aita, postilaatikko ja omenapuu.'],
     body: ['Talot on rakennettu oikeille paikoilleen, ikkunat verhoineen, ovet kadun puolelle. Pihoilla leikitään, grillataan, lakaistaan mattoja ja pelataan sulkapalloa.', 'Mäet ovat toistaiseksi kahdeksankertaisesti liioiteltuja – oikea maanmittauslaitoksen korkeusmalli on tulossa.'] },
   { id: 'aika', size: 'page', n: 11, kick: '🌅 VUOROKAUSI', title: 'Aamu, päivä ja ilta', lede: 'Jokainen lähtö arpoo vuorokaudenajan: kostea aamu, kirkas päivä tai kultainen kesäilta.',
     img: ['aika.jpg'], cap: ['Sama kylä kolmessa valossa: aamu, päivä, ilta.'],
     body: ['Valo tulee eri suunnasta, varjot pitenevät ja taivas vaihtaa väriä. Illalla ikkunat hehkuvat ja saunan piipussa näkyy kiukaan loimu.'] },
-  { id: 'jalan', size: 'page', n: 12, kick: '🚶 JALKAISIN', title: 'F – ja kuski nousee autosta', lede: 'Pysähdy, paina F, ja kävele. Juokse välilyönnillä – mutta kunto loppuu, ja auton jättäminen yksin pelottaa.',
+  { id: 'jalan', size: 'page', n: 12, kick: '🚶 JALKAISIN', title: 'F – ja kuski nousee autosta', lede: 'Pysähdy, paina F, ja kävele – nuolet vievät sinne minne osoittavat. Välilyönti lyö, ja lyöty juoksee karkuun. Joku soittaa aina poliisit.',
     img: ['jalan.jpg'], cap: ['Kuski jaloittelee kylän raitilla. Auto odottaa käsijarru päällä.'],
-    body: ['Jalkaisin kuski on ihan tavallinen kyläläinen: hän törmäilee aitoihin ja kaatuu, jos joku ajaa päälle. Hän nousee kyllä itse.', 'Juokseminen väsyttää, ja yli 90 metrin päässä autosta kuski alkaa pelätä, että joku vie sen. 140 metrin jälkeen ei uskalla kauemmas.'],
-    box: ['NÄPPÄIMET', 'F = ulos / takaisin autoon', 'Nuolet = kävely · välilyönti = juoksu'] },
+    body: ['Jalkaisin kuski on ihan tavallinen kyläläinen: hän törmäilee aitoihin ja kaatuu, jos joku ajaa päälle. Hän nousee kyllä itse.', 'Shiftillä pääsee juoksemaan, mutta se väsyttää. Yli 90 metrin päässä autosta kuski alkaa pelätä, että joku vie sen. 140 metrin jälkeen ei uskalla kauemmas.', 'Kyläläisiä ei kannata lyödä: poliisi tulee paikalle, ja lyöty pakenee paikalta niin kovaa kuin pääsee.'],
+    box: ['NÄPPÄIMET', 'F = ulos / takaisin autoon', 'Nuolet = kävely · Shift = juoksu', 'Välilyönti = lyö (poliisi tulee)'] },
   { id: 'es', size: 'page', n: 13, kick: '⚡ ES', title: 'ES-juoma: tuplanopeus 40 sekunniksi', lede: 'K-kaupan edessä on ES-piste. Pysähdy, myyjä tuo tölkin – ja auto kulkee kaksi kertaa niin kovaa.',
     img: ['es.jpg'], cap: ['ES-kyltti K-kaupan edessä. Tanssijat houkuttelevat pysähtymään.'],
     body: ['Nopeus tuplaantuu 40 sekunniksi. Mutta varo: kolari ES:n vaikutuksen alaisena sytyttää auton, ja kuski lentää ulos.'] },
@@ -4682,7 +4696,21 @@ const LH_ADS = [   // the paper's ads: they fill what the stories leave (an odd 
   { img: 'es.jpg', big: 'ES 2,90 mk', small: 'K-kauppa Ylästö · kylmänä kassalta · tuplavauhti 40 sekunniksi' },
   { img: 'pizza.jpg', big: 'PIZZAA PERILLE!', small: 'Pizzeria Ylästö · lähetti löytää sinut ajon aikana · +10 % vauhtia' },
   { cl: 1, big: 'KADONNUT', small: 'Kuumailmapallon kori, pajua, Ylästön yllä. Löytäjä palkitaan. Ilmailukerho Ylätuuli.' },
+  { img: 'es.jpg', big: 'K-KAUPPA YLÄSTÖ', small: 'Maito, makkara ja ES. Auki myös ydinsodan jälkeen – kassalla sama hymy.' },
+  { img: 'kaali.jpg', big: 'TUORETTA KAALIA', small: 'Ylästön vihannestila. Nyt 30 % vähemmän rengasjälkiä. Traktori jahtaa vain varkaat.' },
+  { img: 'pizza.jpg', big: 'PIZZA PERILLE', small: 'Pizzeria Ylästö: kuski ajaa ennätysvauhtia – väistäkää. Kylmä pizza = seuraava kylmä myös.' },
+  { cl: 1, big: 'OSTETAAN', small: 'Ehjä betoniporsas. Mieluiten kaukana tiestä. Vastaukset K-kaupan ilmoitustaululle.' },
+  { cl: 1, big: 'KIITOS', small: 'Palokunnalle, joka ajoi suoraan metsään. Talo paloi, mutta kuusikko on nyt siisti. – Perhe Ylästöstä' },
+  { cl: 1, big: 'VUOKRATAAN', small: 'Saunakärry. Savuaa hyvin. Naapurit eivät ole valittaneet (enää). Soita iltaisin.' },
+  { cl: 1, big: 'MYYDÄÄN', small: 'Kaalia, vähän ajettu. Vihannestila, pihalla ei koiraa (on).' },
 ];
+// the small-ads page: the village's own shops and people, a little absurd (Antti, 29.9.: the K-shop, the pizzeria, the vegetable farm)
+function lhAdsPage(pno) { const A = (k, h) => { const a = LH_ADS[k], ph = a.img ? '<div class="lh-photo ad-ph"><img data-src="lehti/' + a.img + '" alt=""><span class="lh-miss"></span></div>' : '';
+    return '<div class="lh-ad' + (a.img ? ' v' : ' cl') + '" style="height:' + h + 'px;margin:0"><span class="ad-tag">ILMOITUS</span>' + ph + '<div class="ad-txt"><div class="ad-big">' + a.big + '</div><div class="ad-small">' + lhEsc(a.small) + '</div></div></div>'; };
+  const I = (b) => LH_ADS.findIndex(a => a.big === b);
+  return lhPg(lhFolio('ILMOITUKSET', pno) + '<span class="lh-kick">📢 ILMOITUKSET</span><h2 class="mid">Pienet ilmoitukset</h2>' +
+    '<div class="lh-adgrid">' + A(I('K-KAUPPA YLÄSTÖ'), 330) + A(I('PIZZA PERILLE'), 330) + A(I('TUORETTA KAALIA'), 300) + '<div class="lh-adcol">' + A(I('OSTETAAN'), 96) + A(I('KIITOS'), 96) + A(I('VUOKRATAAN'), 96) + '</div></div>' +
+    '<div class="lh-adrow">' + A(I('MYYDÄÄN') >= 0 ? LH_ADS.findIndex(a => a.big === 'MYYDÄÄN' && /Kaalia/.test(a.small)) : 0, 92) + A(I('KADONNUT'), 92) + '</div>', 'lh-frame', ' data-noad="1"'); }
 let LH_ADN = 0;
 function lhAd(h, avoid) { let A = LH_ADS[LH_ADN++ % LH_ADS.length]; for (let k = 0; k < LH_ADS.length && avoid && A.img && avoid.includes(A.img); k++) A = LH_ADS[LH_ADN++ % LH_ADS.length];   // (not the photo of the story beside it)
   const fill = h == null, v = fill || h >= 300, st = fill ? '' : ' style="height:' + Math.floor(h) + 'px"';
@@ -4700,11 +4728,12 @@ function lhPlan() {   // the running order: front, (the police page and a page �
   for (const s of pages) if (!(polLead && s === pages[0])) seq.push(['page', s]);
   if (!polLead) seq.push(['pol']);
   for (let i = 0; i < halves.length; i += 2) seq.push(['half', halves[i], halves[i + 1]]);
+  seq.push(['ads']);
   const where = {}; let pn = 2;
-  for (const it of seq) { if (it[0] === 'pol') where.__pol = pn++; else if (it[0] === 'main') { where[it[1].id] = pn; pn += 2; } else { where[it[1].id] = pn; if (it[2]) where[it[2].id] = pn; pn++; } }
+  for (const it of seq) { if (it[0] === 'pol') where.__pol = pn++; else if (it[0] === 'ads') where.__ads = pn++; else if (it[0] === 'main') { where[it[1].id] = pn; pn += 2; } else { where[it[1].id] = pn; if (it[2]) where[it[2].id] = pn; pn++; } }
   const keysPage = pn++, lyhPage = pn;
   P.push(lhFront(lead, where, keysPage, lyhPage));
-  for (const it of seq) { const no = P.length + 1; if (it[0] === 'pol') P.push(lhPolice(no)); else if (it[0] === 'main') P.push(...lhSpread(it[1], it[1] === lead, no)); else if (it[0] === 'page') P.push(lhPage(it[1], no)); else P.push(lhHalves(it[1], it[2], no)); }
+  for (const it of seq) { const no = P.length + 1; if (it[0] === 'pol') P.push(lhPolice(no)); else if (it[0] === 'ads') P.push(lhAdsPage(no)); else if (it[0] === 'main') P.push(...lhSpread(it[1], it[1] === lead, no)); else if (it[0] === 'page') P.push(lhPage(it[1], no)); else P.push(lhHalves(it[1], it[2], no)); }
   P.push(lhKeys(where, keysPage, lyhPage, P.length + 1)); P.push(...lhLyhyesti(P.length + 1));
   return lhFitAll(P); }
 const lhPg = (inner, cls, attrs) => '<div class="pv-page ' + cls + '"><div class="lh-in"' + (attrs || '') + '>' + inner + '</div></div>';
@@ -4742,7 +4771,7 @@ function lhKeys(where, keysPage, lyhPage, pno) { const K = [['Enter', 'lähtö']
     '<div class="lh-boxes"><div class="lh-box"><b>GTA-TILA</b>Aja lähdössä oikeaa kaistaa pois radalta – koko kylä on vapaa. R palauttaa kisaan.</div>' +
     '<div class="lh-box"><b>KERRO KAVERILLE</b>suomiralli.netlify.app – QR-koodi on alkuruudussa.</div>' +
     '<div class="lh-box"><b>LEHTI PDF:NÄ</b>Koko lehti tulostettavana: ⬇ PDF lehden yläkulmassa.</div></div>' +
-    '<div class="lh-index"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + where.__pol + '">Poliisi tiedottaa <i>' + where.__pol + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame'); }
+    '<div class="lh-index"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + where.__pol + '">Poliisi tiedottaa <i>' + where.__pol + '</i></a><a data-go="' + where.__ads + '">Pienet ilmoitukset <i>' + where.__ads + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame'); }
 function lhLyhyesti(pno) {   // the change list, filled page by page for real: items go into fixed-height columns until a fourth column would open
   const host = document.createElement('div'); host.className = 'lh-measure'; document.body.appendChild(host); const out = [];
   const items = CHANGES.map(([d, t, hm]) => { const e = lhEsc(t), k = e.indexOf(': '); return '<p><b class="d">' + lhEsc(d) + (hm ? ' ' + hm : '') + '</b> ' + (k > 0 && k <= 70 ? '<b>' + e.slice(0, k + 1) + '</b>' + lhHy(e.slice(k + 1)) : lhHy(e)) + '</p>'; });
@@ -4867,8 +4896,8 @@ function flowRef() { let r = Infinity; const L = ONLINE.list && ONLINE.list[0]; 
 let FLOW_FX = null;
 function flowFx(dt) {   // on record pace: a small yellow beacon flashing on the roof, and a small line at the top of the screen
   const on = FLOW.on && gameState === State.RACING && lapStarted && !WALK.on;
-  if (!FLOW_FX && on) { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: 0xffc81e }); const b = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.16, 10), m); b.position.y = 0.08; g.add(b);
-    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xffb400, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); gl.scale.set(2.6, 2.6, 1); gl.position.y = 0.14;   // (seen from the camera's 40 m up) g.add(gl);
+  if (!FLOW_FX && on) { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: 0xffc81e }); const b = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.3, 12), m); b.position.y = 0.15; g.add(b);
+    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xffd000, depthWrite: false, depthTest: false, transparent: true })); gl.scale.set(3.2, 3.2, 1); gl.position.y = 0.3; gl.renderOrder = 5; g.add(gl);   // a plain yellow flash drawn over the roof: seen from the camera 40 m up, in daylight too
     g.position.set(0, 1.33, -0.45); carGroup.add(g); FLOW_FX = { g, m, gl, t: 0 }; }
   const hud = document.getElementById('flow-hud'); if (hud) hud.style.display = on ? 'block' : 'none'; if (!FLOW_FX) return;
   FLOW_FX.g.visible = on; if (!on) return; FLOW_FX.t += dt; const lit = Math.sin(FLOW_FX.t*14) > 0;   // (≈ 2 flashes a second)
@@ -4876,7 +4905,7 @@ function flowFx(dt) {   // on record pace: a small yellow beacon flashing on the
 function flowSplit(ci, t) { const ref = splitRef(), best = flowRef(); let want = ref && ref.splits && ref.splits[ci] != null ? ref.splits[ci] : 0;
   const rt = ref && (ref.t || ref.time); if (best && want && rt && rt > best) want *= best/rt;   // (the rival you race may be slower than the record: scaled to the record)
   if (!want && best) want = best*(ci + 1)/(checkpoints.length + 1);
-  const was = FLOW.on; FLOW.on = !!want && t <= want*1.05; if (FLOW.on && !was && audio) beep(1320, 0.18, 0.12, 'square'); }   // (shown small at the top and by the yellow beacon on the roof: flowFx)
+  const was = FLOW.on; FLOW.on = !!want && t <= want*1.10; if (FLOW.on && !was && audio) beep(1320, 0.18, 0.12, 'square'); }   // (shown small at the top and by the yellow beacon on the roof: flowFx)
 function ghostSplit(ci, t) { flowSplit(ci, t); if (ghostRec) ghostRec.splits[ci] = t; const ref = splitRef();
   if (ref && ref.splits[ci] !== undefined && ref.splits[ci] !== null) showDelta(t - ref.splits[ci], false); }
 function ghostRecord() {
@@ -9032,7 +9061,7 @@ addEventListener('wheel', e => {
 let camAdj = 0, _clTopFrac = 1, _clT = 0; const _camV = new THREE.Vector3();
 const _camWalker = { x: 0, z: 0, angle: 0, vx: 0, vz: 0 };
 function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind the car, no speed lead — Antti asked it back (the later lead + auto look-ahead went too top-down)
-  const C = WALK.on && WALK.h ? Object.assign(_camWalker, { x: WALK.h.x, z: WALK.h.z, angle: WALK.h.yaw, vx: WALK.h.vx || 0, vz: WALK.h.vz || 0 }) : car;   // (on foot: the same camera, high up, on the walker — Antti, 29.9.)
+  const C = WALK.on && WALK.h ? Object.assign(_camWalker, { x: WALK.h.x, z: WALK.h.z, angle: WALK.camA, vx: WALK.h.vx || 0, vz: WALK.h.vz || 0 }) : car;   // (on foot: the same camera, high up, on the walker — Antti, 29.9.)
   const speed=Math.sqrt(C.vx*C.vx+C.vz*C.vz);
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
   camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two views
