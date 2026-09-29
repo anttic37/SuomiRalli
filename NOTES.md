@@ -688,6 +688,17 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   yellow street-edge line, POLIISI AJONEUVOT). Two scuffles (buildScuffle: a drunk + 2 or 1 officers, task 'scuffle'): 'grab' —
   circling, the drunk flailing, the police shoving; 'loose' — he tears off staggering 4 m, they run him down; 'pin' — face down,
   officers kneeling on him 4–8 s; then up and again. Shouting (saunaShout) < 60 m. Knock any of them and that scuffle stops.
+- THE BOMB (29.9., "kun koe 11 soi → ydinräjähdys, välähdys, 90 % kaikki pois, auto tänästyy, voi jatkaa ajamista"): NUKE in
+  src/game.html before lifeExtras3Build. radioPlay() → nukeArm() when koelahetys-11 starts (not in the menu); 7 s later, if it's
+  still that song and the radio is on → nukeBoom(): ground zero 520 m from the car, a white screen flash (HTML div, fades 2.2 s),
+  rumble, a mushroom (nukeCloud: billowed icosahedra — rolled stem, cauliflower cap, skirt, dust surge, white-hot fireball; cools from
+  emissive 2.2 to dirty grey-brown), a ground shock ring at 340 m/s. When it reaches the car → nukeHit(): the car flung 24 m/s away
+  + heavy damage (drives on); all merged scenery (treeMeshes) and the verge tufts hidden; ~12 % of houses left as charred shells
+  (one InstancedMesh of black boxes) that burn, 8 % of trees within 420 m as black leaning trunks; statics removed except those
+  shells/rocks (staticRemove, saved); 90 % of people gone, the rest knocked (DISPATCH blocked while NUKE.on); 90 % of vehicles
+  v.nuked (moved 1e5 away, hidden, skipped by AI/physics), the rest charred and burning; 90 % of lifeGroup props hidden (userData.hide);
+  balloons burst; ground tinted 0x7a4c3a, roads ×0.55, brown sky/fog, orange light, a brown screen tint, ash falling round the camera.
+  R (worldReset → lifeExtras3Reset → nukeReset) restores everything (statics re-added, materials, setTimeOfDay). t_nuke.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
