@@ -180,9 +180,10 @@
   #lehti-mini:hover { transform: translateY(-50%) rotate(-1deg) scale(1.02); }
   #lehti-mini .lm-scale { transform-origin: 0 0; width: 760px; height: 1000px; overflow: hidden; pointer-events: none; }
   #lehti-mini .lm-btn { position: absolute; right: -14px; bottom: -16px; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 14px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; transform: rotate(4deg); letter-spacing: 0.04em; }
-  #lehti-btn { display: none; margin: 10px auto 0; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 16px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; cursor: pointer; }
-  body:not(.lh-wide) #lehti-btn { display: table; }
-  body.lh-wide #share { position: fixed; left: auto; right: 34px; top: 50%; margin: 0; transform: translateY(-50%) rotate(3deg); z-index: 5; }
+  #lehti-btn { display: table; margin: 10px auto 0; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 16px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; cursor: pointer; }
+  /* wide enough for the paper on the left (the same limit as lehtiLayout's s ≥ 0.24: W ≥ 1285, H ≥ 380): decided by CSS from the first paint,
+     not when the script gets there after the village is built — the QR used to sit top-left first and then jump right */
+  @media (min-width: 1285px) and (min-height: 380px) { #share { position: fixed; left: auto; right: 34px; top: 50%; margin: 0; transform: translateY(-50%) rotate(3deg); z-index: 5; } body #lehti-btn { display: none; } }
   #paper { position: fixed; inset: 0; z-index: 300; background: rgba(16,14,12,0.975); display: none; user-select: none; cursor: default; }   /* (body hides the pointer for driving; the paper is outside #overlay) */
   #paper.on { display: block; }
   #paper .pv-stage { position: absolute; left: 50%; top: 50%; transform-origin: 0 0; }
@@ -4406,6 +4407,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '🔧 Alkuruutu ei enää hypi: Kerro kaverille -QR on heti oikealla paikallaan (ennen ensin vasemmassa yläkulmassa)'],
   ['29.9.', '🧱 Betoniporsaat kauas: mutkien sisäreunoilla ja sivuteiden suilla on nyt renkaita, porsaat vasta 8 m niiden takana – reunan hipaisu ei enää pilaa kisaa'],
   ['29.9.', '⚙️ Lisää kevennystä: vain liikkuneiden kappaleiden matriisit lasketaan (ennen kaikki 6600 joka ruutu), liikkumattomia ei kopioida instansseihin, kaikenkokoiset laatikot ja lieriöt piirretään yhdellä kutsulla – piirtokutsuja ~820 → ~570'],
   ['29.9.', '🧈 Nykiminen pois: auto piirretään fysiikka-askelten väliin (120 Hz fysiikka ei enää nyi 60/144 Hz näytöllä), savut ja liekit eivät tee roskaa (ei keräyspätkiä), kaukaiset ihmiset päivitetään harvemmin – logiikka ~25 % kevyempi'],
@@ -4743,7 +4745,7 @@ function lehtiInit() { if (!document.getElementById('lehti-mini')) return; PAPER
   addEventListener('keydown', (e) => { if (!PAPER.open) return; e.stopImmediatePropagation(); if (['ArrowRight', 'PageDown', 'Space', 'ArrowDown'].includes(e.code)) { e.preventDefault(); paperGo(1); } else if (['ArrowLeft', 'PageUp', 'ArrowUp'].includes(e.code)) { e.preventDefault(); paperGo(-1); } else if (e.code === 'Escape' || e.code === 'Enter' || e.code === 'NumpadEnter') { e.preventDefault(); paperClose(); } }, true);   // (while it's open: the keys turn pages, nothing reaches the game)
   addEventListener('resize', () => { lehtiLayout(); if (PAPER.open) paperShow(); }); lehtiLayout(); }
 function lehtiLayout() { const mini = document.getElementById('lehti-mini'); if (!mini) return; const W = innerWidth, H = innerHeight, s = Math.min(0.43, (H - 140)/1000, ((W - 800)/2 - 60)/760);
-  const wide = s >= 0.24; document.body.classList.toggle('lh-wide', wide); mini.style.display = wide ? '' : 'none'; if (!wide) return;
+  const wide = matchMedia('(min-width: 1285px) and (min-height: 380px)').matches; document.body.classList.toggle('lh-wide', wide); mini.style.display = wide ? '' : 'none'; if (!wide) return;   // (the same test as the CSS: s ≥ 0.24)
   mini.style.width = (760*s).toFixed(0) + 'px'; mini.style.height = (1000*s).toFixed(0) + 'px'; if (mini.firstChild) mini.firstChild.style.transform = 'scale(' + s.toFixed(3) + ')'; }
 function paperViews() { const n = PAPER.pages.length, V = []; if (!PAPER.two) { for (let i = 0; i < n; i++) V.push([i]); return V; } V.push([0]); for (let i = 1; i < n; i += 2) V.push(i + 1 < n ? [i, i + 1] : [i]); return V; }
 function paperOpen(page) { lehtiBuild(); rapSend(false).then(rapFetch); PAPER.open = true; document.getElementById('paper').classList.add('on'); paperToPage(page || 0); }
