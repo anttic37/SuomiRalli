@@ -260,7 +260,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 18.38 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div class="build-stamp">editorista 18.42 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
     <div style="text-align:center"><div id="okstamp"><b data-t>✔ 28.9. TESTATTU: PELI SKULAA</b> <span data-t>– jos ei, niin voi voi</span></div></div>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
@@ -4426,6 +4426,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '🎥 Kamera palautettu siihen, jolla Mane ajoi ennätyksen 1.24,804 (27.9.): auton takana, katse loivasti eteen, ei enää nopeuden mukana auton päälle nousevaa kuvakulmaa'],
   ['29.9.', '👻 Haamut nopeammin: kerran haettu haamu muistetaan selaimessa, viimeksi nähdyt pyydetään jo latauksen alussa ja oma haamu samaan aikaan muiden kanssa – ja ajaa voi heti, haamut tulevat radalle kun ehtivät. Ykkönen näkee radalla oman ennätyksensä (nopein aika) ja kaksi lähintä takaa-ajajaa. Kylä rakentuu nopeammin (talohaku ruudukolla)'],
   ['29.9.', '📰 Lehden sivunapit ‹ › toimivat taas hiirellä, AVAA LEHTI -tarra näkyy kokonaan pikkulehden päällä, ja räjähdys on nyt suoraan: ☢️ YDINSOTA ALKOI (ei koeräjäytys)'],
   ['29.9.', '🔧 Alkuruutu ei enää hypi: Kerro kaverille -QR on heti oikealla paikallaan (ennen ensin vasemmassa yläkulmassa)'],
@@ -8963,7 +8964,7 @@ addEventListener('wheel', e => {
 
 // where the car sits on screen (high view): in the lower part, but always above the gauge cluster — a slow correction of the look-ahead
 let camAdj = 0, _clTopFrac = 1, _clT = 0; const _camV = new THREE.Vector3();
-function updateCamera(dt) {
+function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind the car, no speed lead — Antti asked it back (the later lead + auto look-ahead went too top-down)
   if (WALK.on && WALK.h) { walkCamera(dt); return; }
   const speed=Math.sqrt(car.vx*car.vx+car.vz*car.vz);
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
@@ -8974,13 +8975,11 @@ function updateCamera(dt) {
   camAngle.current+=angleDiff*1.2*dt;
   const cfx=Math.sin(camAngle.current),cfz=Math.cos(camAngle.current);
   const camDist=((21+speed*0.1)*(1-camLowK) + (10.5+speed*0.1)*camLowK)*camZoom;
-  const lead = 0.527*(1-camLowK), lookLead = 0.434*(1-camLowK);   // the follow lags v/ln(1/0.15) and v/ln(10) behind: aimed that far ahead, the car keeps its place on screen at any speed
-  camTarget.set(car.x-cfx*camDist+car.vx*lead, Y(car.x,car.z)+h, car.z-cfz*camDist+car.vz*lead);
+  camTarget.set(car.x-cfx*camDist, Y(car.x,car.z)+h, car.z-cfz*camDist);
   camTarget.y = Math.max(camTarget.y, Y(camTarget.x, camTarget.z) + 2.2);   // never under a crest behind the car
   camPos.lerp(camTarget,1-Math.pow(0.15,dt));
   camPos.y = Math.max(camPos.y, Y(camPos.x, camPos.z) + 1.6);
-  if ((_clT -= dt) <= 0) { _clT = 1; const el = document.getElementById('cluster'), r = el && el.getBoundingClientRect(); _clTopFrac = r && r.height > 0 && r.top > 0 ? r.top/innerHeight : 1; }
-  const la=(17+speed*0.1+camAdj)*(1-camLowK) + (13+speed*0.35)*camLowK;
+  const la=(15+speed*0.2)*(1-camLowK) + (13+speed*0.35)*camLowK;
   // look into the drift: blend look direction toward velocity direction
   let lookAng = camAngle.current;
   if (speed > 6) {
@@ -8990,11 +8989,9 @@ function updateCamera(dt) {
     lookAng = camAngle.current + Math.max(-0.5, Math.min(0.5, dAng)) * 0.55;
   }
   const lfx = Math.sin(lookAng), lfz = Math.cos(lookAng);
-  const lt=new THREE.Vector3(car.x+lfx*la+car.vx*lookLead, Y(car.x,car.z)*(1-camLowK) + (Y(car.x+lfx*la, car.z+lfz*la) + 1.4)*camLowK, car.z+lfz*la+car.vz*lookLead);
+  const lt=new THREE.Vector3(car.x+lfx*la, Y(car.x,car.z)*(1-camLowK) + (Y(car.x+lfx*la, car.z+lfz*la) + 1.4)*camLowK, car.z+lfz*la);
   camLookAt.lerp(lt,1-Math.pow(0.1,dt));
   camera.position.copy(camPos); camera.lookAt(camLookAt);
-  if (camLowK < 0.5 && dt > 0 && camPos.distanceTo(camTarget) < 4 + speed*0.6) { camera.updateMatrixWorld();   /* (only once the camera has caught up: not while it swings in after a restart) */ _camV.set(car.x, Y(car.x, car.z), car.z).project(camera); const fy = (1 - _camV.y)/2, want = Math.min(0.78, _clTopFrac - 0.08);
-    camAdj = Math.max(-22, Math.min(10, camAdj - (fy - want)*40*dt)); }   // (too low on screen: look less far ahead, and the other way round)
   
   // Speed FOV: widens slightly at speed
   const targetFov = 50 + Math.min(speed, 45) * 0.22;
