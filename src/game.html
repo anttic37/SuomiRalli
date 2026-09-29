@@ -4399,6 +4399,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', '⚙️ Lisää kevennystä: vain liikkuneiden kappaleiden matriisit lasketaan (ennen kaikki 6600 joka ruutu), liikkumattomia ei kopioida instansseihin, kaikenkokoiset laatikot ja lieriöt piirretään yhdellä kutsulla – piirtokutsuja ~820 → ~570'],
   ['29.9.', '🧈 Nykiminen pois: auto piirretään fysiikka-askelten väliin (120 Hz fysiikka ei enää nyi 60/144 Hz näytöllä), savut ja liekit eivät tee roskaa (ei keräyspätkiä), kaukaiset ihmiset päivitetään harvemmin – logiikka ~25 % kevyempi'],
   ['29.9.', '🚨 Rekisteri: rikkomukset kirjataan kaikkialla – kisassa, GTA-tilassa ja maalin jälkeen; ne lähtevät heti maalissa ja valikkoon palatessa, lehti näyttää juuri tehdyt, ja myöhemmin annettu nimi päivittyy vanhoihin merkintöihin'],
   ['29.9.', '🚨 Lehteen Poliisi tiedottaa -sivu: eniten tulipaloja sytyttäneet ja ihmisten yli ajaneet kuskit netistä, etsintäkuulutus pahimmasta ja oma rekisterisi. Peli laskee palot, yliajot ja eläimet ja kertoo ne palvelimelle'],
@@ -4920,6 +4921,17 @@ const lifeGroup = new THREE.Group(); scene.add(lifeGroup);
 //    hidden exactly as before, but sits on layer 1, which no camera draws; every frame, after three.js has updated the matrices,
 //    the shown ones are copied into the instance buffers (scene.onBeforeRender). ≈ 150–250 fewer draw calls a frame (most in the shadow pass). ──
 const BATCH = { groups: new Map(), dirty: true, scans: 0 };
+// ── matrices only for what moved: three recomposes every object's matrix and world matrix every frame (6600 of them, most houses and trees
+//    that never move). Now an object whose position / rotation / scale is as it was keeps its matrix, and its subtree keeps theirs; a
+//    world matrix that was recomputed bumps _wv, so batchFill can skip the ones that didn't move. ──
+{ const P3 = THREE.Object3D.prototype, compose = P3.updateMatrix;
+  P3.updateMatrix = function () { const p = this.position, q = this.quaternion, s = this.scale; let c = this._mc;
+    if (c && c[0] === p.x && c[1] === p.y && c[2] === p.z && c[3] === q._x && c[4] === q._y && c[5] === q._z && c[6] === q._w && c[7] === s.x && c[8] === s.y && c[9] === s.z) return;
+    if (!c) c = this._mc = new Float64Array(10); c[0] = p.x; c[1] = p.y; c[2] = p.z; c[3] = q._x; c[4] = q._y; c[5] = q._z; c[6] = q._w; c[7] = s.x; c[8] = s.y; c[9] = s.z; compose.call(this); };
+  P3.updateMatrixWorld = function (force) {   // (three r128's own, plus the version bump)
+    if (this.matrixAutoUpdate) this.updateMatrix();
+    if (this.matrixWorldNeedsUpdate || force) { if (this.parent === null) this.matrixWorld.copy(this.matrix); else this.matrixWorld.multiplyMatrices(this.parent.matrixWorld, this.matrix); this.matrixWorldNeedsUpdate = false; this._wv = (this._wv | 0) + 1; force = true; }
+    const ch = this.children; for (let i = 0, l = ch.length; i < l; i++) ch[i].updateMatrixWorld(force); }; }
 { const add = THREE.Object3D.prototype.add, remove = THREE.Object3D.prototype.remove, clear = THREE.Object3D.prototype.clear;   // anything added or removed anywhere: rescan
   THREE.Object3D.prototype.add = function () { BATCH.dirty = true; return add.apply(this, arguments); };
   THREE.Object3D.prototype.remove = function () { BATCH.dirty = true; return remove.apply(this, arguments); };
@@ -4928,11 +4940,26 @@ const _bDefCompile = THREE.Material.prototype.onBeforeCompile;
 function batchable(o) { const m = o.material;
   return o.isMesh && !o.isInstancedMesh && !o.isSkinnedMesh && m && m.isMeshStandardMaterial && !m.map && !m.transparent && m.opacity === 1 && !m.vertexColors && !m.alphaTest && !m.wireframe && m.visible
     && m.onBeforeCompile === _bDefCompile && m.emissive.r + m.emissive.g + m.emissive.b === 0 && !o.geometry.morphAttributes.position && !o.userData.noBatch && o.matrixWorld.determinant() > 0; }
+// boxes and plain cylinders of any size share one unit shape: the size goes into the instance matrix (one draw for all the grey boxes, not one
+// per size). Only when every vertex of the geometry is exactly the unit one scaled and moved (so a box turned on its side keeps its own).
+const _canonUnit = new Map(), _canonTmp = new THREE.Vector3();
+function batchCanon(g) { if (g.userData._canon !== undefined) return g.userData._canon; let unit = null, M = null, key = null; const p = g.parameters;
+  if (!g.index || !g.attributes.position) return (g.userData._canon = null);
+  g.computeBoundingBox(); const bb = g.boundingBox, c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3());
+  if (g.type === 'BoxGeometry' && p.widthSegments === 1 && p.heightSegments === 1 && p.depthSegments === 1) { key = 'ubox'; M = new THREE.Matrix4().compose(c, new THREE.Quaternion(), new THREE.Vector3(p.width, p.height, p.depth)); }
+  else if (g.type === 'CylinderGeometry' && p.radiusTop === p.radiusBottom && p.heightSegments === 1 && !p.openEnded && p.thetaStart === 0 && Math.abs(p.thetaLength - Math.PI*2) < 1e-9) {
+    key = 'ucyl' + p.radialSegments; M = new THREE.Matrix4().compose(c, new THREE.Quaternion(), new THREE.Vector3(p.radiusTop, p.height, p.radiusTop)); }
+  if (!key) return (g.userData._canon = null);
+  unit = _canonUnit.get(key); if (!unit) _canonUnit.set(key, unit = key === 'ubox' ? new THREE.BoxGeometry(1, 1, 1) : new THREE.CylinderGeometry(1, 1, 1, p.radialSegments));
+  const A = g.attributes.position, U = unit.attributes.position; if (A.count !== U.count || g.index.count !== unit.index.count) return (g.userData._canon = null);
+  for (let i = 0; i < A.count; i++) { _canonTmp.fromBufferAttribute(U, i).applyMatrix4(M); if (Math.abs(_canonTmp.x - A.getX(i)) > 1e-5 || Math.abs(_canonTmp.y - A.getY(i)) > 1e-5 || Math.abs(_canonTmp.z - A.getZ(i)) > 1e-5) return (g.userData._canon = null); }
+  return (g.userData._canon = { key, unit, M }); }
+const _canonM = new THREE.Matrix4();
 function batchScan() {
   BATCH.dirty = false; BATCH.scans++;
   for (const B of BATCH.groups.values()) B.meshes.length = 0;
-  const visit = (o) => { if (o.isInstancedMesh) return; if (batchable(o)) { const m = o.material, k = o.geometry.id + ':' + m.roughness + ':' + m.metalness + ':' + m.side + ':' + m.flatShading + ':' + o.castShadow + ':' + o.receiveShadow;
-      let B = BATCH.groups.get(k); if (!B) BATCH.groups.set(k, B = { geo: o.geometry, mat: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: m.roughness, metalness: m.metalness, side: m.side, flatShading: m.flatShading }), cast: o.castShadow, recv: o.receiveShadow, meshes: [], im: null, cap: 0 });
+  const visit = (o) => { if (o.isInstancedMesh) return; if (batchable(o)) { const m = o.material, cn = batchCanon(o.geometry), k = (cn ? cn.key : o.geometry.id) + ':' + m.roughness + ':' + m.metalness + ':' + m.side + ':' + m.flatShading + ':' + o.castShadow + ':' + o.receiveShadow;
+      let B = BATCH.groups.get(k); if (!B) BATCH.groups.set(k, B = { geo: cn ? cn.unit : o.geometry, canon: !!cn, mat: new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: m.roughness, metalness: m.metalness, side: m.side, flatShading: m.flatShading }), cast: o.castShadow, recv: o.receiveShadow, meshes: [], im: null, cap: 0 });
       B.meshes.push(o); }
     for (const c of o.children) visit(c); };
   visit(lifeGroup); /* (runs inside render: the world matrices are fresh) */ for (const v of VEHICLES) if (v.view.kind === 'mesh' && v.view.g.parent !== lifeGroup) visit(v.view.g);
@@ -4941,7 +4968,7 @@ function batchScan() {
     const on = B.meshes.length >= 2;   // a one-off geometry stays an ordinary (frustum-culled) mesh
     for (const m of B.meshes) m.layers.set(on ? 1 : 0);
     if (on && B.cap < B.meshes.length) { if (B.im) { scene.remove(B.im); B.im.dispose(); }
-      B.cap = Math.ceil(B.meshes.length*1.25) + 4; B.im = new THREE.InstancedMesh(B.geo, B.mat, B.cap); B.im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+      B.cap = Math.ceil(B.meshes.length*1.25) + 4; B.own = []; B.im = new THREE.InstancedMesh(B.geo, B.mat, B.cap); B.im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
       B.im.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(B.cap*3), 3).setUsage(THREE.DynamicDrawUsage);
       B.im.castShadow = B.cast; B.im.receiveShadow = B.recv; B.im.frustumCulled = false; B.im.matrixAutoUpdate = false; B.im.userData.key = 'batch'; scene.add(B.im); BATCH.dirty = false; }
     if (B.im) { B.im.count = 0; B.im.visible = false; B.on = on; } }
@@ -4952,7 +4979,9 @@ function batchFill() {
   if (BATCH.dirty) batchScan();
   for (const B of BATCH.groups.values()) { if (!B.im || !B.on) continue;
     const A = B.im.instanceMatrix.array, C = B.im.instanceColor.array; let n = 0, ch = false;
-    for (const m of B.meshes) { if (!batchShown(m) || !m.parent) continue; const e = m.matrixWorld.elements, o = n*16; for (let k = 0; k < 16; k++) { const v = Math.fround(e[k]); if (A[o+k] !== v) { A[o+k] = v; ch = true; } }
+    const own = B.own || (B.own = []);   // (which mesh a slot was last written for: a mesh in its own slot that hasn't moved is skipped)
+    for (const m of B.meshes) { if (!batchShown(m) || !m.parent) continue; const o = n*16;
+      if (own[n] !== m || m._bw !== m._wv) { own[n] = m; m._bw = m._wv; const e = B.canon ? _canonM.multiplyMatrices(m.matrixWorld, m.geometry.userData._canon.M).elements : m.matrixWorld.elements; for (let k = 0; k < 16; k++) { const v = Math.fround(e[k]); if (A[o+k] !== v) { A[o+k] = v; ch = true; } } }
       const c = m.material.color, j = n*3; if (C[j] !== Math.fround(c.r) || C[j+1] !== Math.fround(c.g) || C[j+2] !== Math.fround(c.b)) { C[j] = c.r; C[j+1] = c.g; C[j+2] = c.b; ch = true; } n++; }
     if (n !== B.im.count) ch = true; B.im.count = n; B.im.visible = n > 0;
     if (n && ch) { /* (parked grills, bikes, poles: nothing changed, nothing uploaded) */ B.im.instanceMatrix.updateRange.count = n*16; B.im.instanceMatrix.needsUpdate = true; B.im.instanceColor.updateRange.count = n*3; B.im.instanceColor.needsUpdate = true; } }
