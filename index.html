@@ -18,6 +18,7 @@
   #ghost-delta { position: fixed; top: 43%; left: 50%; transform: translate(-50%, -50%); font-size: 30px; font-weight: 800; letter-spacing: 2px; opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.25s; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
   #pizza-msg { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 800; letter-spacing: 1px; color: #ffb347; text-shadow: 0 2px 6px rgba(0,0,0,0.7); opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.3s; white-space: nowrap; }
   #police-msg { position: fixed; top: 22%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 800; letter-spacing: 1px; color: #6a9aff; text-shadow: 0 2px 6px rgba(0,0,0,0.8); opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.3s; white-space: nowrap; }
+  #flow-hud { display: none; position: fixed; top: 122px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 800; letter-spacing: 0.3em; color: #ffd23a; text-shadow: 0 1px 4px rgba(0,0,0,0.8); pointer-events: none; z-index: 20; }
   #police-hud { display: none; position: fixed; top: 86px; left: 50%; transform: translateX(-50%); padding: 6px 16px; font-size: 14px; font-weight: 800; letter-spacing: 0.25em; color: #fff; border-radius: 4px; pointer-events: none; z-index: 20; animation: policeFlash 0.6s steps(1) infinite; }
   @keyframes policeFlash { 0% { background: #1a4ad8; } 50% { background: #d81a1a; } }
   /* the car radio, top right: an amber LCD, the song scrolling if it doesn't fit */
@@ -259,7 +260,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 20.04 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div class="build-stamp">editorista 20.13 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -292,7 +293,7 @@
 </div>
 <div id="checkpoint-display"></div>
 <div id="ghost-delta"></div>
-<div id="pizza-msg"></div><div id="police-msg"></div><div id="police-hud" data-t>🚨 POLIISI JAHTAA</div>
+<div id="pizza-msg"></div><div id="police-msg"></div><div id="police-hud" data-t>🚨 POLIISI JAHTAA</div><div id="flow-hud" data-t>🔥 ENNÄTYSVAUHTI</div>
 <div id="countdown"></div>
 <div id="pause"><div class="p-box"><div class="p-t" data-t>TAUKO</div><div class="p-s" data-t>P jatka · R uusi lähtö · Esc alkuruutu</div></div></div>
 <div id="bass-hud" data-t>🔊 BASSOBOOST · B</div><div id="es-hud"></div>
@@ -348,7 +349,7 @@ const I18N = {
   '😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!': ['😰 THE CAR’S ALL ALONE – SOMEONE COULD TAKE IT!', '😰 BILEN STÅR ALENE – NOEN KAN TA DEN!'],
   '😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!': ['😱 TOO SCARED TO GO FURTHER – THEY’LL STEAL THE CAR!', '😱 TØR IKKE GÅ LENGRE – BILEN BLIR STJÅLET!'],
   '😮‍💨 PUUSKUTTAA…': ['😮‍💨 OUT OF BREATH…', '😮‍💨 ANDPUSTEN…'],
-  '🔥 ENNÄTYSVAUHTI – KYLÄ VÄISTÄÄ!': ['🔥 RECORD PACE – THE VILLAGE MAKES WAY!', '🔥 REKORDFART – BYGDA VIKER!'],
+  '🔥 ENNÄTYSVAUHTI': ['🔥 RECORD PACE', '🔥 REKORDFART'],
   '☢️ YDINSOTA ALKOI!': ['☢️ NUCLEAR WAR HAS BEGUN!', '☢️ ATOMKRIGEN HAR BEGYNT!'],
   '🎈 KUUMAILMAPALLO POKSAHTI!': ['🎈 A HOT-AIR BALLOON BURST!', '🎈 EN LUFTBALLONG SPRAKK!'],
   '🐕 KOIRA JÄI ALLE! NAAPURIT RAIVOISSAAN': ['🐕 YOU RAN OVER A DOG! THE NEIGHBOURS ARE FURIOUS', '🐕 DU KJØRTE OVER EN HUND! NABOENE ER RASENDE'],
@@ -4427,6 +4428,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['29.9.', 'Ennätysvauhdin merkki on nyt pieni keltainen vilkku auton katolla ja pieni 🔥 ENNÄTYSVAUHTI ruudun yläreunassa (iso teksti pois); lehden juttu päivitetty', '23.13'],
   ['29.9.', '🔥 Ennätysvauhti: kun väliajat ovat korkeintaan 5 % parhaan ajan perässä (tai edellä), paloautot, poliisit, ambulanssit ja hirvet väistävät – suoraan metsään. Lehteen oma sivu', '23.02'],
   ['29.9.', 'Lehden etusivulle Kylän suurimmat rikolliset (etsintäkuulutettu nimeltä), Poliisi tiedottaa heti sivulla 2, ydinsota lehden loppupäähän; kaikki lehden kuvat uusiksi kauempaa ja yläviistosta', '22.45'],
   ['29.9.', 'Jalkaisin kamera pysyy ylhäällä kuten ajaessa (ei enää selän takana matalalla)', '22.36'],
@@ -4600,10 +4602,10 @@ const LEHTI = [
     body: ['YLÄSTÖ. Paineaalto kulki maata pitkin 340 metriä sekunnissa. Kun se ehti kylään, yhdeksän taloa kymmenestä oli poissa. Jäljelle jäi hiiltyneitä kuoria, vinoja puunrunkoja ja palanut maa.', 'Rallikuski lensi autoineen sivuun, mutta auto lähti yhä käyntiin. – Pellit menivät, mutta ajaa voi, kuski kertoo.', 'Ambulansseja ei tullut. Taivas muuttui ruskeaksi ja ilmassa leijui tuhkaa. Kuumailmapallot poksahtivat.', 'Viranomaiset muistuttavat: R-näppäin palauttaa kylän ennalleen. Sota alkaa, kun radiossa kuuluu koelähetys 11 – noin kerran kahdessa tunnissa.'],
     box: ['NÄIN SE TAPAHTUU', '1. Pidä radio päällä (E vaihtaa kanavaa)', '2. Odota, kunnes kuuluu 📡 KOELÄHETYS 11', '3. Seitsemän sekuntia… voi voi.'] },
 
-  { id: 'vauhti', size: 'page', n: 50, kick: '🔥 ENNÄTYSVAUHTI', title: 'Ennätysvauhti – koko kylä väistää', lede: 'Kun kuski ajaa ennätyksen tahtia, paloautot, poliisit, ambulanssit ja hirvet eivät jää tielle. Ne kaartavat suoraan metsään.',
+  { id: 'vauhti', size: 'page', n: 50, kick: '🔥 ENNÄTYSVAUHTI', title: 'Ennätysvauhti – koko kylä väistää', lede: 'Kun kuski ajaa ennätyksen tahtia, katolla vilkkuu keltainen valo – ja paloautot, poliisit, ambulanssit ja hirvet kaartavat tieltä suoraan metsään.',
     img: ['vauhti.jpg'], cap: ['Poliisiauto valitsi metsän. Rallikuski jatkoi ennätysvauhtia.'],
-    body: ['YLÄSTÖ. Väliajoilla kello kertoo, oletko ennätyksen tahdissa. Viisi prosenttia perässä riittää – tai parempi.', 'Silloin kylä tietää, kenen tie tämä on. Hälytysajoneuvot kääntävät rattia ja painavat kaasun pohjaan, eivätkä ne katso eteensä. Hirvi ei jähmety valoihin, vaan loikkaa kuusikkoon.', '– Ajoin paloautolla suoraan metsään. En tiedä miksi, sanoo nimettömänä pysyvä palomies.'],
-    box: ['NÄIN SE TOIMII', 'Väliajoilla verrataan parhaaseen aikaan', 'Alle 5 % perässä: 🔥 ENNÄTYSVAUHTI', 'Edessä olevat väistävät metsään'] },
+    body: ['YLÄSTÖ. Väliajoilla kello kertoo, oletko ennätyksen tahdissa. Viisi prosenttia perässä riittää – tai parempi.', 'Silloin auton katolle syttyy pieni keltainen vilkku ja ruudun yläreunaan tulee 🔥 ENNÄTYSVAUHTI. Kylä tietää, kenen tie tämä on. Hälytysajoneuvot kääntävät rattia ja painavat kaasun pohjaan, eivätkä ne katso eteensä. Hirvi ei jähmety valoihin, vaan loikkaa kuusikkoon.', '– Ajoin paloautolla suoraan metsään. En tiedä miksi, sanoo nimettömänä pysyvä palomies.'],
+    box: ['NÄIN SE TOIMII', 'Väliajoilla verrataan parhaaseen aikaan', 'Alle 5 % perässä: keltainen vilkku katolle', 'Edessä olevat väistävät metsään'] },
   { id: 'kyla', size: 'page', n: 10, kick: '🏡 KYLÄ', title: 'Oikea Ylästö, oikeat talot', lede: 'Kadut kartasta, talot 1990-luvun kylästä: rintamamiestaloja, kuusikymmentäluvun pitkiä taloja ja kasaritaloja pihoineen.',
     img: ['kyla.jpg'], cap: ['Ylästö ylhäältä. Joka talolla oma piha, aita, postilaatikko ja omenapuu.'],
     body: ['Talot on rakennettu oikeille paikoilleen, ikkunat verhoineen, ovet kadun puolelle. Pihoilla leikitään, grillataan, lakaistaan mattoja ja pelataan sulkapalloa.', 'Mäet ovat toistaiseksi kahdeksankertaisesti liioiteltuja – oikea maanmittauslaitoksen korkeusmalli on tulossa.'] },
@@ -4859,10 +4861,19 @@ function splitRef() {   // whose splits to race: the nearest rival FASTER than y
 //    and moose swerve off it and go straight into the forest (Antti, 29.9.). The best time: the board's first, your own, the local ghost. ──
 const FLOW = { on: false, n: 0 };
 function flowRef() { let r = Infinity; const L = ONLINE.list && ONLINE.list[0]; if (L) r = L.t; if (bestTime < r) r = bestTime; if (ghost && ghost.time < r) r = ghost.time; return isFinite(r) ? r : 0; }
+let FLOW_FX = null;
+function flowFx(dt) {   // on record pace: a small yellow beacon flashing on the roof, and a small line at the top of the screen
+  const on = FLOW.on && gameState === State.RACING && lapStarted && !WALK.on;
+  if (!FLOW_FX && on) { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: 0xffc81e }); const b = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.16, 10), m); b.position.y = 0.08; g.add(b);
+    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xffb400, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); gl.scale.set(1.6, 1.6, 1); gl.position.y = 0.12; g.add(gl);
+    g.position.set(0, 1.33, -0.45); carGroup.add(g); FLOW_FX = { g, m, gl, t: 0 }; }
+  const hud = document.getElementById('flow-hud'); if (hud) hud.style.display = on ? 'block' : 'none'; if (!FLOW_FX) return;
+  FLOW_FX.g.visible = on; if (!on) return; FLOW_FX.t += dt; const lit = Math.sin(FLOW_FX.t*14) > 0;   // (≈ 2 flashes a second)
+  FLOW_FX.m.color.setHex(lit ? 0xffd23a : 0x5a4208); FLOW_FX.gl.material.opacity = lit ? 0.95 : 0; }
 function flowSplit(ci, t) { const ref = splitRef(), best = flowRef(); let want = ref && ref.splits && ref.splits[ci] != null ? ref.splits[ci] : 0;
   const rt = ref && (ref.t || ref.time); if (best && want && rt && rt > best) want *= best/rt;   // (the rival you race may be slower than the record: scaled to the record)
   if (!want && best) want = best*(ci + 1)/(checkpoints.length + 1);
-  const was = FLOW.on; FLOW.on = !!want && t <= want*1.05; if (FLOW.on && !was) { pizzaMsg(T('🔥 ENNÄTYSVAUHTI – KYLÄ VÄISTÄÄ!'), true); if (audio) beep(1320, 0.18, 0.12, 'square'); } }
+  const was = FLOW.on; FLOW.on = !!want && t <= want*1.05; if (FLOW.on && !was && audio) beep(1320, 0.18, 0.12, 'square'); }   // (shown small at the top and by the yellow beacon on the roof: flowFx)
 function ghostSplit(ci, t) { flowSplit(ci, t); if (ghostRec) ghostRec.splits[ci] = t; const ref = splitRef();
   if (ref && ref.splits[ci] !== undefined && ref.splits[ci] !== null) showDelta(t - ref.splits[ci], false); }
 function ghostRecord() {
@@ -9269,7 +9280,7 @@ function loop(time) {
     rx = RI.x + (car.x - RI.x)*al; rz = RI.z + (car.z - RI.z)*al; ra = RI.a + da*al; car.x = rx; car.z = rz; car.angle = ra;
     carGroup.position.set(rx, Y(rx, rz) + BASS.hopY, rz); carGroup.rotation.y = ra; }
   U_TIME.value = performance.now()/1000; skyDome.position.copy(camera.position);
-  updateMarks(dt); updateDust(dt); updateDebris(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
+  updateMarks(dt); updateDust(dt); updateDebris(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); flowFx(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
   if (gameState !== State.MENU) drawMinimap();
   renderer.render(scene, camera);
   if (rx !== null) { car.x = sx + (car.x - rx); car.z = sz + (car.z - rz); car.angle = sa + (car.angle - ra); }   // (back to the physics state, keeping any push the world gave it meanwhile)
