@@ -4868,7 +4868,7 @@ let FLOW_FX = null;
 function flowFx(dt) {   // on record pace: a small yellow beacon flashing on the roof, and a small line at the top of the screen
   const on = FLOW.on && gameState === State.RACING && lapStarted && !WALK.on;
   if (!FLOW_FX && on) { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: 0xffc81e }); const b = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.16, 10), m); b.position.y = 0.08; g.add(b);
-    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xffb400, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); gl.scale.set(1.6, 1.6, 1); gl.position.y = 0.12; g.add(gl);
+    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xffb400, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); gl.scale.set(2.6, 2.6, 1); gl.position.y = 0.14;   // (seen from the camera's 40 m up) g.add(gl);
     g.position.set(0, 1.33, -0.45); carGroup.add(g); FLOW_FX = { g, m, gl, t: 0 }; }
   const hud = document.getElementById('flow-hud'); if (hud) hud.style.display = on ? 'block' : 'none'; if (!FLOW_FX) return;
   FLOW_FX.g.visible = on; if (!on) return; FLOW_FX.t += dt; const lit = Math.sin(FLOW_FX.t*14) > 0;   // (≈ 2 flashes a second)

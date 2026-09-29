@@ -260,7 +260,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 20.13 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
+  <div class="build-stamp">editorista 20.38 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4865,7 +4865,7 @@ let FLOW_FX = null;
 function flowFx(dt) {   // on record pace: a small yellow beacon flashing on the roof, and a small line at the top of the screen
   const on = FLOW.on && gameState === State.RACING && lapStarted && !WALK.on;
   if (!FLOW_FX && on) { const g = new THREE.Group(), m = new THREE.MeshBasicMaterial({ color: 0xffc81e }); const b = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.16, 10), m); b.position.y = 0.08; g.add(b);
-    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xffb400, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); gl.scale.set(1.6, 1.6, 1); gl.position.y = 0.12; g.add(gl);
+    const gl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xffb400, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); gl.scale.set(2.6, 2.6, 1); gl.position.y = 0.14;   // (seen from the camera's 40 m up) g.add(gl);
     g.position.set(0, 1.33, -0.45); carGroup.add(g); FLOW_FX = { g, m, gl, t: 0 }; }
   const hud = document.getElementById('flow-hud'); if (hud) hud.style.display = on ? 'block' : 'none'; if (!FLOW_FX) return;
   FLOW_FX.g.visible = on; if (!on) return; FLOW_FX.t += dt; const lit = Math.sin(FLOW_FX.t*14) > 0;   // (≈ 2 flashes a second)
