@@ -932,6 +932,9 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   crank through a 120–400 Hz lowpass, lumpy AM) plus a 70 Hz body peak, a hungrier idle hunt; levels: idle rms ~0.21 (the Pökö's
   0.05), full ~0.29 (0.24). Burnout: throttle + brake locks the fronts and spins the rears on a small share of their grip (it stays put),
   rpm 7800 — the rev you can hear. t_burn renders both synths offline (OfflineAudioContext) and measures them.
+- Every flame from small ones (30.9., Antti: "liekit enemmän pieniä, ei isoja levyjä"; soft particles as in three's webgpu example were
+  weighed and left out — r128 WebGL would need a second depth pass): boom() 150×k flames at ~1×k (was 70 at 2.2×k), the nuke's burning
+  shells 70/s at ~1.1 (was 30/s at 2.2), the kokko twice the rate at ~0.55× the size; house/vehicle fires were done before.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

@@ -340,7 +340,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 16.42 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 16.52 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4610,6 +4610,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Kaikki liekit pienistä liekeistä: räjähdykset, ydinsodan palot ja juhannuskokko – ei enää isoja liekkilevyjä', '19.50'],
   ['30.9.', 'Dragsteri hajoaa pieniksi paloiksi (jokainen tanko ja levy erikseen), ja palat ovat eripainoisia: moottorilohko jää paikalleen, siipi lepattaa, renkaat pomppivat, teräsosat kipinöivät. Tuli koostuu monesta pienestä liekistä eikä leikkaudu seiniin. Dragsterin moottorissa kunnon V8-pörinä, kaasu + jarru = burnout', '19.42'],
   ['30.9.', 'Dragsterin runko hajoaa kovassa kolarissa lyhyiksi paloiksi: kiskot kolmena osana kummaltakin puolelta, ohjaamo, moottorilohko ja takapää omina laatikoinaan', '19.27'],
   ['30.9.', 'Dragsterin irtoavat osat ovat nyt oikeita laatikoita omalla fysiikallaan: ne pyörivät oman keskipisteensä ympäri, putoavat, kaatuvat kulmiltaan, liukuvat ja jäävät makaamaan maahan. Pitkä keula on kahdessa osassa', '19.14'],
@@ -7534,7 +7535,7 @@ function forestSpot(a, b) { for (let k = 0; k < 800; k++) { const p = trackPoint
   if (Math.abs(x) < 540 && Math.abs(z) < 540 && landClassAt(x, z) === 1 && distRoute(x, z) >= a && rockHeightAt(x, z) < -0.5 && clearSpot(x, z, 1.2)) return [x, z]; } return null; }
 function boom(x, y, z, big) {   // an explosion: a ball of flame, sparks, black smoke, a thump
   const k = big ? 1 : 0.6;
-  for (let i = 0; i < 70*k; i++) { const a = Math.random()*6.3, e = Math.random()*1.4, s = 3 + Math.random()*9; flameFx2.emit(x, y + 0.6, z, Math.cos(a)*Math.cos(e)*s, Math.sin(e)*s + 2, Math.sin(a)*Math.cos(e)*s, 0.5 + Math.random()*0.6, 2.2*k + Math.random(), 0.6, 1, 1, 0.7, 0.2, 0.9, 0.25, 0.05); }
+  for (let i = 0; i < 150*k; i++) { const a = Math.random()*6.3, e = Math.random()*1.4, s = 3 + Math.random()*9; flameFx2.emit(x, y + 0.6, z, Math.cos(a)*Math.cos(e)*s, Math.sin(e)*s + 2, Math.sin(a)*Math.cos(e)*s, 0.5 + Math.random()*0.6, 1.0*k + Math.random()*0.5, 0.6, 1, 1, 0.7, 0.2, 0.9, 0.25, 0.05); }
   for (let i = 0; i < 40*k; i++) { const a = Math.random()*6.3, s = 2 + Math.random()*6; emberFx.emit(x, y + 0.8, z, Math.cos(a)*s, 3 + Math.random()*6, Math.sin(a)*s, 0.8 + Math.random()*0.8, 0.16, 0.06, 1, 1, 0.8, 0.3, 1, 0.4, 0.05); }
   for (let i = 0; i < 30*k; i++) lifeFx.emit(x + (Math.random() - 0.5)*2, y + 1 + Math.random()*2, z + (Math.random() - 0.5)*2, (Math.random() - 0.5)*2, 1.5 + Math.random()*2, (Math.random() - 0.5)*2, 4 + Math.random()*3, 1.5, 7, 0.8, 0.12, 0.11, 0.1, 0.3, 0.29, 0.3);
   if (audio && (x - car.x)**2 + (z - car.z)**2 < 250*250) { beep(55, 0.9, 0.5, 'sawtooth'); beep(38, 1.2, 0.5, 'square'); } }
@@ -8860,8 +8861,8 @@ function nukeUpdate(dt) {
   if (!NUKE.hit && rR >= dCar) nukeHit();
   if (!NUKE.hit) return;
   if ((NUKE.ashAcc += dt*40) > 1) for (; NUKE.ashAcc > 1; NUKE.ashAcc--) { const a = Math.random()*6.3, r = Math.random()*45; lifeFx.emit(camera.position.x + Math.sin(a)*r, camera.position.y + 5 + Math.random()*15, camera.position.z + Math.cos(a)*r, (Math.random() - 0.5)*1.5, -1.5 - Math.random(), (Math.random() - 0.5)*1.5, 6, 0.15, 0.15, 0.7, 0.4, 0.38, 0.36, 0.3, 0.29, 0.28); }   // ash falling
-  if ((NUKE.fireAcc += dt*30) > 1) for (; NUKE.fireAcc > 1; NUKE.fireAcc--) { const f = NUKE.fires[Math.floor(Math.random()*NUKE.fires.length)]; if (!f || (f[0] - car.x)**2 + (f[1] - car.z)**2 > 250*250) continue;   // the shells burning
-    const x = f[0] + (Math.random() - 0.5)*5, z = f[1] + (Math.random() - 0.5)*5, y = Y(x, z) + 0.8; if (Math.random() < 0.6) flameFx2.emit(x, y, z, 0, 1.5, 0, 0.6, 2.2, 0.6, 0.95, 1, 0.55, 0.15, 0.85, 0.2, 0.04); else lifeFx.emit(x, y + 2, z, 0.5, 1.6, 0.3, 7, 1.5, 9, 0.6, 0.12, 0.11, 0.1, 0.28, 0.27, 0.27); } }
+  if ((NUKE.fireAcc += dt*70) > 1) for (; NUKE.fireAcc > 1; NUKE.fireAcc--) { const f = NUKE.fires[Math.floor(Math.random()*NUKE.fires.length)]; if (!f || (f[0] - car.x)**2 + (f[1] - car.z)**2 > 250*250) continue;   // the shells burning
+    const x = f[0] + (Math.random() - 0.5)*5, z = f[1] + (Math.random() - 0.5)*5, y = Y(x, z) + 0.5 + Math.random()*1.2; if (Math.random() < 0.7) flameFx2.emit(x, y, z, (Math.random() - 0.5)*0.6, 1.5 + Math.random(), (Math.random() - 0.5)*0.6, 0.5 + Math.random()*0.3, 0.9 + Math.random()*0.5, 0.3, 0.95, 1, 0.55, 0.15, 0.85, 0.2, 0.04); else lifeFx.emit(x, y + 2, z, 0.5, 1.6, 0.3, 7, 1.5, 9, 0.6, 0.12, 0.11, 0.1, 0.28, 0.27, 0.27); } }
 function nukeReset() { NUKE.armT = -1; if (!NUKE.on) return; NUKE.on = false; NUKE.flash.style.opacity = 0; NUKE.tint.style.opacity = 0; if (NUKE.cloud) NUKE.cloud.G.visible = false; if (NUKE.ring) NUKE.ring.visible = false;
   if (NUKE.ruins) { scene.remove(NUKE.ruins); NUKE.ruins.dispose(); NUKE.ruins = null; } NUKE.fires.length = 0; const S = NUKE.saved; NUKE.saved = null; if (!S) return;
   S.stat.forEach(addStaticBox); S.life.forEach(m => { m.visible = true; }); S.veh.forEach(v => { v.nuked = false; if (v.view.kind === 'mesh') v.view.g.visible = true; });
@@ -9127,7 +9128,7 @@ function emittersUpdate(dt) {
     const far = (E.x - car.x)**2 + (E.z - car.z)**2 > 240*240; if (E.glow) E.glow.visible = !far; if (far) continue; E.acc += dt;
     if (E.kind === 'grill') while (E.acc > 0.28) { E.acc -= 0.28; lifeFx.emit(E.x + (Math.random() - 0.5)*0.3, E.y, E.z + (Math.random() - 0.5)*0.3, 0.25 + Math.random()*0.2, 0.5 + Math.random()*0.3, 0.12, 3.2 + Math.random()*1.5, 0.35, 2.4, 0.32, 0.78, 0.78, 0.8, 0.9, 0.9, 0.92); }
     else if (E.kind === 'kokko') { E.glow.material.opacity = 0.5 + 0.2*Math.sin(worldT*13)*Math.sin(worldT*5.7);   // the midsummer bonfire: flames, sparks, a little smoke
-      while (E.acc > 0.022) { E.acc -= 0.022; const R = Math.random(), a = Math.random()*6.3, r = Math.random()*0.45, px = E.x + Math.sin(a)*r, pz = E.z + Math.cos(a)*r, py = E.y + Math.random()*0.8, s = 0.7 + Math.random()*0.5;
+      while (E.acc > 0.011) { E.acc -= 0.011; const R = Math.random(), a = Math.random()*6.3, r = Math.random()*0.55, px = E.x + Math.sin(a)*r, pz = E.z + Math.cos(a)*r, py = E.y + Math.random()*0.9, s = 0.55 + Math.random()*0.35;
         if (R < 0.5) flameFx2.emit(px, py, pz, (Math.random() - 0.5)*0.5, 1.2 + Math.random()*1.4, (Math.random() - 0.5)*0.5, 0.5 + Math.random()*0.4, s*1.2, s*0.3, 0.95, 1.0, 0.55, 0.12, 0.85, 0.18, 0.04);
         else if (R < 0.85) fireFx.emit(px, py, pz, (Math.random() - 0.5)*0.5, 1.6 + Math.random()*1.4, (Math.random() - 0.5)*0.5, 0.4 + Math.random()*0.3, s, s*0.3, 0.95, 1.0, 0.9, 0.45, 1.0, 0.4, 0.08);
         else if (R < 0.93) fireFx.emit(px, py + 0.8, pz, (Math.random() - 0.5)*1.2, 2.5 + Math.random()*2, (Math.random() - 0.5)*1.2, 1.4 + Math.random(), 0.12, 0.07, 1.0, 1.0, 0.75, 0.3, 1.0, 0.35, 0.05);
