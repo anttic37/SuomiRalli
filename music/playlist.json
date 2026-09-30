@@ -382,5 +382,40 @@
   "artist": "Ylen musiikkitoimitus",
   "talk": true,
   "show": "keittio"
+ },
+ {
+  "file": "parko-1.mp3",
+  "title": "Markkinarako: kuluttajapörssi",
+  "artist": "Ylen musiikkitoimitus",
+  "talk": true,
+  "show": "parko"
+ },
+ {
+  "file": "parko-2.mp3",
+  "title": "Markkinarako: Helsinki-brändi",
+  "artist": "Ylen musiikkitoimitus",
+  "talk": true,
+  "show": "parko"
+ },
+ {
+  "file": "parko-3.mp3",
+  "title": "Markkinarako: kannettava fax",
+  "artist": "Ylen musiikkitoimitus",
+  "talk": true,
+  "show": "parko"
+ },
+ {
+  "file": "parko-4.mp3",
+  "title": "Markkinarako: hissihaastattelu",
+  "artist": "Ylen musiikkitoimitus",
+  "talk": true,
+  "show": "parko"
+ },
+ {
+  "file": "parko-5.mp3",
+  "title": "Markkinarako: hautaamon kanta-asiakkuus",
+  "artist": "Ylen musiikkitoimitus",
+  "talk": true,
+  "show": "parko"
  }
 ]
