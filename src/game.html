@@ -4644,6 +4644,7 @@ const CHANGES = [
   ['30.9.', '🐕 Pihakoira hyppää kyytiin, kun pysähdyt sen viereen, ja haukkuu mukana seuraavaan pysähdykseen', '10.04'],
   ['30.9.', '🌭 Makkarakärry: pysähdy viereen, makkara tuodaan ikkunaan, röyh ja savua', '10.04'],
   ['30.9.', '📸 Peltipoliisi: kaksi nopeuskameraa radan varrella, yli 80 km/h välähtää ja kovin lukema kirjataan rekisteriin', '10.04'],
+  ['30.9.', '✈ Lentokone Antin merkitsemään paikkaan: maaliviivan takana S-mutkan jälkeen tien vasemmalla puolella, nokka rallitielle – nousu suoraa pitkin', '23.12'],
   ['30.9.', 'Radioon neljä uutta biisiä: Summer Folded in My Hands, Ankara–Helsinki, Istanbulin yöstä, If You Come Back by Morning', '23.03'],
   ['30.9.', '✈ Lentokone ensimmäiseen mutkaan lähdön jälkeen, nokka kohti Ylästöntietä; maassa ↑ = kaasu kuin autossa, ↓ nostaa nokan; kamera korkeammalla; siivet oikenevat itsestään ja kylän rajalla kone kaartaa takaisin', '22.56'],
   ['30.9.', 'Radioon viisi uutta biisiä: Paluulippu, Kartta luokan seinällä, Käsi kädessä rauhan puolesta, Yhdessä rakennamme maailmaa, Antakaa meille tulevaisuus', '22.31'],
@@ -4900,8 +4901,8 @@ const LEHTI = [
     img: ['parko.jpg'], cap: ['Parko Markkinen Ylästöntien pienkoneen luona. – Tässä on konsepti, hän sanoi, mutta ei vielä kertonut mikä.'],
     body: ['YLÄSTÖ. Parko Markkinen, 38, puhuu nopeasti ja keskeyttää itsensä, kun uusi idea tulee kesken lauseen. Ensimmäisessä lähetyksessä hän keksi kirpputoreille kuluttajapörssin: iso sähkötaulu, jossa kahvinkeittimien kurssi elää. – Aamupäivän pörssissä leivänpaahtimet avautuivat vahvasti, hän kuvaili.', 'Toisessa jaksossa Markkinen myi koko Helsingin. Puiston penkit, ratikkapysäkit ja kaupunginosat saisivat sponsorin, ja viemärinkansissakin voisi olla pieni yhteistyötunnus. Missä helsinkiläiset sitten asuisivat? – Brändissä.', 'Kolmannessa jaksossa hän ennusti, että jokaisessa kodissa on tietokone, jolla tehdään kauppaa, ja taskussa laite, jolla katsotaan karttaa ja otetaan valokuvia. Sitten hän keksi paremman: kannettavan faksin. – Paperi ratkaisee, Markkinen sanoi.', 'Markkinarako kuuluu autoradiossa viidessä jaksossa. Hississä pidettävä työhaastattelu ja hautaustoimiston kanta-asiakkuus ovat vielä kuulematta. Markkinen on usein väärässä yksityiskohdissa, mutta ärsyttävän usein oikeassa suunnasta.'],
     box: ['MARKKINARAKO', 'Kuluttajapörssi', 'Helsinki-brändi', 'Kannettava fax', 'Hissihaastattelu', 'Hautaamon kanta-asiakkuus'] },
-  { id: 'lentokone', size: 'page', n: 61, kick: '✈ LENTOKONE', title: 'Pienkone nousi Ylästöntieltä', lede: 'Heti lähdön jälkeen, ensimmäisen mutkan kupeessa, odottaa pieni potkurikone. Nokka osoittaa Ylästöntielle: paina nuolta ylös, ja seitsemänkymmentä metriä myöhemmin olet ilmassa.',
-    img: ['lentokone.jpg'], cap: ['Kone irtosi Ylästöntieltä 92 kilometrin tuntinopeudessa. Alla pellolla haaksirikkoutunut ufo.'],
+  { id: 'lentokone', size: 'page', n: 61, kick: '✈ LENTOKONE', title: 'Pienkone nousi rallitieltä', lede: 'Maaliviivan takana, S-mutkan jälkeen tien varressa, odottaa pieni potkurikone. Nokka osoittaa rallitielle: paina nuolta ylös, ja kahdeksankymmentä metriä myöhemmin olet ilmassa.',
+    img: ['lentokone.jpg'], cap: ['Kone nousi rallitien varresta 93 kilometrin tuntinopeudessa. Katsojat seurasivat vieressä.'],
     body: ['YLÄSTÖ. Koneessa on oikea lentofysiikka: siipi nostaa kohtauskulman mukaan, liian jyrkällä nousulla se sakkaa ja nokka putoaa, kallistus kääntää konetta, ja potkurivirta tekee peräsimet käyttökelpoisiksi jo rullatessa.', 'Kävele koneen luo ja paina F. Maassa nuoli ylös antaa kaasua kuin autossa, ja noin 80 km/h:ssa nuoli alas nostaa nokan. Ilmassa sivunuolet kallistavat, A ja D käyttävät sivuperäsintä ja W ja S säätävät kaasua. Välilyönti jarruttaa. Maassa F vie takaisin Pököön.', 'Kun kädet irtoavat sivunuolista, kone oikaisee siipensä itse. Kylän rajalla se kaartaa takaisin kylän ylle. Siivenkärki tai potkuri maahan, niin kone romahtaa. R antaa uuden koneen. Lennetty kierros ei kelpaa ennätykseksi.'],
     box: ['NÄIN LENNÄT', 'F koneen vieressä', '↑ kaasu, ↓ nokka ylös 80 km/h:ssa', '← → kallistus, A/D sivuperäsin'] },
   { id: 'liftari', size: 'page', n: 53, kick: '🧍 LIFTARI', title: 'Liftari odottaa kyytiä K-kaupalle', lede: 'Tien varressa seisoo mies pahvikyltin kanssa. Pysähdy, niin hän hyppää kyytiin. Vie hänet K-kaupan pihaan, niin hyvä tekosi kirjataan poliisin rekisteriin.',
@@ -8279,26 +8280,21 @@ function makePlane() { const G = new THREE.Group(), wht = lmat(0xf2f2ee, 0.5), r
 function buildPlane() { PLANE.home = null; PLANE.on = false; if (PLANE.sb) { staticRemove(PLANE.sb); PLANE.sb = null; } if (PLANE.mesh) { scene.remove(PLANE.mesh); PLANE.mesh = null; }
   // the runway: the Ylästöntie straight nearest the start (the first bend turns onto it — Antti, 30.9.); the plane waits beside that bend,
   // pointing the longer way along the straight, so it rolls straight onto the road
-  const n = trackPoints.length, g0 = gridIndex(), tp = (i) => trackPoints[(i + n) % n], hdg = (i) => Math.atan2(tp(i + 3).x - tp(i).x, tp(i + 3).y - tp(i).y);
-  let C = null; for (let k = 0; k < 300 && !C; k += 2) { const t = Math.atan2(Math.sin(hdg(g0 + k + 12) - hdg(g0 + k)), Math.cos(hdg(g0 + k + 12) - hdg(g0 + k))); if (Math.abs(t) > 0.8) C = tp(g0 + k + 7); }   // (the first bend after the start)
-  if (!C) return; let best = null;
-  for (const r of sideRoads.filter(r => r.name === 'YLÄSTÖNTIE')) { const P = r.pts;
-    for (let i = 0; i < P.length; i += 2) { let j = i; for (let k = i + 10; k < P.length; k += 2) { const bx = P[k].x - P[i].x, bz = P[k].y - P[i].y, L = Math.hypot(bx, bz); let ok = true;
-        for (let m = i; m <= k; m++) if (Math.abs((P[m].x - P[i].x)*bz - (P[m].y - P[i].y)*bx)/L > 2.5) { ok = false; break; } if (ok) j = k; else break; }
-      const L = Math.hypot(P[j].x - P[i].x, P[j].y - P[i].y); if (L < 60) continue; const ux = (P[j].x - P[i].x)/L, uz = (P[j].y - P[i].y)/L, t = (C.x - P[i].x)*ux + (C.y - P[i].y)*uz, off = Math.abs((C.x - P[i].x)*uz - (C.y - P[i].y)*ux);
-      const sc = off + Math.max(0, -t, t - L) - L*0.05; if (off < 25 && (!best || sc < best.sc)) best = { sc, L, a: P[i], b: P[j], t: Math.max(0, Math.min(L, t)) }; } }
-  if (!best) return;
-  const ux = (best.b.x - best.a.x)/best.L, uz = (best.b.y - best.a.y)/best.L, s = { x: best.a.x + ux*best.t, y: best.a.y + uz*best.t };
-  const climb = (dx, dz) => { let m = -1; for (let t = 150; t <= 700; t += 25) m = Math.max(m, (Y(s.x + dx*t, s.y + dz*t) - Y(s.x, s.y))/t); return m; };   // (the steepest the ground ahead rises: no hill in the way)
-  const D = [{ dx: ux, dz: uz, L: best.L - best.t }, { dx: -ux, dz: -uz, L: best.t }].map(d => ({ ...d, c: climb(d.dx, d.dz) })).map(d => ({ ...d, cen: d.dx*(HG.x0 + HG.n*HG.step/2 - s.x) + d.dz*(HG.z0 + HG.n*HG.step/2 - s.y) })).sort((p, q) => (p.L >= 80 ? 0 : 1) - (q.L >= 80 ? 0 : 1) || (p.c > 0.08 ? 1 : 0) - (q.c > 0.08 ? 1 : 0) || q.cen - p.cen);   // (towards the village, not off the map — unless a hill is in the way)
-  const dir = D[0], e = { x: s.x + dir.dx*dir.L, y: s.y + dir.dz*dir.L }, ang = Math.atan2(dir.dx, dir.dz), fx = dir.dx, fz = dir.dz; let spot = null, bestS = Infinity;
-  for (let along = -30; along <= 0; along += 5) for (const side of [11, -11, 14, -14, 18, -18, 23, -23]) { const x = s.x + fx*along + fz*side, z = s.y + fz*along - fx*side;
+  // the runway: the race road's own straight after the finish line and its S (Antti's mark, 30.9.): the first stretch past the line that
+  // stays within 5 m of a chord for ≥ 110 m; the plane waits on the grass to its left, just before it, nose angled onto the road
+  const n = trackPoints.length, tp = (i) => trackPoints[((i % n) + n) % n], fxl = finishLine.position.x, fzl = finishLine.position.y; let fi = 0, fd = Infinity;
+  trackPoints.forEach((p, i) => { const d = Math.hypot(p.x - fxl, p.y - fzl); if (d < fd) { fd = d; fi = i; } });
+  const run = (i0) => { let j = i0; for (let k = i0 + 20; k < i0 + 160; k += 2) { const A = tp(i0), B = tp(k), L = Math.hypot(B.x - A.x, B.y - A.y); let ok = true; for (let m = i0; m <= k; m++) { const q = tp(m); if (Math.abs((q.x - A.x)*(B.y - A.y) - (q.y - A.y)*(B.x - A.x))/L > 5) { ok = false; break; } } if (ok) j = k; else break; } return j; };
+  let i0 = fi + 24, j0 = run(i0); for (let i = fi + 16; i < fi + 70; i += 2) { const j = run(i); if (Math.hypot(tp(j).x - tp(i).x, tp(j).y - tp(i).y) >= 110) { i0 = i; j0 = j; break; } }   // (the road bends gently: 110 m within 5 m of a line is plenty — it's off in ~70)
+  const s = { x: tp(i0).x, y: tp(i0).y }, e = { x: tp(j0).x, y: tp(j0).y }, Lr = Math.hypot(e.x - s.x, e.y - s.y); if (Lr < 60) return;
+  const ang = Math.atan2(e.x - s.x, e.y - s.y), fx = (e.x - s.x)/Lr, fz = (e.y - s.y)/Lr; let spot = null, bestS = Infinity;
+  for (let along = -30; along <= 5; along += 5) for (const side of [11, -11, 14, -14, 18, -18, 23, -23]) { const x = s.x + fx*along + fz*side, z = s.y + fz*along - fx*side;
     if (onRoad(x, z, 4)) continue; let free = true; staticNear(x, z, 12, B => { if (Math.hypot(B.x - x, B.z - z) < 6.5 + Math.max(B.hw, B.hl)) free = false; });
     if (free) for (const it of KNOCK.items) if (Math.abs(it.x - x) < 9 + it.hl && Math.abs(it.z - z) < 9 + it.hl && Math.hypot(it.x - x, it.z - z) < 7.5 + it.hl) { free = false; break; } if (!free) continue;   // (no tree, hedge or fence under the wings either)
     const tx = s.x + fx*12, tz = s.y + fz*12, a2 = Math.atan2(tx - x, tz - z);   // (pointing at the road a little past the bend: straight ahead is Ylästöntie)
     let path = true; for (let q = 3; q < Math.hypot(tx - x, tz - z); q += 3) { const px = x + Math.sin(a2)*q, pz = z + Math.cos(a2)*q; staticNear(px, pz, 4, B => { if (Math.hypot(B.x - px, B.z - pz) < 2 + Math.max(B.hw, B.hl)) path = false; }); }
     { const bx = x - Math.sin(a2)*12, bz = z - Math.cos(a2)*12; staticNear(bx, bz, 8, B => { if (Math.hypot(B.x - bx, B.z - bz) < 4 + Math.max(B.hw, B.hl)) path = false; }); }   // (nothing where the camera stands behind it)
-    if (!path) continue; const sl = Math.abs(Y(x + fz*1.2, z - fx*1.2) - Y(x - fz*1.2, z + fx*1.2))*2 + Math.abs(Y(x + fx*2, z + fz*2) - Y(x - fx*2, z - fz*2)), sc = sl + Math.abs(along)*0.01 + Math.abs(side)*0.01;
+    if (!path) continue; const sl = Math.abs(Y(x + fz*1.2, z - fx*1.2) - Y(x - fz*1.2, z + fx*1.2))*2 + Math.abs(Y(x + fx*2, z + fz*2) - Y(x - fx*2, z - fz*2)), sc = sl + Math.abs(along)*0.01 + Math.abs(side)*0.01 + (side < 0 ? 0.6 : 0);   // (the left of the road: where Antti drew the H)
     if (sc < bestS) { bestS = sc; spot = { x, z, angle: a2 }; } }
   if (!spot) spot = { x: s.x - fx*15, z: s.y - fz*15, angle: ang };
   PLANE.home = { ...spot, runway: { s: [s.x, s.y], e: [e.x, e.y], L: Math.round(Math.hypot(e.x - s.x, e.y - s.y)) } }; PLANE.mesh = makePlane(); scene.add(PLANE.mesh); planeInit(spot); planeView(0); }
