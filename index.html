@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 17.23 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 17.55 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4638,6 +4638,7 @@ const CHANGES = [
   ['30.9.', '🐕 Pihakoira hyppää kyytiin, kun pysähdyt sen viereen, ja haukkuu mukana seuraavaan pysähdykseen', '10.04'],
   ['30.9.', '🌭 Makkarakärry: pysähdy viereen, makkara tuodaan ikkunaan, röyh ja savua', '10.04'],
   ['30.9.', '📸 Peltipoliisi: kaksi nopeuskameraa radan varrella, yli 80 km/h välähtää ja kovin lukema kirjataan rekisteriin', '10.04'],
+  ['30.9.', 'Dragsterin ääni uusiksi: oikea V8-malli (8 sylinteriä oikeassa sytytysjärjestyksessä, pakosarjat soivat, ahtimen ulina) – tyhjäkäynti matala mörinä, ei enää sahaavaa surinaa eikä jatkuvaa rätinää', '20.54'],
   ['30.9.', 'Lehden taitto kuntoon: oma lehtifontti mukana (teksti ei enää leikkaudu Windowsin Georgialla), tiiviimpi lehtimäinen riviväli, puolikkaissa jutuissa kuva levenee ja otsikko+teksti yhdessä, ajatusviiva ei jää rivin alkuun', '20.23'],
   ['30.9.', 'Kuski nousee autosta kuljettajan puolelta (vasen), liftari apukuljettajan ovelle; R dragsterissa – ehjässä tai romuna – vie suoraan uuteen dragsteriin', '20.05'],
   ['30.9.', 'Korjauksia: liftarin K-KAUPPA-kyltti isompi ja näkyvissä, jalkaisin poliisi tulee sinun luoksesi eikä tyhjälle autolle, HONK-banderolli aukealle, ufo ei nappaa pakenevaa hirveä', '09.32'],
@@ -9595,6 +9596,40 @@ function createTyreSynth(ctx, dest, noiseBuf) {
 // ── the dragster's sound (30.9.): a Top Fuel hemi — eight cylinders, four firings a turn, a sawtooth pulse hard into a saturator, a sub an
 //    octave under, a roar of noise gated at the firing rate, the blower's whine; a lumpy idle that crackles out of open headers, a bark
 //    at the launch, a burst of cracks off the throttle; hull scraping the tarmac; crunches in a crash. ──
+// the dragster's engine, modelled sample by sample (an AudioWorklet): a cross-plane V8 firing 1-8-4-3-6-5-7-2, so each bank's
+// header gets its pulses unevenly (the V8 burble), each pulse a blowdown with a ragged edge, down a header that rings (a
+// waveguide: the round trip, the open end throwing it back inverted), the blower whining on top; soft clip, brighter on load
+const DRAG_WORKLET = `class DragV8 extends AudioWorkletProcessor {
+  static get parameterDescriptors() { return [{ name: 'rpm', defaultValue: 1000, automationRate: 'k-rate' }, { name: 'load', defaultValue: 0, automationRate: 'k-rate' }, { name: 'level', defaultValue: 0, automationRate: 'k-rate' }]; }
+  constructor() { super(); const sr = sampleRate; this.ph = 0; this.slot = 0; this.rpm = 1000; this.load = 0; this.lv = 0; this.bank = [0, 1, 1, 0, 1, 0, 0, 1];
+    this.len = [Math.round(sr*2*0.92/343), Math.round(sr*2*1.07/343)]; this.buf = [new Float32Array(this.len[0]), new Float32Array(this.len[1])]; this.wi = [0, 0];
+    this.A = [0, 0]; this.B = [0, 0]; this.dm = [0, 0]; this.pd = [0, 0]; this.bo = [0, 0]; this.seed = 12345; this.dcx = 0; this.dcy = 0; this.lp = 0; this.lp2 = 0; this.wh = 0; this.nz = 0; }
+  rnd() { this.seed = (this.seed*16807) % 2147483647; return this.seed/2147483647; }
+  process(inputs, outputs, P) { const out = outputs[0][0]; if (!out) return true; const sr = sampleRate, rpmT = P.rpm[0], loadT = P.load[0], lvT = P.level[0];
+    for (let i = 0; i < out.length; i++) {
+      this.rpm += (rpmT - this.rpm)*0.002; this.load += (loadT - this.load)*0.0015; this.lv += (lvT - this.lv)*0.002;
+      const rpm = this.rpm, load = this.load, idle = Math.max(0, Math.min(1, (2600 - rpm)/1400));
+      const ts = 0.0009 + 0.0022*idle, kA = Math.exp(-1/(ts*sr)), kB = Math.exp(-1/(0.00022*sr));
+      this.ph += rpm/60*4/sr;
+      while (this.ph >= 1) { this.ph -= 1; const b = this.bank[this.slot]; this.slot = (this.slot + 1) & 7;
+        let a = (0.32 + 0.68*load)*(1 + (this.rnd() - 0.5)*(0.2 + 0.55*idle));
+        if (idle > 0.3 && this.rnd() < 0.08*idle) a *= 0.3;
+        this.A[b] += a; this.B[b] += a; }
+      this.nz += ((this.rnd()*2 - 1) - this.nz)*0.35;
+      let rad = 0, body = 0;
+      for (let b = 0; b < 2; b++) { const p = this.A[b] - this.B[b]; this.A[b] *= kA; this.B[b] *= kB;
+        const x = p*(1 + (0.35 + 0.35*load)*this.nz);
+        const L = this.len[b], w = this.wi[b], d = this.buf[b][w]; this.dm[b] += 0.42*(d - this.dm[b]);
+        const y = x - 0.64*this.dm[b]; this.buf[b][w] = y; this.wi[b] = (w + 1) % L;
+        rad += (d - this.pd[b])*(b ? 0.9 : 1); this.pd[b] = d; body += y; }
+      let s = 1.6*rad + 0.5*body;
+      this.dcy = s - this.dcx + 0.995*this.dcy; this.dcx = s; s = this.dcy;
+      s = Math.tanh(s*(1.4 + 1.6*load));
+      this.wh += rpm/60*5.6/sr; if (this.wh > 1) this.wh -= 1; s += (0.03 + 0.05*load)*(rpm/8000)*Math.sin(this.wh*6.2832);
+      const fc = 700 + rpm*0.25 + load*(2200 + rpm*0.3), c = 1 - Math.exp(-6.2832*fc/sr); this.lp += c*(s - this.lp); this.lp2 += c*(this.lp - this.lp2);
+      out[i] = this.lp2*this.lv; }
+    return true; } }
+registerProcessor('drag-v8', DragV8);`;
 function createDragSynth(ctx, dest) {
   const nb = ctx.createBuffer(1, ctx.sampleRate*2, ctx.sampleRate), nd = nb.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random()*2 - 1;
   const noise = () => { const s = ctx.createBufferSource(); s.buffer = nb; s.loop = true; s.start(0, Math.random()*1.5); return s; };
@@ -9602,6 +9637,9 @@ function createDragSynth(ctx, dest) {
   const gain = (v, to) => { const g = ctx.createGain(); g.gain.value = v; if (to) g.connect(to); return g; };
   const filt = (type, f, Q, to) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = Q; if (to) b.connect(to); return b; };
   const out = gain(0, dest), lp = filt('lowpass', 900, 0.7, out), body = filt('peaking', 90, 1.2, lp); body.gain.value = 8;
+  let V8 = null;   // (the modelled engine above; the oscillator stack below only where there's no AudioWorklet)
+  if (ctx.audioWorklet && window.Blob) { const url = URL.createObjectURL(new Blob([DRAG_WORKLET], { type: 'application/javascript' }));
+    ctx.audioWorklet.addModule(url).then(() => { V8 = new AudioWorkletNode(ctx, 'drag-v8', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1] }); V8.connect(dest); out.disconnect(); }).catch(() => {}); }
   const shaper = ctx.createWaveShaper(); { const c = new Float32Array(2048); for (let i = 0; i < 2048; i++) { const x = i/1023.5 - 1; c[i] = Math.tanh(x*4)/Math.tanh(4); } shaper.curve = c; shaper.oversample = '2x'; } shaper.connect(body);
   const drive = gain(1, shaper);
   const fire = osc('sawtooth', 120), fireG = gain(0.55, drive); fire.connect(fireG);
@@ -9633,16 +9671,18 @@ function createDragSynth(ctx, dest) {
     ease(pLP, 480 + rpm*0.12 + thr*(1600 + rpm*0.35), dt, 0.03); ease(pW, crank*16, dt, 0.03); ease(pWG, s.on ? 0.012 + 0.03*thr*rpm/8000 : 0, dt, 0.05);
     ease(pSc, s.on ? 0.22*s.scrape : 0, dt, 0.04); ease(pScF, 2200 + 3000*s.scrape, dt, 0.05);
     ease(pOut, s.on ? (0.085 + 0.15*thr + 0.05*rpm/8000)*(s.volume == null ? 1 : s.volume) : 0, dt, 0.02);   // (a lumpy idle about 3× the Pökö's, full song a little over it)
+    if (V8) { const Q = V8.parameters; Q.get('rpm').setValueAtTime(rpm, t); Q.get('load').setValueAtTime(thr, t); Q.get('level').setValueAtTime(s.on ? DRAG_V8_LEVEL*(1.5 - 0.5*thr)*(s.volume == null ? 1 : s.volume) : 0, t); }
     for (const o of P) { if (!o.s) { o.p.setValueAtTime(o.v, t); o.s = true; } else o.p.linearRampToValueAtTime(o.v, t + dt); }
     if (!s.on) { prevThr = 0; return; }
     if (thr && !prevThr) { pop(t, 1.2); pop(t + 0.03, 0.9); }   // the bark as it lights up
     if (!thr && prevThr && rpm > 3500) { burst = t + 0.9; nextPop = t + 0.02; }
     if (thr) burst = -1;
     if (t < burst && t >= nextPop) { pop(t, 0.5 + rand()*0.6); nextPop = t + 0.025 + rand()*0.08; }
-    else if (!thr && idle > 0.5 && rand() < dt*5) pop(t + rand()*dt, 0.25 + rand()*0.25);   // open headers at idle
+    else if (!thr && idle > 0.5 && rand() < dt*(V8 ? 0.6 : 5)) pop(t + rand()*dt, (V8 ? 0.12 : 0.25) + rand()*0.15);   // open headers at idle (a stray one now and then — a crackle 5× a second grated)
     prevThr = thr; }
-  return { update, pop: (s) => pop(ctx.currentTime, s || 1) };
+  return { update, pop: (s) => pop(ctx.currentTime, s || 1), get v8() { return !!V8; } };
 }
+const DRAG_V8_LEVEL = 1;   // (set by ear-free measurement: idle and full song against the Pökö, see t_dragsnd)
 let _dcrashT = 0;
 function dragCrashSound(s) { if (!audio) return; const now = performance.now(); if (now - _dcrashT < 140) return; _dcrashT = now; const { ctx, master } = audio, t = ctx.currentTime;
   const src = ctx.createBufferSource(); src.buffer = audio.noiseBuf; const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700 + s*1500; const g = ctx.createGain(), d = 0.2 + s*0.35;

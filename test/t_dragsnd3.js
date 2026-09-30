@@ -1,0 +1,2 @@
+const out = {}; try { const c = new AudioContext(); out.state0 = c.state; const u = URL.createObjectURL(new Blob([DRAG_WORKLET], { type: 'application/javascript' })); await c.audioWorklet.addModule(u); out.ok = true; const n = new AudioWorkletNode(c, 'drag-v8', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1] }); out.node = !!n; } catch (e) { out.err = String(e); }
+initAudio(); await new Promise(r => setTimeout(r, 2000)); out.v8 = audio.dragSynth.v8; out.st = audio.ctx.state; return out;
