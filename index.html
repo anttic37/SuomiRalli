@@ -198,6 +198,8 @@
   #posti .po-send:disabled { opacity: 0.6; cursor: default; }
   #posti .po-st { min-height: 20px; margin-top: 8px; font: 700 13px Arial, sans-serif; color: #8a1a10; }
   #posti .po-hint { font: 12px Arial, sans-serif; color: #6b6152; margin-top: 4px; }
+  #aja-btn { display: table; margin: 4px auto 12px; background: #e0141e; color: #fff; font: italic 900 clamp(28px, 4.2vw, 46px)/1 "Arial Black", Arial, sans-serif; letter-spacing: 0.06em; padding: 14px 64px 16px; border: none; border-radius: 8px; box-shadow: 0 6px 0 #7a0a10, 0 10px 30px rgba(224,20,30,0.45); cursor: pointer; transform: skewX(-8deg); }
+  #aja-btn:hover { background: #ff2a33; } #aja-btn:active { transform: skewX(-8deg) translateY(4px); box-shadow: 0 2px 0 #7a0a10; }
   #lehti-btn { display: table; margin: 10px auto 0; background: #ffd23a; color: #111; font: 900 15px Arial, sans-serif; padding: 8px 16px; border: 3px solid #111; box-shadow: 3px 4px 0 #000; cursor: pointer; }
   /* wide enough for the paper on the left (the same limit as lehtiLayout's s ≥ 0.24: W ≥ 1285, H ≥ 380): decided by CSS from the first paint,
      not when the script gets there after the village is built — the QR used to sit top-left first and then jump right */
@@ -334,7 +336,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 09.14 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 09.33 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -446,6 +448,7 @@ const I18N = {
   'R uusi lähtö · Esc': ['R restart · Esc', 'R ny start · Esc'], 'OIKAISU – KIERROS EI KELPAA': ["SHORTCUT – THE LAP DOESN'T COUNT", 'SNARVEI – RUNDEN TELLER IKKE'],
   'AIKA KÄY': ['CLOCK RUNNING', 'KLOKKA GÅR'], 'FINAL — FIND FINISH': ['FINAL — FIND FINISH', 'SISTE — FINN MÅL'], 'CHECKPOINT {0}': ['CHECKPOINT {0}', 'SJEKKPUNKT {0}'],
   'KISA': ['RACE', 'LØP'],
+  '▶ AJA': ['▶ DRIVE', '▶ KJØR'],
   '🏁 DRAGSTERI! Hirveät tehot – aika ei kelpaa ennätykseksi': ['🏁 DRAGSTER! Monstrous power – no records with it', '🏁 DRAGSTER! Enorm kraft – ingen rekorder med den'], 'dragsterilla — aika ei kelpaa': ["with the dragster — the time doesn't count", 'med dragsteren — tiden teller ikke'],
   '📸 PELTIPOLIISI NAPSAHTI! {0} km/h': ['📸 SPEED CAMERA FLASHED! {0} km/h', '📸 FARTSKAMERAET BLITSET! {0} km/t'], 'Peltipoliisi: kovin ylinopeus {0} km/h – {1}': ['Speed camera: fastest {0} km/h – {1}', 'Fotoboks: raskeste {0} km/t – {1}'],
   '🌭 MAKKARA! …RÖYH!': ['🌭 SAUSAGE! …BURP!', '🌭 PØLSE! …RAP!'], '🌭 makkara tulossa… {0}': ['🌭 sausage coming… {0}', '🌭 pølse kommer… {0}'],
@@ -3296,7 +3299,7 @@ const WALK_FEAR = 90, WALK_MAX = 140;
 function walkMsg(t, col) { const cpd = document.getElementById('checkpoint-display'); if (!cpd) return; cpd.textContent = t; cpd.style.color = col || '#ffe9a8'; cpd.style.opacity = 1; clearTimeout(walkMsg.tm); walkMsg.tm = setTimeout(() => cpd.style.opacity = 0, 1600); }
 const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WALK;   // the arrows move you the way they point on the screen (the camera holds still while you walk), Shift runs, Space punches
   const ix = ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0) - ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0), iz = ((keys['ArrowUp'] || keys['KeyW']) ? 1 : 0) - ((keys['ArrowDown'] || keys['KeyS']) ? 1 : 0), wantRun = keys['ShiftLeft'] || keys['ShiftRight'];
-  const A = W.camA, mx = Math.sin(A)*iz + Math.cos(A)*ix, mz = Math.cos(A)*iz - Math.sin(A)*ix, ml = Math.hypot(mx, mz), fwd = ml > 0.01 ? 1 : 0;
+  const A = W.camA, mx = Math.sin(A)*iz - Math.cos(A)*ix, mz = Math.cos(A)*iz + Math.sin(A)*ix,   /* (screen right = (−cos A, sin A): a bigger heading is a left turn) */ ml = Math.hypot(mx, mz), fwd = ml > 0.01 ? 1 : 0;
   if (fwd) h.yaw += angDiff(Math.atan2(mx, mz) - h.yaw)*Math.min(1, dt*12);   // (turns to where it goes, quickly)
   if (keys['Space'] && !W.spPrev && !h.down && !h.ride) walkPunch(h); W.spPrev = !!keys['Space']; if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; }
   if (W.stam < 0.02) W.puff = true; else if (W.stam > 0.35) W.puff = false;
@@ -3351,7 +3354,7 @@ function updateCar(dt, live = true) {
   const spd = Math.abs(vF);
   const ri0 = roadInfo(car.x, car.z);
   const onPitch = inSandPitch(car.x, car.z);
-  const onTrk = onRoad(car.x, car.z, 0.4) || onPitch;   // the sand pitch drives like a gravel road
+  const onTrk = onRoad(car.x, car.z, 0.4) || onPitch || inLayby(car.x, car.z);   // the sand pitch drives like a gravel road
   car.onTrack = onTrk;
   const surf = onPitch && !onRoad(car.x, car.z, 0.4) ? 'gravel' : onTrk ? surfaceAt(car.x, car.z) : 'grass'; car.surface = surf;
   const gravelOn = surf === 'gravel';
@@ -4567,6 +4570,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Alkuruutuun iso ▶ AJA -nappi. Jalkaisin nuolet oikein päin (oikea vie oikealle). Dragsteri Malminrajantien varteen omalle asfalttilevikkeelle', '12.33'],
   ['30.9.', '🏁 Dragsteri Malminrajantien varressa maalin lähellä: nouse autosta (F), kävele dragsterille ja F – 0–100 alle sekunnissa, jarruvarjo aukeaa kun kaasu nousee. Pökö jää odottamaan; dragsterilla ajettu aika ei kelpaa ennätykseksi', '12.14'],
   ['30.9.', '📰 Lehti taitettu uudestaan aamulehden malliin: etusivulle teaserilaatikot, iso nimiö keltaisella viivalla, osastolaput, kuvatekstit kuvaajineen, harmaat faktalaatikot, LYHYESTI-palsta aukeamille ja sivuviittaukset', '10.34'],
   ['30.9.', '🧖 Saunojat juoksevat tien laitaan huutamaan HILJEMPAA, kun ajat lujaa ohi', '10.04'],
@@ -4799,9 +4803,9 @@ const LEHTI = [
     img: ['asema.jpg'], cap: ['Poliisiaseman piha. Kolme partioautoa ruuduissaan.'],
     body: ['Juoppo repäisee itsensä irti ja hoippuu karkuun, mutta konstaapelit saavat hänet naama asfalttiin. Partioautoihin ei kannata ajaa – poliisi huomaa sen.'] },
 
-  { id: 'dragster', size: 'page', n: 56, kick: '🏁 DRAGSTERI', title: 'Dragsteri odottaa Malminrajantiellä', lede: 'Maalin lähellä tien varressa on pitkä keltainen dragsteri. Nouse Pököstä, kävele sen luo ja paina F: nollasta sataan menee alle sekunti.',
+  { id: 'dragster', size: 'page', n: 56, kick: '🏁 DRAGSTERI', title: 'Dragsteri odottaa Malminrajantiellä', lede: 'Malminrajantien varressa, omalla asfalttilevikkeellään, on pitkä keltainen dragsteri. Nouse Pököstä, kävele sen luo ja paina F: nollasta sataan menee alle sekunti.',
     img: ['dragster.jpg'], cap: ['Dragsteri kiitää Malminrajantietä ylös. Takaa jää savuvana.'],
-    body: ['YLÄSTÖ. Malminrajantie on suora kuin viivoitin, ja sen varteen on joku pysäköinyt dragsterin: pitkä keltainen runko, pienet etupyörät, valtavat takarenkaat, ahdin ja siipi.', 'Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F uudestaan. Kaasu pohjaan, ja sata tulee täyteen alle sekunnissa. Ohjaus on kuin rekillä.', 'Kun nostat kaasun kovassa vauhdissa, jarruvarjo aukeaa. Pökö odottaa siellä, minne sen jätit: kävele sen luo ja paina F, niin vaihdat takaisin.', 'Ennätyksiä dragsterilla ei saa. Kierros ei kelpaa listalle eikä haamuksi, mutta hauskaa on.'],
+    body: ['YLÄSTÖ. Malminrajantie on suora kuin viivoitin, ja sen varteen on tehty oma levike, jolle joku on pysäköinyt dragsterin: pitkä keltainen runko, pienet etupyörät, valtavat takarenkaat, ahdin ja siipi.', 'Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F uudestaan. Kaasu pohjaan, ja sata tulee täyteen alle sekunnissa. Ohjaus on kuin rekillä.', 'Kun nostat kaasun kovassa vauhdissa, jarruvarjo aukeaa. Pökö odottaa siellä, minne sen jätit: kävele sen luo ja paina F, niin vaihdat takaisin.', 'Ennätyksiä dragsterilla ei saa. Kierros ei kelpaa listalle eikä haamuksi, mutta hauskaa on.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä', 'Kävele dragsterille, F: kyytiin', 'Kaasu pohjaan – varjo aukeaa kun nostat', 'Ennätyksiä ei tule'] },
   { id: 'liftari', size: 'page', n: 53, kick: '🧍 LIFTARI', title: 'Liftari odottaa kyytiä K-kaupalle', lede: 'Tien varressa seisoo mies pahvikyltin kanssa. Pysähdy, niin hän hyppää kyytiin. Vie hänet K-kaupan pihaan, niin hyvä tekosi kirjataan poliisin rekisteriin.',
     img: ['liftari.jpg'], cap: ['Peukalo pystyssä, kyltissä K-KAUPPA. Rallikuski pysähtyi.'],
@@ -5030,7 +5034,8 @@ function lehtiLayout() { const mini = document.getElementById('lehti-mini'); if 
 function paperViews() { const n = PAPER.pages.length, V = []; if (!PAPER.two) { for (let i = 0; i < n; i++) V.push([i]); return V; } V.push([0]); for (let i = 1; i < n; i += 2) V.push(i + 1 < n ? [i, i + 1] : [i]); return V; }
 // the post to the maker: a letter from the start screen → /api/posti (Antti reads them on posti.html)
 const POSTI = { open: false, busy: false };
-function postiInit() { const P = document.getElementById('posti'); if (!P) return;
+function postiInit() { const ab = document.getElementById('aja-btn'); if (ab) ab.onclick = (e) => { e.stopPropagation(); ab.blur(); if (gameState === State.MENU || gameState === State.FINISHED) { initAudio(); startRace(false); } };   // the big AJA button: the same as Enter
+  const P = document.getElementById('posti'); if (!P) return;
   document.getElementById('posti-btn').onclick = postiOpen; P.querySelector('.po-close').onclick = postiClose; P.querySelector('.po-send').onclick = postiSend;
   P.addEventListener('mousedown', (e) => { if (e.target === P) postiClose(); });
   addEventListener('keydown', (e) => { if (!POSTI.open) return; e.stopImmediatePropagation();   // (while it's open: typing is typing, nothing reaches the game)
@@ -7821,10 +7826,17 @@ function makeDragster() { const G = new THREE.Group(), body = lmat(0xf2c21a, 0.3
 function makeChute() { const m = new THREE.Mesh(new THREE.ConeGeometry(1.1, 1.6, 12, 1, true), new THREE.MeshStandardMaterial({ color: 0xf4f4f0, roughness: 0.8, side: THREE.DoubleSide })); m.rotation.x = -Math.PI/2; return m; }
 function buildDragster() { DRAG.home = null; DRAG.on = false; DRAG.carMesh = DRAG.parkMesh = DRAG.pokoMesh = null; if (!finishLine) return;
   const n = trackPoints.length, g = gridIndex(); let B = null;   // parked on the verge of Malminrajantie just short of the line, nose up the road: out onto the straight and floor it
-  for (let k = 10; k < 90 && !B; k += 3) for (const sd of [1, -1]) { const i = (g - k + n) % n, a = trackPoints[i], b = trackPoints[(i + 3) % n], L = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x)/L, uz = (b.y - a.y)/L, off = wAt(i)/2 + 3.0;
-    const x = a.x + uz*off*sd, z = a.y - ux*off*sd; if ([-3.2, -1.6, 0, 1.6, 3.2].every(t => roadsideOk(x + ux*t, z + uz*t, 0.9) && clearSpot(x + ux*t, z + uz*t, 0.8))) { B = { x, z, yaw: Math.atan2(-ux, -uz) }; break; } }   // (the rally comes down Malminrajantie to the line: the dragster faces up it, 300 m of straight)
+  for (let k = 10; k < 110 && !B; k += 2) for (const sd of [1, -1]) { const i = (g - k + n) % n, a = trackPoints[i], b = trackPoints[(i + 3) % n], L = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x)/L, uz = (b.y - a.y)/L, w2 = wAt(i)/2;
+    let ok = true; for (let t = -6; t <= 6 && ok; t += 2) for (const u of [w2 + 0.9, w2 + 2.2, w2 + 3.6]) { const x = a.x + ux*t + uz*u*sd, z = a.y + uz*t - ux*u*sd; if (!roadsideOk(x, z, 0.5) || LIFE_PLAN.some(P => Math.hypot(P.x - x, P.z - z) < (P.r || 0) + 0.8) || VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < 3)) ok = false; }   // (room for the lay-by: 12 × 3.6 m off the road edge; spectators there step off it)
+    if (ok) { const off = w2 + 2.0, x = a.x + uz*off*sd, z = a.y - ux*off*sd; B = { x, z, yaw: Math.atan2(-ux, -uz), lay: { x: a.x + uz*(w2 + 1.75)*sd, z: a.y - ux*(w2 + 1.75)*sd, yaw: Math.atan2(ux, uz) } }; break; } }   // (the rally comes down Malminrajantie to the line: the dragster faces up it, 300 m of straight)
   if (!B) { const L0 = finishLot(finishLine.position.x, finishLine.position.y, 8.6, 3, 14, 70); if (L0) B = { x: L0.x, z: L0.z, yaw: L0.yaw + Math.PI/2 }; } if (!B) return;
-  DRAG.home = { x: B.x, z: B.z, angle: B.yaw }; reserve('dragster', [B.x, B.z], 4.5);
+  DRAG.home = { x: B.x, z: B.z, angle: B.yaw }; reserve('dragster', [B.x, B.z], 4.5); DRAG.lay = null;
+  if (B.lay) { const Ly = B.lay, G = new THREE.Mesh(new THREE.BoxGeometry(3.9, 0.14, 13), new THREE.MeshStandardMaterial({ color: 0x4c4c50, roughness: 0.92 })); const fx = Math.sin(Ly.yaw), fz = Math.cos(Ly.yaw), rx = Math.cos(Ly.yaw), rz = -Math.sin(Ly.yaw), yF = Y(Ly.x + fx*6.5, Ly.z + fz*6.5), yB = Y(Ly.x - fx*6.5, Ly.z - fz*6.5), yR = Y(Ly.x + rx*1.9, Ly.z + rz*1.9), yL = Y(Ly.x - rx*1.9, Ly.z - rz*1.9);
+    G.position.set(Ly.x, (yF + yB + yR + yL)/4 + 0.04, Ly.z); G.rotation.order = 'YXZ'; G.rotation.set(-Math.atan2(yF - yB, 13), Ly.yaw, Math.atan2(yR - yL, 3.8)); G.receiveShadow = true; lifeGroup.add(G);   // (laid on the slope, both ways)   // "levike": its own paved lay-by off Malminrajantie
+    DRAG.lay = { x: Ly.x, z: Ly.z, c: Math.cos(Ly.yaw), s: Math.sin(Ly.yaw), mesh: G };
+    for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i]; if (!h.gone && !h.player && inLayby(h.x, h.z, 1.2)) humanRemove(h); } }   // (the crowd that stood there makes room)
+  if (DRAG.lay) { const m = new THREE.Matrix4(), p = new THREE.Vector3(), q = new THREE.Quaternion(), sc = new THREE.Vector3();   // the verge grass and lupins under the lay-by: gone
+    trackMeshGroup.traverse(o => { if (!o.isInstancedMesh || o.userData.key !== 'verge') return; let ch = false; for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, m); m.decompose(p, q, sc); if (!inLayby(p.x, p.z, 0.4)) continue; sc.set(0, 0, 0); m.compose(p, q, sc); o.setMatrixAt(i, m); ch = true; } if (ch) o.instanceMatrix.needsUpdate = true; }); }
   DRAG.parkMesh = makeDragster(); lifeGroup.add(DRAG.parkMesh); DRAG.carMesh = makeDragster(); DRAG.carMesh.name = 'dragster'; DRAG.carMesh.visible = false; carGroup.add(DRAG.carMesh);
   DRAG.chuteM = makeChute(); DRAG.chuteM.position.set(0, 0.8, -4.3); DRAG.chuteM.visible = false; DRAG.carMesh.add(DRAG.chuteM);
   DRAG.park = { ...DRAG.home }; dragPlace(); }
@@ -7841,6 +7853,7 @@ function dragSwap(toDrag) { if (!DRAG.home || DRAG.on === toDrag) return;
     pizzaMsg(T('🏁 DRAGSTERI! Hirveät tehot – aika ei kelpaa ennätykseksi'), true); }
   else { DRAG.park = here; DRAG.carMesh.visible = false; DRAG.chute = 0; DRAG.chuteM.visible = false; DRAG.hidden.forEach(c => c.visible = true); DRAG.hidden = []; if (DRAG.saved) Object.assign(DRIVE, DRAG.saved); DRAG.saved = null; }
   DRAG.on = toDrag; car.x = RI.x = go.x; car.z = RI.z = go.z; car.angle = RI.a = go.angle; car.vx = car.vz = car.speed = 0; car.steerSm = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle; dragPlace(); }
+function inLayby(x, z, m) { const L = DRAG.lay; if (!L) return false; const dx = x - L.x, dz = z - L.z, a = L.c*dx - L.s*dz, b = L.s*dx + L.c*dz; return Math.abs(a) < 2.0 + (m || 0) && Math.abs(b) < 6.6 + (m || 0); }   // (the lay-by drives like the road)
 function dragNear(h) { if (!DRAG.home || !h) return false; const P = DRAG.on ? DRAG.poko : DRAG.park; return !!P && Math.hypot(h.x - P.x, h.z - P.z) < 4.2; }   // (by the parked one: the dragster, or the Pökö while you have the dragster)
 function dragUpdate(dt) { if (!DRAG.on) return; const v = Math.hypot(car.vx, car.vz), lift = !car.throttle;
   if (!DRAG.chute && lift && v > 45) { DRAG.chute = 1; DRAG.chuteM.visible = true; DRAG.chuteM.scale.setScalar(0.2); if (audio) beep(300, 0.2, 0.08, 'triangle'); }   // off the gas at speed: the chute pops

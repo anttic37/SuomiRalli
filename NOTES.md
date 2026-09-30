@@ -806,6 +806,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   (dragUpdate, extra drag). DRAG.used during a race → finishRace refuses the time like a cut (no board, no ghost). startRace →
   dragReset(): Pökö back, the dragster home. On foot you can't walk far from the car you left, so park the dragster by the Pökö to
   swap back. t_drag: 0–100 0.57 s, 345 km/h. Photo t_lh_n → dragster.jpg (page story, n 56).
+- 30.9. (Antti): a big ▶ AJA button on the start screen (#aja-btn, = Enter). Walking: the arrows had left/right swapped — screen
+  right is (−cos A, sin A) (a bigger heading is a left turn); t_walk3's measure had the same mistake, both fixed. The dragster now
+  has its own paved lay-by ("levike") on Malminrajantie: 13 × 3.9 m off the road edge, laid on the slope both ways, drives like the
+  road (inLayby in updateCar), crowd there removed, verge grass under it scaled to 0; the dragster sits in it, nose up the road.
+  Candidates skip clearSpot (the crowd's reservations filled the verge) for roadsideOk + LIFE_PLAN + vehicles. t_ajabtn.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
