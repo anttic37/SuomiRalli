@@ -417,5 +417,30 @@
   "artist": "Ylen musiikkitoimitus",
   "talk": true,
   "show": "parko"
+ },
+ {
+  "file": "paluulippu.mp3",
+  "title": "Paluulippu",
+  "artist": "Ylen musiikkitoimitus"
+ },
+ {
+  "file": "kartta-luokan-seinalla.mp3",
+  "title": "Kartta luokan seinällä",
+  "artist": "Ylen musiikkitoimitus"
+ },
+ {
+  "file": "kasi-kadessa-rauhan-puolesta.mp3",
+  "title": "Käsi kädessä rauhan puolesta",
+  "artist": "Ylen musiikkitoimitus"
+ },
+ {
+  "file": "yhdessa-rakennamme-maailmaa.mp3",
+  "title": "Yhdessä rakennamme maailmaa",
+  "artist": "Ylen musiikkitoimitus"
+ },
+ {
+  "file": "antakaa-meille-tulevaisuus.mp3",
+  "title": "Antakaa meille tulevaisuus",
+  "artist": "Ylen musiikkitoimitus"
  }
 ]
