@@ -3381,6 +3381,7 @@ function walkCamera(dt) { const h = WALK.h, gy = Y(h.x, h.z) + h.hop; WALK.cy +=
   if (Math.hypot(ax - lightAnchor.x, az - lightAnchor.z) > 24) { lightAnchor.x = ax; lightAnchor.z = az; const ay = Y(ax, az); dirLight.position.set(ax + SUN.x, SUN.y + ay, az + SUN.z); dirLight.target.position.set(ax, ay, az); dirLight.target.updateMatrixWorld(); } }
 function updateCar(dt, live = true) {
   const held = POLICE.hold > 0 || WRECK.on || WALK.on; if (held) live = false;   // pulled over: the police have it
+  if (PLANE.on) { planePhys(dt, live); return; }   // the plane: its own flight physics (PLANE)
   if (DRAG.on) { dragPhys(dt, live); return; }   // the dragster: its own physics (below, DP)
   const throttle = live && (keys['ArrowUp'] || keys['KeyW']) ? 1 : 0;
   const brake = live && (keys['ArrowDown'] || keys['KeyS']) ? 1 : 0;   /* (not while held: the brake at a standstill is reverse) */
@@ -4641,6 +4642,7 @@ const CHANGES = [
   ['30.9.', '🐕 Pihakoira hyppää kyytiin, kun pysähdyt sen viereen, ja haukkuu mukana seuraavaan pysähdykseen', '10.04'],
   ['30.9.', '🌭 Makkarakärry: pysähdy viereen, makkara tuodaan ikkunaan, röyh ja savua', '10.04'],
   ['30.9.', '📸 Peltipoliisi: kaksi nopeuskameraa radan varrella, yli 80 km/h välähtää ja kovin lukema kirjataan rekisteriin', '10.04'],
+  ['30.9.', '✈ Pienkone K-kaupan mutkan jälkeen Ylästöntien varressa: F koneen vieressä, W kaasu, ↓ nokka ylös, ← → kallistus, A/D sivuperäsin – oikea kevyt lentofysiikka', '22.10'],
   ['30.9.', 'Mobiilisivun radio soi taas (ja jakonappi, tilastot ja top 5): sivun koodissa oli kirjoitusvirhe, joka pysäytti kaiken', '21.35'],
   ['30.9.', 'Dragsteri elää: moottori keinuu vääntöä vastaan ja tärisee tyhjäkäynnillä, runko kiertyy, pakoputket väpättää, nokka ja siivet lepattaa vauhdissa, takasiipi painuu, kuski painuu penkkiin, slicksit litistyy lähdössä ja kasvaa vauhdissa', '21.10'],
   ['30.9.', 'Dragsterin ääni uusiksi: oikea V8-malli (8 sylinteriä oikeassa sytytysjärjestyksessä, pakosarjat soivat, ahtimen ulina) – tyhjäkäynti matala mörinä, ei enää sahaavaa surinaa eikä jatkuvaa rätinää', '20.54'],
@@ -4888,6 +4890,10 @@ const LEHTI = [
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+  { id: 'lentokone', size: 'page', n: 61, kick: '✈ LENTOKONE', title: 'Pienkone nousi Ylästöntieltä', lede: 'K-kaupan mutkan jälkeen, Ylästöntien varren nurmella, odottaa pieni potkurikone. Rullaa se tielle, anna kaasua, ja sata metriä myöhemmin olet ilmassa.',
+    img: ['lentokone.jpg'], cap: ['Kone irtosi Ylästöntien asfaltista 93 kilometrin tuntinopeudessa.'],
+    body: ['YLÄSTÖ. Koneessa on oikea lentofysiikka: siipi nostaa kohtauskulman mukaan, liian jyrkällä nousulla se sakkaa ja nokka putoaa, kallistus kääntää konetta, ja potkurivirta tekee peräsimet käyttökelpoisiksi jo rullatessa.', 'Kävele koneen luo ja paina F. W antaa kaasua, nuoli alas nostaa nokkaa, sivunuolet kallistavat ja A ja D käyttävät sivuperäsintä. Välilyönti jarruttaa. Maassa F vie takaisin Pököön.', 'Siivenkärki tai potkuri maahan, niin kone romahtaa. R antaa uuden koneen. Lennetty kierros ei kelpaa ennätykseksi.'],
+    box: ['NÄIN LENNÄT', 'F koneen vieressä', 'W kaasu, ↓ nokka ylös 90 km/h:ssa', '← → kallistus, A/D sivuperäsin'] },
   { id: 'liftari', size: 'page', n: 53, kick: '🧍 LIFTARI', title: 'Liftari odottaa kyytiä K-kaupalle', lede: 'Tien varressa seisoo mies pahvikyltin kanssa. Pysähdy, niin hän hyppää kyytiin. Vie hänet K-kaupan pihaan, niin hyvä tekosi kirjataan poliisin rekisteriin.',
     img: ['liftari.jpg'], cap: ['Peukalo pystyssä, kyltissä K-KAUPPA. Rallikuski pysähtyi.'],
     body: ['YLÄSTÖ. Muutama sata metriä ennen K-kauppaa, radan oikealla laidalla, seisoo liftari. Pysähdy hänen viereensä, niin hän kävelee apukuljettajan ovelle ja nousee kyytiin.', 'Minikartalla vilkkuu sininen piste: K-kauppa. Pysähdy kaupan pihaan, niin liftari nousee pois, vilkuttaa kiitokseksi ja menee ostoksille.', 'Jos ajat ohi täyttä vauhtia, hän heristää nyrkkiä. Hyvät teot kirjataan poliisin rekisteriin, ja radio kertoo kylän kiltein kuskin.'],
@@ -8238,7 +8244,101 @@ function dragAlive(P, fdt) { const L = DRAG_LIVE, dt = Math.min(0.05, Math.max(0
   if (P.driver.visible) P.driver.position.set(buzz*n(27)*0.5, lope*0.01 + buzz*n(25), -Math.max(-0.06, Math.min(0.08, L.a*0.0022)));   // (pressed into the seat; thrown at the belts under the chute)
   for (const S of DP.wh) { if (S.W.front) continue; const w = P.wheels[S.W.id]; if (!w) continue; const sq = run ? Math.max(0, Math.min(1, L.a/25))*Math.max(0, 1 - v/30) : 0, sy = 1 - 0.1*sq + 0.07*Math.min(1, v*v/6400);
     w.g.scale.set(1, sy, 2 - sy); w.g.position.y = S.hy - S.W.r*(1 - sy); } }
-function buildFinishArea() { FINISH_AREA.ctx = null; FINISH_AREA.last = ''; buildDragster(); if (!finishLine) return; const fx = finishLine.position.x, fz = finishLine.position.y;
+// ── THE PLANE (a quick test, Antti 30.9.): a Cessna 150-ish high-wing on the grass past the K-kauppa bend, beside Ylästöntie's
+// longest straight — taxi onto the road and take off along it. F by it (on foot) → in; F on the ground at a standstill → back to
+// the Pökö. A 6-DOF rigid body: lift from the angle of attack with a stall, drag + induced drag, stability derivatives for pitch,
+// roll and yaw (the controls also bite in the prop wash, so it steers while slow), a prop whose thrust falls with speed, sprung
+// wheels with tyre friction and a steerable nose wheel. W/S throttle, ↓ nose up / ↑ nose down, ← → roll (and the nose wheel on
+// the ground), A/D rudder, Space brakes. A flown lap doesn't count.
+const PLANE = { on: false, home: null, mesh: null, pokoMesh: null, poko: null, used: false, crashed: false, air: false, airT: 0, thr: 0, de: 0, da: 0, dr: 0, rpm: 0, prop: 0,
+  p: new THREE.Vector3(), v: new THREE.Vector3(), q: new THREE.Quaternion(), w: new THREE.Vector3(), cam: null, hud: null };
+const PL_M = 650, PL_S = 16, PL_B = 10, PL_C = 1.5, PL_I = [1100, 1800, 900], PL_GEAR = [[0, -1.05, 1.4, 22000, 1], [1.1, -1.05, -0.35, 38000, 0], [-1.1, -1.05, -0.35, 38000, 0], [0, -0.6, -2.2, 60000, 2], [0, -0.75, 0.3, 60000, 2], [0, 0.0, -4.8, 60000, 2]],   /* (wheels; then skids: a tail or belly scrape grinds, it doesn't crash) */
+  PL_HARD = [[5, 0.7, 0.2], [-5, 0.7, 0.2], [0, -0.15, 3.15]];   /* (a wingtip or the prop into the ground: a crash) */
+const _pF = new THREE.Vector3(), _pU = new THREE.Vector3(), _pL = new THREE.Vector3(), _pR = new THREE.Vector3(), _pV = new THREE.Vector3(), _pT = new THREE.Vector3(), _pA = new THREE.Vector3(), _pQ = new THREE.Quaternion();
+function makePlane() { const G = new THREE.Group(), wht = lmat(0xf2f2ee, 0.5), red = lmat(0xc8202a, 0.5), dark = lmat(0x2a2a2e, 0.6), glass = lmat(0x3a5a78, 0.2), grey = lmat(0x8a8c90, 0.5);
+  const cyl = (x0, y0, z0, x1, y1, z1, r, m) => { const d = new THREE.Vector3(x1 - x0, y1 - y0, z1 - z0), me = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 6), m);
+    me.position.set((x0 + x1)/2, (y0 + y1)/2, (z0 + z1)/2); me.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); me.castShadow = true; G.add(me); };
+  lmesh(lbox(1.1, 1.15, 3.2), wht, 0, -0.15, 0.6, G); lmesh(lbox(1.12, 0.5, 1.5), glass, 0, 0.25, 0.5, G); lmesh(lbox(1.14, 0.12, 3.25), red, 0, -0.3, 0.6, G);
+  lmesh(lbox(0.95, 0.9, 0.8), wht, 0, -0.15, 2.55, G); lmesh(lbox(0.6, 0.6, 3.0), wht, 0, 0.05, -2.4, G); lmesh(lbox(0.4, 0.45, 1.0), wht, 0, 0.15, -4.2, G);
+  lmesh(lbox(10, 0.14, 1.5), wht, 0, 0.75, 0.3, G); for (const s of [-1, 1]) { lmesh(lbox(0.6, 0.15, 1.52), red, s*4.75, 0.75, 0.3, G); cyl(s*0.5, -0.5, 0.6, s*2.6, 0.68, 0.5, 0.035, grey); }
+  lmesh(lbox(3.4, 0.08, 0.9), wht, 0, 0.2, -4.35, G); lmesh(lbox(0.08, 1.3, 1.0), red, 0, 0.9, -4.45, G);
+  for (const [x, y, z, r] of [[0, -0.8, 1.4, 0.25], [1.1, -0.78, -0.35, 0.27], [-1.1, -0.78, -0.35, 0.27]]) { const t = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 0.16, 12), dark); t.rotation.z = Math.PI/2; t.position.set(x, y, z); t.castShadow = true; G.add(t); cyl(x*0.4, -0.55, z, x, y, z, 0.04, grey); }
+  const prop = new THREE.Group(); prop.position.set(0, -0.15, 3.0); G.add(prop); lmesh(lbox(0.12, 1.85, 0.05), dark, 0, 0, 0, prop); const sp = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.35, 10), red); sp.rotation.x = Math.PI/2; sp.position.z = 0.15; prop.add(sp);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(0.95, 24), new THREE.MeshBasicMaterial({ color: 0x222222, transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide })); disc.position.set(0, -0.15, 3.02); G.add(disc);
+  G.userData.prop = prop; G.userData.disc = disc; return G; }
+function buildPlane() { PLANE.home = null; PLANE.on = false; if (PLANE.mesh) { scene.remove(PLANE.mesh); PLANE.mesh = null; }
+  // the runway: Ylästöntie's longest straight; the plane waits beside its end nearer the K-kauppa bend, pointing along it
+  const K = LANDMARKS.find(L => L[0] === 'kauppa'); let best = null;
+  for (const r of sideRoads.filter(r => r.name === 'YLÄSTÖNTIE')) { const P = r.pts;
+    for (let i = 0; i < P.length; i += 3) { let j = i; for (let k = i + 10; k < P.length; k += 2) { const bx = P[k].x - P[i].x, bz = P[k].y - P[i].y, L = Math.hypot(bx, bz); let ok = true;
+        for (let m = i; m <= k; m++) if (Math.abs((P[m].x - P[i].x)*bz - (P[m].y - P[i].y)*bx)/L > 2.5) { ok = false; break; } if (ok) j = k; else break; }
+      const L = Math.hypot(P[j].x - P[i].x, P[j].y - P[i].y); if (!best || L > best.L) best = { L, a: P[i], b: P[j] }; } }
+  if (!best || best.L < 120) return;
+  let s = best.a, e = best.b; if (K && Math.hypot(e.x - K[1], e.y - K[2]) < Math.hypot(s.x - K[1], s.y - K[2])) [s, e] = [e, s];
+  const ang = Math.atan2(e.x - s.x, e.y - s.y), fx = Math.sin(ang), fz = Math.cos(ang); let spot = null, bestS = Infinity;   // (the flattest free grass near the runway's start: off every road, clear of houses and trees)
+  for (let along = 5; along <= 90; along += 5) for (const side of [10, -10, 13, -13, 17, -17, 22, -22, 28, -28, 35, -35]) { const x = s.x + fx*along + fz*side, z = s.y + fz*along - fx*side;
+    if (onRoad(x, z, 4)) continue; let free = true; staticNear(x, z, 12, B => { if (Math.hypot(B.x - x, B.z - z) < 6.5 + Math.max(B.hw, B.hl)) free = false; }); if (free) for (const it of KNOCK.items) if (Math.abs(it.x - x) < 9 + it.hl && Math.abs(it.z - z) < 9 + it.hl && Math.hypot(it.x - x, it.z - z) < 7.5 + it.hl) { free = false; break; } if (!free) continue;   // (no tree, hedge or fence under the wings either)
+    const sl = Math.abs(Y(x + fz*1.2, z - fx*1.2) - Y(x - fz*1.2, z + fx*1.2))*2 + Math.abs(Y(x + fx*2, z + fz*2) - Y(x - fx*2, z - fz*2)), sc = sl + along*0.004 + Math.abs(side)*0.01;
+    if (sc < bestS) { bestS = sc; spot = { x, z, angle: ang }; } }
+  if (!spot) spot = { x: s.x + fx*60, z: s.y + fz*60, angle: ang };
+  PLANE.home = { ...spot, runway: { s: [s.x, s.y], e: [e.x, e.y], L: Math.round(best.L) } }; PLANE.mesh = makePlane(); scene.add(PLANE.mesh); planeInit(spot); planeView(0); }
+function planeInit(S) { PLANE.q.setFromAxisAngle(_pA.set(0, 1, 0), S.angle); const gy = Math.max(Y(S.x, S.z), Y(S.x + Math.sin(S.angle)*1.4, S.z + Math.cos(S.angle)*1.4));
+  PLANE.p.set(S.x, gy + 1.08, S.z); PLANE.v.set(0, 0, 0); PLANE.w.set(0, 0, 0); PLANE.thr = 0; PLANE.de = PLANE.da = PLANE.dr = 0; PLANE.rpm = 0; PLANE.crashed = false; PLANE.air = false; PLANE.airT = 0;
+  if (PLANE.mesh) PLANE.mesh.visible = true; }
+function planeNear(h) { return !!(PLANE.home && h && !PLANE.on && !DRAG.on && Math.hypot(h.x - PLANE.p.x, h.z - PLANE.p.z) < 5.5); }
+function planeEnter(fresh) { if (!PLANE.home || DRAG.on) return; if (fresh) planeInit(PLANE.home);
+  PLANE.poko = { x: car.x, z: car.z, angle: car.angle }; if (!PLANE.pokoMesh) { PLANE.pokoMesh = carGroup.clone(true); for (const c of [...PLANE.pokoMesh.children]) if (c.name === 'dragster') PLANE.pokoMesh.remove(c); scene.add(PLANE.pokoMesh); }
+  PLANE.pokoMesh.visible = true; PLANE.pokoMesh.position.set(car.x, Y(car.x, car.z), car.z); PLANE.pokoMesh.rotation.set(0, car.angle, 0); carGroup.visible = false;
+  PLANE.on = true; if (gameState === State.RACING) PLANE.used = true; PLANE.cam = null; car.vx = car.vz = car.speed = 0;
+  pizzaMsg(T('✈ W/S kaasu · ↓ nokka ylös · ← → kallistus · A/D sivuperäsin · välilyönti jarru · F maassa = ulos'), true); }
+function planeExit() { if (!PLANE.on || PLANE.air || PLANE.v.length() > 2) return false; PLANE.on = false; PLANE.thr = 0; const P = PLANE.poko;
+  car.x = RI.x = P.x; car.z = RI.z = P.z; car.angle = RI.a = P.angle; car.vx = car.vz = car.speed = 0; carGroup.visible = true; if (PLANE.pokoMesh) PLANE.pokoMesh.visible = false; return true; }
+function planeReset() { if (PLANE.on) { PLANE.on = false; carGroup.visible = true; } if (PLANE.pokoMesh) PLANE.pokoMesh.visible = false; PLANE.used = false; if (PLANE.home) planeInit(PLANE.home); }
+function planePhys(dt, live) { const P = PLANE; if (P.crashed) { car.vx = car.vz = car.speed = 0; return; }
+  const k = (c) => live && !!keys[c], thrIn = k('KeyW') ? 1 : k('KeyS') ? -1 : 0; P.thr = Math.max(0, Math.min(1, P.thr + thrIn*0.7*dt));
+  const ease = (x, t, r) => x + Math.max(-r*dt, Math.min(r*dt, t - x));
+  P.de = ease(P.de, (k('ArrowDown') ? 1 : 0) - (k('ArrowUp') ? 1 : 0), 3); P.da = ease(P.da, (k('ArrowRight') ? 1 : 0) - (k('ArrowLeft') ? 1 : 0), 4); P.dr = ease(P.dr, (k('KeyD') ? 1 : 0) - (k('KeyA') ? 1 : 0), 3);
+  const F = _pF.set(0, 0, 1).applyQuaternion(P.q), U = _pU.set(0, 1, 0).applyQuaternion(P.q), L = _pL.set(1, 0, 0).applyQuaternion(P.q), v = P.v, w = P.w;
+  const V = v.length() + 0.01, vz = v.dot(F), vy = v.dot(U), vx = v.dot(L), qd = 0.5*1.225*V*V, al = Math.atan2(-vy, Math.max(0.5, Math.abs(vz))), be = Math.asin(Math.max(-1, Math.min(1, -vx/V)));
+  const st = al > 0.26 || al < -0.2, CL = al > 0.26 ? Math.max(0.6, 1.5 - 3*(al - 0.26)) : al < -0.2 ? Math.min(-0.5, -0.71 - 3*(al + 0.2)) : 0.25 + 4.8*al, CD = 0.035 + CL*CL/(Math.PI*0.75*6.25) + (st ? 0.25 : 0);
+  const Tp = P.thr*Math.min(2600, 0.8*75000/Math.max(V, 12)), qc = qd + P.thr*380;   // (the prop wash over the tail: the controls bite while slow)
+  const Fo = _pT.set(0, -PL_M*9.81, 0).addScaledVector(F, Tp).addScaledVector(v, -qd*PL_S*CD/V);
+  if (Math.abs(vz) > 1) { const n = Math.hypot(vz, vy) || 1; Fo.addScaledVector(U, qd*PL_S*CL*vz/n).addScaledVector(F, -qd*PL_S*CL*vy/n); }
+  Fo.addScaledVector(L, qd*PL_S*0.35*Math.sin(be));
+  const qn = -w.dot(L), pn = w.dot(F), rn = -w.dot(U), bV = PL_B/(2*Math.max(V, 5)), cV = PL_C/(2*Math.max(V, 5));
+  const Mp = qd*PL_S*PL_C*(0.04 - 0.9*al - 10*qn*cV) + qc*PL_S*PL_C*0.26*P.de, Mr = qd*PL_S*PL_B*(-0.08*be - 0.45*pn*bV) + qc*PL_S*PL_B*0.05*P.da, My = qd*PL_S*PL_B*(0.06*be - 0.1*rn*bV) + qc*PL_S*PL_B*0.035*P.dr;
+  const Tq = _pR.set(0, 0, 0).addScaledVector(L, -Mp).addScaledVector(F, Mr).addScaledVector(U, -My);
+  // the wheels: springs on the ground, tyres that grip sideways, the nose wheel steered, brakes on the mains
+  let onGround = 0, hard = 0; const steer = (P.dr + P.da)*0.5*Math.max(0, 1 - V/25);
+  for (const [bx, by, bz, ks, nose] of PL_GEAR) { const r = _pV.set(bx, by, bz).applyQuaternion(P.q), px = P.p.x + r.x, py = P.p.y + r.y, pz = P.p.z + r.z, g = Y(px, pz), pen = g - py; if (pen <= 0) continue; if (nose < 2) onGround++;
+    const vpx = v.x + w.y*r.z - w.z*r.y, vpy = v.y + w.z*r.x - w.x*r.z, vpz = v.z + w.x*r.y - w.y*r.x; if (nose < 2 && -vpy > 6) hard = Math.max(hard, -vpy);
+    const N = Math.max(0, ks*pen - 3500*vpy); let hx = F.x, hz = F.z; if (nose) { const c = Math.cos(steer), s = Math.sin(steer); [hx, hz] = [hx*c + hz*s, hz*c - hx*s]; } const hl = Math.hypot(hx, hz) || 1; hx /= hl; hz /= hl;
+    const lx = hz, lz = -hx, vl = vpx*hx + vpz*hz, vt = vpx*lx + vpz*lz, br = nose === 2 ? 0.5 : !nose && k('Space') ? 0.6 : 0.025, fl = -Math.sign(vl)*Math.min(br*N, Math.abs(vl)*PL_M*6), ft = -Math.sign(vt)*Math.min((nose === 2 ? 0.5 : 0.8)*N, Math.abs(vt)*PL_M*8);
+    const gx = hx*fl + lx*ft, gz = hz*fl + lz*ft; Fo.x += gx; Fo.y += N; Fo.z += gz; Tq.x += r.y*gz - r.z*N; Tq.y += r.z*gx - r.x*gz; Tq.z += r.x*N - r.y*gx; }
+  for (const [bx, by, bz] of PL_HARD) { const r = _pV.set(bx, by, bz).applyQuaternion(P.q), px = P.p.x + r.x, py = P.p.y + r.y, pz = P.p.z + r.z; if (py < Y(px, pz) - 0.05) hard = Math.max(hard, V > 6 ? 99 : 0); }
+  { let hit = false; for (const [bx, bz] of [[0, 0], [4.5, 0.3], [-4.5, 0.3]]) { const r = _pV.set(bx, 0, bz).applyQuaternion(P.q), x = P.p.x + r.x, z = P.p.z + r.z, y = P.p.y + r.y - Y(x, z);
+      staticNear(x, z, 3, B => { if (hit) return; const dx = x - B.x, dz = z - B.z, c = Math.cos(B.yaw || 0), s = Math.sin(B.yaw || 0), a = dx*c - dz*s, b = dx*s + dz*c, top = B.kind === 'house' ? 8 : B.kind === 'pole' ? 9 : /pine|tree|puu|kuusi/.test(B.kind || '') ? 15 : 4;
+        if (Math.abs(a) < B.hw + 0.4 && Math.abs(b) < B.hl + 0.4 && y < top) hit = true; }); } if (hit && V > 5) hard = 99; }
+  if (hard > 0) { P.crashed = true; boom(P.p.x, P.p.y, P.p.z, true); P.thr = 0; pizzaMsg(T('💥 LENTOKONE ROMAHTI – R = uusi kone'), true); car.vx = car.vz = car.speed = 0; return; }
+  v.addScaledVector(Fo, dt/PL_M); P.p.addScaledVector(v, dt);
+  const wb = [w.dot(L), w.dot(U), w.dot(F)], tb = [Tq.dot(L), Tq.dot(U), Tq.dot(F)]; for (let i = 0; i < 3; i++) wb[i] += tb[i]/PL_I[i]*dt;
+  if (onGround && V < 0.3 && !P.thr) { wb[0] *= 0.8; wb[1] *= 0.8; wb[2] *= 0.8; }
+  w.set(0, 0, 0).addScaledVector(L, wb[0]).addScaledVector(U, wb[1]).addScaledVector(F, wb[2]);
+  const wl = w.length(); if (wl > 1e-6) { _pQ.setFromAxisAngle(_pA.copy(w).multiplyScalar(1/wl), wl*dt); P.q.premultiply(_pQ).normalize(); }
+  P.air = !onGround && (P.airT += dt) > 0.3; if (onGround) P.airT = 0; P.rpm = 700 + 2000*P.thr + Math.min(400, V*8);
+  const hd = Math.atan2(F.x, F.z); car.x = RI.x = P.p.x; car.z = RI.z = P.p.z; car.angle = RI.a = hd; car.throttle = P.thr > 0.2 ? 1 : 0;
+  if (P.air) { car.vx = car.vz = car.speed = 0; } else { car.vx = v.x; car.vz = v.z; car.speed = vz; } car.onTrack = true; }
+function planeView(dt) { const P = PLANE; if (!P.mesh) return; P.mesh.position.copy(P.p); P.mesh.quaternion.copy(P.q); P.prop += (P.on && !P.crashed ? 20 + 180*P.thr : 0)*(dt || 0); const pr = P.mesh.userData.prop; pr.rotation.z = P.prop; P.mesh.userData.disc.visible = P.on && !P.crashed && P.thr > 0.05;
+  if (P.on) { let h = P.hud; if (!h) { h = P.hud = document.createElement('div'); h.style.cssText = 'position:fixed;left:50%;top:84px;transform:translateX(-50%);font:700 15px JetBrains Mono,monospace;color:#fff;background:rgba(0,0,0,0.5);padding:5px 12px;border-radius:6px;z-index:20;pointer-events:none'; document.body.appendChild(h); }
+    const V = P.v.length(), agl = Math.max(0, P.p.y - 1.05 - Y(P.p.x, P.p.z)); h.style.display = 'block'; h.textContent = '✈ ' + Math.round(V*3.6) + ' km/h · ' + Math.round(agl) + ' m · kaasu ' + Math.round(P.thr*100) + ' %' + (P.air ? '' : ' · maassa'); }
+  else if (P.hud) P.hud.style.display = 'none'; }
+function planeCamera(dt) { const P = PLANE, F = _pF.set(0, 0, 1).applyQuaternion(P.q); if (!P.cam) P.cam = F.clone(); P.cam.lerp(F, 1 - Math.pow(0.05, dt)); const d = P.cam;
+  const hl = Math.hypot(d.x, d.z) || 1; camTarget.set(P.p.x - d.x/hl*16, P.p.y + 4.5 - d.y*6, P.p.z - d.z/hl*16); camTarget.y = Math.max(camTarget.y, Y(camTarget.x, camTarget.z) + 1.5);
+  camPos.lerp(camTarget, 1 - Math.pow(0.002, dt)); camLookAt.lerp(_camV.set(P.p.x + d.x*12, P.p.y + d.y*12 + 1, P.p.z + d.z*12), 1 - Math.pow(0.001, dt));
+  camera.position.copy(camPos); camera.lookAt(camLookAt); camera.fov += (60 - camera.fov)*Math.min(2*dt, 1); camera.updateProjectionMatrix();
+  const texel = 200/4096, ax = Math.round(P.p.x/texel)*texel, az = Math.round(P.p.z/texel)*texel;
+  if (Math.hypot(ax - lightAnchor.x, az - lightAnchor.z) > 24) { lightAnchor.x = ax; lightAnchor.z = az; const ay = Y(ax, az); dirLight.position.set(ax + SUN.x, SUN.y + ay, az + SUN.z); dirLight.target.position.set(ax, ay, az); dirLight.target.updateMatrixWorld(); } }
+function buildFinishArea() { FINISH_AREA.ctx = null; FINISH_AREA.last = ''; buildDragster(); buildPlane(); if (!finishLine) return; const fx = finishLine.position.x, fz = finishLine.position.y;
   // the scoreboard
   // the scoreboards: one by the finish, two more a third and two thirds of the way round (30.9., Antti) — one canvas, one material for all three
   const n = trackPoints.length, spots = [[fx, fz]]; if (n) { let fi = 0, fd = Infinity; trackPoints.forEach((p, i) => { const d = Math.hypot(p.x - fx, p.y - fz); if (d < fd) { fd = d; fi = i; } });
@@ -9762,14 +9862,14 @@ function updateAudio(dt) {
   const racing = gameState === State.RACING;
   const kmh = Math.abs(car.speed) * 3.6;
   // engine: same rpm and gear as the tachometer; idles on the grid and after the finish, silent in the menu
-  engineSynth.update({ rpm: engine.rpmDisp, throttle: !!engine.throttle, gear: engine.gear, on: gameState !== State.MENU && !DRAG.on, volume: racing ? 1 : 0.8 }, t, Math.min(0.1, Math.max(0.001, dt || 1/60)));
+  engineSynth.update({ rpm: PLANE.on ? PLANE.rpm : engine.rpmDisp, throttle: PLANE.on ? PLANE.thr > 0.2 : !!engine.throttle, gear: PLANE.on ? 1 : engine.gear, on: gameState !== State.MENU && !DRAG.on, volume: racing ? 1 : 0.8 }, t, Math.min(0.1, Math.max(0.001, dt || 1/60)));
   audio.dragSynth.update({ rpm: DP.rpm, thr: racing && DRAG.on && !WALK.on && !WRECK.on ? DP.thr : 0, on: DRAG.on && gameState !== State.MENU && !WRECK.on, scrape: DP.scrape, volume: WALK.on ? 0.5 : 1 }, t, Math.min(0.1, Math.max(0.001, dt || 1/60)));
   
   // Screech when drifting on tarmac — volume scales with slip depth
   const screech = (racing && car.drifting && car.onTrack && Math.abs(car.speed) > 6)
     ? 0.02 + Math.min(car.maxSlip, 0.5) * 0.11 : 0;
   const fdt = Math.min(0.1, Math.max(0.001, dt || 1/60));
-  tyreSynth.update({ active: racing, slide: car.drifting || (keys['Space'] && Math.abs(car.speed) > 4), slip: Math.max(car.maxSlip || 0, keys['Space'] ? 0.45 : 0), speed: Math.abs(car.speed), surface: car.onTrack ? (car.surface || 'asphalt') : 'grass', sinceGravel: car.lastGravelT ? (performance.now() - car.lastGravelT)/1000 : 99 }, t, fdt);
+  tyreSynth.update({ active: racing && !PLANE.air, slide: car.drifting || (keys['Space'] && Math.abs(car.speed) > 4), slip: Math.max(car.maxSlip || 0, keys['Space'] ? 0.45 : 0), speed: Math.abs(car.speed), surface: car.onTrack ? (car.surface || 'asphalt') : 'grass', sinceGravel: car.lastGravelT ? (performance.now() - car.lastGravelT)/1000 : 99 }, t, fdt);
   
   prevThrottle = car.throttle;   // overrun pops now come from the engine synth
   
@@ -9801,7 +9901,9 @@ addEventListener('keydown', e => {
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
   if (e.code==='KeyE' && !e.repeat) { initAudio(); radioNext(); }   // (in the menu too: the radio there)
   if (e.code==='KeyB' && !e.repeat && gameState !== State.MENU) { initAudio(); bassToggle(); }
-  if (e.code==='KeyF' && !e.repeat) { if (WALK.on) { if (dragNear(WALK.h) && !WALK.h.down) { dragSwap(!DRAG.on); walkIn(true); } else walkIn(); } else walkOut(); }   // out of the car / back in — or into the other one parked here (the dragster, the Pökö)
+  if (e.code==='KeyF' && !e.repeat && PLANE.on) planeExit();   // (out of the plane: back in the Pökö)
+  else if (e.code==='KeyF' && !e.repeat && WALK.on && planeNear(WALK.h) && !WALK.h.down) { walkIn(true); planeEnter(); }
+  else if (e.code==='KeyF' && !e.repeat) { if (WALK.on) { if (dragNear(WALK.h) && !WALK.h.down) { dragSwap(!DRAG.on); walkIn(true); } else walkIn(); } else walkOut(); }   // out of the car / back in — or into the other one parked here (the dragster, the Pökö)
   if (e.code==='Digit1' || e.code==='Numpad1') radioVol(-1);   // radio quieter / louder
   if (e.code==='Digit2' || e.code==='Numpad2') radioVol(1);
   if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = T(camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'); cpd.style.color='#ffe9a8'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0, 900); }
@@ -9815,10 +9917,10 @@ function startRace(newTrack) {
   FLOW.on = false; FLOW.mopo = true; for (const v of VEHICLES) v.dodge = null;
   if (audio && audio.ctx.state === 'suspended') audio.ctx.resume();
   if (newTrack) generateTrack();
-  const wasDrag = DRAG.on && gameState === State.RACING;   // (R in the dragster, whole or in bits: straight into a fresh one at its lay-by — Antti, 30.9.)
+  const wasDrag = DRAG.on && gameState === State.RACING, wasPlane = PLANE.on && gameState === State.RACING;   // (R in the dragster, whole or in bits: straight into a fresh one at its lay-by — Antti, 30.9.)
   resetCar();
   checkpoints.forEach(cp=>cp.passed=false);
-  walkIn(true); dragReset(); knockReset(); rbClear(); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
+  walkIn(true); planeReset(); dragReset(); knockReset(); rbClear(); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
   checkpointsPassed=0; raceTime=0; prevFinishS=null; prevCpS=null; onlineStart();
   gameState = State.RACING; raceTime = 0;   // (no 3-2-1-GO: the clock starts at the line anyway — Antti, 29.9.)
   countdownT = 0; radioStart(); countdownLast = -1; document.getElementById('countdown').style.opacity = 0;
@@ -9832,7 +9934,8 @@ function startRace(newTrack) {
   lapStarted = false; prevStartS = null; ghostStartRun();
   repairCar(); smokeFx.clear(); flameFx.clear(); sparkFx.clear(); smokeGear = 1; carBody.dirt = 0; carBody.vx = carBody.vz = 0;
   pickTimeOfDay();
-  if (wasDrag && DRAG.home) { dragSwap(true); DRAG.used = true; }   // (the Pökö waits on the grid)
+  if (wasDrag && DRAG.home) { dragSwap(true); DRAG.used = true; }
+  if (wasPlane && PLANE.home) { planeEnter(true); PLANE.used = true; }   // (R in the plane: a fresh one on its grass)   // (the Pökö waits on the grid)
 }
 
 function updateCountdown(dt) {
@@ -9885,7 +9988,7 @@ function finishRace() {
   document.getElementById('final-time').style.color=raceTime<bestTime?'#44ff44':'#ff4444';
   const prevBest = bestTime;
   if (CUT.on) cutUpdate();   // (finished while still off the road: judged now)
-  if (DRAG.used) { ghostRec = null; ONLINE.lastRun = null; document.getElementById('final-time').style.color = '#ff4444'; document.getElementById('best-time-display').textContent = T('dragsterilla — aika ei kelpaa') + (bestTime < Infinity ? ' · ' + T('paras: {0}', formatTime(bestTime)) : ''); return; }   // (the dragster: fun, not a record)
+  if (DRAG.used || PLANE.used) { ghostRec = null; ONLINE.lastRun = null; document.getElementById('final-time').style.color = '#ff4444'; document.getElementById('best-time-display').textContent = T(PLANE.used ? 'lennetty — aika ei kelpaa' : 'dragsterilla — aika ei kelpaa') + (bestTime < Infinity ? ' · ' + T('paras: {0}', formatTime(bestTime)) : ''); return; }   // (the dragster: fun, not a record)
   if (CUT.bad) { ghostRec = null; ONLINE.lastRun = null; onlineOfferName(); document.getElementById('final-time').style.color = '#ff4444';
     document.getElementById('best-time-display').textContent = T('mutka oikaistu — aika ei kelpaa') + (bestTime < Infinity ? ' · ' + T('paras: {0}', formatTime(bestTime)) : ''); return; }
   ghostFinish(raceTime); onlineOfferName();
@@ -10131,6 +10234,7 @@ addEventListener('wheel', e => {
 let camAdj = 0, _clTopFrac = 1, _clT = 0; const _camV = new THREE.Vector3();
 const _camWalker = { x: 0, z: 0, angle: 0, vx: 0, vz: 0 };
 function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind the car, no speed lead — Antti asked it back (the later lead + auto look-ahead went too top-down)
+  if (PLANE.on) { planeCamera(dt); return; }   // (the plane: a chase camera along its nose)
   const C = WALK.on && WALK.h ? Object.assign(_camWalker, { x: WALK.h.x, z: WALK.h.z, angle: WALK.camA, vx: WALK.h.vx || 0, vz: WALK.h.vz || 0 }) : car;   // (on foot: the same camera, high up, on the walker — Antti, 29.9.)
   const speed=Math.min(DRAG.on ? 45 : Infinity, Math.sqrt(C.vx*C.vx+C.vz*C.vz));   // (the dragster at 400 km/h: the camera as at 160)
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
@@ -10394,6 +10498,7 @@ function loop(time) {
     rx = RI.x + (car.x - RI.x)*al; rz = RI.z + (car.z - RI.z)*al; ra = RI.a + da*al; car.x = rx; car.z = rz; car.angle = ra;
     carGroup.position.set(rx, Y(rx, rz) + BASS.hopY + ABD.carY, rz); carGroup.rotation.y = ra; }
   if (DRAG.on && DP.ok) dragView(dt);
+  planeView(dt);
   U_TIME.value = performance.now()/1000; skyDome.position.copy(camera.position);
   updateMarks(dt); updateDust(dt); updateDebris(dt); rbUpdate(dt); knockAnim(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); flowFx(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
   if (gameState !== State.MENU && (MM_TICK = (MM_TICK + 1) % 2) === 0) drawMinimap();   // (30 Hz is plenty for the map: half the 2D canvas uploads)
