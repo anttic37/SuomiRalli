@@ -4,7 +4,7 @@ import http from 'node:http'; import fs from 'node:fs'; import path from 'node:p
 import { handle } from '../netlify/functions/api.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'), PORT = +(process.argv[2] || 8787), mem = new Map();
 const store = { async get(k, o) { const v = mem.get(k); return v === undefined ? null : (o && o.type === 'json' ? JSON.parse(v) : v); }, async setJSON(k, v) { mem.set(k, JSON.stringify(v)); }, async delete(k) { mem.delete(k); } };
-const T = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json' };
+const T = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.jpg': 'image/jpeg', '.png': 'image/png', '.mp3': 'audio/mpeg', '.pdf': 'application/pdf' };
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost:' + PORT);
   if (url.pathname.startsWith('/api/')) { const body = req.method === 'POST' ? await new Promise(r => { let b = ''; req.on('data', c => b += c); req.on('end', () => r(b)); }) : undefined;

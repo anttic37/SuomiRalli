@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>YLÄSTÖ 1988 · Suomiralli – PC-peli</title>
+<meta name="description" content="Kylärallia Vantaan Ylästön oikeilla kaduilla, kesä 1988. PC-peli selaimessa – avaa koneella.">
+<meta property="og:title" content="YLÄSTÖ 1988 · Suomiralli">
+<meta property="og:description" content="Kylärallia Ylästön oikeilla kaduilla, kesä 1988. Selainpeli tietokoneelle.">
+<meta property="og:image" content="lehti/ralli_a.jpg">
+<meta name="theme-color" content="#1a1814">
+<!-- the phone's page (30.9., Antti: "mainossivu että hei tää on pc-peli"): the game sends touch-only devices here (src/game.html, top of
+     <head>); ?pc=1 on the game skips it. Features with the paper's photos, the car radio playing music/playlist.json, the paper (headlines
+     from lehti/lehti.json, the PDF), and the village's live numbers from /api (stats, rap, top — the track's sig from mobiili.json). -->
+<style>
+  :root { --paper: #f4ecd8; --ink: #1a1814; --red: #c8161d; --yel: #f2c21a; --soft: #6b6152; --line: #d9ccae; --night: #1a1814; }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--night); color: var(--ink); font: 17px/1.5 Georgia, "Times New Roman", serif; overflow-x: hidden; }
+  a { color: inherit; }
+  .wrap { max-width: 620px; margin: 0 auto; }
+  /* hero */
+  .hero { position: relative; min-height: 88vh; min-height: 88svh; display: flex; flex-direction: column; justify-content: flex-end; color: #fff; overflow: hidden; }
+  .hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.25) 40%, rgba(10,8,6,0.92) 100%); }
+  .hero .in { position: relative; z-index: 1; padding: 0 16px 28px; }
+  .tag { display: inline-block; background: var(--yel); color: var(--ink); font: 800 12px/1 Arial, sans-serif; letter-spacing: 0.12em; padding: 6px 9px; transform: rotate(-2deg); }
+  h1 { margin: 12px 0 2px; font: 900 clamp(46px, 15vw, 86px)/0.92 Impact, "Arial Black", Arial, sans-serif; letter-spacing: 0.01em; text-shadow: 0 3px 0 rgba(0,0,0,0.45); }
+  .sub { font: italic 18px/1.35 Georgia, serif; opacity: 0.92; margin: 6px 0 18px; }
+  .pc { background: rgba(244,236,216,0.97); color: var(--ink); padding: 16px 16px 14px; border-left: 6px solid var(--red); }
+  .pc b.big { display: block; font: 900 26px/1.1 "Arial Black", Arial, sans-serif; letter-spacing: -0.01em; }
+  .pc p { margin: 6px 0 12px; font-size: 16px; }
+  .url { display: flex; gap: 8px; align-items: stretch; }
+  .url code { flex: 1; min-width: 0; font: 700 16px/1 "Courier New", monospace; background: #fff; border: 2px solid var(--ink); padding: 12px 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  button, .btn { font: 700 15px/1 Arial, sans-serif; border: 0; cursor: pointer; padding: 12px 14px; background: var(--ink); color: var(--paper); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn.red { background: var(--red); color: #fff; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .row .btn { flex: 1 1 140px; }
+  .anyway { display: block; margin-top: 12px; font: 13px Arial, sans-serif; color: var(--soft); }
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--yel); color: var(--ink); font: 700 14px Arial, sans-serif; padding: 10px 16px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 9; }
+  .toast.on { opacity: 1; }
+  /* sections */
+  section { background: var(--paper); padding: 26px 16px 28px; border-top: 3px double var(--ink); }
+  section.dark { background: #221f1b; color: #efe6d2; border-top-color: #000; }
+  h2 { margin: 0 0 4px; font: 900 30px/1.05 "Times New Roman", serif; letter-spacing: -0.01em; }
+  .kick { font: 800 12px Arial, sans-serif; letter-spacing: 0.14em; color: var(--red); text-transform: uppercase; }
+  .dark .kick { color: var(--yel); }
+  .lede { margin: 6px 0 16px; color: var(--soft); }
+  .dark .lede { color: #b9ad94; }
+  /* features */
+  .feats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .feat { background: #fff; box-shadow: 0 1px 0 var(--line), 0 3px 10px rgba(0,0,0,0.08); }
+  .feat img { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; }
+  .feat div { padding: 8px 10px 11px; }
+  .feat b { display: block; font: 800 14px/1.2 Arial, sans-serif; }
+  .feat span { display: block; margin-top: 3px; font-size: 13.5px; line-height: 1.35; color: #3d372e; }
+  .feat.wide { grid-column: 1 / -1; }
+  @media (max-width: 360px) { .feats { grid-template-columns: 1fr; } }
+  /* radio */
+  .radio { background: linear-gradient(#2b2825, #171513); border: 2px solid #000; border-radius: 10px; padding: 14px; box-shadow: inset 0 1px 0 #4a4540, 0 6px 18px rgba(0,0,0,0.5); }
+  .disp { background: #0d1a10; border: 2px solid #000; border-radius: 4px; padding: 10px 12px; font: 700 15px/1.35 "Courier New", monospace; color: #7dff8a; text-shadow: 0 0 6px rgba(125,255,138,0.55); min-height: 76px; }
+  .disp .fq { font-size: 26px; letter-spacing: 0.05em; }
+  .disp .st { color: #b6ffbd; font-size: 13px; }
+  .disp .ti { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ctl { display: flex; gap: 10px; align-items: center; margin-top: 12px; }
+  .ctl button { width: 56px; height: 48px; border-radius: 6px; background: linear-gradient(#56504a, #2c2825); color: #f4ecd8; font-size: 20px; border: 1px solid #000; padding: 0; }
+  .ctl button.play { width: 72px; background: linear-gradient(#d7262d, #8f1016); }
+  .ctl input[type=range] { flex: 1; min-width: 0; accent-color: var(--yel); }
+  .shows { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .shows li { background: #2d2925; border-left: 4px solid var(--yel); padding: 8px 10px; font-size: 14.5px; line-height: 1.35; }
+  .shows li b { display: block; font: 800 13px Arial, sans-serif; letter-spacing: 0.04em; color: #fff; }
+  /* paper */
+  .paper { display: grid; grid-template-columns: 118px 1fr; gap: 14px; align-items: start; }
+  .cover { background: #fff; padding: 7px 7px 9px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); transform: rotate(-2deg); }
+  .cover .mh { font: 900 15px/0.95 Impact, "Arial Black", sans-serif; text-align: center; letter-spacing: 0.02em; }
+  .cover .ln { height: 3px; background: var(--yel); margin: 3px 0 5px; }
+  .cover img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+  .cover .hd { font: 700 10px/1.15 Georgia, serif; margin-top: 4px; }
+  .heads { margin: 0; padding: 0; list-style: none; }
+  .heads li { padding: 6px 0; border-bottom: 1px solid var(--line); font: 700 15px/1.25 Georgia, serif; }
+  .heads li:last-child { border-bottom: 0; }
+  /* live */
+  .nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .num { background: #fff; text-align: center; padding: 10px 4px; }
+  .num b { display: block; font: 900 24px/1 "Arial Black", Arial, sans-serif; }
+  .num span { font: 12px/1.2 Arial, sans-serif; color: var(--soft); }
+  .top { margin: 14px 0 0; padding: 0; list-style: none; counter-reset: t; }
+  .top li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 2px; border-bottom: 1px dashed var(--line); font: 16px Georgia, serif; counter-increment: t; }
+  .top li::before { content: counter(t) '.'; font-weight: 700; width: 1.6em; }
+  .top li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top li b { font-family: "Courier New", monospace; }
+  footer { padding: 26px 16px 40px; color: #9d917a; font: 13px/1.5 Arial, sans-serif; text-align: center; }
+  footer b { color: #efe6d2; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <img src="lehti/ralli_a.jpg" alt="Punainen rallihatchback Ylästön kylätiellä">
+    <div class="in">
+      <span class="tag">💾 PC-PELI · SELAIMESSA</span>
+      <h1>YLÄSTÖ<br>1988</h1>
+      <div class="sub">Kylärallia Vantaan Ylästön oikeilla kaduilla. Kesä, Pökö 205 ja koko kylä kyydissä.</div>
+      <div class="pc">
+        <b class="big">Hei, tää on PC-peli! 🖥️</b>
+        <p>Puhelimella ei pääse ajamaan – peli tarvitsee näppäimistön ja tietokoneen näytönohjaimen. Avaa tämä osoite koneella:</p>
+        <div class="url"><code id="url">suomiralli.netlify.app</code><button id="copy" aria-label="Kopioi osoite">📋</button></div>
+        <div class="row"><button class="btn red" id="share">📤 Lähetä linkki itselle</button><a class="btn" href="#radio">📻 Kuuntele radiota</a></div>
+        <a class="anyway" href="index.html?pc=1">Kokeile silti puhelimella → (raskas, ei kosketusohjausta)</a>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="kick">Mitä pelissä on</div>
+    <h2>Koko kylä on auki</h2>
+    <p class="lede">Oikea tieverkko ja 1990-luvun talot kartalta, mäet ja metsät, satoja kyläläisiä – ja kaikki reagoi siihen, miten ajat.</p>
+    <div class="feats">
+      <div class="feat wide"><img src="lehti/ralli_b.jpg" alt="" loading="lazy"><div><b>🏁 Ralli oikeilla kaduilla</b><span>Kierros Ylästön teitä pitkin, väliajat ja maaliviiva. Nopeimmat pääsevät kylän ennätyslistalle.</span></div></div>
+      <div class="feat"><img src="lehti/haamu_a.jpg" alt="" loading="lazy"><div><b>👻 Haamut</b><span>Aja omaa ja muiden parasta kierrosta vastaan.</span></div></div>
+      <div class="feat"><img src="lehti/gta_a.jpg" alt="" loading="lazy"><div><b>🗺️ Vapaa ajo</b><span>Käänny lähdössä oikealle, niin koko kylä on vapaa.</span></div></div>
+      <div class="feat"><img src="lehti/dragster.jpg" alt="" loading="lazy"><div><b>🚀 Dragsteri</b><span>Nouse autosta F:llä. Levikkeellä odottaa 0–100 alle sekunnissa.</span></div></div>
+      <div class="feat"><img src="lehti/tuli_a.jpg" alt="" loading="lazy"><div><b>🚒 Hälytysajot</b><span>Palokunta, ambulanssi ja poliisi tulevat, kun jotain sattuu.</span></div></div>
+      <div class="feat"><img src="lehti/puu.jpg" alt="" loading="lazy"><div><b>🌲 26 000 puuta</b><span>Ja jokaisen voi kaataa. Aidat myös.</span></div></div>
+      <div class="feat"><img src="lehti/ufo_a.jpg" alt="" loading="lazy"><div><b>👽 Ufot</b><span>Kylän laidalle on laskeutunut kaksi lautasta.</span></div></div>
+      <div class="feat"><img src="lehti/mummo.jpg" alt="" loading="lazy"><div><b>👵 Kylän elämä</b><span>Mummo suojatiellä, saunojat, makkarakärry, pihakoirat.</span></div></div>
+      <div class="feat"><img src="lehti/poliisi_a.jpg" alt="" loading="lazy"><div><b>🚨 Rikosrekisteri</b><span>Poliisi pitää kirjaa – pahimmat pääsevät lehteen.</span></div></div>
+      <div class="feat wide"><img src="lehti/nuke_a.jpg" alt="" loading="lazy"><div><b>☢️ …ja jos radiossa kuuluu koelähetys 11</b><span>Siitä ei puhuta.</span></div></div>
+    </div>
+  </section>
+
+  <section class="dark" id="radio">
+    <div class="kick">Autoradio</div>
+    <h2>Radio Ylästö soi myös puhelimessa</h2>
+    <p class="lede">Pelin radio: kylän omat biisit, urheilua, merisää ja puheohjelmat. Paina ▶.</p>
+    <div class="radio">
+      <div class="disp"><div class="fq" id="fq">-- . -</div><div class="st" id="st">VIRTA POIS</div><div class="ti" id="ti">&nbsp;</div></div>
+      <div class="ctl"><button class="play" id="play" aria-label="Soita">▶</button><button id="next" aria-label="Seuraava">⏭</button><input id="vol" type="range" min="0" max="1" step="0.05" value="0.8" aria-label="Äänenvoimakkuus"></div>
+    </div>
+    <ul class="shows">
+      <li><b>🍍 MARJATAN KEITTIÖ</b>Marjatta Väänänen ja mikroaaltouunin vallankumous. Ananas sopii melkein kaikkeen.</li>
+      <li><b>☭ NAAPURIVARTTI</b>Aki Korhonen tietää: Berliinin muuri pysyy ja Japanista tulee maailman talouskeskus.</li>
+      <li><b>🏒 URHEILUKIERROS</b>Kari Lehtinen: numero, nimi, tulos. Sählystä ei tule oikeaa lajia.</li>
+      <li><b>🌊 MERISÄÄ JA EUROOPAN SÄÄ</b>Seppo Hämäläinen: Bonn, Leningrad, Jugoslavia. Tuulet ja millibaarit.</li>
+    </ul>
+  </section>
+
+  <section id="lehti">
+    <div class="kick">Ylästön Sanomat</div>
+    <h2>Kylän oma lehti</h2>
+    <p class="lede">Kaikki pelin tapahtumat lehtenä – poliisin rekisteri, ufot, dragsteri ja Marjatan keittiö.</p>
+    <div class="paper">
+      <a class="cover" href="lehti/ylaston-sanomat.pdf"><div class="mh">YLÄSTÖN<br>SANOMAT</div><div class="ln"></div><img src="lehti/rikolliset.jpg" alt=""><div class="hd">Kylän suurimmat rikolliset</div></a>
+      <div><ul class="heads" id="heads"><li>Mikroaaltouuni mullistaa suomalaisen keittiön</li><li>Aki Korhonen: Neuvostoliitto kestää, Yhdysvallat ei</li><li>Dragsterissa on nyt oikea fysiikka</li><li>Rallikuski kaatoi kuusen</li></ul>
+        <div class="row"><a class="btn red" href="lehti/ylaston-sanomat.pdf">📰 Lue koko lehti (PDF)</a></div></div>
+    </div>
+  </section>
+
+  <section id="live">
+    <div class="kick">Suorana kylästä</div>
+    <h2>Tänään Ylästössä</h2>
+    <p class="lede" id="livelede">Kuskit ympäri Suomea ajavat parhaillaan.</p>
+    <div class="nums"><div class="num"><b id="n-starts">–</b><span>kisaa ajettu</span></div><div class="num"><b id="n-fires">–</b><span>taloa palanut</span></div><div class="num"><b id="n-trees">–</b><span>puuta kaadettu</span></div></div>
+    <ol class="top" id="top"></ol>
+  </section>
+
+  <footer><b>YLÄSTÖ 1988 · Suomiralli</b><br>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et – vielä.<br>Avaa koneella: suomiralli.netlify.app</footer>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const $ = (id) => document.getElementById(id), GAME = location.origin + location.pathname.replace(/[^/]*$/, '');
+$('url').textContent = GAME.replace(/^https?:\/\//, '').replace(/\/$/, '');
+const toast = (t) => { const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 1800); };
+$('copy').onclick = async () => { try { await navigator.clipboard.writeText(GAME); toast('✔ Osoite kopioitu'); } catch (e) { toast(GAME); } };
+$('share').onclick = async () => { const d = { title: 'YLÄSTÖ 1988 · Suomiralli', text: 'Kylärallia Ylästössä – avaa koneella:', url: GAME };
+  if (navigator.share) { try { await navigator.share(d); } catch (e) {} } else { try { await navigator.clipboard.writeText(GAME); toast('✔ Osoite kopioitu – liitä se viestiin'); } catch (e) { toast(GAME); } } };
+// the radio: the game's own playlist (songs and programmes; the hevi band's LP stays in the game), shuffled, one after another
+const R = { list: [], i: 0, el: new Audio(), on: false };
+const STN = ['Radio Ylästö', 'YLE Rinnakkaisohjelma', 'Radio Vantaa', 'Radio City 88', 'Kesäradio'], SHOW = { sport: 'YLE Urheiluradio', weather: 'YLE Radio 1 – Merisää', koe: 'Tuntematon asema' };
+R.el.preload = 'none'; R.el.addEventListener('ended', () => radioGo(1)); R.el.addEventListener('error', () => { if (R.on) setTimeout(() => radioGo(1), 400); });
+fetch('music/playlist.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : []).then(d => { const a = (Array.isArray(d) ? d : d.tracks || []).filter(t => t && t.file && !t.hevi && !t.koe);
+  const songs = a.filter(t => !t.talk).sort(() => Math.random() - 0.5), talk = a.filter(t => t.talk).sort(() => Math.random() - 0.5); let k = 0;
+  songs.forEach((s, i) => { R.list.push(s); if (i % 2 === 1 && k < talk.length) R.list.push(talk[k++]); }); while (k < talk.length) R.list.push(talk[k++]); radioShow(); }).catch(() => {});
+function radioShow() { const t = R.list[R.i]; if (!R.on || !t) { $('fq').textContent = '-- . -'; $('st').textContent = R.list.length ? 'VIRTA POIS · PAINA ▶' : 'EI KUULUVUUTTA'; $('ti').innerHTML = '&nbsp;'; return; }
+  const st = t.sport ? SHOW.sport : t.weather ? SHOW.weather : STN[(R.i*3) % STN.length], fq = (87.6 + ((R.i*7 + 3) % 20) + ((R.i*3) % 10)/10).toFixed(1);
+  $('fq').textContent = fq + ' MHz'; $('st').textContent = st.toUpperCase(); $('ti').textContent = (t.talk ? '🎙 ' : '♪ ') + t.title + (t.talk ? '' : ' – ' + (t.artist || '')); }
+function radioGo(d) { if (!R.list.length) return; R.i = (R.i + d + R.list.length) % R.list.length; R.el.src = 'music/' + R.list[R.i].file; if (R.on) R.el.play().catch(() => {}); radioShow(); }
+$('play').onclick = () => { if (!R.list.length) { toast('Radio virittyy… kokeile hetken päästä'); return; } R.on = !R.on; $('play').textContent = R.on ? '⏸' : '▶';
+  if (R.on) { if (!R.el.src) R.el.src = 'music/' + R.list[R.i].file; R.el.play().catch(() => {}); } else R.el.pause(); radioShow(); };
+$('next').onclick = () => radioGo(1);
+$('vol').oninput = (e) => { R.el.volume = +e.target.value; }; R.el.volume = 0.8; radioShow();
+// the paper: the headlines of the pages as laid out for the game
+fetch('lehti/lehti.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(j => { if (!j || !Array.isArray(j.pages)) return; const seen = new Set(), H = [];
+  for (const h of j.pages) { const doc = new DOMParser().parseFromString(h, 'text/html'); for (const e of doc.querySelectorAll('h2')) { const t = e.textContent.trim(); if (t.length > 8 && t.length < 90 && !seen.has(t)) { seen.add(t); H.push(t); } } if (H.length >= 7) break; }
+  if (H.length) $('heads').innerHTML = H.slice(0, 7).map(t => '<li>' + t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]) + '</li>').join(''); }).catch(() => {});
+// live from the village: races, fires, trees, the fastest five
+const fmt = (n) => (n || 0).toLocaleString('fi-FI'), clock = (t) => { const m = Math.floor(t/60), s = t - m*60; return m + '.' + s.toFixed(3).padStart(6, '0').replace('.', ':'); };
+fetch('api/stats').then(r => r.ok ? r.json() : null).then(j => { if (!j) return; $('n-starts').textContent = fmt(j.starts); if (j.drivers) $('livelede').textContent = fmt(j.drivers) + ' kuskia on ajanut Ylästössä. Tässä kylän nopeimmat:'; }).catch(() => {});
+fetch('api/rap').then(r => r.ok ? r.json() : null).then(j => { if (!j || !j.total) return; $('n-fires').textContent = fmt(j.total.f); $('n-trees').textContent = fmt(j.total.t); }).catch(() => {});
+fetch('mobiili.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(m => m && m.sig ? fetch('api/top?sig=' + encodeURIComponent(m.sig)) : null).then(r => r && r.ok ? r.json() : null).then(j => {
+  const L = (j && j.list || []).slice(0, 5); if (!L.length) return; $('top').innerHTML = L.map(r => '<li><span>' + String(r.name || '?').replace(/[&<>]/g, '') + '</span><b>' + clock(r.t) + '</b></li>').join(''); }).catch(() => {});
+</script>
+</body>
+</html>

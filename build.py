@@ -27,6 +27,7 @@ try:
     old[fnv(T['sig'])] = T
     open(tp, 'w', encoding='utf-8').write('// written by build.py: each track version (by trackId of its signature) → route points and road widths, for the cut check in api.mjs\nexport const TRACKS = ' + json.dumps(old, separators=(',', ':')) + ';\n')
     print('track for the server:', fnv(T['sig']), len(T['x']), 'points')
+    open(p('mobiili.json'), 'w', encoding='utf-8').write(json.dumps({'sig': T['sig']}) + '\n')   # (the phone page's top-5 asks /api/top with it)
 except Exception as e: print('WARNING: track export failed (the server keeps the previous tracks.mjs):', str(e)[:200], r.stderr[-300:])
 # the paper as a PDF beside the photos (lehti/ylaston-sanomat.pdf, the ⬇ PDF button in the paper): every page of the built game's PAPER
 if not os.environ.get('NOPDF'):

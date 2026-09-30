@@ -884,6 +884,14 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   phone call). Paper: 'keittio' main n 8.5 (keittio.jpg + radiot.jpg, the four together), 'naapurivartti' page n 60, 'urheilukierros'
   and 'merisaa' halves; photos t_lh_q (hosts are staged Humans with fixed looks: LOOK in the script). Six NEWS_GOSSIP lines (fi/en/no).
   Playlist entries may carry show: 'keittio' | 'naapurivartti' | 'urheilukierros' | 'merisaa' → SHOW_STATIONS name on the dial.
+- Phone page (30.9., Antti: "mainossivu että hei tää on pc-peli, featuret, radio ja lehti"): mobiili.html at the site root (static,
+  like posti.html). The game's <head> starts with a tiny script: a touch-only device (pointer: coarse, no fine pointer, touch points)
+  on *.netlify.app / localhost goes to mobiili.html (?pc=1 plays anyway, ?mobiili=1 forces the page). The page: hero (ralli_a.jpg,
+  "Hei, tää on PC-peli!", copy / share the address), ten feature cards with the paper's photos, the car radio (music/playlist.json
+  songs + talk shows, shuffled, <audio>, play / next / volume, a green display), the four hosts' shows, Ylästön Sanomat (headlines
+  parsed from lehti/lehti.json h2s, the PDF), live numbers (/api/stats starts, /api/rap fires + trees, /api/top top 5 with the sig
+  build.py writes to mobiili.json). test/mob_check.js (Playwright Pixel 5 + desktop against serve.mjs, which now sends jpg/mp3/pdf
+  types). The page title is "YLÄSTÖ 1988 · Suomiralli" (was "korkeuserot").
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
