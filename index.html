@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YLÄSTÖ 1988 · korkeuserot</title>
+<title>YLÄSTÖ 1988 · Suomiralli</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;0,800;1,400&family=Saira:ital,wght@1,800;1,900&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -336,7 +336,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 12.39 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 13.14 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4605,6 +4605,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Sivun otsikko selaimen välilehdellä: YLÄSTÖ 1988 · Suomiralli (oli vanha työnimi "korkeuserot")', '16.14'],
   ['30.9.', 'Radio Ylästön äänet lehteen: Marjatan keittiö (aukeama), Akin Naapurivartti, Karin Urheilukierros ja Sepon Merisää – ja kylähuhuihin. Ohjelmilla omat asemanimet, kun niiden äänitteet tulevat soittolistalle', '15.36'],
   ['30.9.', 'Dragsterin kamera ei enää pyöri metsässä: se seuraa ajosuuntaa eikä keulaa ja kääntyy korkeintaan 60° sekunnissa; puun isku pyöräyttää dragsteria maltillisemmin', '15.07'],
   ['30.9.', 'Puunkaadot uutisiin: radion kylähuhu kertoo heti kaadetusta puusta tai aidasta, ja poliisin rekisteri laskee kaikkien kaatamat puut – radio kertoo kylän pahimman metsurin', '14.59'],
