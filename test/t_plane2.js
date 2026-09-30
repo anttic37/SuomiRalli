@@ -1,0 +1,11 @@
+// the plane at the first bend: straight ahead is Ylästöntie; ↑ throttle on the ground, ↓ lifts the nose at 80 km/h, holding ↑ through lift-off doesn't dive it
+startRace(false); step(30); const P = PLANE, H = P.home, out = { home: H && { x: Math.round(H.x), z: Math.round(H.z), runway: H.runway, dGrid: Math.round(Math.hypot(H.x - trackPoints[gridIndex()].x, H.z - trackPoints[gridIndex()].y)) } }; if (!H) return out;
+{ const fx = Math.sin(H.angle), fz = Math.cos(H.angle); let d = null; for (let t = 2; t < 60; t += 1) if (onRoad(H.x + fx*t, H.z + fz*t, 0)) { d = t; break; } out.roadAhead = d; }
+car.x = RI.x = H.x - Math.cos(H.angle)*4; car.z = RI.z = H.z + Math.sin(H.angle)*4; car.angle = RI.a = H.angle; car.vx = car.vz = 0; step(5); walkOut(); step(3);
+dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyF' })); dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyF' })); step(40); out.inPlane = P.on; RR(scene, camera); await __save('s3_p2_park.png', renderer.domElement.toDataURL('image/png'));
+const att = () => { const F = new THREE.Vector3(0, 0, 1).applyQuaternion(P.q); return { pitch: +(Math.asin(F.y)*57.3).toFixed(1), hd: +(Math.atan2(F.x, F.z)*57.3).toFixed(0) }; }, agl = () => +(P.p.y - 1.05 - Y(P.p.x, P.p.z)).toFixed(1);
+const x0 = P.p.x, z0 = P.p.z; keys.ArrowUp = true; let t = 0, lift = null, onRd = null, minAglAfter = 99;
+step(60*20, () => { t += 1/60; const V = P.v.length()*3.6; if (onRd === null && onRoad(P.p.x, P.p.z, 0)) onRd = +t.toFixed(1); keys.ArrowDown = V > 80 && att().pitch < 10; if (!lift && P.air) lift = { t: +t.toFixed(1), d: Math.round(Math.hypot(P.p.x - x0, P.p.z - z0)), kmh: Math.round(V) }; if (lift && t > lift.t + 1) minAglAfter = Math.min(minAglAfter, agl()); if (P.crashed) return false; });
+RR(scene, camera); await __save('s3_p2_air.png', renderer.domElement.toDataURL('image/png')); keys.ArrowUp = keys.ArrowDown = false; out.onRoadAfter = onRd; out.takeoff = lift; out.after20 = { agl: agl(), kmh: Math.round(P.v.length()*3.6), ...att(), crashed: P.crashed, minAglAfter };
+{ const gy = Y(P.p.x, P.p.z); out.cam = { above: +(camera.position.y - P.p.y).toFixed(1), back: +Math.hypot(camera.position.x - P.p.x, camera.position.z - P.p.z).toFixed(1) }; }
+return out;
