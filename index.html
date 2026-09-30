@@ -340,7 +340,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 15.09 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 15.25 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -453,6 +453,7 @@ const I18N = {
   'AIKA KÄY': ['CLOCK RUNNING', 'KLOKKA GÅR'], 'FINAL — FIND FINISH': ['FINAL — FIND FINISH', 'SISTE — FINN MÅL'], 'CHECKPOINT {0}': ['CHECKPOINT {0}', 'SJEKKPUNKT {0}'],
   'KISA': ['RACE', 'LØP'],
   '▶ AJA': ['▶ DRIVE', '▶ KJØR'],
+  '💥 DRAGSTERI HAJOSI KAPPALEIKSI!': ['💥 THE DRAGSTER CAME APART!', '💥 DRAGSTEREN GIKK I STYKKER!'],
   '🔥 DRAGSTERI KATOLLAAN – TULESSA, KUSKI LENSI ULOS!': ['🔥 DRAGSTER ON ITS ROOF – ON FIRE, THE DRIVER THROWN OUT!', '🔥 DRAGSTEREN PÅ TAKET – I BRANN, SJÅFØREN SLENGT UT!'],
   '🏁 DRAGSTERI! Hirveät tehot – aika ei kelpaa ennätykseksi': ['🏁 DRAGSTER! Monstrous power – no records with it', '🏁 DRAGSTER! Enorm kraft – ingen rekorder med den'], 'dragsterilla — aika ei kelpaa': ["with the dragster — the time doesn't count", 'med dragsteren — tiden teller ikke'],
   '📸 PELTIPOLIISI NAPSAHTI! {0} km/h': ['📸 SPEED CAMERA FLASHED! {0} km/h', '📸 FARTSKAMERAET BLITSET! {0} km/t'], 'Peltipoliisi: kovin ylinopeus {0} km/h – {1}': ['Speed camera: fastest {0} km/h – {1}', 'Fotoboks: raskeste {0} km/t – {1}'],
@@ -4609,6 +4610,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Dragsteri: kunnon liekit putkista (isot kaasulla, paukkeet kun kaasu nousee), hajoaa osiin (keula, etusiipi, kaari, kone, putket – ja kovassa kolarissa koko auto), oma mittaristo 9000 rpm / 500 km/h. Levike samaa asfalttia kuin tie', '18.16'],
   ['30.9.', 'Radion biiseissä pelkkä nimi (esim. Kesä ei kysy); toimittajana Ylen musiikkitoimitus', '18.09'],
   ['30.9.', 'Keittiöjaksoille nimet (Marjatta kokkaa: mikroaaltouunin ihme, ananas sopii kaikkeen, hyytelö juhlapöytään, hamburgeri ja tako, avaruusateria); radiossa näkyy pelkkä biisin nimi', '17.59'],
   ['30.9.', 'Marjatan keittiö soi nyt autoradiossa: viisi jaksoa, omalla asemallaan Radio Ylästö – Marjatan keittiö (myös puhelimen sivulla)', '17.54'],
@@ -4868,9 +4870,9 @@ const LEHTI = [
     img: ['merisaa.jpg'], cap: ['Seppo Hämäläinen katsoo tuulen suunnan lipputangosta.'],
     body: ['YLÄSTÖ. Seppo Hämäläinen lukee tuulet, millibaarit ja majakoiden havainnot samalla äänellä kuin Euroopan sään: Bonn, Saksan demokraattinen tasavalta, Tšekkoslovakia, Jugoslavia, Leningrad. Hän lukee myös valmiustiedotteet, joissa testataan sireenejä ja säteilymittareita. Radio muistuttaa, että koelähetykset ovat vain kokeita.'] },
   { id: 'dragster', size: 'main', n: 8, kick: '🏁 DRAGSTERI', title: 'Dragsterissa on nyt oikea fysiikka', lede: 'Malminrajantien levikkeellä odottava dragsteri ei ole enää lelu. Se nousee keulilleen, sutii, lentää ja pyörii – ja kun se jää katolleen, se syttyy.',
-    img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: slicksit savuavat, keula nousee wheelie-tukien varaan. Sata tulee täyteen alle sekunnissa.', 'Kova osuma 120 km/h vauhdissa: dragsteri kierähtää ilmaan. Siipi ja renkaat voivat irrota.'],
-    body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Siipi ja renkaat irtoavat, jos iskut ovat kovia. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
-    box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – keula nousee, renkaat savuavat', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+    img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
+    body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
+    box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
   { id: 'liftari', size: 'page', n: 53, kick: '🧍 LIFTARI', title: 'Liftari odottaa kyytiä K-kaupalle', lede: 'Tien varressa seisoo mies pahvikyltin kanssa. Pysähdy, niin hän hyppää kyytiin. Vie hänet K-kaupan pihaan, niin hyvä tekosi kirjataan poliisin rekisteriin.',
     img: ['liftari.jpg'], cap: ['Peukalo pystyssä, kyltissä K-KAUPPA. Rallikuski pysähtyi.'],
     body: ['YLÄSTÖ. Muutama sata metriä ennen K-kauppaa, radan oikealla laidalla, seisoo liftari. Pysähdy hänen viereensä, niin hän kävelee apukuljettajan ovelle ja nousee kyytiin.', 'Minikartalla vilkkuu sininen piste: K-kauppa. Pysähdy kaupan pihaan, niin liftari nousee pois, vilkuttaa kiitokseksi ja menee ostoksille.', 'Jos ajat ohi täyttä vauhtia, hän heristää nyrkkiä. Hyvät teot kirjataan poliisin rekisteriin, ja radio kertoo kylän kiltein kuskin.'],
@@ -7542,8 +7544,8 @@ function wreckCar(how) { if (WRECK.on || gameState !== State.RACING) return; WRE
   if (how === 'boom') { boom(car.x, gy, car.z, true); for (let r = 0; r < 2; r++) for (const [nx, nz] of [[fx, fz], [-fx, -fz], [fz, -fx], [-fz, fx]]) { for (const p of carParts) p.cool = 0; carDamage(nx, nz, 30); } }
   startFire({ vehicle: RV }); if (RV.fire) RV.fire.level = how === 'boom' ? 1 : 0.6;
   const [dx, dz] = lloc(car.x, car.z, car.angle, -1.4, 0.2), h = new Human({ x: dx, z: dz, yaw: car.angle, rig: makeAdult(0xf2f2ee, 0xf2f2ee, lpick(L_HAIR), { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), temp: true }); h.ao = aoAlloc(); WRECK.driver = h;
-  const k = how === 'boom' ? 9 : how === 'drag' ? 7 : 3; knock(h, -fz*k + car.vx*0.3, fx*k + car.vz*0.3, how === 'boom' ? 14 : how === 'drag' ? 12 : 6);   // thrown clear out of the driver's door: the ambulance is on its way
-  car.vx *= 0.2; car.vz *= 0.2; esHud(); pizzaMsg(T(how === 'boom' ? '👽 UFO AMPUI AUTON!' : how === 'drag' ? '🔥 DRAGSTERI KATOLLAAN – TULESSA, KUSKI LENSI ULOS!' : '⚡🔥 ES + KOLARI = TULIPALO!'), true); }
+  const k = how === 'boom' ? 9 : how === 'drag' || how === 'dragboom' ? 7 : 3; knock(h, -fz*k + car.vx*0.3, fx*k + car.vz*0.3, how === 'boom' ? 14 : how === 'drag' || how === 'dragboom' ? 12 : 6);   // thrown clear out of the driver's door: the ambulance is on its way
+  car.vx *= 0.2; car.vz *= 0.2; esHud(); pizzaMsg(T(how === 'boom' ? '👽 UFO AMPUI AUTON!' : how === 'drag' ? '🔥 DRAGSTERI KATOLLAAN – TULESSA, KUSKI LENSI ULOS!' : how === 'dragboom' ? '💥 DRAGSTERI HAJOSI KAPPALEIKSI!' : '⚡🔥 ES + KOLARI = TULIPALO!'), true); }
 function wreckReset() { if (WRECK.rv && WRECK.rv.charred) charVehicle(WRECK.rv, false); WRECK.on = false; WRECK.rv = null; WRECK.driver = null; }
 
 // ── 1. moose: big, slow, grazing in the woods; now and then one wanders across a road — and stops dead in the lights ──
@@ -7905,21 +7907,24 @@ function makeDragster() { const G = new THREE.Group(), body = new THREE.Group();
   const yel = lmat(0xf2c21a, 0.3), black = lmat(0x141414, 0.6), chrome = lmat(0xd8dade, 0.18), red = lmat(0xc8201e, 0.4), alu = lmat(0x9aa0a8, 0.35), rubber = lmat(0x161616, 0.85), skin = lmat(0xe8b795, 0.7);
   const beam = (x0, y0, z0, x1, y1, z1, r, m, par) => { const L = Math.hypot(x1 - x0, y1 - y0, z1 - z0), me = new THREE.Mesh(lgeo('rod' + r, () => new THREE.CylinderGeometry(r, r, 1, 6)), m); me.scale.y = L; me.position.set((x0 + x1)/2, (y0 + y1)/2, (z0 + z1)/2);
     me.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(x1 - x0, y1 - y0, z1 - z0).normalize()); (par || body).add(me); return me; };
+  // the pieces a crash can tear off, each its own group (at the body's origin, so nothing moves): the nose, the front wing, the cage,
+  // the engine with its blower, the pipes of each bank (the wing, the wheels and the driver below)
+  const grp = (n) => { const g = new THREE.Group(); g.name = n; body.add(g); return g; }, nose = grp('nose'), fwing = grp('fwing'), cage = grp('cage'), engine = grp('engine'), pipesL = grp('pipesL'), pipesR = grp('pipesR');
   // the rails and the long tapered nose (a stretched cylinder, flattened)
   for (const sx of [-1, 1]) beam(sx*0.3, 0.38, -2.3, sx*0.14, 0.34, 3.7, 0.045, black);
-  { const nose = new THREE.Mesh(lgeo('dnose', () => { const g = new THREE.CylinderGeometry(0.1, 0.34, 4.6, 12, 1); g.rotateX(Math.PI/2); g.scale(1, 0.62, 1); return g; }), yel); nose.position.set(0, 0.46, 1.55); nose.castShadow = true; body.add(nose); }
-  lmesh(lbox(1.25, 0.05, 0.34), red, 0, 0.34, 3.95, body); for (const sx of [-1, 1]) lmesh(lbox(0.04, 0.2, 0.38), red, sx*0.62, 0.42, 3.95, body);   // the front wing, its end plates
+  { const nose = new THREE.Mesh(lgeo('dnose', () => { const g = new THREE.CylinderGeometry(0.1, 0.34, 4.6, 12, 1); g.rotateX(Math.PI/2); g.scale(1, 0.62, 1); return g; }), yel); nose.position.set(0, 0.46, 1.55); nose.castShadow = true; nose.name = ''; body.getObjectByName('nose').add(nose); }
+  lmesh(lbox(1.25, 0.05, 0.34), red, 0, 0.34, 3.95, fwing); for (const sx of [-1, 1]) lmesh(lbox(0.04, 0.2, 0.38), red, sx*0.62, 0.42, 3.95, fwing);   // the front wing, its end plates
   // the cockpit, the cage, the driver
   lmesh(lbox(0.66, 0.42, 1.3), yel, 0, 0.6, -0.5, body);
   { const dec = new THREE.MeshStandardMaterial({ map: dragDecal(), roughness: 0.4 }); for (const sx of [-1, 1]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.28), dec); m.position.set(sx*0.335, 0.62, -0.3); m.rotation.y = sx*Math.PI/2; body.add(m); } }
-  for (const sx of [-1, 1]) { beam(sx*0.3, 0.8, 0.1, sx*0.24, 1.42, -0.35, 0.03, chrome); beam(sx*0.3, 0.8, -0.95, sx*0.24, 1.42, -0.55, 0.03, chrome); } beam(-0.24, 1.42, -0.45, 0.24, 1.42, -0.45, 0.03, chrome);
+  for (const sx of [-1, 1]) { beam(sx*0.3, 0.8, 0.1, sx*0.24, 1.42, -0.35, 0.03, chrome, cage); beam(sx*0.3, 0.8, -0.95, sx*0.24, 1.42, -0.55, 0.03, chrome, cage); } beam(-0.24, 1.42, -0.45, 0.24, 1.42, -0.45, 0.03, chrome, cage);
   const driver = new THREE.Group(); driver.name = 'driver'; body.add(driver); lmesh(lbox(0.44, 0.34, 0.5), lmat(0x2a3a8a, 0.7), 0, 0.92, -0.55, driver);   // the driver, his own group: thrown out in a wreck
   { const hel = new THREE.Mesh(lgeo('dhelmet', () => new THREE.SphereGeometry(0.17, 12, 10)), red); hel.position.set(0, 1.2, -0.48); hel.castShadow = true; driver.add(hel); lmesh(lbox(0.2, 0.07, 0.03), lmat(0x1c2630, 0.1), 0, 1.2, -0.31, driver, false); }
   // the engine: block, valve covers, the blower with its belt, the injector hat, eight zoomies a side
-  lmesh(lbox(0.62, 0.42, 1.0), black, 0, 0.66, -1.55, body); for (const sx of [-1, 1]) lmesh(lbox(0.12, 0.08, 0.9), chrome, sx*0.24, 0.9, -1.55, body);
-  lmesh(lbox(0.46, 0.3, 0.7), alu, 0, 1.02, -1.55, body); lmesh(lbox(0.5, 0.08, 0.74), chrome, 0, 1.18, -1.55, body); lmesh(lbox(0.06, 0.34, 0.36), black, 0, 0.92, -1.08, body);
-  lmesh(lbox(0.4, 0.2, 0.3), red, 0, 1.32, -1.5, body); lmesh(lbox(0.44, 0.06, 0.34), chrome, 0, 1.44, -1.5, body);
-  for (const sx of [-1, 1]) for (let k = 0; k < 4; k++) beam(sx*0.33, 0.72, -1.2 - k*0.2, sx*0.62, 1.12, -1.26 - k*0.2, 0.035, chrome);
+  lmesh(lbox(0.62, 0.42, 1.0), black, 0, 0.66, -1.55, body); for (const sx of [-1, 1]) lmesh(lbox(0.12, 0.08, 0.9), chrome, sx*0.24, 0.9, -1.55, engine);
+  lmesh(lbox(0.46, 0.3, 0.7), alu, 0, 1.02, -1.55, engine); lmesh(lbox(0.5, 0.08, 0.74), chrome, 0, 1.18, -1.55, engine); lmesh(lbox(0.06, 0.34, 0.36), black, 0, 0.92, -1.08, engine);
+  lmesh(lbox(0.4, 0.2, 0.3), red, 0, 1.32, -1.5, engine); lmesh(lbox(0.44, 0.06, 0.34), chrome, 0, 1.44, -1.5, engine);
+  for (const sx of [-1, 1]) for (let k = 0; k < 4; k++) beam(sx*0.33, 0.72, -1.2 - k*0.2, sx*0.62, 1.12, -1.26 - k*0.2, 0.035, chrome, sx < 0 ? pipesL : pipesR);
   // the wing on its struts (its own group: it can come off), the chute pack and the chute
   const wing = new THREE.Group(); wing.name = 'wing'; body.add(wing);
   for (const sx of [-0.5, 0.5]) beam(sx, 0.7, -2.45, sx, 2.05, -2.85, 0.03, black, wing);
@@ -7934,14 +7939,15 @@ function makeDragster() { const G = new THREE.Group(), body = new THREE.Group();
     if (W.front) for (let k = 0; k < 6; k++) { const sp = lmesh(lbox(0.02, W.r*1.5, 0.02), chrome, 0, 0, 0, spin, false); sp.rotation.x = k*Math.PI/6; }   // spokes
     else { const lip = lmesh(lcyl(W.r*0.62, 0.04, 14), chrome, Math.sign(W.x)*(W.w/2 + 0.01), 0, 0, spin, false); lip.rotation.z = Math.PI/2; }
     wheels[W.id] = { g: wg, spin, W }; if (!W.front) beam(0, 0.62 - W.r, 0, -Math.sign(W.x)*(Math.abs(W.x) - 0.3), 0.62 - W.r, 0, 0.05, black, wg); }   // (the axle stub)
-  G.userData.parts = { body, wing, driver, chute, wheels }; G.rotation.order = 'YXZ'; return G; }
+  G.userData.parts = { body, wing, driver, chute, wheels, nose, fwing, cage, engine, pipesL, pipesR }; G.rotation.order = 'YXZ'; return G; }
 function buildDragster() { DRAG.home = null; DRAG.on = false; DRAG.carMesh = DRAG.parkMesh = DRAG.pokoMesh = null; DRAG.lay = null; if (!finishLine || LAY.pts.length < 10) return;
   // the lay-by: a ribbon at the road's own height following LAY.pts (its inner edge on the road's edge), a dashed line where it leaves the
   // road, a red-and-white kerb along its outer edge
-  const P = LAY.pts, hw = LAY.W/2, pos = [], idx = [];
-  P.forEach((p, k) => { const lx = p.dz, lz = -p.dx; for (const s of [-1, 1]) { const x = p.x + lx*hw*(s > 0 ? 1.02 : 1)*s, z = p.z + lz*hw*(s > 0 ? 1.02 : 1)*s; pos.push(x, Y(x, z) + ROAD_Y + 0.004, z); } if (k) idx.push(2*k - 2, 2*k - 1, 2*k, 2*k - 1, 2*k + 1, 2*k); });
-  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
-  const G = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x4a4a4e, roughness: 0.93, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); G.receiveShadow = true; lifeGroup.add(G);
+  const P = LAY.pts, hw = LAY.W/2, pos = [], idx = [], uv = [], col = [];
+  P.forEach((p, k) => { const lx = p.dz, lz = -p.dx; for (const s of [-1, 1]) { const x = p.x + lx*hw*(s > 0 ? 1.02 : 1)*s, z = p.z + lz*hw*(s > 0 ? 1.02 : 1)*s; pos.push(x, Y(x, z) + ROAD_Y + 0.004, z); uv.push(...roadUV(x, z)); const c = roadNoise(x, z)*0.97; col.push(c, c, c*1.01); } if (k) idx.push(2*k - 2, 2*k - 1, 2*k, 2*k - 1, 2*k + 1, 2*k); });
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+  const am = asphaltMat(), lam = new THREE.MeshStandardMaterial({ color: am.color, map: am.map, vertexColors: true, roughness: 0.95, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }); roadDetail(lam, false);   // (the road's own asphalt: its texture, world UVs, stains)
+  const G = new THREE.Mesh(geo, lam); G.receiveShadow = true; lifeGroup.add(G);
   const lp = [], lm = new THREE.MeshBasicMaterial({ color: 0xeeeee6, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
   { const pts = []; P.forEach(p => { if (p.t < -34 || p.t > 0) return; const x = p.x - p.dz*(hw - 0.12), z = p.z + p.dx*(hw - 0.12); pts.push(x, Y(x, z) + ROAD_Y + 0.02, z); }); for (let k = 0; k + 3 < pts.length; k += 6) lp.push(pts[k], pts[k + 1], pts[k + 2], pts[k + 3], pts[k + 4], pts[k + 5]); }   // (dashed: 1 m on, 1 m off)
   { const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3)); lifeGroup.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: 0xeeeee6 }))); }
@@ -7976,6 +7982,15 @@ function dragNear(h) { if (!DRAG.home || !h) return false; const P = DRAG.on ? D
 function dragUpdate(dt) { if (!DRAG.on) return; const v = Math.hypot(car.vx, car.vz), P = DRAG.carMesh.userData.parts;
   for (const S of DP.wh) { const w = P.wheels[S.W.id]; w.spin.rotation.x += (car.speed + (S.W.front ? 0 : DP.spin))*dt/S.W.r; if (S.W.front) w.g.rotation.y = DP.steer; }   // (the slicks spin up faster than the ground goes by at a launch)
   if (DP.spin > 2.5 && Math.random() < dt*40) for (const S of DP.wh) if (!S.W.front && S.on) { const [x, z] = lloc(car.x, car.z, car.angle, S.W.x, S.W.z - 0.5); lifeFx.emit(x, Y(x, z) + 0.3, z, (Math.random() - 0.5)*1.5 - car.vx*0.2, 0.8 + Math.random(), (Math.random() - 0.5)*1.5 - car.vz*0.2, 1.2 + Math.random(), 0.5, 1.8, 0.4, 0.86, 0.86, 0.88, 0.92, 0.92, 0.93); }   // tyre smoke
+  // the zoomies: eight pipes blowing flame — tall and yellow under load, a lick at idle, a gout off the throttle (the pops)
+  if (!WRECK.on && !DP.lost.engine) { const thr = car.throttle && !WALK.on, rpmK = Math.min(1, DP.rpm/8000), M = DRAG.carMesh.matrixWorld; DP.flameT = (DP.flameT || 0) + dt;
+    if (!thr && DP.wasThr && DP.rpm > 3500) DP.gout = 0.35; DP.wasThr = thr; if (DP.gout > 0) DP.gout -= dt;
+    const rate = thr ? 55 + 70*rpmK : DP.gout > 0 ? 45 : 5;
+    for (const sx of [-1, 1]) { if (DP.lost[sx < 0 ? 'pipesL' : 'pipesR']) continue; for (let k = 0; k < 4; k++) { if (Math.random() > rate*dt) continue;
+      _dA.set(sx*0.62, 1.12, -1.26 - k*0.2).applyMatrix4(M); _dB.set(sx*0.29, 0.4, -0.06).normalize().transformDirection(M);
+      const big = thr ? 0.7 + 0.8*rpmK : DP.gout > 0 ? 1 : 0.35, sp = (thr ? 6 + 8*rpmK : 4)*(0.8 + Math.random()*0.4), blue = !thr && DP.gout <= 0;
+      flameFx2.emit(_dA.x, _dA.y, _dA.z, _dB.x*sp + car.vx*0.95, _dB.y*sp + 0.5, _dB.z*sp + car.vz*0.95, 0.08 + 0.1*big*Math.random() + 0.05, 0.28*big + 0.1, 0.55*big + 0.1, 0.95,
+        blue ? 0.45 : 1, blue ? 0.6 : 0.85, blue ? 1 : 0.35, blue ? 0.2 : 0.95, blue ? 0.3 : 0.25, blue ? 0.9 : 0.05); } } }
   if (!DRAG.chute && !car.throttle && v > 45 && !WRECK.on) { DRAG.chute = 1; DRAG.chuteM.visible = true; DRAG.chuteM.scale.setScalar(0.2); dragChuteSound(); }   // off the gas at speed: the chute pops
   if (DRAG.chute) { DRAG.chuteM.scale.setScalar(Math.min(1, DRAG.chuteM.scale.x + dt*3)); DRAG.chuteM.rotation.z += dt*2; if (v < 4 || car.throttle) { DRAG.chute = 0; DRAG.chuteM.visible = false; } } }
 function dragReset() { if (DRAG.on) { DRAG.on = false; DRAG.carMesh.visible = false; DRAG.chute = 0; if (DRAG.chuteM) DRAG.chuteM.visible = false; DRAG.hidden.forEach(c => c.visible = true); DRAG.hidden = []; }
@@ -7990,10 +8005,11 @@ const DP = { ok: false, p: new THREE.Vector3(), v: new THREE.Vector3(), q: new T
   m: 950, I: [4640, 4860, 620], cg: [0, 0.42, -0.3], wh: [], lost: {}, spin: 0, rpm: 1800, slip: 0, scrape: 0, hit: 0, roofT: 0, cx: 0, cz: 0, cvx: 0, cvz: 0, steer: 0, thr: 0, spark: 0, broken: false,
   POWER: 2.6e6, FMAX: 38000, CDA: 2.4, CLA_W: 1.2, CLA_F: 0.6, CDA_CHUTE: 4.5 };
 // hull contact points in the model's own frame: [x, y, z, part]. 'bar' = the wheelie bars' little wheels (they roll)
-const DP_PTS = [[0, 0.3, 4.05], [0, 0.36, 3.2], [0, 0.42, 2.4], [0, 0.46, 1.6], [-0.63, 0.28, 3.95], [0.63, 0.28, 3.95], [-0.55, 0.3, 3.3, 'FL'], [0.55, 0.3, 3.3, 'FR'], [-0.46, 0.62, 3.3, 'FL'], [0.46, 0.62, 3.3, 'FR'],
-  [-0.3, 0.28, 1.0], [0.3, 0.28, 1.0], [-0.3, 0.28, -1.0], [0.3, 0.28, -1.0], [-0.34, 0.8, -0.5], [0.34, 0.8, -0.5], [-0.24, 1.46, -0.45], [0.24, 1.46, -0.45], [0, 1.48, -1.5], [-0.64, 1.12, -1.3], [0.64, 1.12, -1.3],
+const DP_PTS = [[0, 0.3, 4.05, 'nose'], [0, 0.36, 3.2, 'nose'], [0, 0.42, 2.4, 'nose'], [0, 0.46, 1.6], [-0.63, 0.28, 3.95, 'fwing'], [0.63, 0.28, 3.95, 'fwing'], [-0.55, 0.3, 3.3, 'FL'], [0.55, 0.3, 3.3, 'FR'], [-0.46, 0.62, 3.3, 'FL'], [0.46, 0.62, 3.3, 'FR'],
+  [-0.3, 0.28, 1.0], [0.3, 0.28, 1.0], [-0.3, 0.28, -1.0], [0.3, 0.28, -1.0], [-0.34, 0.8, -0.5], [0.34, 0.8, -0.5], [-0.24, 1.46, -0.45, 'cage'], [0.24, 1.46, -0.45, 'cage'], [0, 1.48, -1.5, 'engine'], [-0.64, 1.12, -1.3, 'pipesL'], [0.64, 1.12, -1.3, 'pipesR'],
   [-1.08, 0.64, -1.46, 'RL'], [-1.08, 0.64, -2.74, 'RL'], [-0.8, 1.28, -2.1, 'RL'], [-1.08, 1.1, -2.1, 'RL'], [1.08, 0.64, -1.46, 'RR'], [1.08, 0.64, -2.74, 'RR'], [0.8, 1.28, -2.1, 'RR'], [1.08, 1.1, -2.1, 'RR'],
   [-0.97, 2.3, -2.45, 'wing'], [0.97, 2.3, -2.45, 'wing'], [-0.97, 2.3, -3.4, 'wing'], [0.97, 2.3, -3.4, 'wing'], [-0.97, 1.75, -2.95, 'wing'], [0.97, 1.75, -2.95, 'wing'], [0, 0.45, -3.1], [-0.45, 0.12, -3.52, 'bar'], [0.45, 0.12, -3.52, 'bar']];
+const DP_PARTS = ['wing', 'FL', 'FR', 'RL', 'RR', 'nose', 'fwing', 'cage', 'engine', 'pipesL', 'pipesR'], DP_LOSE = { wing: 6, FL: 9, FR: 9, RL: 9, RR: 9, nose: 14, fwing: 7, cage: 11, engine: 12, pipesL: 9, pipesR: 9 };   // (the impact speed that tears each off, on the ground; against a wall +3)
 const _dA = new THREE.Vector3(), _dB = new THREE.Vector3(), _dU = new THREE.Vector3(), _dF = new THREE.Vector3(), _dR = new THREE.Vector3(), _dQ = new THREE.Quaternion(), _dYax = new THREE.Vector3(0, 1, 0);
 function dpW(lx, ly, lz, out) { return out.set(lx - DP.cg[0], ly - DP.cg[1], lz - DP.cg[2]).applyQuaternion(DP.q).add(DP.p); }   // model point → world
 function dpAng(Lx, Ly, Lz) { _dA.set(Lx, Ly, Lz).applyQuaternion(DP.qi); _dA.x /= DP.I[0]; _dA.y /= DP.I[1]; _dA.z /= DP.I[2]; return _dA.applyQuaternion(DP.q); }   // world angular impulse → change of spin
@@ -8013,13 +8029,13 @@ function dragInit(x, z, angle) {
   DP.q.setFromAxisAngle(_dYax, angle); const fx = Math.sin(angle), fz = Math.cos(angle), rx = x, rz = z;   // (x, z: the model's root, on the ground between the axles)
   DP.p.set(rx + fx*DP.cg[2], Y(rx, rz) + DP.cg[1] + 0.03, rz + fz*DP.cg[2]); DP.v.set(0, 0, 0); DP.w.set(0, 0, 0); DP.pp.copy(DP.p); DP.pq.copy(DP.q);
   DP.wh = DRAG_GEOM.wheels.map(W => ({ W, hy: W.r, rot: 0, on: false, load: 0 })); DP.spin = 0; DP.rpm = 1800; DP.slip = 0; DP.scrape = 0; DP.hit = 0; DP.roofT = 0; DP.steer = 0; DP.broken = false; DP.lost = {};
-  DP.camA = angle; DP.ok = true; if (DRAG.carMesh) { const P = DRAG.carMesh.userData.parts; P.wing.visible = P.driver.visible = true; for (const k in P.wheels) P.wheels[k].g.visible = true; } dpSync(); }
+  DP.camA = angle; DP.ok = true; if (DRAG.carMesh) { const P = DRAG.carMesh.userData.parts; P.driver.visible = true; for (const k of DP_PARTS) (P.wheels[k] ? P.wheels[k].g : P[k]).visible = true; } dpSync(); }
 function dpSync() { dpW(0, DP.cg[1], 0, _dR); _dF.set(0, 0, 1).applyQuaternion(DP.q); if (Math.hypot(_dF.x, _dF.z) > 0.2) car.angle = Math.atan2(_dF.x, _dF.z);
   car.x = DP.cx = _dR.x; car.z = DP.cz = _dR.z; car.vx = DP.cvx = DP.v.x; car.vz = DP.cvz = DP.v.z; car.speed = DP.v.x*Math.sin(car.angle) + DP.v.z*Math.cos(car.angle); }
 function dpLose(part, vx, vz) {   // torn off: a world-space copy flies free (the rally car's debris), the original hides
-  if (DP.lost[part]) return; DP.lost[part] = true; DP.broken = true; const P = DRAG.carMesh.userData.parts, g = part === 'wing' ? P.wing : P.wheels[part].g; g.updateMatrixWorld(true);
+  if (DP.lost[part]) return; DP.lost[part] = true; DP.broken = true; const P = DRAG.carMesh.userData.parts, g = P.wheels[part] ? P.wheels[part].g : P[part]; if (!g || !g.visible) return; g.updateMatrixWorld(true);
   const piece = g.clone(true); piece.matrixAutoUpdate = true; g.matrixWorld.decompose(_dp, _dq, _ds); piece.position.copy(_dp); piece.quaternion.copy(_dq); piece.scale.copy(_ds); scene.add(piece); g.visible = false;
-  debris.push({ obj: piece, vx: DP.v.x*0.7 + (vx || 0), vy: 3 + Math.random()*4, vz: DP.v.z*0.7 + (vz || 0), wx: (Math.random() - 0.5)*14, wy: (Math.random() - 0.5)*10, wz: (Math.random() - 0.5)*14, rest: false, r: part === 'wing' ? 1 : 0.7 });
+  debris.push({ obj: piece, vx: DP.v.x*0.7 + (vx || 0), vy: 3 + Math.random()*4, vz: DP.v.z*0.7 + (vz || 0), wx: (Math.random() - 0.5)*14, wy: (Math.random() - 0.5)*10, wz: (Math.random() - 0.5)*14, rest: false, r: part === 'wing' || part === 'nose' ? 1 : 0.7 });
   sparkBurst(_dp.x, _dp.y, _dp.z, 0, 0, 22, 5); dragCrashSound(1); }
 function dpStep(h, thr, brk, steerIn, hand) {
   const G = DRAG_GEOM, q = DP.q; DP.qi.copy(q).invert();
@@ -8066,10 +8082,10 @@ function dpStep(h, thr, brk, steerIn, hand) {
     if (py < gy) { const n = dpNormal(px, pz, _dQv), dep = (gy - py)*n.y, bar = part === 'bar', v0 = dpVel(px, py, pz, _dB), v0x = v0.x, v0z = v0.z, vt = Math.hypot(v0x, v0z);
       const hit = dpContact(px, py, pz, n.x, n.y, n.z, dep, bar ? 0.04 : part && part !== 'wing' ? 0.8 : 0.45, 0.2, h); lift = Math.max(lift, dep);
       if (!bar) { if (hit > hitMax) hitMax = hit; if (vt > 3) { scr = Math.max(scr, Math.min(1, vt/25)); if (Math.random() < h*40) sparkBurst(px, gy + 0.1, pz, v0x/vt, v0z/vt, 3, 3); }
-        if (part && hit > (part === 'wing' ? 6 : 9)) dpLose(part, (Math.random() - 0.5)*4, (Math.random() - 0.5)*4); } }
+        if (part && DP_LOSE[part] && hit > DP_LOSE[part]) dpLose(part, (Math.random() - 0.5)*4, (Math.random() - 0.5)*4); } }
     for (const B of boxes) { const o = boxPush(B, px, pz, 0.12); if (!o) continue; const hit = dpContact(px, py, pz, o.nx, 0, o.nz, o.ov, 0.3, 0.3, h); DP.p.x += o.nx*Math.min(o.ov, 0.3)*0.5; DP.p.z += o.nz*Math.min(o.ov, 0.3)*0.5;
       if (hit > hitMax) hitMax = hit; if (hit > 3) sparkBurst(px, py, pz, o.nx, o.nz, Math.min(18, 4 + hit*0.8), 4);
-      if (part && part !== 'bar' && hit > (part === 'wing' ? 7 : 12)) dpLose(part, o.nx*hit*0.3, o.nz*hit*0.3);
+      if (part && DP_LOSE[part] && hit > DP_LOSE[part] + 3) dpLose(part, o.nx*hit*0.3, o.nz*hit*0.3);
       if (B.kind === 'house' && hit >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) { rapCount('f'); policeIncident('fire'); } } }
     if (rocks) { const o = rockOut(px, pz, 0.3); if (o) { const hit = dpContact(px, py, pz, o.nx, 0, o.nz, o.depth, 0.4, 0.3, h); DP.p.x -= o.nx*Math.min(o.depth, 0.3)*0.5; DP.p.z -= o.nz*Math.min(o.depth, 0.3)*0.5; if (hit > hitMax) hitMax = hit; if (hit > 3) sparkBurst(px, py, pz, -o.nx, -o.nz, 12, 4); } } }
   { _dA.set(0, 0, 0.2).applyQuaternion(q); const sx = DP.p.x + _dA.x - fx*DP.cg[2], sz = DP.p.z + _dA.z - fz*DP.cg[2], hl = Math.hypot(fx, fz) || 1, S = { x: sx, z: sz, yaw: Math.atan2(fx, fz), hw: 0.3, hl: 3.8*hl };   // the spine (a pole between two hull points)
@@ -8095,12 +8111,15 @@ function dragPhys(dt, live) {
   for (const v of VEHICLES) { if (v.gone) continue; const R = v.hl + 4.6; if (Math.abs(v.x - B.x) > R || Math.abs(v.z - B.z) > R) continue; const hh = obbSat(B, v); if (!hh) continue;
     const vx0 = B.vx, vz0 = B.vz, imp = resolvePair(B, v, hh, 0.25); v.awake = true; v.moved = true; DP.p.x += B.x - car.x; DP.p.z += B.z - car.z; B.x = car.x; B.z = car.z;
     const cpx = (v.x + car.x)/2, cpz = (v.z + car.z)/2; dpImpulse(cpx, DP.p.y, cpz, (B.vx - vx0)*DP.m, 0, (B.vz - vz0)*DP.m); B.vx = DP.v.x; B.vz = DP.v.z;
-    if (imp > 0.8) { DP.hit = Math.max(DP.hit, imp); if (imp > 3) sparkBurst(cpx, 0.6 + Y(cpx, cpz), cpz, -hh.nx, -hh.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
+    if (imp > 0.8) { DP.hit = Math.max(DP.hit, Math.hypot(B.vx - vx0, B.vz - vz0));   /* (what it takes: the dragster's own change of speed, not the closing speed of the two) */ if (imp > 3) sparkBurst(cpx, 0.6 + Y(cpx, cpz), cpz, -hh.nx, -hh.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
   dpSync(); boxHitsHumans(playerBox(), car.vx, car.vz, true, true); DP.cvx = car.vx; DP.cvz = car.vz;
   // the engine: the slicks' speed through the drive (5:1), the clutch slipping at a launch; a lope at idle
   const wr = (Math.max(0, car.speed) + DP.spin)/0.64*60/(2*Math.PI)*5; DP.rpm += ((thr ? Math.max(5200, Math.min(8400, wr)) : Math.max(1700, Math.min(8400, wr*0.9))) - DP.rpm)*Math.min(1, dt*(thr ? 9 : 3));
   car.onTrack = onRoad(car.x, car.z, 0.4) || inLay(car.x, car.z, 0.3); car.surface = car.onTrack ? surfaceAt(car.x, car.z) : 'grass'; car.drifting = DP.slip > 0.25; car.maxSlip = DP.slip*0.5;
   if (DP.hit > 4) dragCrashSound(Math.min(1, DP.hit/18));
+  if (DP.hit > 26 && !WRECK.on && gameState === State.RACING) {   // a crash that hard: it comes apart — every piece off, flying, the driver out, the chassis on fire
+    for (const k of DP_PARTS) dpLose(k, (Math.random() - 0.5)*DP.hit*0.5, (Math.random() - 0.5)*DP.hit*0.5); boom(car.x, Y(car.x, car.z), car.z, false);
+    wreckCar('dragboom'); DRAG.carMesh.userData.parts.driver.visible = false; }
   // on its roof or its side and stopped: fire, the driver thrown out (the rally car's wreck: the fire engine and the ambulance come)
   _dU.set(0, 1, 0).applyQuaternion(DP.q); if (_dU.y < 0.35 && DP.v.length() < 2.5 && DP.w.length() < 1.5) DP.roofT += dt; else DP.roofT = 0;
   if (DP.roofT > 1.2 && !WRECK.on && gameState === State.RACING) { wreckCar('drag'); DRAG.carMesh.userData.parts.driver.visible = false; DP.broken = true; } }
@@ -10129,23 +10148,32 @@ function drawClusterBase() {
   clAngS = clusterDial(g, CL_S.cx, CL_S.cy, CL_S.R, 200, 20, 10, 1, 999, 'km/h', 0.14);
   return c;
 }
+let clusterBaseDrag = null, clAngTD = null, clAngSD = null;
+function drawClusterBaseDrag() {   // the dragster's: 9000 rpm (red from 8000), 500 km/h — no gearbox, one gear
+  const keep = [clAngT, clAngS], c = drawClusterBase(), g = c.getContext('2d'); clusterBase = clusterBase || null;
+  const pad = (cx, cy, R) => { g.beginPath(); g.arc(cx, cy, R + 16, 0, Math.PI*2); g.fillStyle = 'rgba(12,12,14,1)'; g.fill(); };
+  pad(CL_T.cx, CL_T.cy, CL_T.R); pad(CL_S.cx, CL_S.cy, CL_S.R);
+  clAngTD = clusterDial(g, CL_T.cx, CL_T.cy, CL_T.R, 9000, 1000, 500, 1000, 8000, 'x1000 rpm'); clAngSD = clusterDial(g, CL_S.cx, CL_S.cy, CL_S.R, 500, 50, 25, 1, 999, 'km/h', 0.13);
+  [clAngT, clAngS] = keep; return c; }
 function drawCluster(g) {
   if (!clusterBase) clusterBase = drawClusterBase();
-  g.clearRect(0, 0, CL_W, CL_H); g.drawImage(clusterBase, 0, 0);
+  if (DRAG.on && !clusterBaseDrag) clusterBaseDrag = drawClusterBaseDrag();
+  g.clearRect(0, 0, CL_W, CL_H); g.drawImage(DRAG.on ? clusterBaseDrag : clusterBase, 0, 0);
   // trip counter in the speedometer
   const km = (engine.trip/1000).toFixed(2).padStart(6, '0');
   g.fillStyle = '#000'; g.fillRect(CL_S.cx-46, CL_S.cy+50, 92, 26); g.strokeStyle = '#444'; g.lineWidth = 2; g.strokeRect(CL_S.cx-46, CL_S.cy+50, 92, 26);
   g.fillStyle = '#e8e6d8'; g.font = 'bold 19px "Courier New", monospace'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(km, CL_S.cx, CL_S.cy+64);
   // gear digit in the tachometer
-  g.fillStyle = '#e8e6d8'; g.font = 'bold 28px Arial, sans-serif'; g.fillText(car.speed < -0.5 ? 'R' : String(engine.gear), CL_T.cx, CL_T.cy+64);
+  g.fillStyle = '#e8e6d8'; g.font = 'bold 28px Arial, sans-serif'; g.fillText(car.speed < -0.5 ? 'R' : DRAG.on ? '1' : String(engine.gear), CL_T.cx, CL_T.cy+64);
   // warning lights between the cups
   const lamp = (y, on, col, sym) => { g.beginPath(); g.arc(380, y, 17, 0, Math.PI*2); g.fillStyle = on ? col : '#1d1d20'; g.fill(); g.lineWidth = 2; g.strokeStyle = on ? col : '#333'; g.stroke();
     g.fillStyle = on ? '#111' : '#3a3a3e'; g.font = 'bold 20px Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(sym, 380, y+1); };
   lamp(150, !!keys['Space'], '#ff3b30', '(!)');
   lamp(200, !car.onTrack || car.drifting, '#ffab2e', '≈');
-  lamp(250, engine.rpmDisp > RPM_SHIFT && engine.gear < 5, '#ff3b30', '▲');   // shift light
-  clusterNeedle(g, CL_T.cx, CL_T.cy, CL_T.R, clAngT(engine.rpmDisp));
-  clusterNeedle(g, CL_S.cx, CL_S.cy, CL_S.R, clAngS(engine.kmhDisp));
+  lamp(250, !DRAG.on && engine.rpmDisp > RPM_SHIFT && engine.gear < 5, '#ff3b30', '▲');   // shift light
+  if (DRAG.on) { DP.rpmDisp = (DP.rpmDisp || 1800) + (DP.rpm - (DP.rpmDisp || 1800))*0.3; clusterNeedle(g, CL_T.cx, CL_T.cy, CL_T.R, clAngTD(DP.rpmDisp)); clusterNeedle(g, CL_S.cx, CL_S.cy, CL_S.R, clAngSD(engine.kmhDisp)); }
+  else { clusterNeedle(g, CL_T.cx, CL_T.cy, CL_T.R, clAngT(engine.rpmDisp));
+  clusterNeedle(g, CL_S.cx, CL_S.cy, CL_S.R, clAngS(engine.kmhDisp)); }
 }
 const setText = (el, t) => { if (el.__t !== t) { el.__t = t; el.textContent = t; } };   // touch the DOM only when the text changes
 function updateHUD(dt){

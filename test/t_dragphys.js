@@ -10,7 +10,7 @@ const toRoad = (back) => { const n = trackPoints.length, g = gridIndex(), i = (g
 const enter = () => { if (WRECK.on || !DRAG.on) { startRace(false); step(30); lapStarted = true; dragSwap(true); step(10); } };
 toRoad(40);
 let t100 = null, t200 = null, vmax = 0, t = 0, pitch = 0, minUp = 1, spinMax = 0; keys.ArrowUp = true;
-step(60*3, () => { t += 1/60; const v = Math.hypot(car.vx, car.vz)*3.6; vmax = Math.max(vmax, v); if (t100 === null && v >= 100) t100 = r2(t); if (t200 === null && v >= 200) t200 = r2(t); pitch = Math.max(pitch, fwd().y); minUp = Math.min(minUp, up().y); spinMax = Math.max(spinMax, DP.spin);
+step(60*2.2, () => { t += 1/60; const v = Math.hypot(car.vx, car.vz)*3.6; vmax = Math.max(vmax, v); if (t100 === null && v >= 100) t100 = r2(t); if (t200 === null && v >= 200) t200 = r2(t); pitch = Math.max(pitch, fwd().y); minUp = Math.min(minUp, up().y); spinMax = Math.max(spinMax, DP.spin);
   if (t < 0.3 && !out.launchShot) { out.launchShot = 1; } });
 keys.ArrowUp = false; out.launch = { t0_100: t100, t0_200: t200, vmaxKmh: Math.round(vmax), maxNoseUpDeg: r2(Math.asin(pitch)*57.3), minUpY: r2(minUp), spinMax: r2(spinMax), rpm: Math.round(DP.rpm) };
 step(20); out.chute = DRAG.chute > 0; const v0 = Math.hypot(car.vx, car.vz); step(120); out.chuteDecel = r2((v0 - Math.hypot(car.vx, car.vz))/2/9.81);

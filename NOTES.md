@@ -894,6 +894,15 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   types). The page title is "YLÄSTÖ 1988 · Suomiralli" (was "korkeuserot").
 - Marjatan keittiö audio (30.9.): music/keittio-1..5.mp3 (Antti's uploads Keitti_1..5), playlist entries talk + show 'keittio' (titles
   "Marjatan keittiö, jakso N" — the files carry no tags); the dial reads SHOW_STATIONS.keittio, mobiili.html's radio too.
+- Dragster step 3 (30.9., Antti: "levike tekstuuri kuten muualla, kunnon liekit piipuista, voi hajota osiin, oliko vaihteita?"):
+  the lay-by ribbon uses the road's asphalt (asphaltMat's map, roadUV world UVs, roadNoise vertex colours, roadDetail). Pipe flames
+  in dragUpdate: flameFx2 from the 8 zoomie tips (model (±0.62, 1.12, -1.26 - k*0.2), outward-up), with the car's velocity; tall and
+  yellow on throttle (rate and size by rpm), a 0.35 s gout off the throttle above 3500 rpm, small blue licks at idle. Break-up:
+  makeDragster groups the body into nose / fwing / cage / engine / pipesL / pipesR (at the body origin); DP_PTS carry those tags;
+  DP_LOSE gives each part's tearing speed (ground; +3 against walls); dpLose works on any of DP_PARTS; DP.hit > 26 (one step) →
+  everything off + boom + wreckCar('dragboom') ("DRAGSTERI HAJOSI KAPPALEIKSI"). No gearbox (like a real Top Fuel: direct drive and a
+  slipper clutch): its own cluster base (drawClusterBaseDrag: 9000 rpm red from 8000, 500 km/h), gear "1", no shift light.
+  Photos: t_lh_r → dragster.jpg (flames at the launch), dragster_b.jpg (came apart against a house).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
