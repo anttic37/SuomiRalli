@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 20.43 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 21.30 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -592,11 +592,97 @@ let worldLifted = false;
 function Y(x, z) { return worldLifted ? H(x, z) : 0; }
 function H(x, z) {
   const g = HG, h = g.h; if (!h) return 0;
+  if (x < g.x0 || z < g.z0 || x > g.x0 + (g.n - 1)*g.step || z > g.z0 + (g.n - 1)*g.step) return hOuter(x, z);   // (beyond the village: OUT, below)
   let fx = (x - g.x0)/g.step, fz = (z - g.z0)/g.step;
   fx = Math.max(0, Math.min(g.n - 1.001, fx)); fz = Math.max(0, Math.min(g.n - 1.001, fz));
   const ix = fx | 0, iz = fz | 0, u = fx - ix, v = fz - iz, a = iz*g.n + ix, b = a + 1, c = a + g.n, d = c + 1;
   return (u + v <= 1) ? h[a] + (h[b] - h[a])*u + (h[c] - h[a])*v : h[d] + (h[c] - h[d])*(1 - u) + (h[b] - h[d])*(1 - v);   // the ground mesh's own triangles
 }
+// ── BEYOND THE VILLAGE (30.9., Antti: "karttaa loputtomiin, harva metsä riittää; joskus harvoin korpikenttä, pitkä rata ja kusinen koppi"):
+// outside the height grid the ground goes on for ever — the edge height eases (260 m) into gentle forest hills (value noise), sparse
+// pines drawn as one instanced forest round the camera, and now and then a backwoods airstrip: a flattened clearing, an 800 m strip,
+// a hut, a windsock. Inside the grid nothing changes (H's own path). Trees and huts near the car/plane become static boxes (solid).
+const OUT = { mesh: null, cx: 1e9, cz: 1e9, trees: null, crowns: null, tx: 1e9, tz: 1e9, af: new Map(), afG: new Map(), sb: [], sx: 1e9, sz: 1e9 };
+const AF_CELL = 2400, AF_L = 820, AF_W = 26, AF_NAMES = ['Rämeenperä', 'Hongikko', 'Kurjensuo', 'Korpilahti', 'Metsäpelto', 'Kaarnakangas', 'Karhunkorpi', 'Pökkelö', 'Sammalmäki', 'Hukanaho', 'Kuusikorpi', 'Tervaskangas'];
+function hsh(i, j, k) { let h = (i*374761393 + j*668265263 + (k || 0)*982451653) | 0; h = (h ^ (h >>> 13))*1274126177 | 0; h ^= h >>> 16; return (h >>> 0)/4294967296; }
+function vnoise(x, z) { const ix = Math.floor(x), iz = Math.floor(z), fx = x - ix, fz = z - iz, u = fx*fx*(3 - 2*fx), v = fz*fz*(3 - 2*fz);
+  const a = hsh(ix, iz), b = hsh(ix + 1, iz), c = hsh(ix, iz + 1), d = hsh(ix + 1, iz + 1); return (a + (b - a)*u + (c - a)*v + (a - b - c + d)*u*v)*2 - 1; }
+const outerBase = (x, z) => 6 + 24*vnoise(x/800, z/800) + 10*vnoise(x/260 + 17.3, z/260 - 9.1) + 2.5*vnoise(x/70 + 3.1, z/70 + 7.7);   // (hills like the village's own: ~50 m of relief)
+function airfieldCell(i, j) { const key = i + ',' + j; let A = OUT.af.get(key); if (A !== undefined) return A;
+  if (i === 0 && j === 0) A = { x: 1450, z: 150, a: Math.PI/2 };   // (the first one, east of the village: a short hop)
+  else if (hsh(i, j, 7) < 0.42) { const x = i*AF_CELL + 500 + hsh(i, j, 8)*(AF_CELL - 1000), z = j*AF_CELL + 500 + hsh(i, j, 9)*(AF_CELL - 1000); A = Math.max(Math.abs(x), Math.abs(z)) > 1350 ? { x, z, a: hsh(i, j, 10)*Math.PI } : null; }
+  else A = null;
+  if (A) { A.h = outerBase(A.x, A.z); A.fx = Math.sin(A.a); A.fz = Math.cos(A.a); A.name = AF_NAMES[Math.floor(hsh(i, j, 11)*AF_NAMES.length)]; A.key = key; }
+  OUT.af.set(key, A); return A; }
+function airfieldsNear(x, z, R) { const out = [], i0 = Math.floor((x - R)/AF_CELL), i1 = Math.floor((x + R)/AF_CELL), j0 = Math.floor((z - R)/AF_CELL), j1 = Math.floor((z + R)/AF_CELL);
+  for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) { const A = airfieldCell(i, j); if (A && Math.hypot(A.x - x, A.z - z) < R) out.push(A); } return out; }
+function afMask(A, x, z) { const dx = x - A.x, dz = z - A.z, a = dx*A.fx + dz*A.fz, b = dx*A.fz - dz*A.fx, ea = Math.max(0, Math.abs(a) - (AF_L/2 + 50)), eb = Math.max(0, Math.abs(b) - (AF_W/2 + 45)), e = Math.hypot(ea, eb);
+  if (e >= 70) return 0; const t = e/70; return 1 - t*t*(3 - 2*t); }
+function hOuter(x, z) { const g = HG, X1 = g.x0 + (g.n - 1)*g.step, Z1 = g.z0 + (g.n - 1)*g.step, cx = Math.max(g.x0, Math.min(X1, x)), cz = Math.max(g.z0, Math.min(Z1, z));
+  const he = H(cx, cz), d = Math.hypot(x - cx, z - cz), t = Math.min(1, d/260), s = t*t*(3 - 2*t); let h = he + (outerBase(x, z) - he)*s;
+  for (const A of airfieldsNear(x, z, AF_L/2 + 200)) { const m = afMask(A, x, z); if (m > 0) h += (A.h - h)*m; } return h; }
+function inBase(x, z, m) { const g = HG, X1 = g.x0 + (g.n - 1)*g.step; return x > g.x0 - (m || 0) && x < X1 + (m || 0) && z > g.z0 - (m || 0) && z < X1 + (m || 0); }
+// the ground out there: one 2 km sheet round the camera on the height grid's own 20 m lattice (so its edge lies on the village's), rebuilt every 100 m
+function outerGround(cx0, cz0) { const S = 20, N = 111, g = HG, cx = g.x0 + Math.round((cx0 - g.x0)/S)*S, cz = g.z0 + Math.round((cz0 - g.z0)/S)*S;
+  if (OUT.mesh && Math.abs(cx - OUT.cx) < 160 && Math.abs(cz - OUT.cz) < 160) return; OUT.cx = cx; OUT.cz = cz;
+  const pos = new Float32Array(N*N*3), col = new Float32Array(N*N*3), idx = [], half = (N - 1)/2*S, X1 = g.x0 + (g.n - 1)*g.step;
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const x = cx - half + i*S, z = cz - half + j*S, k = (j*N + i)*3, inside = x > g.x0 + 0.1 && x < X1 - 0.1 && z > g.z0 + 0.1 && z < X1 - 0.1;
+    let af = 0; if (!inside) for (const A of airfieldsNear(x, z, AF_L/2 + 200)) af = Math.max(af, afMask(A, x, z));
+    pos[k] = x; pos[k + 1] = inside ? H(x, z) - 4 : H(x, z); pos[k + 2] = z;   // (under the village's own ground where they overlap)
+    const n = 0.5 + 0.5*vnoise(x/90, z/90), tn = terrainNormal(x, z, {}), lit = Math.max(0.6, Math.min(1.4, 1 + ((tn.x*HS_L[0] + tn.y*HS_L[1] + tn.z*HS_L[2])/HS_L[1] - 1)*1.9)), l = (0.8 + 0.2*n)*lit;   // (lit like the village's ground: NW banks light, hollows dark)
+    col[k] = (0.36 + 0.07*af)*l; col[k + 1] = (0.54 + 0.06*af)*l; col[k + 2] = (0.27 + 0.03*af)*l; }   // (the strip's clearing: mown, a shade lighter)
+  for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) { const a = j*N + i, b = a + 1, c = a + N, d = c + 1; idx.push(a, c, b, b, c, d); }
+  if (!OUT.mesh) { OUT.mesh = new THREE.Mesh(new THREE.BufferGeometry(), addGroundDetail(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), 0.7)); OUT.mesh.receiveShadow = true; OUT.mesh.renderOrder = -3; OUT.mesh.frustumCulled = false; scene.add(OUT.mesh); }
+  const geo = OUT.mesh.geometry; geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.setIndex(idx); geo.computeVertexNormals(); geo.computeBoundingSphere(); }
+// the sparse forest: pines on 60 m tiles (a hash per tile: 0–5 trees), 950 m round the camera, one instanced draw for trunks, one for crowns
+function outerTreesAt(i, j, fn) { const cx = i*60 + 30, cz = j*60 + 30, W = WORLD_EDGE, e = Math.hypot(Math.max(0, -W - cx, cx - W), Math.max(0, -W - cz, cz - W));   // (from where the village's own forest stops: WORLD_EDGE)   // (thick forest by the village, thinning out over 250 m to the sparse one)
+  const d = Math.max(0, 1 - e/160), n = Math.min(60, Math.floor(hsh(i, j, 21)*6) + Math.floor(d*d*48*(0.75 + 0.5*hsh(i, j, 22)))); for (let k = 0; k < n; k++) { const x = i*60 + hsh(i, j, 30 + k)*60, z = j*60 + hsh(i, j, 40 + k)*60; if (Math.abs(x) < WORLD_EDGE + 1 && Math.abs(z) < WORLD_EDGE + 1) continue; if (outerExitNear(x, z)) continue;
+    let ok = true; for (const A of airfieldsNear(x, z, AF_L/2 + 200)) if (afMask(A, x, z) > 0.02) { ok = false; break; } if (ok) fn(x, z, 3.8 + hsh(i, j, 50 + k)*4.6, k); } }   // (the village's spruce sizes: 3.8–8.4 m)
+function outerExitNear(x, z) {   // (a lane through the forest where a village road meets the edge: the car can drive out along it, 300 m)
+  if (!OUT.exits) { OUT.exits = []; for (const r of sideRoads) for (const e of [0, 1]) { const P = r.pts, a = e ? P[P.length - 1] : P[0], b = e ? P[Math.max(0, P.length - 4)] : P[Math.min(P.length - 1, 3)];
+      if (Math.max(Math.abs(a.x), Math.abs(a.y)) < 470) continue;   /* (the roads that run out of the village: Tolkinkyläntie, Ylästöntie) */ const l = Math.hypot(a.x - b.x, a.y - b.y) || 1; OUT.exits.push({ x: a.x, z: a.y, dx: (a.x - b.x)/l, dz: (a.y - b.y)/l }); } }
+  for (const E of OUT.exits) { const t = (x - E.x)*E.dx + (z - E.z)*E.dz; if (t < -10 || t > 400) continue; if (Math.abs((x - E.x)*E.dz - (z - E.z)*E.dx) < 9) return true; } return false; }
+function outerForest(cx, cz) { const ti = Math.floor(cx/60), tj = Math.floor(cz/60); if (OUT.trees && Math.abs(ti - OUT.tx) < 3 && Math.abs(tj - OUT.tz) < 3) return; OUT.tx = ti; OUT.tz = tj;   // (rebuilt every ~150 m: 840 m round is past the fog anyway)
+  if (!OUT.trees) { const MAX = 20000, cm = () => new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: !!SPRUCE_FOREST[0].attributes.color, roughness: 0.9 });   // (the village's own spruce model and trunk: the forest carries on seamlessly)
+    OUT.trees = new THREE.InstancedMesh(unitTrunk, new THREE.MeshStandardMaterial({ color: 0x5b3d22, roughness: 0.95 }), 4000); OUT.crowns = new THREE.InstancedMesh(SPRUCE_FOREST[0], cm(), 4000); OUT.far = new THREE.InstancedMesh(SPRUCE_FOREST[0], cm(), MAX);
+    for (const m of [OUT.crowns, OUT.far]) m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(m.instanceMatrix.count*3).fill(1), 3);   // (made now: a shader compiled before the first setColorAt would never show the colours)
+    for (const m of [OUT.trees, OUT.crowns, OUT.far]) { m.receiveShadow = true; m.frustumCulled = false; scene.add(m); } OUT.trees.castShadow = OUT.crowns.castShadow = true; OUT.max = MAX; }   // (near ones, 200 m: shadows and trunks; far ones: crowns only, no shadow pass)
+  const M = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), C = new THREE.Color(); let n = 0, f = 0; const R = 14, x0 = ti*60 + 30, z0 = tj*60 + 30;
+  for (let i = ti - R; i <= ti + R; i++) for (let j = tj - R; j <= tj + R; j++) { if ((i - ti)*(i - ti) + (j - tj)*(j - tj) > R*R) continue;
+    outerTreesAt(i, j, (x, z, h, k) => { const near = Math.hypot(x - x0, z - z0) < 200; if (near ? n >= 4000 : f >= OUT.max) return; const y0 = H(x, z), fr = h*(0.27 + hsh(i, j, 70 + k)*0.08); q.setFromAxisAngle(_pA.set(0, 1, 0), hsh(i, j, 60 + k)*6.28);
+      const g = hsh(i, j, 80 + k); C.setHex([0x2f6b3a, 0x3b7d44, 0x2b5e3c, 0x36663e, 0x2c6349][Math.floor(g*5)]).multiplyScalar(1.15); M.compose(p.set(x, y0 + 0.35, z), q, s.set(fr, h, fr));
+      if (near) { OUT.crowns.setMatrixAt(n, M); OUT.crowns.setColorAt(n, C); M.compose(p.set(x, y0 + 0.5, z), q, s.set(0.15, 1, 0.15)); OUT.trees.setMatrixAt(n, M); n++; } else { OUT.far.setMatrixAt(f, M); OUT.far.setColorAt(f, C); f++; } }); }
+  OUT.trees.count = OUT.crowns.count = n; OUT.far.count = f; for (const m of [OUT.trees, OUT.crowns, OUT.far]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; } }
+// an airstrip's things: the strip (a painted texture), the hut with its sign, a windsock, edge markers — built when near, dropped when far
+let _afTex = null;
+function afTexture() { if (_afTex) return _afTex; const c = document.createElement('canvas'); c.width = 64; c.height = 1024; const g = c.getContext('2d'); g.fillStyle = '#5b5d5f'; g.fillRect(0, 0, 64, 1024);
+  for (let i = 0; i < 3000; i++) { g.fillStyle = 'rgba(' + (Math.random() < 0.5 ? '255,255,255' : '0,0,0') + ',0.05)'; g.fillRect(Math.random()*64, Math.random()*1024, 2, 2); }
+  g.fillStyle = '#e8e8e2'; for (let y = 40; y < 984; y += 44) g.fillRect(30, y, 4, 22); for (const y of [6, 1000]) for (let x = 6; x < 60; x += 8) g.fillRect(x, y, 4, 18);
+  _afTex = new THREE.CanvasTexture(c); _afTex.anisotropy = 4; return _afTex; }
+function afBuild(A) { const G = new THREE.Group(), y = A.h;
+  const strip = new THREE.Mesh(new THREE.PlaneGeometry(AF_W, AF_L), new THREE.MeshStandardMaterial({ map: afTexture(), roughness: 0.95, polygonOffset: true, polygonOffsetFactor: -2 })); strip.rotation.set(-Math.PI/2, 0, A.a); strip.position.set(A.x, y + 0.04, A.z); strip.receiveShadow = true; G.add(strip);
+  const loc = (a, b) => [A.x + A.fx*a + A.fz*b, A.z + A.fz*a - A.fx*b];
+  for (let a = -AF_L/2; a <= AF_L/2; a += 60) for (const sd of [-1, 1]) { const [x, z] = loc(a, sd*(AF_W/2 + 2)), m = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.35, 0.6), new THREE.MeshStandardMaterial({ color: 0xf2f2ee })); m.position.set(x, y + 0.17, z); G.add(m); }
+  const [hx, hz] = loc(-AF_L/2 + 70, AF_W/2 + 16), hut = new THREE.Group(); hut.position.set(hx, y, hz); hut.rotation.y = A.a; G.add(hut);   // the hut: a small red-brown wooden shed, a tin roof, a door, one window, a sign
+  const wood = new THREE.MeshStandardMaterial({ color: 0x7a3a22, roughness: 0.9 }), B = (w, h, d, m, px, py, pz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(px, py, pz); o.castShadow = true; o.receiveShadow = true; hut.add(o); return o; };
+  B(3.2, 2.3, 2.6, wood, 0, 1.15, 0); const roof = B(3.7, 0.12, 3.2, new THREE.MeshStandardMaterial({ color: 0x55585c, roughness: 0.6, metalness: 0.3 }), 0, 2.45, 0); roof.rotation.x = 0.12;
+  B(0.05, 1.8, 0.8, new THREE.MeshStandardMaterial({ color: 0x3a2a1c }), -1.62, 0.9, 0.3); B(0.05, 0.6, 0.7, new THREE.MeshStandardMaterial({ color: 0x9fc0d8, roughness: 0.2 }), -1.62, 1.5, -0.8);
+  { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#f2ead6'; g.fillRect(0, 0, 256, 64); g.fillStyle = '#2a2016'; g.font = '900 30px Arial'; g.textAlign = 'center'; g.fillText(A.name.toUpperCase(), 128, 44);
+    const sg = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.6), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c) })); sg.position.set(-1.64, 2.0, 0); sg.rotation.y = -Math.PI/2; hut.add(sg); }
+  const [wx, wz] = loc(-AF_L/2 + 90, -(AF_W/2 + 14)); const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 6, 6), new THREE.MeshStandardMaterial({ color: 0xdddddd })); pole.position.set(wx, y + 3, wz); pole.castShadow = true; G.add(pole);
+  const sock = new THREE.Mesh(new THREE.ConeGeometry(0.35, 2, 10, 1, true), new THREE.MeshStandardMaterial({ color: 0xff7a1a, side: THREE.DoubleSide })); sock.rotation.z = Math.PI/2 - 0.2; sock.position.set(wx + 1, y + 5.7, wz); G.add(sock);
+  A.solid = [{ x: hx, z: hz, yaw: A.a, hw: 1.7, hl: 1.4, kind: 'lm' }, { x: wx, z: wz, yaw: 0, hw: 0.2, hl: 0.2, kind: 'pole' }]; scene.add(G); return G; }
+// the solid things near the car (or the plane): the pines and huts within 70 m become static boxes; re-done every 30 m
+function outerSolids(x, z) { const si = Math.floor(x/30), sj = Math.floor(z/30); if (si === OUT.sx && sj === OUT.sz) return; OUT.sx = si; OUT.sz = sj;
+  for (const b of OUT.sb) staticRemove(b); OUT.sb.length = 0; if (inBase(x, z, -90)) return;
+  for (let i = Math.floor((x - 70)/60); i <= Math.floor((x + 70)/60); i++) for (let j = Math.floor((z - 70)/60); j <= Math.floor((z + 70)/60); j++)
+    outerTreesAt(i, j, (tx, tz) => { if (Math.hypot(tx - x, tz - z) > 70) return; const b = { x: tx, z: tz, yaw: 0, hw: 0.45, hl: 0.45, kind: 'pine' }; addStaticBox(b); OUT.sb.push(b); });
+  for (const A of airfieldsNear(x, z, AF_L)) if (A.solid) for (const s0 of A.solid) if (Math.hypot(s0.x - x, s0.z - z) < 120) { const b = { ...s0 }; addStaticBox(b); OUT.sb.push(b); } }
+function outerUpdate() { if (!worldLifted) return; const cx = camera.position.x, cz = camera.position.z; outerGround(cx, cz); outerForest(cx, cz);
+  for (const A of airfieldsNear(cx, cz, 1500)) if (!OUT.afG.has(A.key)) OUT.afG.set(A.key, afBuild(A));
+  for (const [k, G] of OUT.afG) { const A = OUT.af.get(k); if (Math.hypot(A.x - cx, A.z - cz) > 2000) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); }); OUT.afG.delete(k); } }
+  outerSolids(car.x, car.z); }
+function nearestAirfield(x, z) { let best = null, bd = Infinity; for (const A of airfieldsNear(x, z, 6000)) { const d = Math.hypot(A.x - x, A.z - z); if (d < bd) { bd = d; best = A; } } return best && { A: best, d: bd }; }
 function terrainNormal(x, z, out) { const e = 1.0, dx = (H(x+e, z) - H(x-e, z))/(2*e), dz = (H(x, z+e) - H(x, z-e))/(2*e); const l = Math.hypot(dx, 1, dz); out = out || {}; out.x = -dx/l; out.y = 1/l; out.z = -dz/l; return out; }
 // raw (unsmoothed) ground before roads: the imported model, or placeholder hills named after the places
 function rawHeight(x, z) {
@@ -4642,6 +4728,7 @@ const CHANGES = [
   ['30.9.', '🌭 Makkarakärry: pysähdy viereen, makkara tuodaan ikkunaan, röyh ja savua', '10.04'],
   ['30.9.', '📸 Peltipoliisi: kaksi nopeuskameraa radan varrella, yli 80 km/h välähtää ja kovin lukema kirjataan rekisteriin', '10.04'],
   ['30.9.', '✈ Lentokone Antin merkitsemään paikkaan: maaliviivan takana S-mutkan jälkeen tien vasemmalla puolella, nokka rallitielle – nousu suoraa pitkin', '23.12'],
+  ['30.9.', '🌲 Kartta jatkuu loputtomiin: kylän metsä harvenee kumpuilevaksi kankaaksi, ja korvessa on silloin tällöin korpikenttä (800 m kiitorata, koppi, tuulipussi) – lentäessä näytöllä lähimmän kentän suunta ja matka', '00.17'],
   ['30.9.', '✈ Lentokoneelle uusi malli kuten autolle: pyöreä runko, siipiprofiilit, OH-YLÄ-tunnus, liikkuvat siivekkeet ja peräsimet, pyöränsuojat ja valot – kolarissa kone hajoaa osiin', '23.43'],
   ['30.9.', 'Radioon neljä uutta biisiä: Summer Folded in My Hands, Ankara–Helsinki, Istanbulin yöstä, If You Come Back by Morning', '23.03'],
   ['30.9.', '✈ Lentokone ensimmäiseen mutkaan lähdön jälkeen, nokka kohti Ylästöntietä; maassa ↑ = kaasu kuin autossa, ↓ nostaa nokan; kamera korkeammalla; siivet oikenevat itsestään ja kylän rajalla kone kaartaa takaisin', '22.56'],
@@ -4895,6 +4982,10 @@ const LEHTI = [
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+  { id: 'korpi', size: 'page', n: 63, kick: '🌲 KORPIKENTTÄ', title: 'Metsä jatkuu – ja korvessa on kiitoratoja', lede: 'Kylän takana alkaa metsä, joka ei lopu. Kuusikko harvenee kumpuileviksi kankaiksi, ja siellä täällä korven keskellä on kiitorata ja pieni koppi.',
+    img: ['korpikentta.jpg'], cap: ['Hukanahon korpikenttä kylästä itään. Kopin seinässä lukee kentän nimi.'],
+    body: ['YLÄSTÖ. Kylän reunalla metsä ei enää lopu seinään. Tiheä kuusikko jatkuu kylän rajan yli ja harvenee vähitellen harvaksi kankaaksi, jota riittää niin pitkälle kuin jaksaa ajaa tai lentää. Autollakin pääsee, mutta kuuset ovat kovia.', 'Harvakseltaan metsän keskellä on raivattu aukea ja 800 metrin kiitorata. Kentän laidalla on pieni punainen koppi, jonka seinässä lukee kentän nimi, ja tuulipussi. Lähin kenttä, Hukanaho, on puolentoista kilometrin päässä kylästä itään.', 'Lentäessä näytön yläreunassa näkyy lähimmän korpikentän suunta ja matka. Laskeudu kiitoradan alkuun hiljaisella kaasulla ja nokka hieman ylhäällä, niin kone pysähtyy radalle. Nousu onnistuu samalta radalta.'],
+    box: ['KORPIKENTÄT', 'Metsä jatkuu loputtomiin', '800 m kiitorata ja koppi', 'Suunta ja matka näytöllä lentäessä'] },
   { id: 'parko', size: 'page', n: 62, kick: '💡 MARKKINARAKO', title: 'Parko Markkinen: Helsinki on brändi', lede: 'Radio Ylästön uusi ohjelma Markkinarako alkoi. Mainosmies Parko Markkinen näkee jokaisessa arkisessa asiassa tuotteen – ja jokaisessa tuotteessa vientimahdollisuuden.',
     img: ['parko.jpg'], cap: ['Parko Markkinen Ylästöntien pienkoneen luona. – Tässä on konsepti, hän sanoi, mutta ei vielä kertonut mikä.'],
     body: ['YLÄSTÖ. Parko Markkinen, 38, puhuu nopeasti ja keskeyttää itsensä, kun uusi idea tulee kesken lauseen. Ensimmäisessä lähetyksessä hän keksi kirpputoreille kuluttajapörssin: iso sähkötaulu, jossa kahvinkeittimien kurssi elää. – Aamupäivän pörssissä leivänpaahtimet avautuivat vahvasti, hän kuvaili.', 'Toisessa jaksossa Markkinen myi koko Helsingin. Puiston penkit, ratikkapysäkit ja kaupunginosat saisivat sponsorin, ja viemärinkansissakin voisi olla pieni yhteistyötunnus. Missä helsinkiläiset sitten asuisivat? – Brändissä.', 'Kolmannessa jaksossa hän ennusti, että jokaisessa kodissa on tietokone, jolla tehdään kauppaa, ja taskussa laite, jolla katsotaan karttaa ja otetaan valokuvia. Sitten hän keksi paremman: kannettavan faksin. – Paperi ratkaisee, Markkinen sanoi.', 'Markkinarako kuuluu autoradiossa viidessä jaksossa. Hississä pidettävä työhaastattelu ja hautaustoimiston kanta-asiakkuus ovat vielä kuulematta. Markkinen on usein väärässä yksityiskohdissa, mutta ärsyttävän usein oikeassa suunnasta.'],
@@ -8383,7 +8474,7 @@ function planePhys(dt, live) { const P = PLANE; if (P.crashed) { car.vx = car.vz
   const ease = (x, t, r) => x + Math.max(-r*dt, Math.min(r*dt, t - x));
   P.de = ease(P.de, (pitchUp ? 1 : 0) - (pitchDn ? 1 : 0) || (P.edge ? Math.min(0.35, Math.abs(P.bank || 0)*0.4) : 0), 3); let daT = (k('ArrowRight') ? 1 : 0) - (k('ArrowLeft') ? 1 : 0); const cx = HG.x0 + HG.n*HG.step/2, cz = HG.z0 + HG.n*HG.step/2, edge = Math.min(P.p.x - HG.x0, HG.x0 + HG.n*HG.step - P.p.x, P.p.z - HG.z0, HG.z0 + HG.n*HG.step - P.p.z);
   const bankNow = Math.asin(Math.max(-1, Math.min(1, -_pL.set(1, 0, 0).applyQuaternion(P.q).y)));   // (+ = left wing down)
-  P.edge = P.air && edge < 320 && P.p.y - Y(P.p.x, P.p.z) > 35;   /* (not low down just off the runway: a wingtip would hit) */
+  P.edge = false && edge < 320;   /* (the map has no edge any more: the forest goes on — the turn-back assist is off) */   /* (not low down just off the runway: a wingtip would hit) */
   if (P.edge && !daT) {   /* the edge of the map: it banks back towards the village by itself; a left turn wants a left bank (this bank measure is + to the left) */ const Fh = _pF.set(0, 0, 1).applyQuaternion(P.q), err = Math.atan2(Math.sin(Math.atan2(cx - P.p.x, cz - P.p.z) - Math.atan2(Fh.x, Fh.z)), Math.cos(Math.atan2(cx - P.p.x, cz - P.p.z) - Math.atan2(Fh.x, Fh.z))), bank = Math.asin(Math.max(-1, Math.min(1, -_pL.set(1, 0, 0).applyQuaternion(P.q).y)));
     daT = Math.max(-1, Math.min(1, (bank - (Math.abs(err) > 0.2 ? Math.sign(err)*0.75 : 0))*2)); P.bank = bank; } else P.bank = 0;
   if (!daT && !P.edge && P.air) daT = Math.max(-0.6, Math.min(0.6, bankNow*1.2 - P.w.dot(_pF.set(0, 0, 1).applyQuaternion(P.q))*0.4));   // (hands off the stick: a gentle wing leveller, so it doesn't roll away on its own)
@@ -8421,7 +8512,8 @@ function planePhys(dt, live) { const P = PLANE; if (P.crashed) { car.vx = car.vz
 function planeView(dt) { const P = PLANE; if (!P.mesh) return; P.mesh.position.copy(P.p); P.mesh.quaternion.copy(P.q); P.prop += (P.on && !P.crashed ? 20 + 180*P.thr : 0)*(dt || 0); const pr = P.mesh.userData.prop; pr.rotation.z = P.prop; const Q = P.mesh.userData.parts;   /* the controls move: ailerons (opposite), elevator, rudder, the nose wheel */
   if (Q.ailL) { Q.ailL.rotation.x = -P.da*0.35; Q.ailR.rotation.x = P.da*0.35; Q.elev.rotation.x = P.de*0.35; Q.rud.rotation.y = P.dr*0.4; Q.steerN.rotation.y = (P.dr + P.da)*0.5*Math.max(0, 1 - P.v.length()/25)*0.6; } P.mesh.userData.disc.visible = P.on && !P.crashed && P.thr > 0.05;
   if (P.on) { let h = P.hud; if (!h) { h = P.hud = document.createElement('div'); h.style.cssText = 'position:fixed;left:50%;top:84px;transform:translateX(-50%);font:700 15px JetBrains Mono,monospace;color:#fff;background:rgba(0,0,0,0.5);padding:5px 12px;border-radius:6px;z-index:20;pointer-events:none'; document.body.appendChild(h); }
-    const V = P.v.length(), agl = Math.max(0, P.p.y - 1.05 - Y(P.p.x, P.p.z)); h.style.display = 'block'; h.textContent = '✈ ' + Math.round(V*3.6) + ' km/h · ' + Math.round(agl) + ' m · kaasu ' + Math.round(P.thr*100) + ' %' + (P.air ? '' : ' · maassa') + (P.edge ? ' · KYLÄN RAJA – KÄÄNNYTÄÄN' : ''); }
+    const V = P.v.length(), agl = Math.max(0, P.p.y - 1.05 - Y(P.p.x, P.p.z)); h.style.display = 'block'; h.textContent = '✈ ' + Math.round(V*3.6) + ' km/h · ' + Math.round(agl) + ' m · kaasu ' + Math.round(P.thr*100) + ' %' + (P.air ? '' : ' · maassa') + (() => { const N = nearestAirfield(P.p.x, P.p.z); if (!N || N.d < 60) return ''; const F = _pF.set(0, 0, 1).applyQuaternion(P.q), rel = Math.atan2(Math.sin(Math.atan2(N.A.x - P.p.x, N.A.z - P.p.z) - Math.atan2(F.x, F.z)), Math.cos(Math.atan2(N.A.x - P.p.x, N.A.z - P.p.z) - Math.atan2(F.x, F.z)));
+      return ' · ' + ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'][((Math.round(-rel/(Math.PI/4)) % 8) + 8) % 8] + ' ' + N.A.name.toUpperCase() + ' ' + (N.d/1000).toFixed(1).replace('.', ',') + ' km'; })(); }   // (the nearest backwoods strip: which way, how far)
   else if (P.hud) P.hud.style.display = 'none'; }
 function planeCamera(dt) { const P = PLANE, F = _pF.set(0, 0, 1).applyQuaternion(P.q); if (!P.cam) P.cam = F.clone(); P.cam.lerp(F, 1 - Math.pow(0.05, dt)); const d = P.cam;
   const hl = Math.hypot(d.x, d.z) || 1; P.camK = (P.camK || 0) + ((P.air ? 1 : 0) - (P.camK || 0))*Math.min(1, dt*0.8); const back = 11 + 11*P.camK, up = 4.5 + 5*P.camK;   // (close behind on the ground, higher and further back in the air)
@@ -10590,7 +10682,7 @@ function loop(time) {
     rx = RI.x + (car.x - RI.x)*al; rz = RI.z + (car.z - RI.z)*al; ra = RI.a + da*al; car.x = rx; car.z = rz; car.angle = ra;
     carGroup.position.set(rx, Y(rx, rz) + BASS.hopY + ABD.carY, rz); carGroup.rotation.y = ra; }
   if (DRAG.on && DP.ok) dragView(dt);
-  planeView(dt);
+  planeView(dt); outerUpdate();   // (the endless forest and its airstrips round the camera)
   U_TIME.value = performance.now()/1000; skyDome.position.copy(camera.position);
   updateMarks(dt); updateDust(dt); updateDebris(dt); rbUpdate(dt); knockAnim(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); flowFx(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
   if (gameState !== State.MENU && (MM_TICK = (MM_TICK + 1) % 2) === 0) drawMinimap();   // (30 Hz is plenty for the map: half the 2D canvas uploads)
