@@ -285,7 +285,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 06.32 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 07.13 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -397,6 +397,11 @@ const I18N = {
   'R uusi lähtö · Esc': ['R restart · Esc', 'R ny start · Esc'], 'OIKAISU – KIERROS EI KELPAA': ["SHORTCUT – THE LAP DOESN'T COUNT", 'SNARVEI – RUNDEN TELLER IKKE'],
   'AIKA KÄY': ['CLOCK RUNNING', 'KLOKKA GÅR'], 'FINAL — FIND FINISH': ['FINAL — FIND FINISH', 'SISTE — FINN MÅL'], 'CHECKPOINT {0}': ['CHECKPOINT {0}', 'SJEKKPUNKT {0}'],
   'KISA': ['RACE', 'LØP'],
+  '📸 PELTIPOLIISI NAPSAHTI! {0} km/h': ['📸 SPEED CAMERA FLASHED! {0} km/h', '📸 FARTSKAMERAET BLITSET! {0} km/t'], 'Peltipoliisi: kovin ylinopeus {0} km/h – {1}': ['Speed camera: fastest {0} km/h – {1}', 'Fotoboks: raskeste {0} km/t – {1}'],
+  '🌭 MAKKARA! …RÖYH!': ['🌭 SAUSAGE! …BURP!', '🌭 PØLSE! …RAP!'], '🌭 makkara tulossa… {0}': ['🌭 sausage coming… {0}', '🌭 pølse kommer… {0}'],
+  '🐕 KOIRA HYPPÄSI KYYTIIN!': ['🐕 A DOG JUMPED IN!', '🐕 EN HUND HOPPET INN!'], '🐕 KOIRA HYPPÄSI POIS': ['🐕 THE DOG JUMPED OFF', '🐕 HUNDEN HOPPET AV'],
+  '👵 MUMMO YLITTÄÄ TIEN…': ['👵 GRANNY IS CROSSING…', '👵 BESTEMOR GÅR OVER…'], '👵 NUORISO NYKYÄÄN!': ['👵 YOUNG PEOPLE THESE DAYS!', '👵 UNGDOMMEN NOW TIL DAGS!'], '👵 KIITOS, NUORIMIES! – hyvä teko kirjattu': ['👵 THANK YOU, YOUNG MAN! – good deed noted', '👵 TAKK, UNGE MANN! – god gjerning notert'],
+  '🧖 SAUNOJAT: ”HILJEMPAA!”': ['🧖 SAUNA GANG: "SLOW DOWN!"', '🧖 BADSTUEGJENGEN: «SAKTE NÅ!»'],
   'Tuntematon kuski': ['Unknown driver', 'Ukjent sjåfør'],
   'KYLÄHUHU': ['VILLAGE RUMOUR', 'BYGDESLADDER'], '{0} johtaa ennätyslistaa ajalla {1}': ['{0} leads the record list with {1}', '{0} leder rekordlista med {1}'], '{0} ajoi tänään {1}': ['{0} drove {1} today', '{0} kjørte {1} i dag'],
   'Ylästössä ajettu jo {0} kisaa, kuskeja {1}': ['{0} races driven in Ylästö, {1} drivers', '{0} løp kjørt i Ylästö, {1} sjåfører'], 'Kylässä palanut jo {0} taloa – palokunta pyytää rauhoittumaan': ['{0} houses burnt in the village – the fire brigade asks everyone to calm down', '{0} hus brent i bygda – brannvesenet ber alle roe seg'],
@@ -4476,14 +4481,14 @@ function oppPick(others, myT, mine) {
   if (!pick.length && mine) pick = [mine];       // (alone on the board: your own best, under your name)
   return pick.sort((a, b) => b.t - a.t); }       // nearest first
 // ── the police's rap sheet: fires the driver set, people and animals they ran over → /api/rap (as deltas), and the list back for the paper's "Poliisi tiedottaa" ──
-const RAP = { f: 0, p: 0, a: 0, h: 0, sent: { f: 0, p: 0, a: 0, h: 0 }, life: { f: 0, p: 0, a: 0, h: 0 }, list: null, at: -1e9, busy: false };   // (h: rides given to hitchhikers — the good deeds)
+const RAP = { f: 0, p: 0, a: 0, h: 0, v: 0, vSent: 0, sent: { f: 0, p: 0, a: 0, h: 0 }, life: { f: 0, p: 0, a: 0, h: 0 }, list: null, at: -1e9, busy: false };   // (h: rides given to hitchhikers — the good deeds)
 try { const l = JSON.parse(localStorage.getItem('ylasto1988-rekisteri') || 'null'); if (l) for (const k of ['f', 'p', 'a', 'h']) RAP.life[k] = Math.max(0, l[k] | 0); } catch (e) {}
 function rapCount(k) { if (gameState === State.MENU) return;   // (the race, GTA, after the finish line: all of it counts)
   RAP[k]++; RAP.life[k]++; try { localStorage.setItem('ylasto1988-rekisteri', JSON.stringify(RAP.life)); } catch (e) {} }
 function rapSend(beacon) {   // → a promise that settles when the server has it (so the paper's list, fetched after, includes it)
-  if (!ONLINE.api || !ONLINE.id) return Promise.resolve(); const d = { f: RAP.f - RAP.sent.f, p: RAP.p - RAP.sent.p, a: RAP.a - RAP.sent.a, h: RAP.h - RAP.sent.h }, name = ONLINE.name || '';
-  if (!d.f && !d.p && !d.a && !d.h && (!name || name === RAP.sentName || !(RAP.life.f + RAP.life.p + RAP.life.a + RAP.life.h))) return Promise.resolve();   // (nothing new — or only a name given since: then the name goes, to put it on the old rows)
-  const body = JSON.stringify({ id: ONLINE.id, name, ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a, h: RAP.h }; RAP.sentName = name; RAP.at = -1e9;
+  if (!ONLINE.api || !ONLINE.id) return Promise.resolve(); const d = { f: RAP.f - RAP.sent.f, p: RAP.p - RAP.sent.p, a: RAP.a - RAP.sent.a, h: RAP.h - RAP.sent.h, v: RAP.v > RAP.vSent ? RAP.v : 0 }, name = ONLINE.name || '';
+  if (!d.f && !d.p && !d.a && !d.h && !d.v && (!name || name === RAP.sentName || !(RAP.life.f + RAP.life.p + RAP.life.a + RAP.life.h))) return Promise.resolve();   // (nothing new — or only a name given since: then the name goes, to put it on the old rows)
+  const body = JSON.stringify({ id: ONLINE.id, name, ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a, h: RAP.h }; RAP.vSent = Math.max(RAP.vSent, RAP.v); RAP.sentName = name; RAP.at = -1e9;
   try { if (beacon && navigator.sendBeacon) { navigator.sendBeacon(ONLINE.api + '/rap', body); return Promise.resolve(); } return fetch(ONLINE.api + '/rap', { method: 'POST', body, keepalive: true }).catch(() => {}); } catch (e) { return Promise.resolve(); } }
 function rapFetch() { if (!ONLINE.api || RAP.busy || performance.now() - RAP.at < 60000) return; RAP.busy = true;
   fetch(ONLINE.api + '/rap', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { RAP.busy = false; if (!j || !Array.isArray(j.fires)) return; RAP.list = j; RAP.at = performance.now(); posterRefresh(); mailFetch(); lhRapFill(document.getElementById('lehti-mini')); if (PAPER.open) lhRapFill(document.querySelector('#paper .pv-stage')); }).catch(() => { RAP.busy = false; }); }
@@ -4512,6 +4517,12 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', '🧖 Saunojat juoksevat tien laitaan huutamaan HILJEMPAA, kun ajat lujaa ohi', '10.04'],
+  ['30.9.', '🐦 Lintuparvi pyrähtää metsästä, kun ajat lujaa ohi', '10.04'],
+  ['30.9.', '👵 Suojatie ja mummo: pysähdy, niin hän ylittää tien ja kiittää (hyvä teko rekisteriin)', '10.04'],
+  ['30.9.', '🐕 Pihakoira hyppää kyytiin, kun pysähdyt sen viereen, ja haukkuu mukana seuraavaan pysähdykseen', '10.04'],
+  ['30.9.', '🌭 Makkarakärry: pysähdy viereen, makkara tuodaan ikkunaan, röyh ja savua', '10.04'],
+  ['30.9.', '📸 Peltipoliisi: kaksi nopeuskameraa radan varrella, yli 80 km/h välähtää ja kovin lukema kirjataan rekisteriin', '10.04'],
   ['30.9.', 'Korjauksia: liftarin K-KAUPPA-kyltti isompi ja näkyvissä, jalkaisin poliisi tulee sinun luoksesi eikä tyhjälle autolle, HONK-banderolli aukealle, ufo ei nappaa pakenevaa hirveä', '09.32'],
   ['30.9.', 'Mopopojat lähtevät perään useammin: riittää 15 % ennätyksestä, ja ennen ensimmäistä väliaikaa aina', '08.56'],
   ['30.9.', 'Naamiaisolympialaiset ovat nyt HONK-olympialaiset, ja kentän laidalla on banderolli', '08.56'],
@@ -4749,7 +4760,15 @@ const LEHTI = [
   { id: 'kirje', size: 'half', n: 44, kick: '✉ POSTI', title: 'Kirjoita tekijälle – hän vastaa lehdessä', img: ['kirje.jpg'], body: ['Alkuruudun LÄHETÄ POSTIA TEKIJÄLLE avaa kirjepaperin: terveiset, kehut, haukut ja toiveet suoraan tekijälle.', 'Tekijä valitsee parhaat kirjeet ja vastaa niihin Lukijoiden kirjeet -palstalla lehden lopussa.'] },
   { id: 'rekisteri', size: 'half', n: 43, kick: '🚨 POLIISI', title: 'Poliisi julkaisee rikosrekisterin', img: ['rekisteri.jpg'], body: ['Jokainen sytytetty talo ja jokainen yliajettu kyläläinen kirjataan. Pahimmat kuskit ovat lehden Poliisi tiedottaa -sivulla – ja pahin etsintäkuulutettuna.', 'Oman rekisterisi näet samalta sivulta.'] },
   { id: 'pdf', size: 'half', n: 42, kick: '📄 PDF', title: 'Lehti nyt myös paperilla', img: ['pdf.jpg'], body: ['Ylästön Sanomat latautuu kokonaan PDF:nä – lehden yläkulman ⬇ PDF -napista. Kaikki sivut, kuvat ja muutokset, tulostimeen tai kaverille.', 'Sisällysluettelon sivunumerot hyppäävät PDF:ssäkin oikeaan juttuun.'] },
-  { id: 'sauna', size: 'half', n: 30, kick: '🔥 SAUNA', title: 'Saunaporukka savuttaa pellolla', img: ['sauna.jpg'], body: ['Saunakärry ja vanha pakettiauto ilmestyvät joka kerta eri paikkaan. Piipusta nousee pitkä musta nauha, ja möly kuuluu kylälle asti.'] },
+  { id: 'sauna', size: 'half', n: 48, kick: '🧖 SAUNA', title: 'Saunojat: ”Hiljempaa!”', img: ['saunojat.jpg'], body: ['Saunakärry ja vanha pakettiauto ilmestyvät joka kerta eri paikkaan, ja piipusta nousee pitkä musta nauha.', 'Jos ajat lujaa ohi, pyyhkeisiin kääriytyneet saunojat juoksevat tien laitaan riviin ja huutavat nyrkit pystyssä: HILJEMPAA!'] },
+  { id: 'mummo', size: 'page', n: 55, kick: '👵 SUOJATIE', title: 'Mummo odottaa suojatiellä', lede: 'Kylän raitilla on uusi suojatie, ja sen reunalla odottaa mummo keppeineen. Pysähdy, niin hän ylittää tien, kiittää ja hyvä tekosi kirjataan rekisteriin.',
+    img: ['mummo.jpg'], cap: ['Mummo astuu suojatielle. Rallikuski odottaa kiltisti.'],
+    body: ['YLÄSTÖ. Talojen välissä, keskellä rataa, on valkoiset raidat ja niiden reunalla mummo. Jos pysähdyt ennen suojatietä, mummo lähtee kävelemään tien yli omaa tahtiaan.', 'Toisella puolella hän kääntyy, vilkuttaa ja huutaa: kiitos, nuorimies! Hyvä teko kirjataan poliisin rekisteriin samalla tavalla kuin liftarin kyyditys.', 'Jos ajat ohi täysillä, mummo heristää keppiään. – Nuoriso nykyään, hän toteaa.'],
+    box: ['NÄIN SE TOIMII', 'Pysähdy ennen suojatietä', 'Odota, että mummo on ylittänyt tien', 'Hyvä teko kirjataan rekisteriin'] },
+  { id: 'pelti', size: 'half', n: 52, kick: '📸 PELTIPOLIISI', title: 'Peltipoliisi vahtii rataa', img: ['pelti.jpg'], body: ['Radan kahdella suoralla on nopeuskamera. Jos ajat ohi yli 80 km/h, se välähtää ja kovin lukema kirjataan rekisteriin.', 'Radio kertoo kylähuhuissa, kuka on ajanut kameran ohi kovimmin.'] },
+  { id: 'makkara', size: 'half', n: 51, kick: '🌭 MAKKARA', title: 'Makkara ikkunaan – röyh!', img: ['makkara.jpg'], body: ['Pysähdy katsomon makkarakärryn viereen, niin myyjän apulainen tuo makkaran auton ikkunaan.', 'Kuski syö sen yhdellä haukulla, röyhtäisee ja pakoputkesta tulee hetken sinistä savua.'] },
+  { id: 'koira', size: 'half', n: 50, kick: '🐕 KOIRA', title: 'Pihakoira lähti kyytiin', img: ['koira.jpg'], body: ['Pysähdy pihakoiran lähelle, niin se juoksee autolle, hyppää kyytiin ja haukkuu mukana koko matkan.', 'Seuraavassa pysähdyksessä koira loikkaa pois ja tassuttelee kotiin.'] },
+  { id: 'linnut', size: 'half', n: 49, kick: '🐦 LINNUT', title: 'Lintuparvi pyrähtää metsästä', img: ['linnut.jpg'], body: ['Kun ajat lujaa metsän ohi, puista pyrähtää lintuparvi. Linnut kaartavat taivaalle ja katoavat puiden taakse.', 'Metsästysseura kiittää: näin linnut ainakin pysyvät kunnossa.'] },
   { id: 'hirvi', size: 'half', n: 31, kick: '🦌 HIRVI', title: 'Hirvi jähmettyi valoihin', img: ['hirvi.jpg'], body: ['Metsissä laiduntaa hirviä. Välillä yksi ylittää tien – ja jää tuijottamaan autoa.'] },
   { id: 'pallot', size: 'half', n: 32, kick: '🎈 PALLOT', title: 'Kuumailmapallo poksahti', img: ['pallot.jpg'], body: ['Kaksi kuumailmapalloa lipuu kylän yllä. Alta ajaessa on 5 % mahdollisuus, että toinen poksahtaa ja kori rymähtää maahan.'] },
   { id: 'koirat', size: 'half', n: 33, kick: '🐕 KOIRAT', title: 'Pihakoirat jahtaavat autoa', img: ['koirat.jpg'], body: ['Neljä koiraa lähtee perään haukkuen. Jos yksi jää alle, naapurit juoksevat nyrkit pystyssä perässä.'] },
@@ -4880,7 +4899,7 @@ function lhKeys(where, keysPage, lyhPage, pno) { const K = [['Enter', 'lähtö']
     '<div class="lh-boxes"><div class="lh-box"><b>GTA-TILA</b>Aja lähdössä oikeaa kaistaa pois radalta – koko kylä on vapaa. R palauttaa kisaan.</div>' +
     '<div class="lh-box"><b>KERRO KAVERILLE</b>suomiralli.netlify.app – QR-koodi on alkuruudussa.</div>' +
     '<div class="lh-box"><b>LEHTI PDF:NÄ</b>Koko lehti tulostettavana: ⬇ PDF lehden yläkulmassa.</div></div>' +
-    '<div class="lh-index"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + where.__pol + '">Poliisi tiedottaa <i>' + where.__pol + '</i></a><a data-go="' + where.__ads + '">Pienet ilmoitukset <i>' + where.__ads + '</i></a><a data-go="' + where.__mail + '">Lukijoiden kirjeet <i>' + where.__mail + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame'); }
+    '<div class="lh-index" style="font-size:' + Math.min(13, Math.max(9.5, 13 - (LEHTI.length + 5 - 40)*0.25)).toFixed(2) + 'px"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + where.__pol + '">Poliisi tiedottaa <i>' + where.__pol + '</i></a><a data-go="' + where.__ads + '">Pienet ilmoitukset <i>' + where.__ads + '</i></a><a data-go="' + where.__mail + '">Lukijoiden kirjeet <i>' + where.__mail + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame'); }
 function lhLyhyesti(pno) {   // the change list, filled page by page for real: items go into fixed-height columns until a fourth column would open
   const host = document.createElement('div'); host.className = 'lh-measure'; document.body.appendChild(host); const out = [];
   const items = CHANGES.map(([d, t, hm]) => { const e = lhEsc(t), k = e.indexOf(': '); return '<p><b class="d">' + lhEsc(d) + (hm ? ' ' + hm : '') + '</b> ' + (k > 0 && k <= 70 ? '<b>' + e.slice(0, k + 1) + '</b>' + lhHy(e.slice(k + 1)) : lhHy(e)) + '</p>'; });
@@ -6441,7 +6460,7 @@ function radioNewsLine() { const L = [], nm = (r) => r.name || T('Tuntematon kus
   const today = new Date().toISOString().slice(0, 10), fresh = (ONLINE.list || []).filter(r => r.d === today); if (fresh.length) { const r = fresh[Math.floor(Math.random()*fresh.length)]; L.push(T('{0} ajoi tänään {1}', r.name, formatTime(r.t))); }
   if (STATS_LAST && STATS_LAST.starts > 0) L.push(T('Ylästössä ajettu jo {0} kisaa, kuskeja {1}', Math.round(STATS_LAST.starts).toLocaleString('fi-FI'), STATS_LAST.drivers));
   const RL = RAP.list; if (RL && RL.total) { if (RL.total.f) L.push(T('Kylässä palanut jo {0} taloa – palokunta pyytää rauhoittumaan', RL.total.f)); if (RL.total.p) L.push(T('Yliajettuja kyläläisiä jo {0} – ambulanssikuski väsynyt', RL.total.p));
-    const w = rapWanted(); if (w) L.push(T('Poliisi etsii kuskia {0} – ei saa lähestyä', w.name)); if (RL.kind && RL.kind[0]) L.push(T('Kylän kiltein kuski: {0}, {1} kyytiä liftareille', nm(RL.kind[0]), RL.kind[0].n)); }
+    const w = rapWanted(); if (w) L.push(T('Poliisi etsii kuskia {0} – ei saa lähestyä', w.name)); if (RL.speed && RL.speed[0]) L.push(T('Peltipoliisi: kovin ylinopeus {0} km/h – {1}', RL.speed[0].n, nm(RL.speed[0]))); if (RL.kind && RL.kind[0]) L.push(T('Kylän kiltein kuski: {0}, {1} kyytiä liftareille', nm(RL.kind[0]), RL.kind[0].n)); }
   if (RAP.f > 0) L.push(T('Tuore tieto: joku sytytti juuri {0} taloa', RAP.f)); if (RAP.p > 0) L.push(T('Tuore tieto: {0} kyläläistä jäi juuri auton alle', RAP.p));
   if (FLOW.n > 0) L.push(T('Hälytysajoneuvoja ajanut metsään: {0}', FLOW.n));
   L.push(T(NEWS_GOSSIP[Math.floor(Math.random()*NEWS_GOSSIP.length)]));
@@ -7219,8 +7238,11 @@ function bark(h) { if (!audio || gameState === State.MENU) return; const d = Mat
   beep(520 + Math.random()*60, 0.06, k, 'square'); setTimeout(() => beep(410, 0.09, k, 'square'), 85); }
 const yardDogTask = (D) => ({ kind: 'yarddog', update(h, dt, t) { const S = D.s, cx = car.x - h.x, cz = car.z - h.z, cd = Math.hypot(cx, cz), cs = Math.hypot(car.vx, car.vz); S.cool -= dt; h.tilt = 0;
   if (S.m === 'idle') { if (cd < 20 && cs > 4 && S.cool <= 0) { S.m = 'chase'; S.t = 0; S.side = Math.random() < 0.5 ? 1 : -1; return; }
+    S.still = cd < 14 && cs < 0.5 && gameState === State.RACING && !WALK.on && !DOGRIDE.D ? (S.still || 0) + dt : 0; if (S.still > 1.2) { S.m = 'board'; S.still = 0; return; }   // the car stopped by: in we get
     if ((S.re -= dt) <= 0) { S.re = 2 + Math.random()*4; const a = Math.random()*6.3, r = Math.random()*D.R; S.tx = D.hx + Math.sin(a)*r; S.tz = D.hz + Math.cos(a)*r; S.sit = Math.random() < 0.45; }
     if (walkTo(h, S.tx, S.tz, 1.4, dt) && S.sit) { h.pose.armL = h.pose.armR = -1.2; h.tilt = -0.3; } return; }
+  if (S.m === 'board') { const [tx, tz] = lloc(car.x, car.z, car.angle, 0, -2.4); if (cs > 2 || cd > 20 || DOGRIDE.D) { S.m = 'home'; return; } h.pose.walk = 0.9; h.pose.ph += dt*8;
+    if (Math.hypot(tx - h.x, tz - h.z) < 0.8 || walkTo(h, tx, tz, 6, dt)) dogRideStart(D); return; }
   if (S.m === 'chase') { S.t += dt; const [tx, tz] = lloc(car.x, car.z, car.angle, S.side*2.4, -1.0); walkTo(h, tx, tz, 9.5, dt); h.pose.walk = 0.9; h.pose.ph += dt*8;
     if ((S.bk -= dt) <= 0) { S.bk = 0.3 + Math.random()*0.35; S.bob = 0.12; bark(h); } if ((S.bob -= dt) > 0) h.tilt = -0.25;
     if (S.t > 7 || cd > 32 || Math.hypot(h.x - D.hx, h.z - D.hz) > 80) S.m = 'home'; return; }
@@ -7671,7 +7693,7 @@ function placeGrandstand(cx, cz, L, relax) {   // 8–45 m from (cx, cz), off ev
       if (ok) { const g = H(px, pz); lo = Math.min(lo, g); hi = Math.max(hi, g); } }
     if (!ok || hi - lo > (relax ? 2 : 1.6)) continue; const [mx, mz] = lloc(x, z, yaw, 0, -1.5), sc = -dr - (hi - lo)*5 - r*0.15 - treeCount(mx, mz, L/2 + 3)*3; if (!best || sc > best.sc) best = { x, z, yaw, sc }; if (k > 250 && best) break; }   // (fewest trees round it)
   return best; }
-function buildGrandstands() { STANDS.length = 0; const spots = []; if (finishLine) spots.push([finishLine.position.x, finishLine.position.y, 16]); const K = LANDMARKS.find(L => L[0] === 'kauppa'); if (K) spots.push([K[1], K[2], 12]); else spots.push([1e9, 1e9, 0]);   /* (index 1 stays the K-shop's) */
+function buildGrandstands() { STANDS.length = 0; MAKKARA.carts.length = 0; const spots = []; if (finishLine) spots.push([finishLine.position.x, finishLine.position.y, 16]); const K = LANDMARKS.find(L => L[0] === 'kauppa'); if (K) spots.push([K[1], K[2], 12]); else spots.push([1e9, 1e9, 0]);   /* (index 1 stays the K-shop's) */
   if (finishLine) for (let k = 0; k < 3; k++) spots.push([finishLine.position.x, finishLine.position.y, 7]);   // three small ones round the finish too
   for (const [si, [cx, cz, L0]] of spots.entries()) { if (!L0) continue; const b0 = { o: lifeGroup.children.length, s: STATIC_LIST.length, h: HUMANS.length, e: EMITTERS.length }; let L = L0, S = placeGrandstand(cx, cz, L) || placeGrandstand(cx, cz, L, true); if (!S) { L -= 3; S = placeGrandstand(cx, cz, L, true); } if (!S) continue;   /* (a tight spot: looser, then shorter) */ reserve('stand', [S.x, S.z], L/2 + 1);
     const [bx, bz] = lloc(S.x, S.z, S.yaw, 0, -1.5); S.base = footprintBase(bx, bz, L/2, 1.8, S.yaw); S.L = L; const G = makeGrandstand(L); G.position.set(S.x, S.base, S.z); G.rotation.y = S.yaw; lifeGroup.add(G); STANDS.push(S);
@@ -7772,7 +7794,7 @@ function sausageCart(S) {
     const sg = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.28), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), roughness: 0.7 })); sg.position.set(0, 0.55, 0.41); G.add(sg); }
   placeAt(G, x, z, yaw); lifeGroup.add(G); nearVis(G, x, z); addStaticBox({ x, z, yaw, hw: 0.8, hl: 0.45, kind: 'lm' });
   const [gx, gz] = lloc(x, z, yaw, 0.15, 0); EMITTERS.push({ x: gx, z: gz, y: Y(gx, gz) + 1.05, kind: 'grill', acc: 0 });
-  const C = { x, z, yaw }; const [sx, sz] = lloc(x, z, yaw, 0.15, -0.85);
+  const C = { x, z, yaw }; const [sx, sz] = lloc(x, z, yaw, 0.15, -0.85); MAKKARA.carts.push({ x, z, yaw, G, back: lloc(x, z, yaw, 1.3, -0.9) });
   new Human({ x: sx, z: sz, yaw, rig: makeAdult(0xf2f2ee, 0x2b2b30, lpick(L_HAIR), { sel: { hat: 1, top: 1, longPants: 1, tache: Math.random() < 0.5 }, acc: 0xc8201e, w: 1.08, belly: 0.5 }), task: sausageSellerTask(C) });
   const n = 2 + Math.floor(Math.random()*2); for (let i = 0; i < n; i++) { const [cx, cz] = lloc(x, z, yaw, -0.5 + i*0.75 + (Math.random() - 0.5)*0.2, 1.25 + (i === n - 1 ? 0.7 : 0));
     new Human({ x: cx, z: cz, yaw: yaw + Math.PI, inst: Math.floor(Math.random()*16), task: sausageBuyerTask(C, i) }); } }
@@ -8256,6 +8278,12 @@ const saunaTask = (S, i) => ({ kind: 'sauna', update(h, dt, t) { const st = h.st
     const d = Math.hypot(car.x - h.x, car.z - h.z), cs = Math.hypot(car.vx, car.vz); h.tilt = 0;
     if (st.m === 'go') { if (walkTo(h, S.door[0], S.door[1], 1.8, dt)) { st.m = 'in'; st.tt = 7 + Math.random()*9; h.inside = true; humanSync(h); } return; }
     if (st.m === 'in') return;   // (the update doesn't run inside: see the party's own clock)
+    if (st.m === 'shout') { st.t += dt; if (st.t < 7 + Math.hypot(st.rx - S.x, st.ry - S.z)/5) {   // (time to get there, and 7 s of shouting)
+      if (walkTo(h, st.rx, st.ry, 5, dt)) { h.yaw = Math.atan2(car.x - h.x, car.z - h.z); h.pose.armR = -2.9 + Math.sin(t*13 + st.ph)*0.35; h.pose.armL = -1.2; } else h.pose.armL = h.pose.armR = -1.0; return; }
+      st.m = 'hang'; st.tt = 10 + Math.random()*20; return; }
+    if (i < 4 && st.m === 'hang' && S.road && gameState === State.RACING && cs > 12 && Math.hypot(car.x - S.x, car.z - S.z) < 140 && worldT - (S.shoutAt || -99) > 35) S.shoutAt = worldT;
+    if (i < 4 && st.m === 'hang' && S.road && worldT - (S.shoutAt || -99) < 0.3) { st.m = 'shout'; st.t = 0; st.rx = S.road[0] + (i - 1.5)*1.4*S.road[3]; st.ry = S.road[1] - (i - 1.5)*1.4*S.road[2];   // off to the roadside, in a row
+      if (i === 0 && Math.hypot(car.x - S.x, car.z - S.z) < 150) pizzaMsg(T('🧖 SAUNOJAT: ”HILJEMPAA!”'), true); return; }
     if (st.m === 'lap') { st.la += dt*0.9; const x = S.x + Math.sin(st.la)*8, z = S.z + Math.cos(st.la)*8; walkTo(h, x, z, 5, dt); h.pose.armL = h.pose.armR = -2.8 + Math.sin(t*12)*0.3;
       if (Math.random() < dt*2) steamPuff(h.x, Y(h.x, h.z) + 1.5, h.z); if (st.la > st.l1) { st.m = 'hang'; st.tt = 15 + Math.random()*25; } return; }
     const gx = S.x + Math.sin(st.a)*st.r, gz = S.z + Math.cos(st.a)*st.r;
@@ -8273,6 +8301,7 @@ function buildSauna() { let sp = null; for (let k = 0; k < 30 && !sp; k++) { con
   const van = new Vehicle({ kind: 'car', x: vx, z: vz, yaw, hw: 0.98, hl: 2.35, view: { kind: 'mesh', g: makeSaunaVan() }, axle: [0.85, 1.45, -1.5], mass: 1.6 }); lifeGroup.add(van.view.g); vehicleSync(van);
   const tr = new Vehicle({ kind: 'car', x: tx, z: tz, yaw, hw: 1.15, hl: 1.75, view: { kind: 'mesh', g: makeSaunaTrailer() }, axle: [1.1, 1.2, -1.2], mass: 1.3 }); lifeGroup.add(tr.view.g); vehicleSync(tr);
   const S = { x: x + Math.cos(yaw)*1.8, z: z - Math.sin(yaw)*1.8, tr, inside: null, inT: 0, shoutT: 0, smokeAcc: 0, glowT: 0 }; S.door = [0, 0];
+  { const ri = roadInfo(S.x, S.z), p = trackPoints[ri.idx], d = Math.sqrt(ri.d2); if (d < 130) { const ux = (S.x - p.x)/(d || 1), uz = (S.z - p.y)/(d || 1), off = wAt(ri.idx)/2 + 2; S.road = [p.x + ux*off, p.y + uz*off, ux, uz]; } }   // (where they run to shout: the route's edge on their side)
   S.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xff7a2a, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })); S.glow.scale.set(2.2, 2.2, 1); lifeGroup.add(S.glow);
   const props = new THREE.Group(); lmesh(lbox(0.42, 0.28, 0.3), lmat(0xe0b020, 0.6), 0.6, 0.14, 0.8, props); lmesh(lbox(1.8, 0.07, 0.38), lmat(0x8a6a44, 0.9), -0.4, 0.45, -1.4, props); for (const s of [-0.7, 0.7]) lmesh(lbox(0.08, 0.42, 0.34), lmat(0x6a4a30, 0.9), -0.4 + s, 0.21, -1.4, props);
   lmesh(lcyl(0.28, 0.35, 10), lmat(0x3a6ab0, 0.6), 1.3, 0.18, -0.6, props); lmesh(lbox(0.5, 0.3, 0.2), lmat(0x1c1c1c, 0.5), 0.2, 0.15, 1.6, props);   // crate, bench, bucket, the ghetto blaster
@@ -8369,7 +8398,7 @@ function nukeReset() { NUKE.armT = -1; if (!NUKE.on) return; NUKE.on = false; NU
 
 function lifeExtras3Build() {
   TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.heli = null; X3.station = null; X3.sauna = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
-  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd();
+  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
 }
 // ── the hitchhiker: by the race route a few hundred metres before the K-shop, a cardboard sign "K-KAUPPA" and a thumb out.
 //    Stop by him and he walks to the window and gets in; stop in the K-shop yard and he gets out, thanks you and goes in —
@@ -8430,6 +8459,95 @@ function abdUpdate(dt) { const A = ABD;
     if (A.t > 5.6) { A.st = 'leave'; A.t = 0; B.visible = false; } return; }
   if (A.st === 'leave') { const k = A.t/3; G.position.set(A.x + (A.fx - A.x)*k*k*1.5, A.gy + 16 + k*k*140, A.z + (A.fz - A.z)*k*k*1.5); if (k >= 1) { G.visible = false; A.st = 'off'; A.next = worldT + 70 + Math.random()*60; } } }
 function abdReset() { const A = ABD; if (A.h) A.h.abd = false; A.h = null; A.st = 'off'; A.carY = A.carV = 0; A.next = worldT + 40 + Math.random()*40; if (A.M) A.M.G.visible = false; if (A.beam) A.beam.visible = false; }
+// ── "peltipoliisi": two speed cameras on posts by the route's straightest stretches, facing the oncoming car. Past one over
+//    80 km/h: a white flash, "📸 PELTIPOLIISI NAPSAHTI! 123 km/h", and the fastest goes on the rap sheet (v) and the radio ──
+const CAMS = [];
+function roadsideOk(x, z, r) { if (onRoad(x, z, 0.6) || tires.some(t => Math.abs(t.x - x) < 1.4 && Math.abs(t.z - z) < 1.4) || treeNear(x, z, 0.8)) return false; let hit = false; staticNear(x, z, r + 2, B => { if (!hit && boxPush(B, x, z, r)) hit = true; }); return !hit; }   // (a verge spot: no road, tyre, trunk or building — spectators just step aside)
+function buildCams() { CAMS.length = 0; const n = trackPoints.length; if (n < 50) return; const cand = [];
+  for (let i = 0; i < n; i += 4) { const a = trackPoints[(i - 12 + n) % n], b = trackPoints[i], c = trackPoints[(i + 12) % n], t1 = Math.atan2(b.x - a.x, b.y - a.y), t2 = Math.atan2(c.x - b.x, c.y - b.y); cand.push({ i, bend: Math.abs(angDiff(t2 - t1)) }); }
+  for (const f of [0.28, 0.72]) { let best = null; for (const C of cand) { const u = C.i/n; if (Math.abs(u - f) > 0.12) continue;
+      const a = trackPoints[C.i], b = trackPoints[(C.i + 3) % n], L = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x)/L, uz = (b.y - a.y)/L, off = wAt(C.i)/2 + 2.2, x = a.x + uz*off, z = a.y - ux*off;
+      if (!roadsideOk(x, z, 0.6)) continue; if (!best || C.bend < best.bend) best = { ...C, x, z, ux, uz }; }
+    if (!best) continue; const G = new THREE.Group(), grey = lmat(0x8a8d90, 0.4), dark = lmat(0x1c1c1e, 0.5);
+    lmesh(lbox(0.12, 2.8, 0.12), grey, 0, 1.4, 0, G); lmesh(lbox(0.46, 0.5, 0.7), lmat(0x5a6068, 0.45), 0, 3.0, 0, G); lmesh(lbox(0.3, 0.3, 0.06), dark, 0, 3.02, 0.36, G, false); lmesh(lbox(0.5, 0.05, 0.78), grey, 0, 3.28, 0, G);
+    const fl = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), color: 0xffffff, depthWrite: false, transparent: true, opacity: 0 })); fl.scale.set(9, 9, 1); fl.position.set(0, 3.0, 0.5); fl.visible = false; G.add(fl);
+    G.position.set(best.x, Y(best.x, best.z), best.z); G.rotation.y = Math.atan2(-best.ux, -best.uz); lifeGroup.add(G); nearVis(G, best.x, best.z); addStaticBox({ x: best.x, z: best.z, yaw: 0, hw: 0.3, hl: 0.3, kind: 'pole' });
+    CAMS.push({ x: best.x, z: best.z, i: best.i, fl, t: 0, cool: 0 }); } }
+function camsUpdate(dt) { for (const C of CAMS) { if (C.t > 0) { C.t -= dt; C.fl.material.opacity = Math.max(0, C.t/0.25); if (C.t <= 0) C.fl.visible = false; } C.cool -= dt;
+    if (gameState !== State.RACING || WALK.on || C.cool > 0) continue; const d = Math.hypot(car.x - C.x, car.z - C.z); if (d > 16) continue;
+    const kmh = Math.round(Math.hypot(car.vx, car.vz)*3.6); if (kmh <= 80) continue; C.cool = 4; C.t = 0.25; C.fl.visible = true; C.fl.material.opacity = 1;
+    if (audio) { beep(2400, 0.05, 0.12, 'square'); setTimeout(() => beep(1800, 0.08, 0.08, 'square'), 60); } pizzaMsg(T('📸 PELTIPOLIISI NAPSAHTI! {0} km/h', kmh), true);
+    if (kmh > RAP.v) RAP.v = Math.min(300, kmh); CAMS.best = Math.max(CAMS.best || 0, kmh); } }
+function camsReset() { for (const C of CAMS) { C.t = 0; C.cool = 0; C.fl.visible = false; } }
+// ── a sausage from the cart: stop by one and the seller's mate brings it to the window — the driver burps, the exhaust smokes ──
+const MAKKARA = { carts: [], guy: null, wait: 0, got: false, smoke: 0, cart: null, WAIT: 3 };
+function makeSausageGuy() { const g = makeAdult(0xf2f2ee, 0x2b2b30, lpick(L_HAIR), { sel: { hat: 1, top: 1, longPants: 1 }, acc: 0xc8201e });
+  const m = new THREE.Group(); lmesh(lbox(0.2, 0.03, 0.08), lmat(0xf2e6c8, 0.8), 0, 0, 0, m); const w = lmesh(lcyl(0.025, 0.2, 6), lmat(0xa0442a, 0.6), 0, 0.03, 0, m, false); w.rotation.z = Math.PI/2; m.position.set(0.22, 1.02, 0.34); g.add(m); g.userData.snack = m; return g; }
+const sausageRunTask = (Ct) => ({ kind: 'sausagerun', update(h, dt) { const st = h.st || (h.st = { mode: 'out' }), sn = h.view.g.userData.snack;
+    if (st.mode === 'out') { const rx = Math.cos(car.angle), rz = -Math.sin(car.angle), fx = Math.sin(car.angle), fz = Math.cos(car.angle), sd = (h.x - car.x)*rx + (h.z - car.z)*rz >= 0 ? 1 : -1, tx = car.x + rx*1.45*sd + fx*0.25, tz = car.z + rz*1.45*sd + fz*0.25;
+      if (Math.hypot(tx - h.x, tz - h.z) < 0.7 || walkTo(h, tx, tz, 2.4, dt)) { h.vx = h.vz = 0; h.yaw = Math.atan2(car.x - h.x, car.z - h.z); h.pose.armR = -1.4; if (MAKKARA.wait >= MAKKARA.WAIT) makkaraGot(h); } }
+    else if (walkTo(h, Ct.back[0], Ct.back[1], 1.8, dt)) { st.done = true; h.vx = h.vz = 0; } },
+  knocked(h) { if (MAKKARA.guy === h) MAKKARA.guy = null; } });
+function makkaraGot(h) { MAKKARA.got = true; MAKKARA.smoke = 5; h.view.g.userData.snack.visible = false; h.st.mode = 'back'; pizzaMsg(T('🌭 MAKKARA! …RÖYH!'), true);
+  if (audio) { const { ctx, master } = audio, o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime + 0.5; o.type = 'sawtooth'; o.frequency.setValueAtTime(110, t0); o.frequency.exponentialRampToValueAtTime(55, t0 + 0.55);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.2, t0 + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6); o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + 0.65); } }   // (the burp)
+function makkaraUpdate(dt) { const M = MAKKARA;
+  if (M.guy && M.guy.st && M.guy.st.done) { humanRemove(M.guy); M.guy = null; }
+  if (M.smoke > 0) { M.smoke -= dt; if (Math.random() < dt*14) { const [ex, ez] = lloc(car.x, car.z, car.angle, 0.45, -2.0); lifeFx.emit(ex, Y(ex, ez) + 0.35, ez, -Math.sin(car.angle)*0.8 + (Math.random() - 0.5)*0.4, 0.5 + Math.random()*0.4, -Math.cos(car.angle)*0.8 + (Math.random() - 0.5)*0.4, 1.4 + Math.random(), 0.3, 1.2, 0.5, 0.36, 0.36, 0.38, 0.55, 0.55, 0.56); } }
+  if (M.got || gameState !== State.RACING || WALK.on || WRECK.on) { M.wait = 0; return; } const still = Math.hypot(car.vx, car.vz) < 0.7;
+  const C = still ? M.carts.find(c => !c.G.userData.hide && Math.hypot(car.x - c.x, car.z - c.z) < 9) : null;   // (not the one GTA mode put away)
+  if (C) { M.wait += dt; if (!M.guy) { M.cart = C; M.guy = new Human({ x: C.back[0], z: C.back[1], yaw: C.yaw, rig: makeSausageGuy(), task: sausageRunTask(C), temp: true }); M.guy.ao = aoAlloc(); }
+    if (M.guy && M.guy.st && M.guy.st.mode === 'back') { M.guy.st.mode = 'out'; M.guy.st.done = false; } pizzaMsg(T('🌭 makkara tulossa… {0}', Math.max(1, Math.ceil(M.WAIT - M.wait))), false); }
+  else { M.wait = 0; if (M.guy && M.guy.st && !M.got) M.guy.st.mode = 'back'; } }
+function makkaraReset() { MAKKARA.got = false; MAKKARA.wait = 0; MAKKARA.guy = null; MAKKARA.smoke = 0; }
+// ── the dog that rides along: stop near a yard dog and it jumps up behind the roof and barks all the way; at the next stop off it hops
+//    and trots home. (The rider is a copy on the car; the dog itself waits "inside", out of the world, meanwhile.) ──
+const DOGRIDE = { D: null, mesh: null, t: 0, bk: 0, stopT: 0 };
+function dogRideStart(D) { const R = DOGRIDE; R.D = D; R.t = 0; R.stopT = 0; D.dog.inside = true; humanSync(D.dog);
+  if (!R.mesh) { R.mesh = makeDog(); R.mesh.scale.setScalar(0.95); carGroup.add(R.mesh); } R.mesh.position.set(0, 1.08, -1.25); R.mesh.rotation.set(0, 0, 0); R.mesh.visible = true;
+  pizzaMsg(T('🐕 KOIRA HYPPÄSI KYYTIIN!'), true); bark(D.dog); }
+function dogRideEnd() { const R = DOGRIDE, D = R.D; if (!D) return; R.D = null; if (R.mesh) R.mesh.visible = false; const rx = Math.cos(car.angle), rz = -Math.sin(car.angle);
+  const h = D.dog; h.x = car.x + rx*1.6; h.z = car.z + rz*1.6; h.inside = false; D.s.m = 'home'; D.s.cool = 25; humanSync(h); }
+function dogRideUpdate(dt) { const R = DOGRIDE; if (!R.D) return; R.t += dt; const h = R.D.dog; h.x = car.x; h.z = car.z;
+  if (R.mesh) { const u = R.mesh.userData.rig; R.mesh.rotation.z = Math.sin(R.t*3)*0.05; if ((R.bk -= dt) <= 0) { R.bk = 0.9 + Math.random()*1.4; bark(h); R.mesh.position.y = 1.14; } else R.mesh.position.y += (1.08 - R.mesh.position.y)*Math.min(1, dt*8); }
+  if (gameState !== State.RACING || WRECK.on) { dogRideEnd(); return; }
+  R.stopT = Math.hypot(car.vx, car.vz) < 0.5 ? R.stopT + dt : 0; if (R.t > 6 && R.stopT > 1) { dogRideEnd(); pizzaMsg(T('🐕 KOIRA HYPPÄSI POIS'), false); } }
+// ── grandma at the zebra crossing: painted stripes across the route in the village, grandma with her stick at the kerb. Stop
+//    before it and she crosses, slowly, then thanks you — a good deed (h), like the hitchhiker. Drive by fast: she shakes the stick. ──
+const MUMMO = { h: null, A: null, B: null, stripes: null, stillT: 0, fistT: 0 };
+function buildMummo() { MUMMO.h = null; const n = trackPoints.length; if (n < 50) return; let best = null;
+  for (let i = 0; i < n; i += 5) { const u = i/n; if (u < 0.4 || u > 0.62) continue; const a = trackPoints[i], b = trackPoints[(i + 3) % n], L = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x)/L, uz = (b.y - a.y)/L, w = wAt(i);
+    const A = [a.x + uz*(w/2 + 1.3), a.y - ux*(w/2 + 1.3)], B = [a.x - uz*(w/2 + 1.3), a.y + ux*(w/2 + 1.3)];
+    if (!roadsideOk(A[0], A[1], 0.5) || !roadsideOk(B[0], B[1], 0.5) || tires.some(t => Math.hypot(t.x - a.x, t.z - a.y) < w/2 + 1.5)) continue;
+    const houses = STATIC_LIST.filter(S => S.kind === 'house' && Math.hypot(S.x - a.x, S.z - a.y) < 45).length; if (!best || houses > best.houses) best = { i, x: a.x, z: a.y, ux, uz, w, A, B, houses }; }
+  if (!best) return; const M = MUMMO; M.A = best.A; M.B = best.B; M.i = best.i;
+  const G = new THREE.Group(), white = new THREE.MeshStandardMaterial({ color: 0xf2f2ea, roughness: 0.7 }), sg = new THREE.BoxGeometry(0.5, 0.02, 3.0), ns = Math.max(3, Math.floor(best.w*0.86/1.0));   // (its own material: not drawn through the instancer)
+  for (let k = 0; k < ns; k++) { const m = new THREE.Mesh(sg, white); m.position.set((k - (ns - 1)/2)*1.0, 0.02, 0); m.receiveShadow = true; G.add(m); }   // the zebra: 3 m stripes the way the traffic goes, side by side across the road
+  G.position.set(best.x, Y(best.x, best.z) + roadLift(best.x, best.z) + 0.01, best.z); G.rotation.y = Math.atan2(best.ux, best.uz); lifeGroup.add(G); M.stripes = G;
+  const rig = makeAdult(0x8a3a5a, 0x3a3440, 0xd8d8d8, { sel: { hair: 3, top: 3, longSleeve: 1, longPants: 1 }, acc: 0x5a3a2a, shoes: 0x2a2020 }); rig.scale.setScalar(0.9);
+  M.h = new Human({ x: M.A[0], z: M.A[1], yaw: Math.atan2(M.B[0] - M.A[0], M.B[1] - M.A[1]), rig, task: mummoTask() }); handProp(M.h, lmesh(lcyl(0.02, 0.9, 6), lmat(0x5a3a1a, 0.7), 0, 0, 0)); reserve('mummo', M.A, 2); }
+const mummoTask = () => ({ kind: 'mummo', update(h, dt, t) { const M = MUMMO, st = h.st || (h.st = { m: 'wait', side: 0 }), from = st.side ? M.B : M.A, to = st.side ? M.A : M.B, cd = Math.hypot(car.x - h.x, car.z - h.z), cs = Math.hypot(car.vx, car.vz);
+    if (st.m === 'wait') { h.vx = h.vz = 0; h.yaw = Math.atan2(to[0] - h.x, to[1] - h.z); if (M.fistT > 0) { M.fistT -= dt; h.pose.armR = -2.9 + Math.sin(t*14)*0.3; return; } h.pose.armR = -0.5;
+      if (gameState !== State.RACING || WALK.on) return;
+      const mx = (M.A[0] + M.B[0])/2, mz = (M.A[1] + M.B[1])/2, dm = Math.hypot(car.x - mx, car.z - mz);
+      if (dm < 16 && dm > 3.5 && cs < 0.8) { M.stillT += dt; if (M.stillT > 0.8) { st.m = 'cross'; M.stillT = 0; pizzaMsg(T('👵 MUMMO YLITTÄÄ TIEN…'), false); } } else M.stillT = 0;
+      if (cd < 12 && cs > 14 && (st.fistAt || -99) < worldT - 8) { st.fistAt = worldT; M.fistT = 1.8; pizzaMsg(T('👵 NUORISO NYKYÄÄN!'), true); } return; }
+    if (st.m === 'cross') { h.pose.armR = -0.6; if (walkTo(h, to[0], to[1], 0.9, dt)) { st.m = 'thank'; st.t = 0; st.side = 1 - st.side; if (gameState === State.RACING) { rapCount('h'); pizzaMsg(T('👵 KIITOS, NUORIMIES! – hyvä teko kirjattu'), true); if (audio) { beep(880, 0.1, 0.18, 'triangle'); setTimeout(() => beep(1175, 0.18, 0.18, 'triangle'), 120); } } } return; }
+    if (st.m === 'thank') { st.t += dt; h.vx = h.vz = 0; h.yaw = Math.atan2(car.x - h.x, car.z - h.z); h.pose.armL = -2.8 + Math.sin(t*9)*0.3; if (st.t > 2.2) { st.m = 'wait'; h.pose.armL = 0; } return; } },
+  reset(h) { h.st = null; MUMMO.stillT = MUMMO.fistT = 0; } });
+// ── birds: past the woods at speed, a flock takes off from the trees ahead and wheels away (a pool of 14 little v-shapes) ──
+const BIRDS = { list: [], t: 8, geo: null, mat: null };
+function birdsUpdate(dt) { const B = BIRDS;
+  for (const b of B.list) { if (!b.live) continue; b.t += dt; b.vy += dt*0.6; b.x += b.vx*dt; b.y += b.vy*dt; b.z += b.vz*dt; b.m.position.set(b.x, b.y, b.z); b.m.rotation.y = Math.atan2(b.vx, b.vz); const f = Math.sin(b.t*18 + b.ph); b.m.scale.set(1.5, 1.5*(0.4 + 0.6*Math.abs(f)), 1.5); b.m.rotation.z = f*0.5;
+    if (b.t > 6) { b.live = false; b.m.visible = false; } }
+  if (gameState !== State.RACING || WALK.on) return; B.t -= dt; if (B.t > 0) return; B.t = 1.5; const cs = Math.hypot(car.vx, car.vz); if (cs < 18) return;
+  const fx = Math.sin(car.angle), fz = Math.cos(car.angle); let x = 0, z = 0, ok = false; for (const off of [16, 28, 40]) { for (const side of Math.random() < 0.5 ? [1, -1] : [-1, 1]) { x = car.x + fx*45 + fz*side*off; z = car.z + fz*45 - fx*side*off; if (treeCount(x, z, 18) >= 5) { ok = true; break; } } if (ok) break; } if (!ok) return;
+  B.t = 9 + Math.random()*8; if (!B.geo) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute([-0.28, 0.06, -0.05, 0, 0, 0.08, 0, 0, -0.1, 0.28, 0.06, -0.05, 0, 0, 0.08, 0, 0, -0.1], 3)); B.geo = g; B.mat = new THREE.MeshBasicMaterial({ color: 0x1c1a1e, side: THREE.DoubleSide }); }
+  const ax = x - car.x, az = z - car.z, al = Math.hypot(ax, az) || 1, n = 9 + Math.floor(Math.random()*6);
+  for (let k = 0; k < n; k++) { let b = B.list.find(q => !q.live); if (!b) { if (B.list.length >= 14) break; b = { m: new THREE.Mesh(B.geo, B.mat) }; b.m.scale.setScalar(1.5); lifeGroup.add(b.m); B.list.push(b); }
+    Object.assign(b, { live: true, t: 0, ph: Math.random()*6, x: x + (Math.random() - 0.5)*8, y: Y(x, z) + 7 + Math.random()*4, z: z + (Math.random() - 0.5)*8, vx: ax/al*(5 + Math.random()*3) + (Math.random() - 0.5)*2, vy: 2 + Math.random()*2, vz: az/al*(5 + Math.random()*3) + (Math.random() - 0.5)*2 }); b.m.visible = true; }
+  if (audio) for (let k = 0; k < 4; k++) setTimeout(() => beep(2600 + Math.random()*900, 0.04, 0.025, 'triangle'), k*90); }
+function birdsReset() { BIRDS.t = 8; for (const b of BIRDS.list) { b.live = false; b.m.visible = false; } }
 function hitchUpdate(dt) { const h = HITCH.h; if (!h || !h.st) { if (h && HITCH.fistT <= 0) hitchFist(h); return; } const st = h.st;
   if (st.mode === 'wait') hitchFist(h);
   if (st.mode !== 'aboard') return; h.x = car.x; h.z = car.z; h.vx = h.vz = 0; const K = HITCH.K, kd = Math.hypot(car.x - K[1], car.z - K[2]);
@@ -8442,7 +8560,8 @@ function buildHitch() { HITCH.h = null; HITCH.aboard = false; const K = LANDMARK
   const rig = makeAdult(0x7a8a3a, 0x2a3450, lpick(L_HAIR), { sel: { hair: 1, top: 2, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0x8a3a1a });   // army-surplus green, jeans, a rucksack colour
   const sign = hitchSign(); sign.position.set(0, 1.3, 0.4); sign.rotation.x = -0.08; rig.add(sign); rig.userData.sign = sign;   // (held up over the chest: read from the road)
   HITCH.h = new Human({ x: S.x, z: S.z, yaw: S.yaw, rig, task: hitchTask() }); reserve('hitch', [S.x, S.z], 2); X3.upd.push(hitchUpdate); }
-function buildAbd() { X3.upd.push(abdUpdate); X3.reset.push(abdReset); ABD.M = null; ABD.beam = null; abdReset(); }
+function buildAbd() { X3.upd.push(abdUpdate); X3.reset.push(abdReset); ABD.M = null; ABD.beam = null; abdReset();
+  BIRDS.list.length = 0; DOGRIDE.mesh = null; DOGRIDE.D = null; X3.upd.push(birdsUpdate, camsUpdate, makkaraUpdate, dogRideUpdate); X3.reset.push(birdsReset, camsReset, makkaraReset, () => { dogRideEnd(); }); }
 function extras3Update(dt) { nukeUpdate(dt); for (const f of X3.upd) f(dt); esUpdate(dt); cabbageUpdate(dt); ufoUpdate(dt); }
 function lifeExtras3Reset() { nukeReset(); for (const f of X3.reset) f(); wreckReset(); esReset(); cabbageReset(); ufoReset(); roadiesPlace(true); }
 

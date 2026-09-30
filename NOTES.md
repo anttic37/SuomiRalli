@@ -782,6 +782,15 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   stage) facing the route; lhKey also hashes the layout functions + every <style> (LH_VER only for what that can't see);
   runall.sh puts s3_shot.inc (+ lh_common.inc for view/around/TRY scripts) in front by itself; abdPick skips bolting moose.
   t_copwalk.
+- Six more (30.9., Antti picked 2 3 4 6 7 10): speed cameras (buildCams: the two straightest verge spots near 28 % / 72 % of the
+  lap, roadsideOk(); >80 km/h within 16 m → flash sprite, RAP.v = the fastest, sent as a max; server row v, GET speed: top 5; radio
+  line); sausage to the window at any visible grandstand cart (MAKKARA.carts from sausageCart, the pizza-guy pattern, burp +
+  exhaust smoke 5 s); yard dog rides along (S.m 'board' → dogRideStart: the dog "inside", a makeDog copy on carGroup behind
+  the roof, barking; off at the next stop ≥ 6 s later); grandma + zebra (buildMummo: the village stretch 40–62 % with most houses;
+  stripes = own material at Y + roadLift + 0.01 — under the road they vanish; stop within 16 m → she crosses, good deed h; fast
+  past → the stick); birds (pool of 14 v-shapes, a flock from woods ≥ 6 trees within 16 m, 45 m ahead, every 9–17 s at > 18 m/s);
+  sauna gang (S.road = the route's edge on their side; fast within 75 m → up to 4 run there in a row and shout, 35 s cool).
+  t_six, photos t_lh_m. The keys page's contents list shrinks with the story count (13 px − 0.25 px a story over 35, ≥ 9.5).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
