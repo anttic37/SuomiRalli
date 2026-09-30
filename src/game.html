@@ -650,7 +650,7 @@ function liftWorld() {
     const all = geo.userData.drapeAll; for (let i = 0; i < P.count; i++) { const y = a[i*3+1]; a[i*3+1] = y + (all || y <= 0.05 ? H(a[i*3], a[i*3+2]) : objBase(objs, oid[i])); }   // ground-touching vertices drape, the rest rises with its object
     P.needsUpdate = true; geo.computeBoundingSphere(); geo.computeBoundingBox(); };
   const liftMergedMesh = (o) => { const geo = o.geometry;
-    if (geo.userData.drapeAll && !done.has(geo)) { const g2 = subdivideLong(geo, 1.2); if (g2 !== geo) { g2.userData = { oid: [], objs: geo.userData.objs, drapeAll: true }; o.geometry = g2; geo.dispose(); } liftMerged(o.geometry); return; }
+    if (geo.userData.drapeAll && !done.has(geo)) { const g2 = subdivideLong(geo, 1.2); if (g2 !== geo) { const ao = g2.attributes.aoid; g2.userData = { oid: ao ? Array.from(ao.array, Math.round) : [], objs: geo.userData.objs, drapeAll: true }; o.geometry = g2; geo.dispose(); } if (o.geometry.attributes.aoid) o.geometry.deleteAttribute('aoid'); liftMerged(o.geometry); return; }
     liftMerged(geo); };
   const drape = (o) => { let geo = o.geometry; if (done.has(geo)) return;
     if (!o.isLine && !o.isLineSegments) { geo = subdivideLong(geo, 3.0); o.geometry = geo; }
@@ -1032,7 +1032,7 @@ function generateTrack() {
       if (w || hit) { if (w || moved > 0.05) { BUILDINGS.splice(i, 1); continue; } B[0] = x0; B[1] = z0; }
       B._roadOk = true; } }
   buildCheckpoints(); buildGridBox(); buildStreetLabels(); buildScenery(); buildTrackTires(); buildRoadside();
-  buildHeightField(); liftWorld(); baleInit(); worldBuild();
+  buildHeightField(); liftWorld(); baleInit(); worldBuild(); knockBuild();
 }
 // Project every raw route point onto the nearest network segment, take the width of that street, resample evenly.
 function snapRouteToNetwork() {
@@ -1418,7 +1418,7 @@ class Merger {
     geo.setAttribute('normal', new THREE.Float32BufferAttribute(g.nrm, 3));
     if (g.col.length) geo.setAttribute('color', new THREE.Float32BufferAttribute(g.col, 3));
     geo.setIndex(g.idx);
-    geo.userData.oid = g.oid; geo.userData.objs = this.objs; geo.userData.drapeAll = DRAPE_ALL.has(g.key); if (g.parts) geo.userData.parts = g.parts;
+    geo.userData.oid = g.oid; geo.userData.objs = this.objs; geo.userData.drapeAll = DRAPE_ALL.has(g.key); if (geo.userData.drapeAll) geo.setAttribute('aoid', new THREE.Float32BufferAttribute(g.oid, 1));   /* (carried through subdivideLong: KNOCK finds each fence section's vertices) */ if (g.parts) geo.userData.parts = g.parts;
     return geo;
   }
   // groups in the same chunk whose materials differ only in colour become one mesh: the colour goes into the vertex colours
@@ -1544,7 +1544,7 @@ const unitTrunk = new THREE.CylinderGeometry(1, 1, 1, 5, 1, true);   // tree tru
 const unitCyl = new THREE.CylinderGeometry(1, 1, 1, 6);
 
 const YARD_SOLID = []; let YARDG = null;   // yard things people bump into: [x, z, r] circles (woodpiles, posts, swings, bushes, flower beds, flagpoles, garden trees)
-function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.drives = []; LIFE_PLAN.length = 0; LIFE_GUESTS.length = 0;
+function buildScenery() { KNOCK.items.length = 0; YARD_SOLID.length = 0; YARDG = null; sceneryDebug.drives = []; LIFE_PLAN.length = 0; LIFE_GUESTS.length = 0;
   CHIMNEYS.length = 0;
   const M = new Merger(160);
   const mat = (c, r=0.85, extra={}) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: r, flatShading: true }, extra));
@@ -1784,21 +1784,25 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
   const nearestRoad = (x, z) => { let best = null; for (const [a0, b0, hw] of segs) { const vx = b0.x-a0.x, vz = b0.y-a0.y, L2 = vx*vx+vz*vz || 1; let t = ((x-a0.x)*vx + (z-a0.y)*vz)/L2; t = Math.max(0, Math.min(1, t));
     const qx = a0.x + vx*t, qz = a0.y + vz*t, dd = Math.hypot(qx-x, qz-z); if (!best || dd < best.d) best = { d: dd, x: qx, y: qz, hw }; } return best; };
   // fence pieces along a straight run
+  // (each section between two posts is its own object, so a car can knock it flat: KNOCK)
   const fenceRun = (pl, ax, az, bx, bz, front) => { const L = Math.hypot(bx-ax, bz-az); if (L < 0.8) return; const ux = (bx-ax)/L, uz = (bz-az)/L, yaw = Math.atan2(ux, uz), st = pl.style;
-    const along = (t) => [ax + ux*t, az + uz*t];
-    if (st < 35) {            // white picket
-      for (let t = 0; t <= L + 0.01; t += 1.8) { const [px, pz] = along(Math.min(t, L)); M.add(unitBox, 'fwhite', fenceWhite, px, 0.5, pz, yaw, 0.08, 1.0, 0.08); }
-      const [mx, mz] = along(L/2); M.add(unitBox, 'fwhite', fenceWhite, mx, 0.35, mz, yaw, 0.04, 0.06, L); M.add(unitBox, 'fwhite', fenceWhite, mx, 0.75, mz, yaw, 0.04, 0.06, L);
-      if (front) for (let t = 0.15; t < L; t += 0.3) { const [px, pz] = along(t); M.add(unitBox, 'fwhite', fenceWhite, px, 0.47, pz, yaw, 0.02, 0.86, 0.06); }
-    } else if (st < 70) {     // brown boards
-      for (let t = 0; t <= L + 0.01; t += 2.0) { const [px, pz] = along(Math.min(t, L)); M.add(unitBox, 'fbrown', fenceBrown, px, 0.55, pz, yaw, 0.1, 1.1, 0.1); }
-      const [mx, mz] = along(L/2); for (const y of [0.3, 0.62, 0.94]) M.add(unitBox, 'fbrown', fenceBrown, mx, y, mz, yaw, 0.03, 0.15, L);
-    } else if (st < 85) {     // hedge
-      for (let t = 0; t < L; t += 3) { const l = Math.min(3, L - t), [px, pz] = along(t + l/2); M.add(unitBox, 'hedgeP', hedgeMatP, px, 0.55, pz, yaw, 0.75, 1.1, l + 0.1); }
-    } else {                  // mesh
-      for (let t = 0; t <= L + 0.01; t += 2.5) { const [px, pz] = along(Math.min(t, L)); M.add(unitBox, 'fpost', meshPost, px, 0.55, pz, yaw, 0.05, 1.1, 0.05); }
-      const [mx, mz] = along(L/2); M.add(unitBox, 'fmesh', meshMat, mx, 0.52, mz, yaw, 0.015, 0.95, L);
-    } };
+    const along = (t) => [ax + ux*t, az + uz*t], S = st < 35 ? 1.8 : st < 70 ? 2.0 : st < 85 ? 3 : 2.5, n = Math.max(1, Math.round(L/S)), l = L/n;
+    for (let k = 0; k < n; k++) { const t0 = k*l, t1 = t0 + l, [cx, cz] = along((t0 + t1)/2), post = (t) => along(t);
+      KNOCK.items.push({ kind: st >= 70 && st < 85 ? 'hedge' : 'fence', x: cx, z: cz, yaw, hl: l/2, hw: st >= 70 && st < 85 ? 0.4 : 0.1, h: 1.1, oid: M.objs.length, ranges: [] }); M.begin(cx, cz, 0.1, l/2, yaw);
+      if (st < 35) {            // white picket
+        for (const t of k === n - 1 ? [t0, t1] : [t0]) { const [px, pz] = post(t); M.add(unitBox, 'fwhite', fenceWhite, px, 0.5, pz, yaw, 0.08, 1.0, 0.08); }
+        M.add(unitBox, 'fwhite', fenceWhite, cx, 0.35, cz, yaw, 0.04, 0.06, l); M.add(unitBox, 'fwhite', fenceWhite, cx, 0.75, cz, yaw, 0.04, 0.06, l);
+        if (front) for (let t = 0.15; t < L; t += 0.3) { if (t < t0 || t >= t1) continue; const [px, pz] = along(t); M.add(unitBox, 'fwhite', fenceWhite, px, 0.47, pz, yaw, 0.02, 0.86, 0.06); }
+      } else if (st < 70) {     // brown boards
+        for (const t of k === n - 1 ? [t0, t1] : [t0]) { const [px, pz] = post(t); M.add(unitBox, 'fbrown', fenceBrown, px, 0.55, pz, yaw, 0.1, 1.1, 0.1); }
+        for (const y of [0.3, 0.62, 0.94]) M.add(unitBox, 'fbrown', fenceBrown, cx, y, cz, yaw, 0.03, 0.15, l);
+      } else if (st < 85) {     // hedge
+        M.add(unitBox, 'hedgeP', hedgeMatP, cx, 0.55, cz, yaw, 0.75, 1.1, l + 0.1);
+      } else {                  // mesh
+        for (const t of k === n - 1 ? [t0, t1] : [t0]) { const [px, pz] = post(t); M.add(unitBox, 'fpost', meshPost, px, 0.55, pz, yaw, 0.05, 1.1, 0.05); }
+        M.add(unitBox, 'fmesh', meshMat, cx, 0.52, cz, yaw, 0.015, 0.95, l);
+      }
+      M.end(); } };
   let flagCount = 0;
   const flagTex = (() => { const cv = document.createElement('canvas'); cv.width = 180; cv.height = 110; const g = cv.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 180, 110); g.fillStyle = '#003580'; g.fillRect(50, 0, 30, 110); g.fillRect(0, 40, 180, 30); return new THREE.CanvasTexture(cv); })();
   const DRIVE_STRIPS = [];
@@ -2121,7 +2125,7 @@ function buildScenery() { YARD_SOLID.length = 0; YARDG = null; sceneryDebug.driv
     if (!clearOfRoad(x,z,7) || !clearOfPlaced(x,z, cls === 1 ? 0.9 : 1.8)) continue;
     const y0 = Y(x,z);
     const pine = cls === 1 ? Math.random() < 0.75 : Math.random() < 0.25;
-    sceneryDebug.trees.push([x, z, pine ? 1 : 0]);
+    sceneryDebug.trees.push([x, z, pine ? 1 : 0]); KNOCK.items.push({ kind: 'tree', x, z, yaw: 0, hl: 0, hw: 0, h: pine ? 6 : 4, oid: M.objs.length, ranges: [] });   // (its object: the begin() below)
     if (pine) {                          // spruce: one model with overlapping sawtooth tiers
       const h = 3.8 + Math.random()*4.6, fr = h*(0.27 + Math.random()*0.08), pm = (i*7) % pineMats.length, rot = Math.random()*6.3;   // spruce build: base ≈ 0.6 × height
       M.begin(x, z, fr*0.55, fr*0.55, 0);   // on a slope the skirt rises with the uphill ground; the trunk reaches down
@@ -4592,6 +4596,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Puut kaatuvat ja aidat lakoavat, kun niihin ajaa lujaa (hiljaa ne pysyvät pystyssä); kaatuva puu kaataa alle jäävät. Dragsterin tuntuma viritetty: jarrut pienemmät (varjo tekee työn), pakki ryömii, etupito ja ohjaus paremmat', '13.57'],
   ['30.9.', 'Dragsterille oma oikea fysiikka: jousitus, slicksien pito ja sutiminen, keulan nousu wheelie-tukien varaan, siiven painovoima, jarruvarjo – osuma kylkeen pyöräyttää, reunakivi voi kääntää katolleen, siipi ja renkaat irtoavat; katollaan se syttyy ja kuski lentää ulos. Kunnon äänet: Top Fuel -moottori, pamaukset, rytinät. Levike kiinni tiessä, reunakivet ja rengasseinä', '13.33'],
   ['30.9.', 'Dragsterille uusi, tarkempi malli (kapeneva nokka, turvakaari ja kuski, ahdin, 8 pakoputkea, slicksit vanteineen, siipi, YLÄSTÖ FUEL -tarrat; pyörät pyörivät ja slicksit savuavat) ja oma levike lähtöruudun vasemmalla puolella', '13.00'],
   ['30.9.', 'Alkuruutuun iso ▶ AJA -nappi. Jalkaisin nuolet oikein päin (oikea vie oikealle). Dragsteri Malminrajantien varteen omalle asfalttilevikkeelle', '12.33'],
@@ -4845,6 +4850,13 @@ const LEHTI = [
   { id: 'rekisteri', size: 'half', n: 43, kick: '🚨 POLIISI', title: 'Poliisi julkaisee rikosrekisterin', img: ['rekisteri.jpg'], body: ['Jokainen sytytetty talo ja jokainen yliajettu kyläläinen kirjataan. Pahimmat kuskit ovat lehden Poliisi tiedottaa -sivulla – ja pahin etsintäkuulutettuna.', 'Oman rekisterisi näet samalta sivulta.'] },
   { id: 'pdf', size: 'half', n: 42, kick: '📄 PDF', title: 'Lehti nyt myös paperilla', img: ['pdf.jpg'], body: ['Ylästön Sanomat latautuu kokonaan PDF:nä – lehden yläkulman ⬇ PDF -napista. Kaikki sivut, kuvat ja muutokset, tulostimeen tai kaverille.', 'Sisällysluettelon sivunumerot hyppäävät PDF:ssäkin oikeaan juttuun.'] },
   { id: 'sauna', size: 'half', n: 48, kick: '🧖 SAUNA', title: 'Saunojat: ”Hiljempaa!”', img: ['saunojat.jpg'], body: ['Saunakärry ja vanha pakettiauto ilmestyvät joka kerta eri paikkaan, ja piipusta nousee pitkä musta nauha.', 'Jos ajat lujaa ohi, pyyhkeisiin kääriytyneet saunojat juoksevat tien laitaan riviin ja huutavat nyrkit pystyssä: HILJEMPAA!'] },
+  { id: 'puut', size: 'page', n: 57, kick: '🌲 METSÄTUHO', title: 'Rallikuski kaatoi kuusen', lede: 'Metsään ajanut Pökö ei enää livahda puiden läpi. Kun rungon osuu lujaa, puu kaatuu – ja kaatuessaan se vie mukanaan sen, joka sattuu alle.',
+    img: ['puu.jpg'], cap: ['Kuusi lähtee kaatumaan viistoon Pökön ohi. Osuma vei autosta kolmanneksen vauhdista.'],
+    body: ['YLÄSTÖ. Kylän metsissä on yli 26 000 puuta, ja jokaisen voi nyt kaataa. Kun runkoon ajaa yli kymmentä kilometriä tunnissa, puu kaatuu tyvestään viistoon eteenpäin ja jää makaamaan.', 'Osuma maksaa: Pökö menettää noin kolmanneksen vauhdistaan ja saa kolhun. Hiljaa ajaen puu pysyy pystyssä ja auto pysähtyy siihen kuin tolppaan. Dragsteri pyörähtää iskusta.', 'Jos kaatuvan puun latvan alla seisoo joku, hän kaatuu myös, ja ambulanssi lähtee liikkeelle. R nostaa kaikki puut takaisin pystyyn.'],
+    box: ['NÄIN KAADAT', 'Aja runkoon lujaa (yli 12 km/h)', 'Puu kaatuu viistoon eteenpäin', 'Vauhti putoaa kolmanneksella', 'R: puut pystyyn'] },
+  { id: 'aidat', size: 'half', n: 57, kick: '🏡 PIHAT', title: 'Aitoja nurin pitkin kylää', lede: 'Pihojen aidat eivät enää ole ilmaa: auto kaataa aitaosion kerrallaan ja pensasaidat lakoavat.',
+    img: ['aita.jpg'], cap: ['Lauta-aidasta lähti yksi väli. Grillijuhlat jatkuivat.'],
+    body: ['YLÄSTÖ. Kun Pökö ajaa aidan läpi, tolppien väli kaatuu maahan poispäin autosta. Vauhdista lähtee vain vähän. Säleaidat, lauta-aidat, verkkoaidat ja pensasaidat kaatuvat kaikki. R nostaa ne takaisin pystyyn.'] },
   { id: 'mummo', size: 'page', n: 55, kick: '👵 SUOJATIE', title: 'Mummo odottaa suojatiellä', lede: 'Kylän raitilla on uusi suojatie, ja sen reunalla odottaa mummo keppeineen. Pysähdy, niin hän ylittää tien, kiittää ja hyvä tekosi kirjataan rekisteriin.',
     img: ['mummo.jpg'], cap: ['Mummo astuu suojatielle. Rallikuski odottaa kiltisti.'],
     body: ['YLÄSTÖ. Talojen välissä, keskellä rataa, on valkoiset raidat ja niiden reunalla mummo. Jos pysähdyt ennen suojatietä, mummo lähtee kävelemään tien yli omaa tahtiaan.', 'Toisella puolella hän kääntyy, vilkuttaa ja huutaa: kiitos, nuorimies! Hyvä teko kirjataan poliisin rekisteriin samalla tavalla kuin liftarin kyyditys.', 'Jos ajat ohi täysillä, mummo heristää keppiään. – Nuoriso nykyään, hän toteaa.'],
@@ -7976,7 +7988,7 @@ function dpStep(h, thr, brk, steerIn, hand) {
   const force = (px, py, pz, gx, gy, gz) => { Fx += gx; Fy += gy; Fz += gz; const rx = px - DP.p.x, ry = py - DP.p.y, rz = pz - DP.p.z; Tx += ry*gz - rz*gy; Ty += rz*gx - rx*gz; Tz += rx*gy - ry*gx; };
   const sp = DP.v.length(), vf = DP.v.x*fx + DP.v.y*fy + DP.v.z*fz;
   // the wheels
-  const stMax = 0.45/(1 + Math.abs(vf)*0.06); DP.steer += (steerIn*stMax - DP.steer)*Math.min(1, h*6); const cs = Math.cos(DP.steer), sn = Math.sin(DP.steer);
+  const stMax = 0.45/(1 + Math.abs(vf)*0.04); DP.steer += (steerIn*stMax - DP.steer)*Math.min(1, h*6); const cs = Math.cos(DP.steer), sn = Math.sin(DP.steer);
   const surf = !(onRoad(DP.p.x, DP.p.z, 0.4) || inLay(DP.p.x, DP.p.z, 0.3)) ? 0.55 : surfaceAt(DP.p.x, DP.p.z) === 'gravel' ? 0.7 : 1;
   const drive = thr ? Math.min(DP.FMAX, DP.POWER/Math.max(1, Math.abs(vf))) : 0; let spinX = 0, slipY = 0, nRear = 0;
   for (const S of DP.wh) { const W = S.W; S.on = false; if (DP.lost[W.id] || uy < 0.25) { S.hy += (W.r - 0.1 - S.hy)*Math.min(1, h*10); continue; }
@@ -7991,10 +8003,10 @@ function dpStep(h, thr, brk, steerIn, hand) {
     const n = dpNormal(cx, cz, _dQv), dn = wx*n.x + wy*n.y + wz*n.z; wx -= n.x*dn; wy -= n.y*dn; wz -= n.z*dn; const wl = Math.hypot(wx, wy, wz) || 1; wx /= wl; wy /= wl; wz /= wl;
     const sx = n.y*wz - n.z*wy, sy = n.z*wx - n.x*wz, sz = n.x*wy - n.y*wx;   // across the tyre
     const vL = vp.x*wx + vp.y*wy + vp.z*wz, vS = vp.x*sx + vp.y*sy + vp.z*sz, N = Fs;
-    const muX = surf*(W.front ? 1.0 : 3.6), muY = surf*(W.front ? 1.1 : 1.9)*(hand && !W.front ? 0.45 : 1);
+    const muX = surf*(W.front ? 1.0 : 3.6), muY = surf*(W.front ? 1.4 : 1.9)*(hand && !W.front ? 0.45 : 1);
     let fL = 0, fS = -muY*N*Math.tanh(vS/(0.08*Math.abs(vL) + 0.35));
-    if (!W.front) { nRear++; if (hand) fL = -muX*N*0.8*Math.tanh(vL*3); else if (thr) fL = drive/2; else if (brk && vL < 0.5) fL = -2600; }
-    if (brk && vL > 0.5) fL += -muX*N*0.9*Math.tanh(vL*2);
+    if (!W.front) { nRear++; if (hand) fL = -muX*N*0.8*Math.tanh(vL*3); else if (thr) fL = drive/2; else if (brk && vL < 0.5) fL = vL > -3.4 ? -1400 : 0; }   // (reverse: a crawl, ~12 km/h)
+    if (brk && vL > 0.5) fL += -Math.min(muX, 1.25)*N*0.9*Math.tanh(vL*2);   // (a dragster's brakes are small: the chute does the real work)
     if (!thr && !(brk && vL < 0.5)) fL += -N*(W.front ? 0.012 : 0.05)*Math.tanh(vL*3) - (sp < 1.5 && !brk ? N*0.5*Math.tanh(vL*6) : 0);   // rolling, the engine holding it, standing still
     const e = Math.hypot(fL/(muX*N + 1e-6), fS/(muY*N + 1e-6)); if (e > 1) { const k2 = (e > 1.2 ? 0.85 : 1)/e; fL *= k2; fS *= k2; if (!W.front && thr) spinX = Math.max(spinX, e - 1); }
     if (Math.abs(vS) > 2.5 && N > 500) slipY = Math.max(slipY, Math.min(1, (Math.abs(vS) - 2.5)/8));
@@ -9063,6 +9075,58 @@ function updateSmoke(dt) {
         smokeFx.emit(wx, ROAD_Y + 0.35 + Y(wx, wz), wz, car.vx*0.18 + (Math.random()-0.5)*1.6, 0.3 + Math.random()*0.5, car.vz*0.18 + (Math.random()-0.5)*1.6, 2.6 + Math.random()*1.8, 1.1, 6.5 + Math.random()*3.5, a0, 0.74, 0.66, 0.5, 0.82, 0.78, 0.68); } } else dustAcc = 0; }
   smokeFx.update(dt, 0.55, 1.6); flameFx.update(dt, 0, 3); sparkFx.update(dt, -9.8, 0.6); chimneyFx.update(dt, 0.12, 0.3); lifeFx.update(dt, 0.25, 0.5); fireFx.update(dt, 1.2, 1.0); flameFx2.update(dt, 1.6, 1.2); emberFx.update(dt, 0.9, 0.7); saunaFx.update(dt, 0, 0.02); waterFx.update(dt, -9.8, 0.2);   // sparks fall
 }
+// ── trees and fences go down (30.9., Antti): a car into a tree trunk or a fence section fast enough knocks it over — it falls away from
+//    the car, pivoting at its foot (the tree ~1.5 s, a fence section in a blink), and lies there until R. Slower than that it is solid.
+//    The tree costs the car a good part of its speed (the Pökö gets dented; the dragster is spun by the blow), a fence little. Anyone
+//    the tree lands on is knocked down. The scenery is merged geometry: each tree / fence section is one Merger object (its oid);
+//    knockBuild finds each one's vertex runs in the merged meshes, knockAnim rotates those vertices (positions and normals) in place. ──
+const KNOCK = { items: [], grid: new Map(), falling: [], down: [], C: 8 };
+const knockKey = (cx, cz) => cx*73856093 ^ cz*19349663;
+function knockBuild() { KNOCK.grid.clear(); KNOCK.falling.length = 0; KNOCK.down.length = 0; const items = KNOCK.items; if (!items.length) return;
+  let maxO = 0; for (const it of items) { it.ranges = []; if (it.oid > maxO) maxO = it.oid; } const map = new Int32Array(maxO + 1).fill(-1); items.forEach((it, k) => { map[it.oid] = k; });
+  for (const m of treeMeshes) { const oid = m.geometry && m.geometry.userData.oid; if (!oid || !oid.length) continue; let any = false;
+    for (let i = 0; i < oid.length; i++) { const o = oid[i]; if (o > maxO) continue; const k = map[o]; if (k < 0) continue; const R = items[k].ranges, last = R[R.length - 1]; any = true;
+      if (last && last[0] === m && last[1] + last[2] === i) last[2]++; else R.push([m, i, 1]); }
+    if (any && m.geometry.boundingSphere) m.geometry.boundingSphere.radius += 9; }   // (a fallen tree may reach out of its tile's sphere)
+  for (const it of items) { if (!it.ranges.length) continue; let y = Infinity; for (const [m, i0, n] of it.ranges) { const a = m.geometry.attributes.position.array; for (let i = i0; i < i0 + n; i++) y = Math.min(y, a[i*3 + 1]); }
+    it.py = y; it.fall = false; it.th = 0; it.w = 0; it.p0 = null; it.n0 = null; const k = knockKey(Math.floor(it.x/KNOCK.C), Math.floor(it.z/KNOCK.C)); let l = KNOCK.grid.get(k); if (!l) KNOCK.grid.set(k, l = []); l.push(it); } }
+function knockNear(x, z, r, fn) { const C = KNOCK.C; for (let cx = Math.floor((x - r)/C); cx <= Math.floor((x + r)/C); cx++) for (let cz = Math.floor((z - r)/C); cz <= Math.floor((z + r)/C); cz++) { const l = KNOCK.grid.get(knockKey(cx, cz)); if (l) for (const it of l) fn(it); } }
+function knockUpdate() {   // (every physics step: the player's car against the trunks and fence sections round it)
+  if (!KNOCK.grid.size || WALK.on || gameState !== State.RACING) return; const B = playerBox(), vx = car.vx, vz = car.vz, sp = Math.hypot(vx, vz);
+  knockNear(B.x, B.z, B.hl + 2, it => { if (it.fall) return; let nx, nz, dep;
+    if (it.kind === 'tree') { const h = boxPush(B, it.x, it.z, 0.3); if (!h) return; nx = h.nx; nz = h.nz; dep = h.ov; }
+    else { const h = obbSat(B, it); if (!h) return; nx = h.nx; nz = h.nz; dep = h.depth; }
+    const into = vx*nx + vz*nz, tree = it.kind === 'tree';
+    if (into > (tree ? 3.2 : 1.5)) { const fx = Math.cos(it.yaw), fz = -Math.sin(it.yaw), sg = Math.sign(fx*vx + fz*vz) || 1; const ta = (Math.random() < 0.5 ? -1 : 1)*(0.6 + Math.random()*0.35), tc = Math.cos(ta), ts = Math.sin(ta); knockOver(it, tree ? (vx*tc + vz*ts)/sp : fx*sg, tree ? (vz*tc - vx*ts)/sp : fz*sg, sp);   // (a tree forward and off to one side of the car's way — not onto the car going on under it; a fence flat away from it)
+      const k = tree ? 0.7 : it.kind === 'hedge' ? 0.88 : 0.95, px = it.x, pz = it.z;
+      if (DRAG.on && DP.ok) { dpImpulse(px, DP.p.y - 0.1, pz, vx*(k - 1)*DP.m, 0, vz*(k - 1)*DP.m); dpSync(); } else { car.vx *= k; car.vz *= k; if (tree) carDamage(nx, nz, into*0.7); } }
+    else { car.x -= nx*dep; car.z -= nz*dep; if (into > 0) { car.vx -= nx*into*1.2; car.vz -= nz*into*1.2; } } }); }   // (slowly: it stands, like a post)
+function knockOver(it, dx, dz, sp) { const l = Math.hypot(dx, dz) || 1; it.fall = true; it.dx = dx/l; it.dz = dz/l; it.th = 0; it.w = it.kind === 'tree' ? Math.min(1.2, sp*0.04) : 2 + sp*0.2; it.max = it.kind === 'tree' ? 1.48 : it.kind === 'hedge' ? 1.2 : 1.45; it.landed = false;
+  it.p0 = it.ranges.map(([m, i0, n]) => m.geometry.attributes.position.array.slice(i0*3, (i0 + n)*3)); it.n0 = it.ranges.map(([m, i0, n]) => m.geometry.attributes.normal.array.slice(i0*3, (i0 + n)*3));
+  KNOCK.falling.push(it); KNOCK.down.push(it); const y = it.py;
+  if (it.kind === 'tree') { for (let i = 0; i < 26; i++) lifeFx.emit(it.x + (Math.random() - 0.5)*2, y + 2 + Math.random()*3, it.z + (Math.random() - 0.5)*2, (Math.random() - 0.5)*3 + it.dx*2, Math.random()*2, (Math.random() - 0.5)*3 + it.dz*2, 1.4 + Math.random(), 0.35, 0.25, 0.9, 0.3, 0.5, 0.2, 0.35, 0.45, 0.2);   // leaves and needles
+    knockSound(1); } else { for (let i = 0; i < 8; i++) lifeFx.emit(it.x + (Math.random() - 0.5)*it.hl*2, y + 0.5, it.z, (Math.random() - 0.5)*2, 1 + Math.random(), (Math.random() - 0.5)*2, 0.8, 0.3, 0.6, 0.6, 0.6, 0.55, 0.45, 0.7, 0.66, 0.6); knockSound(it.kind === 'hedge' ? 0.2 : 0.4); } }
+function knockPose(it, dirty) { const ax = it.dz, az = -it.dx, c = Math.cos(it.th), s = Math.sin(it.th), px = it.x, py = it.py, pz = it.z;   // rotate about the foot, round the axis across the fall
+  it.ranges.forEach(([m, i0, n], r) => { const P = m.geometry.attributes.position.array, N = m.geometry.attributes.normal.array, p0 = it.p0[r], n0 = it.n0[r];
+    for (let k = 0; k < n*3; k += 3) { for (let q = 0; q < 2; q++) { const src = q ? n0 : p0, dst = q ? N : P, vx = src[k] - (q ? 0 : px), vy = src[k + 1] - (q ? 0 : py), vz = src[k + 2] - (q ? 0 : pz), d = ax*vx + az*vz;
+        const x = vx*c + (-az*vy)*s + ax*d*(1 - c), y = vy*c + (az*vx - ax*vz)*s, z = vz*c + (ax*vy)*s + az*d*(1 - c); dst[i0*3 + k] = x + (q ? 0 : px); dst[i0*3 + k + 1] = y + (q ? 0 : py); dst[i0*3 + k + 2] = z + (q ? 0 : pz); } }
+    let d = dirty.get(m); if (!d) dirty.set(m, d = [i0, i0 + n]); else { d[0] = Math.min(d[0], i0); d[1] = Math.max(d[1], i0 + n); } }); }
+function knockFlush(dirty) { for (const [m, [lo, hi]] of dirty) for (const nm of ['position', 'normal']) { const A = m.geometry.attributes[nm]; A.updateRange.offset = lo*3; A.updateRange.count = (hi - lo)*3; A.needsUpdate = true; } }
+function knockAnim(dt) { if (!KNOCK.falling.length) return; const dirty = new Map();
+  for (let i = KNOCK.falling.length - 1; i >= 0; i--) { const it = KNOCK.falling[i], tree = it.kind === 'tree';
+    it.w += (tree ? 3.2 : 12)*(0.25 + Math.sin(it.th))*dt; it.th += it.w*dt;
+    if (it.th >= it.max) { it.th = it.max; if (!it.landed) { it.landed = true; it.w = -it.w*0.22; if (tree) knockLand(it); } else if (it.w > 0) { it.w = 0; KNOCK.falling.splice(i, 1); } }
+    knockPose(it, dirty); }
+  knockFlush(dirty); }
+function knockLand(it) {   // the crown hits the ground: a thud, dust, and anyone under it goes down
+  const L = it.h*0.95; for (let s = 1.5; s <= L; s += 1) forHumansNear(it.x + it.dx*s, it.z + it.dz*s, 1.4, h => { if (h.gone || h.inside || h.seat || h.down || h.player) return; if (Math.hypot(h.x - it.x - it.dx*s, h.z - it.z - it.dz*s) < 1.3) knock(h, it.dx*3, it.dz*3, 6); });
+  for (let i = 0; i < 16; i++) { const s = 1 + Math.random()*L, x = it.x + it.dx*s, z = it.z + it.dz*s; lifeFx.emit(x, Y(x, z) + 0.3, z, (Math.random() - 0.5)*3, 0.5 + Math.random(), (Math.random() - 0.5)*3, 1.2 + Math.random(), 0.6, 2, 0.5, 0.5, 0.45, 0.35, 0.7, 0.66, 0.6); }
+  if (audio && (it.x - car.x)**2 + (it.z - car.z)**2 < 150*150) { beep(55, 0.45, 0.35, 'sine'); beep(90, 0.2, 0.15, 'triangle'); } }
+function knockSound(s) { if (!audio) return; const { ctx, master } = audio, t = ctx.currentTime, src = ctx.createBufferSource(); src.buffer = audio.noiseBuf; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1400 + Math.random()*900; bp.Q.value = 1.4;
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2 + 0.4*s, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12 + 0.25*s); src.connect(bp); bp.connect(g); g.connect(master); src.start(t, Math.random()*0.5); src.stop(t + 0.45);
+  beep(120 + Math.random()*40, 0.12, 0.15 + 0.2*s, 'square'); }   // (the crack of wood, a knock)
+function knockReset() { if (!KNOCK.down.length) return; const dirty = new Map();
+  for (const it of KNOCK.down) { it.th = 0; knockPose(it, dirty); it.fall = false; it.w = 0; it.p0 = it.n0 = null; } KNOCK.down.length = 0; KNOCK.falling.length = 0; knockFlush(dirty); }
 function updateDebris(dt) {
   for (let i = 0; i < carParts.length; i++) if (carParts[i].cool > 0) carParts[i].cool -= dt;
   for (const d of debris) {
@@ -9539,7 +9603,7 @@ function startRace(newTrack) {
   if (newTrack) generateTrack();
   resetCar();
   checkpoints.forEach(cp=>cp.passed=false);
-  walkIn(true); dragReset(); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
+  walkIn(true); dragReset(); knockReset(); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
   checkpointsPassed=0; raceTime=0; prevFinishS=null; prevCpS=null; onlineStart();
   gameState = State.RACING; raceTime = 0;   // (no 3-2-1-GO: the clock starts at the line anyway — Antti, 29.9.)
   countdownT = 0; radioStart(); countdownLast = -1; document.getElementById('countdown').style.opacity = 0;
@@ -10092,7 +10156,7 @@ function loop(time) {
     // hot path so there is no hitch on the first real frame at GO.
     acc += dt;
     const live = gameState === State.RACING;
-    while (acc >= PHYS_DT) { RI.x = car.x; RI.z = car.z; RI.a = car.angle; updateCar(PHYS_DT, live); if (WALK.on) { car.x = WALK.cx; car.z = WALK.cz; car.angle = WALK.ca; car.vx = car.vz = car.speed = 0; }   /* (parked: it stays put, on any slope) */ updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
+    while (acc >= PHYS_DT) { RI.x = car.x; RI.z = car.z; RI.a = car.angle; updateCar(PHYS_DT, live); knockUpdate(); if (WALK.on) { car.x = WALK.cx; car.z = WALK.cz; car.angle = WALK.ca; car.vx = car.vz = car.speed = 0; }   /* (parked: it stays put, on any slope) */ updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
     if (live) updateCheckpoints(dt);
   } else {
     acc = 0;
@@ -10105,7 +10169,7 @@ function loop(time) {
     carGroup.position.set(rx, Y(rx, rz) + BASS.hopY + ABD.carY, rz); carGroup.rotation.y = ra; }
   if (DRAG.on && DP.ok) dragView();
   U_TIME.value = performance.now()/1000; skyDome.position.copy(camera.position);
-  updateMarks(dt); updateDust(dt); updateDebris(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); flowFx(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
+  updateMarks(dt); updateDust(dt); updateDebris(dt); knockAnim(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); flowFx(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
   if (gameState !== State.MENU && (MM_TICK = (MM_TICK + 1) % 2) === 0) drawMinimap();   // (30 Hz is plenty for the map: half the 2D canvas uploads)
   renderer.render(scene, camera);
   if (rx !== null) { car.x = sx + (car.x - rx); car.z = sz + (car.z - rz); car.angle = sa + (car.angle - ra); }   // (back to the physics state, keeping any push the world gave it meanwhile)

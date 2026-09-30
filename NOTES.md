@@ -849,6 +849,25 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
     dragCrashSound (noise thump + clank, rate-limited), dragChuteSound. DP.rpm: the slicks' speed through 5:1, clutch slip >= 5200.
   - Paper: 'dragster' is a main spread now (n 8; police lead stays), photos dragster.jpg (launch off the lay-by) and dragster_b.jpg
     (a tumble) from t_lh_o. Tests: t_dragphys (settle / launch / chute / route autopilot / house crash / roof), t_drag still passes.
+- Trees and fences go down + dragster feel (30.9., Antti: "testaa että tuntuma on hyvä; voisiko puut kaatua ja aidat osumista"):
+  - KNOCK: every scenery tree (sceneryDebug.trees, ~26 000) and every fence section (fenceRun now builds each post-to-post section as its
+    own Merger object: pickets / boards / mesh = 'fence', hedge boxes = 'hedge') is an item { kind, x, z, yaw, hl, hw, h, oid }. The oid
+    of draped keys survives subdivideLong through a temporary 'aoid' vertex attribute (added in geometryOf for DRAPE_ALL keys, read back
+    and deleted in liftMergedMesh). knockBuild (after worldBuild) finds each item's contiguous vertex runs in treeMeshes (an Int32Array
+    oid -> item map, ~120 ms in SwiftShader at boot; ~1.3 M vertices) and its foot height, and grids them (8 m cells); tile bounding
+    spheres +9 m. knockUpdate (each physics step, the player's car only, not on foot): a trunk = circle r 0.3 vs playerBox (boxPush),
+    a section = obbSat. Into it faster than 3.2 m/s (tree) / 1.5 (fence): knockOver — the car keeps 70 % (tree; Pökö dented via
+    carDamage) / 88 % (hedge) / 95 % (fence); the dragster gets that as an impulse at the trunk (spins it). Slower: solid (pushed out).
+    The tree falls forward and 35-55 deg to a random side (not onto the car driving on under it); a fence section flat away from the
+    car. knockAnim rotates the item's vertices (positions + normals, from copies taken at the knock) about its foot, gravity-like
+    (tree ~1.5 s), a small bounce; updateRange limits the upload. A landing tree knocks down anyone along its length (knock(): the
+    ambulance), dust, a thud; leaves at the hit; knockSound = a crack. knockReset in startRace restores them all.
+    Tests: t_knock (tree and fence fall, slow = solid, R restores), t_knockperf. Photos t_lh_p -> puu.jpg ('puut' page n 57), aita.jpg
+    ('aidat' half). Rally records: the route is >= 7 m from any tree and fences are in yards, so on-route laps are unchanged (t_ghost).
+  - Dragster feel (t_dragfeel: lane change at 100, full lock at 50 / 10, a tap at 300, braking from 200, power turn, reverse, handbrake,
+    grass): brakes capped at mu 1.25 (200 -> 0 in ~78 m with the aero; it was 41 m, ~4 g), reverse a crawl (<= 12 km/h; it reached 60),
+    front lateral mu 1.1 -> 1.4 and the steering lock falls off slower (0.45/(1 + v*0.04)): full lock radius ~29 m at 50 km/h, ~13 m at
+    10; power + lock swings the tail (30 deg) without spinning; a tap at 300 km/h stays straight.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
