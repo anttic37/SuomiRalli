@@ -1,0 +1,7 @@
+// the plane into the ground: it comes apart (wings, tail, prop, legs, fuselage as rigid pieces), no NaN; R clears the bits, a whole plane again
+startRace(false); step(20); const P = PLANE; planeEnter(true); const x = P.home.x + 40, z = P.home.z + 40; planeInit({ x, z, angle: 0.5 }); P.p.y = Y(x, z) + 25; P.v.set(Math.sin(0.5)*35, -18, Math.cos(0.5)*35); P.air = true; P.airT = 1; P.thr = 0.8;
+P.q.setFromEuler(new THREE.Euler(0.45, 0.5, 0.3, 'YXZ')); let t = 0; step(60*4, () => { t++; return !P.crashed; }); const out = { crashed: P.crashed, rb: RB.list.length };
+let firstNaN = null; for (let i = 0; i < 80; i++) { step(1); if (firstNaN === null && RB.list.some(b => !isFinite(b.p.x + b.p.y + b.p.z))) firstNaN = { i, which: RB.list.filter(b => !isFinite(b.p.x)).map(b => b.obj.children[0] && b.obj.children[0].name) }; } out.firstNaN = firstNaN; const gy = Y(P.p.x, P.p.z); camera.position.set(P.p.x + 14, gy + 9, P.p.z - 12); camera.lookAt(P.p.x, gy, P.p.z); camera.fov = 55; camera.updateProjectionMatrix(); RR(scene, camera); await __save('s3_pc_crash.png', renderer.domElement.toDataURL('image/png'));
+out.pieces = RB.list.map(b => +Math.hypot(b.p.x - P.p.x, b.p.z - P.p.z).toFixed(1)); out.nan = RB.list.some(b => !isFinite(b.p.x + b.p.y + b.p.z));
+dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyR' })); dispatchEvent(new KeyboardEvent('keyup', { code: 'KeyR' })); step(20);
+out.afterR = { rb: RB.list.length, on: P.on, crashed: P.crashed, visible: Object.keys(PL_BITS).every(k => P.mesh.userData.parts[k].visible) }; return out;

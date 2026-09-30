@@ -1,6 +1,5 @@
-// lehti photo: the plane just off Ylästöntie, climbing over the village
-startRace(false); step(30); const P = PLANE; planeEnter(true); const [sx, sz] = P.home.runway.s, [ex, ez] = P.home.runway.e, ang = Math.atan2(ex - sx, ez - sz);
-planeInit({ x: sx + Math.sin(ang)*5, z: sz + Math.cos(ang)*5, angle: ang }); step(20); keys.KeyW = true; let t = 0;
-step(60*9.5, () => { t += 1/60; const V = P.v.length(); const F = new THREE.Vector3(0, 0, 1).applyQuaternion(P.q); keys.ArrowDown = V > 23.5 && Math.asin(F.y) < 0.14; });
-keys.ArrowDown = false; const F = new THREE.Vector3(0, 0, 1).applyQuaternion(P.q), fx = F.x, fz = F.z, l = Math.hypot(fx, fz), gy = Y(P.p.x, P.p.z);
-await shot('lh_plane', P.p.x, P.p.z, (-fx*14 + fz*16)/l, (-fz*14 - fx*16)/l, P.p.y - gy + 4, P.p.y - gy); return { agl: +(P.p.y - gy).toFixed(1), kmh: Math.round(P.v.length()*3.6) };
+// lehti photo: the plane climbing over the village, from its spot past the finish line (↑ held, ↓ at 80 km/h, as a player flies it)
+startRace(false); step(30); const P = PLANE; planeEnter(true); step(20); keys.ArrowUp = true; let t = 0, lift = null;
+step(60*20, () => { t += 1/60; const V = P.v.length()*3.6, F = new THREE.Vector3(0, 0, 1).applyQuaternion(P.q); keys.ArrowDown = V > 80 && Math.asin(F.y) < 0.17; if (!lift && P.air) lift = t; if (P.crashed) return false; if (lift && t > lift + 9) return false; });
+keys.ArrowUp = keys.ArrowDown = false; const F = new THREE.Vector3(0, 0, 1).applyQuaternion(P.q), L2 = new THREE.Vector3(1, 0, 0).applyQuaternion(P.q), fx = F.x, fz = F.z, gy = Y(P.p.x, P.p.z);
+await shot('lh_plane', P.p.x, P.p.z, fx*8 + L2.x*11, fz*8 + L2.z*11, P.p.y - gy + 2.5, P.p.y - gy - 1); return { agl: +(P.p.y - gy).toFixed(1), kmh: Math.round(P.v.length()*3.6), crashed: P.crashed };
