@@ -285,7 +285,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 06.00 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 06.32 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4512,6 +4512,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Korjauksia: liftarin K-KAUPPA-kyltti isompi ja näkyvissä, jalkaisin poliisi tulee sinun luoksesi eikä tyhjälle autolle, HONK-banderolli aukealle, ufo ei nappaa pakenevaa hirveä', '09.32'],
   ['30.9.', 'Mopopojat lähtevät perään useammin: riittää 15 % ennätyksestä, ja ennen ensimmäistä väliaikaa aina', '08.56'],
   ['30.9.', 'Naamiaisolympialaiset ovat nyt HONK-olympialaiset, ja kentän laidalla on banderolli', '08.56'],
   ['30.9.', 'Kaalimaan laidalla PAULIN KAALI -kyltti: maanviljelijä on Pauli, ja kaikki kaali-ilmoitukset ovat nyt Paulin', '08.56'],
@@ -4908,8 +4909,9 @@ function lhFit(F) { const inn = F.querySelector(':scope > .lh-in'); if (!inn) re
   if (free() >= 150 && !inn.dataset.noad) inn.insertAdjacentHTML('beforeend', lhAd(free() - 16, [...inn.querySelectorAll('img[data-src]')].map(im => im.dataset.src.replace('lehti/', ''))));
   F.dataset.free = Math.round(free()); if (free() > 2) { const hang = inn.scrollHeight - inn.offsetHeight; inn.classList.add('even'); inn.style.height = (avail - hang) + 'px'; } }   // (kept on the page: the layout test checks nothing overflows)
 function lhLoadImgs(el) { el.querySelectorAll('img[data-src]').forEach(im => { if (im.src) return; im.onerror = () => im.parentNode.classList.add('miss'); im.onload = () => im.parentNode.classList.add('ok'); im.src = im.dataset.src; }); }
-const LH_VER = 'mail1';   // (bump when the layout code changes the pages: the baked lehti.json then no longer matches)
-function lhKey() { const str = JSON.stringify([LEHTI, CHANGES, LH_ADS, LH_VER]); let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 0x01000193);   // (which paper this is: the baked pages must be of this very game)
+const LH_VER = 'mail1';   // (the key also covers the layout functions and the styles; bump this only for a change it can't see)
+function lhKey() { const code = [lhPlan, lhFront, lhSpread, lhPage, lhHalves, lhPolice, lhMail, lhAdsPage, lhAd, lhKeys, lhLyhyesti, lhFitAll, lhFit, lhBody, lhImg, lhFolio, lhMast, lhBox, lhQuote].map(String).join('') + [...document.querySelectorAll('style')].map(e => e.textContent).join('');   // (the layout code and the styles too: change either and the baked pages are stale)
+  const str = JSON.stringify([LEHTI, CHANGES, LH_ADS, LH_VER, code]); let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 0x01000193);   // (which paper this is: the baked pages must be of this very game)
   return (h >>> 0).toString(16); }
 function lehtiFetch() {   // the paper comes ready-made from the server (lehti/lehti.json, laid out by build.py); laid out here only if that's missing or of another version
   if (PAPER.pages.length) return; if (!/^https?:/.test(location.protocol)) return lehtiBuild();
@@ -6670,9 +6672,9 @@ function policeIncident(kind) {
   if (on.length) { if (on.length < 3) { policeSpawn(1); policeMsg(T('LISÄÄ POLIISEJA!')); } return; }
   if (POLICE.n >= 3) { policeSpawn(2); policeMsg(T('🚨 POLIISIT TULEVAT!'), true); } else policeMsg(T(kind === 'fire' ? '🔥 TULIPALO {0}/3' : 'KOLARI {0}/3', POLICE.n)); }
 function nearestNode(x, z) { const { nodes } = roadGraph(); let bi = -1, bd = 1e18; for (let i = 0; i < nodes.length; i++) { const d = (nodes[i].x - x)**2 + (nodes[i].z - z)**2; if (d < bd) { bd = d; bi = i; } } return bi; }
-function policeTree(fresh) { if (!fresh && POLICE.tree && worldT - POLICE.treeT < 1) return POLICE.tree; const si = nearestNode(car.x, car.z); if (si < 0) return null;
-  const { nodes } = roadGraph(), d0 = Math.hypot(nodes[si].x - car.x, nodes[si].z - car.z), seeds = [];   // every street node near the car counts (off the road the nearest one can be on a street that joins far away)
-  for (let i = 0; i < nodes.length; i++) { const d = Math.hypot(nodes[i].x - car.x, nodes[i].z - car.z); if (d < d0 + 30) seeds.push([i, d*1.5]); }
+function policeTree(fresh) { if (!fresh && POLICE.tree && worldT - POLICE.treeT < 1) return POLICE.tree; const Q = playerAt(), si = nearestNode(Q.x, Q.z); if (si < 0) return null;   // (to whoever they're after: the car, or you on foot)
+  const { nodes } = roadGraph(), d0 = Math.hypot(nodes[si].x - Q.x, nodes[si].z - Q.z), seeds = [];   // every street node near the car counts (off the road the nearest one can be on a street that joins far away)
+  for (let i = 0; i < nodes.length; i++) { const d = Math.hypot(nodes[i].x - Q.x, nodes[i].z - Q.z); if (d < d0 + 30) seeds.push([i, d*1.5]); }
   POLICE.tree = rgDijkstra(seeds); POLICE.tree.src = si; POLICE.treeT = worldT; return POLICE.tree; }
 let _polTex = null;
 function polTex() { if (_polTex) return _polTex; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
@@ -6718,14 +6720,14 @@ function policeAI(v, dt) {
   if (P.hold) { C.steer = 0; speedTo(v, 0); if (!POLICE.hold && (!P.officer || P.officer.gone || P.officer.down)) { P.hold = false; v.chase = false; } return; }   // parked while the officer talks
   if (P.rev > 0) { P.rev -= dt; C.brk = 0; C.thr = -0.8; C.steer = -P.revSteer; return; }   // backing out of a wall
   let vT;
-  if (v.chase) { const dx = car.x - v.x, dz = car.z - v.z, d = Math.hypot(dx, dz), csp = Math.hypot(car.vx, car.vz);
-    if (d < 45 && clearLine(v.x, v.z, car.x, car.z)) {   // straight for it, aiming a little ahead; ease off right on its bumper
-      const lead = Math.min(1.0, d/Math.max(8, csp + 4)), tx = car.x + car.vx*lead, tz = car.z + car.vz*lead;
-      vT = d < 10 ? Math.max(0, csp - 1 + (d - 5)*0.9) : Math.min(v.spec.vmax, csp + 6 + d*0.35); C.steer = steerToward(v, tx, tz); speedTo(v, vT); }
+  if (v.chase) { const Q = playerAt(), dx = Q.x - v.x, dz = Q.z - v.z, d = Math.hypot(dx, dz), csp = Math.hypot(Q.vx || 0, Q.vz || 0), stop = Q === car ? 10 : 12;   // (on foot: they pull up a little further off)
+    if (d < 45 && clearLine(v.x, v.z, Q.x, Q.z)) {   // straight for it, aiming a little ahead; ease off right on its bumper
+      const lead = Math.min(1.0, d/Math.max(8, csp + 4)), tx = Q.x + (Q.vx || 0)*lead, tz = Q.z + (Q.vz || 0)*lead;
+      vT = d < stop ? Math.max(0, csp - 1 + (d - stop + 5)*0.9) : Math.min(v.spec.vmax, csp + 6 + d*0.35); C.steer = steerToward(v, tx, tz); speedTo(v, vT); }
     else { if ((P.tT -= dt) <= 0 || !v.path) { P.tT = 0.8; const T = policeTree(), { nodes } = roadGraph();
         if (T) { const pts = [[v.x, v.z]], fx = Math.sin(v.yaw), fz = Math.cos(v.yaw); let j = nearestNode(v.x, v.z);
           for (let k = 0; j >= 0 && k < 600; k++) { const q = nodes[j]; if (pts.length > 1 || Math.hypot(q.x - v.x, q.z - v.z) > 7 || (q.x - v.x)*fx + (q.z - v.z)*fz > 0) pts.push([q.x, q.z]); if (j === T.src) break; j = T.prev[j]; }   // (not back to a node just behind it)
-          pts.push([car.x, car.z]); setPath(v, pts); } }
+          pts.push([Q.x, Q.z]); setPath(v, pts); } }
       vT = policeFollow(v, dt, v.spec.vmax); } }
   else { if (!P.away) { const { nodes } = roadGraph(), si = nearestNode(v.x, v.z), T = rgDijkstra(si); let best = -1, bd = -1;   // off home: a street far from the car
       for (let i = 0; i < nodes.length; i += 3) { const d = T.dist[i]; if (!isFinite(d) || d > 500) continue; const sc = Math.hypot(nodes[i].x - car.x, nodes[i].z - car.z) + Math.random()*30; if (sc > bd) { bd = sc; best = i; } }
@@ -6734,9 +6736,11 @@ function policeAI(v, dt) {
   if (vT > 3 && Math.abs(v.vF) < 0.6) { if ((P.stuck += dt) > 1.5) { P.stuck = 0; P.rev = 1.2; P.revSteer = C.steer || 1; } } else P.stuck = 0;
 }
 const officerTask = (v) => ({ kind: 'officer', update(h, dt, t) {
-  if (POLICE.hold > 0.6) { const [tx, tz] = lloc(car.x, car.z, car.angle, -1.4, 0.35); if (walkTo(h, tx, tz, 2.2, dt)) { h.yaw = Math.atan2(car.x - h.x, car.z - h.z); h.pose.armR = -1.45 + Math.sin(t*8)*0.22; h.pose.armL = -0.2; } return; }   // a finger wagged at the driver's window
+  if (POLICE.hold > 0.6) { const W = POLICE.walker && WALK.on && WALK.h && !WALK.h.gone ? WALK.h : null;   // a finger wagged at the driver's window — or at you, on foot, face to face
+    const [tx, tz] = W ? [W.x + Math.sin(W.yaw)*1.1, W.z + Math.cos(W.yaw)*1.1] : lloc(car.x, car.z, car.angle, -1.4, 0.35), fx = W ? W.x : car.x, fz = W ? W.z : car.z;
+    if (Math.hypot(tx - h.x, tz - h.z) < 0.5 || walkTo(h, tx, tz, W ? 3.4 : 2.2, dt)) { h.vx = h.vz = 0; h.yaw = Math.atan2(fx - h.x, fz - h.z); h.pose.armR = -1.45 + Math.sin(t*8)*0.22; h.pose.armL = -0.2; } return; }
   const [bx, bz] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 0.4); if (walkTo(h, bx, bz, 2.2, dt) || v.gone) humanRemove(h); } });
-function policeBust(v) { POLICE.hold = 7; POLICE.caughtT = 0; policeMsg(T('🚨 KIINNI! POLIISI PUHUTTELEE…'), true);
+function policeBust(v) { POLICE.hold = 7; POLICE.caughtT = 0; POLICE.walker = WALK.on; policeMsg(T('🚨 KIINNI! POLIISI PUHUTTELEE…'), true);
   for (const o of POLICE.cars) if (o.chase) { o.pl.hold = true; o.chase = false; }
   const rig = makeAdult(0x2a3a60, 0x1c2c5a, lpick(L_HAIR), { sel: { hat: 3, top: 8, longSleeve: 1, longPants: 1, tache: Math.random() < 0.4 }, acc: 0x1c2540, shoes: 0x141414, w: 1.05 });   // cap, belt, badge
   const [x, z] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 0.4), h = new Human({ x, z, yaw: v.yaw, rig, task: officerTask(v), temp: true }); h.ao = aoAlloc(); v.pl.officer = h; }
@@ -6744,13 +6748,13 @@ function policeUpdate(dt) {
   if (!POLICE.cars.length && !(POLICE.hold > 0) && !POLICE.hudOn) return;   // (nobody out: nothing to do — no arrays every frame)
   if (POLICE.cars.some(v => v.gone)) POLICE.cars = POLICE.cars.filter(v => !v.gone); const chasing = POLICE.cars.filter(v => v.chase), hud = document.getElementById('police-hud');
   POLICE.hudOn = chasing.length > 0 || POLICE.hold > 0; if (hud) { const on = chasing.length > 0 || POLICE.hold > 0; if (hud.__on !== on) { hud.__on = on; hud.style.display = on ? 'block' : 'none'; } }
-  for (const v of POLICE.cars) if (!v.chase && !v.pl.hold) { v.pl.leaveT += dt; if (Math.hypot(v.x - car.x, v.z - car.z) > 220 || v.pl.leaveT > 50) vehicleRemove(v); }   // gone round the corner
+  for (const v of POLICE.cars) if (!v.chase && !v.pl.hold) { v.pl.leaveT += dt; if (Math.hypot(v.x - playerAt().x, v.z - playerAt().z) > 220 || v.pl.leaveT > 50) vehicleRemove(v); }   // gone round the corner
   if (POLICE.hold > 0) { POLICE.hold -= dt; if (POLICE.hold <= 0) { POLICE.hold = 0; POLICE.n = 0; policeMsg(T('SAAT JATKAA — AJA SIIVOSTI')); } return; }
   if (!chasing.length) return;
   if (gameState !== State.RACING) { chasing.forEach(v => { v.chase = false; }); POLICE.n = 0; return; }   // over the line: not their business any more
-  const csp = Math.hypot(car.vx, car.vz), on = chasing.find(v => Math.hypot(v.x - car.x, v.z - car.z) < 8.5);
-  POLICE.caughtT = on && csp < 2.5 ? POLICE.caughtT + dt : 0; if (POLICE.caughtT > 1.2) { policeBust(on); return; }
-  POLICE.lostT = chasing.every(v => Math.hypot(v.x - car.x, v.z - car.z) > 450) ? POLICE.lostT + dt : 0;
+  const Q = playerAt(), foot = Q !== car, csp = Math.hypot(Q.vx || 0, Q.vz || 0), on = chasing.find(v => Math.hypot(v.x - Q.x, v.z - Q.z) < (foot ? 13 : 8.5));
+  POLICE.caughtT = on && csp < (foot ? 4.5 : 2.5) ? POLICE.caughtT + dt : 0; if (POLICE.caughtT > 1.2) { policeBust(on); return; }   // (on foot: walking doesn't get you away, running does)
+  POLICE.lostT = chasing.every(v => Math.hypot(v.x - Q.x, v.z - Q.z) > 450) ? POLICE.lostT + dt : 0;
   if (POLICE.lostT > 10) { chasing.forEach(v => { v.chase = false; }); POLICE.n = 0; POLICE.lostT = 0; policeMsg(T('PÄÄSIT KARKUUN!'), true); } }
 function policeReset() { Object.assign(POLICE, { n: 0, lastT: -99, cars: [], hold: 0, tree: null, treeT: -99, lostT: 0, caughtT: 0 }); const hud = document.getElementById('police-hud'); if (hud) { hud.style.display = 'none'; hud.__on = false; } }
 
@@ -7631,7 +7635,10 @@ function buildOlympics() { const F = FIELD_GAMES[0]; if (!F) return;
     g.fillStyle = '#1a1614'; g.font = '900 54px "Arial Black", Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('HONK-OLYMPIALAISET', 256, 50);   // the banner at the stage's back
     const G = new THREE.Group(), wood = lmat(0x6a4a2a, 0.9); for (const u of [-3.2, 3.2]) lmesh(lbox(0.12, 4.3, 0.12), wood, u, 2.15, 0, G);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(6.2, 1.16), new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), roughness: 0.8, side: THREE.DoubleSide })); m.position.set(0, 3.6, 0); G.add(m);
-    const [bx, bz] = lloc(O.x, O.z, O.yaw, -6.8, 1.5); G.position.set(bx, Y(bx, bz), bz); G.rotation.y = O.yaw + Math.PI/2; lifeGroup.add(G); nearVis(G, bx, bz); O.banner = [bx, bz, G.rotation.y]; }
+    let bb = null; for (const [a, b] of [[-7, 1.5], [-7, -6], [-7, 9], [6, 1.5], [6, -6], [6, 9], [0, -12.5], [0, 15.5]]) { const [x, z] = lloc(O.x, O.z, O.yaw, a, b); if (onRoad(x, z, 1) || STATIC_LIST.some(B => Math.hypot(B.x - x, B.z - z) < 4)) continue;
+      const sc = -treeCount(x, z, 4.5)*4 - treeCount((x + O.x)/2, (z + O.z)/2, 3) - distRoute(x, z)/12; if (!bb || sc > bb.sc) bb = { x, z, sc }; }   // (wherever the fewest trees hide it, near the route)
+    if (bb) { const ri = roadInfo(bb.x, bb.z), p = trackPoints[ri.idx], yaw = Math.atan2(p.x - bb.x, p.y - bb.z);
+      G.position.set(bb.x, Y(bb.x, bb.z), bb.z); G.rotation.y = yaw; lifeGroup.add(G); nearVis(G, bb.x, bb.z); O.banner = [bb.x, bb.z, yaw]; } }
   X3.upd.push((dt) => olyUpdate(O, dt)); X3.reset.push(() => { O.phase = 'line'; O.clock = 0; O.ev = 'sprint'; O.jav.fly = null; O.jav.landed = false; O.jav.inHand = true; O.done.length = 0; O.ready.clear(); }); }
 
 // ── 6. grandstands: one by the finish line, one by the K-shop — four tiers, packed, on their feet when the car comes ──
@@ -8371,7 +8378,7 @@ const HITCH = { h: null, K: null, spot: null, aboard: false, wait: 0, drop: 0, f
 function hitchSign() { const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#b48a55'; g.fillRect(0, 0, 256, 128);
   g.fillStyle = '#9c7444'; for (let k = 0; k < 14; k++) g.fillRect(0, 6 + k*9, 256, 2); g.fillStyle = '#1a1410'; g.font = '900 50px "Comic Sans MS", "Segoe Print", cursive'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.save(); g.translate(128, 66); g.rotate(-0.05); g.fillText('K-KAUPPA', 0, 0); g.restore(); const t = new THREE.CanvasTexture(c);
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 0.31), new THREE.MeshStandardMaterial({ map: t, roughness: 0.95, side: THREE.DoubleSide })); return m; }
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.5), new THREE.MeshStandardMaterial({ map: t, roughness: 0.95, side: THREE.DoubleSide })); return m; }
 function hitchHud(t) { const el = document.getElementById('hitch-hud'); if (el && el.textContent !== t) el.textContent = t; }
 function hitchSpot(K) { const n = trackPoints.length; if (!n) return null; let ki = 0, kd = Infinity; trackPoints.forEach((p, i) => { const d = Math.hypot(p.x - K[1], p.y - K[2]); if (d < kd) { kd = d; ki = i; } });
   for (let m = 110; m < 260; m += 4) { const i = ((ki - m) % n + n) % n, a = trackPoints[i], b = trackPoints[(i + 3) % n], L = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x)/L, uz = (b.y - a.y)/L;
@@ -8383,7 +8390,7 @@ const hitchTask = () => ({ kind: 'hitch', update(h, dt, t) { const st = h.st || 
     const cd = Math.hypot(car.x - h.x, car.z - h.z), cs = Math.hypot(car.vx, car.vz);
     if (st.mode === 'wait') { h.vx = h.vz = 0; h.yaw = S.yaw; if (sign) sign.visible = true;
       if (HITCH.fistT > 0) { HITCH.fistT -= dt; h.pose.armR = -2.9 + Math.sin(t*16)*0.25; h.pose.armL = -1.2; return; }   // the fist after a car that didn't stop
-      h.pose.armL = -1.2; h.pose.armR = Math.sin(t*1.3) > 0.2 ? -1.45 : -1.2;   // the sign in front, now and then the thumb out towards the road
+      h.pose.armL = -1.6; h.pose.armR = Math.sin(t*1.3) > 0.2 ? -1.45 : -1.6;   // the sign held up, now and then the thumb out towards the road
       if (!racing || WALK.on || WRECK.on) { HITCH.wait = 0; return; }
       if (cd < 9 && cs < 1.5) { HITCH.wait += dt; if (HITCH.wait > 0.5) { st.mode = 'walk'; pizzaMsg(T('🧍 LIFTARI: ”K-KAUPALLE, KIITOS!”'), true); } }
       else HITCH.wait = 0; return; }
@@ -8402,7 +8409,7 @@ const hitchTask = () => ({ kind: 'hitch', update(h, dt, t) { const st = h.st || 
 //    metres, sliding to a crawl) until it's out of the light. R: the moose is back. ──
 const ABD = { M: null, beam: null, st: 'off', t: 0, h: null, x: 0, z: 0, gy: 0, fx: 0, fz: 0, carY: 0, carV: 0, next: 50, said: false };
 function abdPick() { let best = null, bs = -1; const fx = Math.sin(car.angle), fz = Math.cos(car.angle);
-  for (const h of HUMANS) { if (!h.task || h.task.kind !== 'moose' || h.gone || h.down || h.inside || h.abd) continue; const dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz);
+  for (const h of HUMANS) { if (!h.task || h.task.kind !== 'moose' || h.gone || h.down || h.inside || h.abd || (h.M && h.M.s && (h.M.s.bolt > 0 || h.M.s.fast))) continue;   /* (not one bolting from a record-pace car: it would jump into the beam) */ const dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz);
     if (d < 50 || d > 230) continue; const ahead = (dx*fx + dz*fz)/d; if (ahead < 0.2) continue; const sc = ahead - d/400; if (sc > bs) { bs = sc; best = h; } }
   return best; }
 function abdUpdate(dt) { const A = ABD;
@@ -8433,7 +8440,7 @@ function hitchFist(h) { if (HITCH.fistT > 0 || gameState !== State.RACING) retur
   if (cd < 14 && Math.hypot(car.vx, car.vz) > 14 && (HITCH.fistAt || -99) < worldT - 10) { HITCH.fistAt = worldT; HITCH.fistT = 1.6; } }
 function buildHitch() { HITCH.h = null; HITCH.aboard = false; const K = LANDMARKS.find(L => L[0] === 'kauppa'); if (!K || !ES.door) return; const S = hitchSpot(K); if (!S) return; HITCH.K = K; HITCH.spot = S;
   const rig = makeAdult(0x7a8a3a, 0x2a3450, lpick(L_HAIR), { sel: { hair: 1, top: 2, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0x8a3a1a });   // army-surplus green, jeans, a rucksack colour
-  const sign = hitchSign(); sign.position.set(0, 1.08, 0.38); sign.rotation.x = -0.15; rig.add(sign); rig.userData.sign = sign;
+  const sign = hitchSign(); sign.position.set(0, 1.3, 0.4); sign.rotation.x = -0.08; rig.add(sign); rig.userData.sign = sign;   // (held up over the chest: read from the road)
   HITCH.h = new Human({ x: S.x, z: S.z, yaw: S.yaw, rig, task: hitchTask() }); reserve('hitch', [S.x, S.z], 2); X3.upd.push(hitchUpdate); }
 function buildAbd() { X3.upd.push(abdUpdate); X3.reset.push(abdReset); ABD.M = null; ABD.beam = null; abdReset(); }
 function extras3Update(dt) { nukeUpdate(dt); for (const f of X3.upd) f(dt); esUpdate(dt); cabbageUpdate(dt); ufoUpdate(dt); }

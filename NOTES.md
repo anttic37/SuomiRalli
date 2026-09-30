@@ -775,6 +775,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   route, P.sign) and the farmer is Pauli in every message/ad/story; the costume games are the HONK-olympialaiset (banner at the
   stage back, O.banner); moped boys chase on FLOW.mopo too (a split within 15 % of the record, or before the first split).
   t_boards (shots of all of it; nearVis objects need the car moved near before view()).
+- Six small fixes (30.9., Antti picked 1 4 5 8 9 10 of ten): the hitchhiker's sign (was never on the rig — the mid-line
+  comment bug, 4th time: comments ONLY at the end of a line) now 1.0×0.5 m, held up; on foot the police chase and bust YOU
+  (policeTree/policeAI/policeUpdate use playerAt(); on foot caught within 13 m below 4.5 m/s — running gets you off; the
+  officer walks up face to face, POLICE.walker); the HONK banner goes where the fewest trees hide it (8 spots round the
+  stage) facing the route; lhKey also hashes the layout functions + every <style> (LH_VER only for what that can't see);
+  runall.sh puts s3_shot.inc (+ lh_common.inc for view/around/TRY scripts) in front by itself; abdPick skips bolting moose.
+  t_copwalk.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
