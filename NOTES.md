@@ -892,6 +892,8 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   parsed from lehti/lehti.json h2s, the PDF), live numbers (/api/stats starts, /api/rap fires + trees, /api/top top 5 with the sig
   build.py writes to mobiili.json). test/mob_check.js (Playwright Pixel 5 + desktop against serve.mjs, which now sends jpg/mp3/pdf
   types). The page title is "YLÄSTÖ 1988 · Suomiralli" (was "korkeuserot").
+- Marjatan keittiö audio (30.9.): music/keittio-1..5.mp3 (Antti's uploads Keitti_1..5), playlist entries talk + show 'keittio' (titles
+  "Marjatan keittiö, jakso N" — the files carry no tags); the dial reads SHOW_STATIONS.keittio, mobiili.html's radio too.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

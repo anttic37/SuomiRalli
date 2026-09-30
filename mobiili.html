@@ -176,13 +176,13 @@ $('share').onclick = async () => { const d = { title: 'YLÄSTÖ 1988 · Suomiral
   if (navigator.share) { try { await navigator.share(d); } catch (e) {} } else { try { await navigator.clipboard.writeText(GAME); toast('✔ Osoite kopioitu – liitä se viestiin'); } catch (e) { toast(GAME); } } };
 // the radio: the game's own playlist (songs and programmes; the hevi band's LP stays in the game), shuffled, one after another
 const R = { list: [], i: 0, el: new Audio(), on: false };
-const STN = ['Radio Ylästö', 'YLE Rinnakkaisohjelma', 'Radio Vantaa', 'Radio City 88', 'Kesäradio'], SHOW = { sport: 'YLE Urheiluradio', weather: 'YLE Radio 1 – Merisää', koe: 'Tuntematon asema' };
+const STN = ['Radio Ylästö', 'YLE Rinnakkaisohjelma', 'Radio Vantaa', 'Radio City 88', 'Kesäradio'], SHOW = { sport: 'YLE Urheiluradio', weather: 'YLE Radio 1 – Merisää', koe: 'Tuntematon asema', keittio: 'Radio Ylästö – Marjatan keittiö', naapurivartti: 'Radio Ylästö – Naapurivartti', urheilukierros: 'YLE Urheiluradio – Urheilukierros', merisaa: 'YLE Radio 1 – Merisää ja Euroopan sää' };
 R.el.preload = 'none'; R.el.addEventListener('ended', () => radioGo(1)); R.el.addEventListener('error', () => { if (R.on) setTimeout(() => radioGo(1), 400); });
 fetch('music/playlist.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : []).then(d => { const a = (Array.isArray(d) ? d : d.tracks || []).filter(t => t && t.file && !t.hevi && !t.koe);
   const songs = a.filter(t => !t.talk).sort(() => Math.random() - 0.5), talk = a.filter(t => t.talk).sort(() => Math.random() - 0.5); let k = 0;
   songs.forEach((s, i) => { R.list.push(s); if (i % 2 === 1 && k < talk.length) R.list.push(talk[k++]); }); while (k < talk.length) R.list.push(talk[k++]); radioShow(); }).catch(() => {});
 function radioShow() { const t = R.list[R.i]; if (!R.on || !t) { $('fq').textContent = '-- . -'; $('st').textContent = R.list.length ? 'VIRTA POIS · PAINA ▶' : 'EI KUULUVUUTTA'; $('ti').innerHTML = '&nbsp;'; return; }
-  const st = t.sport ? SHOW.sport : t.weather ? SHOW.weather : STN[(R.i*3) % STN.length], fq = (87.6 + ((R.i*7 + 3) % 20) + ((R.i*3) % 10)/10).toFixed(1);
+  const st = SHOW[t.show] || (t.sport ? SHOW.sport : t.weather ? SHOW.weather : STN[(R.i*3) % STN.length]), fq = (87.6 + ((R.i*7 + 3) % 20) + ((R.i*3) % 10)/10).toFixed(1);
   $('fq').textContent = fq + ' MHz'; $('st').textContent = st.toUpperCase(); $('ti').textContent = (t.talk ? '🎙 ' : '♪ ') + t.title + (t.talk ? '' : ' – ' + (t.artist || '')); }
 function radioGo(d) { if (!R.list.length) return; R.i = (R.i + d + R.list.length) % R.list.length; R.el.src = 'music/' + R.list[R.i].file; if (R.on) R.el.play().catch(() => {}); radioShow(); }
 $('play').onclick = () => { if (!R.list.length) { toast('Radio virittyy… kokeile hetken päästä'); return; } R.on = !R.on; $('play').textContent = R.on ? '⏸' : '▶';
