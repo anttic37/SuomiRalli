@@ -798,6 +798,14 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   their pages (lhBriefs, LH_WHERE); the front = two light-blue teaser boxes over a condensed masthead (Arial Black scaleX .74)
   + date line on a yellow rule, the lead (headline, deck, a text column + "Sivu N" beside the photo), two photo teasers, an orange
   wide ad. The CSS is an override block at the end of the paper styles. Half text fit bases: h3 34, text 17.
+- The dragster (30.9., Antti: "maalialueen lähellä dragsteri … kävelee ja menee siihen niin voi ajaa … ei sillä enkkaa saa"):
+  DRAG. Parked on the verge of Malminrajantie 10–90 route points short of the line, nose up the road (buildDragster, called from
+  buildFinishArea). On foot, F within 4.2 m of the parked one → dragSwap(): the car teleports to it; the Pökö's carGroup children
+  are hidden and a clone of the Pökö (made once) stands where you left it (static box); the dragster copy under carGroup shows;
+  DRIVE gets DRAG.SPEC (accel 58, maxSpeed 125, turnRate 1.15 …; the old values back on the swap). Lift off over 45 m/s → the chute
+  (dragUpdate, extra drag). DRAG.used during a race → finishRace refuses the time like a cut (no board, no ghost). startRace →
+  dragReset(): Pökö back, the dragster home. On foot you can't walk far from the car you left, so park the dragster by the Pökö to
+  swap back. t_drag: 0–100 0.57 s, 345 km/h. Photo t_lh_n → dragster.jpg (page story, n 56).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

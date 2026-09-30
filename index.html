@@ -334,7 +334,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 07.34 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 09.14 · 33 katua</div><div id="menu-content"><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -446,6 +446,7 @@ const I18N = {
   'R uusi lähtö · Esc': ['R restart · Esc', 'R ny start · Esc'], 'OIKAISU – KIERROS EI KELPAA': ["SHORTCUT – THE LAP DOESN'T COUNT", 'SNARVEI – RUNDEN TELLER IKKE'],
   'AIKA KÄY': ['CLOCK RUNNING', 'KLOKKA GÅR'], 'FINAL — FIND FINISH': ['FINAL — FIND FINISH', 'SISTE — FINN MÅL'], 'CHECKPOINT {0}': ['CHECKPOINT {0}', 'SJEKKPUNKT {0}'],
   'KISA': ['RACE', 'LØP'],
+  '🏁 DRAGSTERI! Hirveät tehot – aika ei kelpaa ennätykseksi': ['🏁 DRAGSTER! Monstrous power – no records with it', '🏁 DRAGSTER! Enorm kraft – ingen rekorder med den'], 'dragsterilla — aika ei kelpaa': ["with the dragster — the time doesn't count", 'med dragsteren — tiden teller ikke'],
   '📸 PELTIPOLIISI NAPSAHTI! {0} km/h': ['📸 SPEED CAMERA FLASHED! {0} km/h', '📸 FARTSKAMERAET BLITSET! {0} km/t'], 'Peltipoliisi: kovin ylinopeus {0} km/h – {1}': ['Speed camera: fastest {0} km/h – {1}', 'Fotoboks: raskeste {0} km/t – {1}'],
   '🌭 MAKKARA! …RÖYH!': ['🌭 SAUSAGE! …BURP!', '🌭 PØLSE! …RAP!'], '🌭 makkara tulossa… {0}': ['🌭 sausage coming… {0}', '🌭 pølse kommer… {0}'],
   '🐕 KOIRA HYPPÄSI KYYTIIN!': ['🐕 A DOG JUMPED IN!', '🐕 EN HUND HOPPET INN!'], '🐕 KOIRA HYPPÄSI POIS': ['🐕 THE DOG JUMPED OFF', '🐕 HUNDEN HOPPET AV'],
@@ -4566,6 +4567,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', '🏁 Dragsteri Malminrajantien varressa maalin lähellä: nouse autosta (F), kävele dragsterille ja F – 0–100 alle sekunnissa, jarruvarjo aukeaa kun kaasu nousee. Pökö jää odottamaan; dragsterilla ajettu aika ei kelpaa ennätykseksi', '12.14'],
   ['30.9.', '📰 Lehti taitettu uudestaan aamulehden malliin: etusivulle teaserilaatikot, iso nimiö keltaisella viivalla, osastolaput, kuvatekstit kuvaajineen, harmaat faktalaatikot, LYHYESTI-palsta aukeamille ja sivuviittaukset', '10.34'],
   ['30.9.', '🧖 Saunojat juoksevat tien laitaan huutamaan HILJEMPAA, kun ajat lujaa ohi', '10.04'],
   ['30.9.', '🐦 Lintuparvi pyrähtää metsästä, kun ajat lujaa ohi', '10.04'],
@@ -4797,6 +4799,10 @@ const LEHTI = [
     img: ['asema.jpg'], cap: ['Poliisiaseman piha. Kolme partioautoa ruuduissaan.'],
     body: ['Juoppo repäisee itsensä irti ja hoippuu karkuun, mutta konstaapelit saavat hänet naama asfalttiin. Partioautoihin ei kannata ajaa – poliisi huomaa sen.'] },
 
+  { id: 'dragster', size: 'page', n: 56, kick: '🏁 DRAGSTERI', title: 'Dragsteri odottaa Malminrajantiellä', lede: 'Maalin lähellä tien varressa on pitkä keltainen dragsteri. Nouse Pököstä, kävele sen luo ja paina F: nollasta sataan menee alle sekunti.',
+    img: ['dragster.jpg'], cap: ['Dragsteri kiitää Malminrajantietä ylös. Takaa jää savuvana.'],
+    body: ['YLÄSTÖ. Malminrajantie on suora kuin viivoitin, ja sen varteen on joku pysäköinyt dragsterin: pitkä keltainen runko, pienet etupyörät, valtavat takarenkaat, ahdin ja siipi.', 'Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F uudestaan. Kaasu pohjaan, ja sata tulee täyteen alle sekunnissa. Ohjaus on kuin rekillä.', 'Kun nostat kaasun kovassa vauhdissa, jarruvarjo aukeaa. Pökö odottaa siellä, minne sen jätit: kävele sen luo ja paina F, niin vaihdat takaisin.', 'Ennätyksiä dragsterilla ei saa. Kierros ei kelpaa listalle eikä haamuksi, mutta hauskaa on.'],
+    box: ['NÄIN SE TOIMII', 'F: ulos Pököstä', 'Kävele dragsterille, F: kyytiin', 'Kaasu pohjaan – varjo aukeaa kun nostat', 'Ennätyksiä ei tule'] },
   { id: 'liftari', size: 'page', n: 53, kick: '🧍 LIFTARI', title: 'Liftari odottaa kyytiä K-kaupalle', lede: 'Tien varressa seisoo mies pahvikyltin kanssa. Pysähdy, niin hän hyppää kyytiin. Vie hänet K-kaupan pihaan, niin hyvä tekosi kirjataan poliisin rekisteriin.',
     img: ['liftari.jpg'], cap: ['Peukalo pystyssä, kyltissä K-KAUPPA. Rallikuski pysähtyi.'],
     body: ['YLÄSTÖ. Muutama sata metriä ennen K-kauppaa, radan oikealla laidalla, seisoo liftari. Pysähdy hänen viereensä, niin hän kävelee apukuljettajan ovelle ja nousee kyytiin.', 'Minikartalla vilkkuu sininen piste: K-kauppa. Pysähdy kaupan pihaan, niin liftari nousee pois, vilkuttaa kiitokseksi ja menee ostoksille.', 'Jos ajat ohi täyttä vauhtia, hän heristää nyrkkiä. Hyvät teot kirjataan poliisin rekisteriin, ja radio kertoo kylän kiltein kuskin.'],
@@ -7797,7 +7803,52 @@ function makeRallyCar(col, num) { const G = new THREE.Group(), body = lmat(col, 
   const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#f4f4ee'; g.beginPath(); g.arc(64, 64, 60, 0, 6.3); g.fill(); g.fillStyle = '#111'; g.font = 'bold 78px Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(num), 64, 70);
   const nm = new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(c), transparent: true, roughness: 0.5 }); for (const sx of [-1, 1]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5), nm); m.position.set(sx*0.84, 0.64, 0.1); m.rotation.y = sx*Math.PI/2; G.add(m); }
   return G; }
-function buildFinishArea() { FINISH_AREA.ctx = null; FINISH_AREA.last = ''; if (!finishLine) return; const fx = finishLine.position.x, fz = finishLine.position.y;
+// ── the dragster by the finish area: a long, low rail with slicks, a blower and a wing. On foot, F by it and you drive it instead
+//    (the Pökö waits parked where you left it; F by the Pökö swaps back). Monstrous power, poor steering, a parachute when you lift
+//    off at speed. A lap with it doesn't count — no records, no ghost. R: both back in their places. ──
+const DRAG = { on: false, used: false, home: null, park: null, poko: null, carMesh: null, parkMesh: null, pokoMesh: null, sb: null, pokoSb: null, saved: null, hidden: [], chute: 0, chuteM: null,
+  SPEC: { accel: 58, maxSpeed: 125, brake: 16, engineBrake: 1.2, turnRate: 1.15, grip: 3.4, powerSlide: 0.85, powerSlideSpeed: 30, grassPower: 0.35, hbKick: 1.2 } };
+function makeDragster() { const G = new THREE.Group(), body = lmat(0xf2c21a, 0.35), black = lmat(0x151515, 0.6), chrome = lmat(0xd4d6da, 0.2), red = lmat(0xc8201e, 0.45);
+  lmesh(lbox(0.46, 0.3, 4.4), body, 0, 0.42, 1.55, G); lmesh(lbox(0.3, 0.2, 0.8), body, 0, 0.36, 3.95, G); lmesh(lbox(1.1, 0.06, 0.4), black, 0, 0.36, 4.3, G);   // the long nose, a little front wing
+  lmesh(lbox(0.82, 0.45, 1.6), body, 0, 0.62, -0.9, G); lmesh(lbox(0.6, 0.5, 0.8), black, 0, 1.05, -0.35, G); lmesh(lbox(0.66, 0.08, 0.7), lmat(0x223040, 0.15), 0, 1.3, -0.35, G);   // the cockpit and cage
+  lmesh(lbox(0.62, 0.42, 0.9), chrome, 0, 1.0, -1.35, G); lmesh(lbox(0.44, 0.34, 0.5), red, 0, 1.38, -1.35, G); lmesh(lbox(0.5, 0.12, 0.35), chrome, 0, 1.6, -1.3, G);   // the engine, the blower, its scoop
+  for (const sx of [-1, 1]) for (let k = 0; k < 4; k++) { const pp = lmesh(lcyl(0.045, 0.45, 6), chrome, sx*0.36, 1.02, -1.0 - k*0.22, G, false); pp.rotation.z = sx*0.9; }   // zoomie pipes
+  for (const sx of [-1, 1]) { const w = lmesh(ltyre(0.62, 0.52), black, sx*0.78, 0.62, -2.05, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.3, 0.54, 12), chrome, sx*0.78, 0.62, -2.05, G, false); h.rotation.z = Math.PI/2; }   // big slicks
+  for (const sx of [-1, 1]) { const w = lmesh(ltyre(0.28, 0.12), black, sx*0.42, 0.28, 3.5, G); w.rotation.z = Math.PI/2; }   // bicycle-thin fronts
+  for (const sx of [-0.55, 0.55]) lmesh(lbox(0.06, 1.3, 0.08), black, sx, 1.45, -2.7, G); lmesh(lbox(1.9, 0.07, 0.75), red, 0, 2.12, -2.8, G); for (const sx of [-0.95, 0.95]) lmesh(lbox(0.05, 0.45, 0.8), red, sx, 2.0, -2.8, G);   // the wing
+  lmesh(lbox(0.3, 0.3, 0.3), black, 0, 0.55, -2.85, G);   // the chute pack
+  G.rotation.order = 'YXZ'; return G; }
+function makeChute() { const m = new THREE.Mesh(new THREE.ConeGeometry(1.1, 1.6, 12, 1, true), new THREE.MeshStandardMaterial({ color: 0xf4f4f0, roughness: 0.8, side: THREE.DoubleSide })); m.rotation.x = -Math.PI/2; return m; }
+function buildDragster() { DRAG.home = null; DRAG.on = false; DRAG.carMesh = DRAG.parkMesh = DRAG.pokoMesh = null; if (!finishLine) return;
+  const n = trackPoints.length, g = gridIndex(); let B = null;   // parked on the verge of Malminrajantie just short of the line, nose up the road: out onto the straight and floor it
+  for (let k = 10; k < 90 && !B; k += 3) for (const sd of [1, -1]) { const i = (g - k + n) % n, a = trackPoints[i], b = trackPoints[(i + 3) % n], L = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x)/L, uz = (b.y - a.y)/L, off = wAt(i)/2 + 3.0;
+    const x = a.x + uz*off*sd, z = a.y - ux*off*sd; if ([-3.2, -1.6, 0, 1.6, 3.2].every(t => roadsideOk(x + ux*t, z + uz*t, 0.9) && clearSpot(x + ux*t, z + uz*t, 0.8))) { B = { x, z, yaw: Math.atan2(-ux, -uz) }; break; } }   // (the rally comes down Malminrajantie to the line: the dragster faces up it, 300 m of straight)
+  if (!B) { const L0 = finishLot(finishLine.position.x, finishLine.position.y, 8.6, 3, 14, 70); if (L0) B = { x: L0.x, z: L0.z, yaw: L0.yaw + Math.PI/2 }; } if (!B) return;
+  DRAG.home = { x: B.x, z: B.z, angle: B.yaw }; reserve('dragster', [B.x, B.z], 4.5);
+  DRAG.parkMesh = makeDragster(); lifeGroup.add(DRAG.parkMesh); DRAG.carMesh = makeDragster(); DRAG.carMesh.name = 'dragster'; DRAG.carMesh.visible = false; carGroup.add(DRAG.carMesh);
+  DRAG.chuteM = makeChute(); DRAG.chuteM.position.set(0, 0.8, -4.3); DRAG.chuteM.visible = false; DRAG.carMesh.add(DRAG.chuteM);
+  DRAG.park = { ...DRAG.home }; dragPlace(); }
+function dragPlace() {   // the parked one(s) where they stand, with their collision boxes
+  const P = DRAG.park; if (DRAG.parkMesh) { DRAG.parkMesh.visible = !DRAG.on; DRAG.parkMesh.position.set(P.x, Y(P.x, P.z), P.z); DRAG.parkMesh.rotation.set(0, P.angle, 0); }
+  if (DRAG.sb) { staticRemove(DRAG.sb); DRAG.sb = null; } if (!DRAG.on && P) { DRAG.sb = { x: P.x, z: P.z, yaw: P.angle, hw: 0.9, hl: 3.4, kind: 'lm' }; addStaticBox(DRAG.sb); }
+  if (DRAG.pokoSb) { staticRemove(DRAG.pokoSb); DRAG.pokoSb = null; } if (DRAG.pokoMesh) DRAG.pokoMesh.visible = DRAG.on;
+  if (DRAG.on && DRAG.poko) { const Q = DRAG.poko; DRAG.pokoMesh.position.set(Q.x, Y(Q.x, Q.z), Q.z); DRAG.pokoMesh.rotation.set(0, Q.angle, 0); DRAG.pokoSb = { x: Q.x, z: Q.z, yaw: Q.angle, hw: 0.85, hl: 1.9, kind: 'lm' }; addStaticBox(DRAG.pokoSb); } }
+function dragSwap(toDrag) { if (!DRAG.home || DRAG.on === toDrag) return;
+  const here = { x: car.x, z: car.z, angle: car.angle }, go = toDrag ? DRAG.park : DRAG.poko;
+  if (toDrag) { if (!DRAG.pokoMesh) { DRAG.pokoMesh = carGroup.clone(true); for (const c of [...DRAG.pokoMesh.children]) if (c.name === 'dragster') DRAG.pokoMesh.remove(c); lifeGroup.add(DRAG.pokoMesh); }   // (a snapshot of the Pökö stays parked)
+    DRAG.poko = here; DRAG.hidden = carGroup.children.filter(c => c !== DRAG.carMesh && c.visible); DRAG.hidden.forEach(c => c.visible = false); DRAG.carMesh.visible = true;
+    DRAG.saved = {}; for (const k in DRAG.SPEC) { DRAG.saved[k] = DRIVE[k]; DRIVE[k] = DRAG.SPEC[k]; } if (gameState === State.RACING) DRAG.used = true;
+    pizzaMsg(T('🏁 DRAGSTERI! Hirveät tehot – aika ei kelpaa ennätykseksi'), true); }
+  else { DRAG.park = here; DRAG.carMesh.visible = false; DRAG.chute = 0; DRAG.chuteM.visible = false; DRAG.hidden.forEach(c => c.visible = true); DRAG.hidden = []; if (DRAG.saved) Object.assign(DRIVE, DRAG.saved); DRAG.saved = null; }
+  DRAG.on = toDrag; car.x = RI.x = go.x; car.z = RI.z = go.z; car.angle = RI.a = go.angle; car.vx = car.vz = car.speed = 0; car.steerSm = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle; dragPlace(); }
+function dragNear(h) { if (!DRAG.home || !h) return false; const P = DRAG.on ? DRAG.poko : DRAG.park; return !!P && Math.hypot(h.x - P.x, h.z - P.z) < 4.2; }   // (by the parked one: the dragster, or the Pökö while you have the dragster)
+function dragUpdate(dt) { if (!DRAG.on) return; const v = Math.hypot(car.vx, car.vz), lift = !car.throttle;
+  if (!DRAG.chute && lift && v > 45) { DRAG.chute = 1; DRAG.chuteM.visible = true; DRAG.chuteM.scale.setScalar(0.2); if (audio) beep(300, 0.2, 0.08, 'triangle'); }   // off the gas at speed: the chute pops
+  if (DRAG.chute) { DRAG.chuteM.scale.setScalar(Math.min(1, DRAG.chuteM.scale.x + dt*3)); const k = Math.min(1, v/40), f = Math.max(0, 1 - dt*1.2*k); car.vx *= f; car.vz *= f; DRAG.chuteM.rotation.z += dt*2;
+    if (v < 4 || car.throttle) { DRAG.chute = 0; DRAG.chuteM.visible = false; } } }
+function dragReset() { if (DRAG.on) { DRAG.on = false; DRAG.carMesh.visible = false; DRAG.chute = 0; if (DRAG.chuteM) DRAG.chuteM.visible = false; DRAG.hidden.forEach(c => c.visible = true); DRAG.hidden = []; if (DRAG.saved) Object.assign(DRIVE, DRAG.saved); DRAG.saved = null; }
+  DRAG.used = false; if (DRAG.home) { DRAG.park = { ...DRAG.home }; dragPlace(); } }
+function buildFinishArea() { FINISH_AREA.ctx = null; FINISH_AREA.last = ''; buildDragster(); if (!finishLine) return; const fx = finishLine.position.x, fz = finishLine.position.y;
   // the scoreboard
   // the scoreboards: one by the finish, two more a third and two thirds of the way round (30.9., Antti) — one canvas, one material for all three
   const n = trackPoints.length, spots = [[fx, fz]]; if (n) { let fi = 0, fd = Infinity; trackPoints.forEach((p, i) => { const d = Math.hypot(p.x - fx, p.y - fz); if (d < fd) { fd = d; fi = i; } });
@@ -8733,7 +8784,7 @@ function emittersUpdate(dt) {
 function worldUpdate(dt) {
   worldT += dt;
   carStillT = Math.hypot(car.vx, car.vz) < 1.5 && gameState === State.RACING ? carStillT + dt : 0;
-  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); lpUpdate(dt); queueUpdate(dt); extras2Update(dt); extras3Update(dt); policeUpdate(dt); trailUpdate(); bassUpdate(dt); heviUpdate(dt); humansUpdate(dt); walkUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
+  DISPATCH.update(); vehiclesUpdate(dt); updateFieldGames(dt); pizzaUpdate(dt); lpUpdate(dt); queueUpdate(dt); extras2Update(dt); extras3Update(dt); policeUpdate(dt); trailUpdate(); dragUpdate(dt); bassUpdate(dt); heviUpdate(dt); humansUpdate(dt); walkUpdate(dt); firesUpdate(dt); emittersUpdate(dt); nearVisUpdate(dt);
   let siren = 0; for (const v of VEHICLES) if ((v.job && v.job.phase === 'drive') || v.chase) siren = Math.max(siren, Math.max(0, 1 - Math.hypot(v.x - car.x, v.z - car.z)/240));
   sirenSet(siren, dt);
 }
@@ -9208,7 +9259,7 @@ addEventListener('keydown', e => {
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
   if (e.code==='KeyE' && !e.repeat) { initAudio(); radioNext(); }   // (in the menu too: the radio there)
   if (e.code==='KeyB' && !e.repeat && gameState !== State.MENU) { initAudio(); bassToggle(); }
-  if (e.code==='KeyF' && !e.repeat) { if (WALK.on) walkIn(); else walkOut(); }   // out of the car / back in
+  if (e.code==='KeyF' && !e.repeat) { if (WALK.on) { if (dragNear(WALK.h) && !WALK.h.down) { dragSwap(!DRAG.on); walkIn(true); } else walkIn(); } else walkOut(); }   // out of the car / back in — or into the other one parked here (the dragster, the Pökö)
   if (e.code==='Digit1' || e.code==='Numpad1') radioVol(-1);   // radio quieter / louder
   if (e.code==='Digit2' || e.code==='Numpad2') radioVol(1);
   if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = T(camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'); cpd.style.color='#ffe9a8'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0, 900); }
@@ -9224,7 +9275,7 @@ function startRace(newTrack) {
   if (newTrack) generateTrack();
   resetCar();
   checkpoints.forEach(cp=>cp.passed=false);
-  walkIn(true); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
+  walkIn(true); dragReset(); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
   checkpointsPassed=0; raceTime=0; prevFinishS=null; prevCpS=null; onlineStart();
   gameState = State.RACING; raceTime = 0;   // (no 3-2-1-GO: the clock starts at the line anyway — Antti, 29.9.)
   countdownT = 0; radioStart(); countdownLast = -1; document.getElementById('countdown').style.opacity = 0;
@@ -9290,6 +9341,7 @@ function finishRace() {
   document.getElementById('final-time').style.color=raceTime<bestTime?'#44ff44':'#ff4444';
   const prevBest = bestTime;
   if (CUT.on) cutUpdate();   // (finished while still off the road: judged now)
+  if (DRAG.used) { ghostRec = null; ONLINE.lastRun = null; document.getElementById('final-time').style.color = '#ff4444'; document.getElementById('best-time-display').textContent = T('dragsterilla — aika ei kelpaa') + (bestTime < Infinity ? ' · ' + T('paras: {0}', formatTime(bestTime)) : ''); return; }   // (the dragster: fun, not a record)
   if (CUT.bad) { ghostRec = null; ONLINE.lastRun = null; onlineOfferName(); document.getElementById('final-time').style.color = '#ff4444';
     document.getElementById('best-time-display').textContent = T('mutka oikaistu — aika ei kelpaa') + (bestTime < Infinity ? ' · ' + T('paras: {0}', formatTime(bestTime)) : ''); return; }
   ghostFinish(raceTime); onlineOfferName();
