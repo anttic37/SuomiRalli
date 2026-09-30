@@ -274,6 +274,55 @@
   .lh-ad .ad-big { font: 900 42px/0.95 "Arial Black", Arial, sans-serif; letter-spacing: -1px; color: #c4201a; } .lh-ad .ad-small { font: 700 15px/1.3 Arial, sans-serif; margin-top: 7px; }
   .lh-ad.cl { background: #f7f1e0; border: 2px solid #1a1814; outline: 1px solid #1a1814; outline-offset: -7px; } .lh-ad.cl .ad-big { font: 900 34px/1 "Times New Roman", serif; color: #1a1814; letter-spacing: 0.08em; } .lh-ad.cl .ad-small { font: 18px/1.35 "Times New Roman", serif; max-width: 480px; margin: 8px auto 0; }
   .lh-ad.low .ad-big { font-size: 26px; } .lh-ad.low .ad-small { font-size: 14px; margin-top: 4px; }
+
+  /* ── 30.9.: the paper set like a Finnish morning paper (Antti's Savon Sanomat sample): near-white newsprint, heavy serif
+     headlines, a tinted section label with a bar on a heavy rule, a light-blue accent, datelines on their own line, grey fact
+     boxes with bullets, captions with the photographer, a big quote mark, "Sivu N" references ── */
+  .pv-page { background: #f4f2ec; background-image: radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px); background-size: 4px 4px; padding: 30px 40px 36px; font-family: Georgia, "Times New Roman", "Liberation Serif", "DejaVu Serif", serif; color: #1b1b1b; }
+  .lh-folio { gap: 12px; border-bottom: 1px solid #1b1b1b; padding-bottom: 4px; margin-bottom: 12px; font: 700 11px Arial, sans-serif; letter-spacing: 0; text-transform: none; color: #1b1b1b; }
+  .lh-folio b { font: 900 12px Arial, sans-serif; letter-spacing: 0.02em; } .lh-folio .pn { font: 900 15px Arial, sans-serif; } .lh-folio i { font: 11.5px Georgia, serif; color: #333; }
+  .lh-sec { border-bottom: 3px solid #1b1b1b; margin: 0 0 12px; line-height: 0; } .lh-sec span { display: inline-block; line-height: 1; background: #dfe8f1; border-left: 7px solid #3f6f9f; color: #1d3c5e; font: 900 15px Arial, sans-serif; letter-spacing: 0.05em; padding: 5px 12px 4px 9px; margin-bottom: 0; }
+  .pv-page h2 { font: 700 50px/1.02 Georgia, "Times New Roman", serif; letter-spacing: -1px; margin: 0 0 8px; } .pv-page h2.up { font-size: 52px; text-transform: none; letter-spacing: -1.2px; } .pv-page h2.mid { font: 700 42px/1.04 Georgia, "Times New Roman", serif; letter-spacing: -0.8px; }
+  .pv-page h2.lh-lead { font: 700 62px/0.98 Georgia, "Times New Roman", serif; letter-spacing: -1.6px; text-transform: none; margin: 10px 0 8px; }
+  .pv-page h3 { font: 700 30px/1.05 Georgia, "Times New Roman", serif; letter-spacing: -0.5px; }
+  .lh-deck { font: 19px/1.3 Georgia, "Times New Roman", serif; color: #222; margin: 2px 0 12px; } .lh-lede { font: 700 18px/1.3 Georgia, serif; }
+  .lh-by { display: none; }
+  .lh-photo { border: none; background: #cfd3d6; } .lh-photo img { filter: none; }
+  .lh-cap { font: 12.5px/1.3 Georgia, serif; font-style: normal; color: #333; margin: 5px 0 12px; } .lh-cap::after { content: ' Kuva: Ylästön Sanomat'; font: 11px Georgia, serif; letter-spacing: 0; color: #555; }
+  .lh-cols { font: 15px/1.42 Georgia, "Times New Roman", serif; text-align: left; hyphens: manual; } .lh-cols.big { font-size: 16px; line-height: 1.45; } .lh-cols.c2, .lh-cols.c3 { column-rule: none; column-gap: 20px; }
+  .lh-cols .dl, .lh-fcol .dl, .lh-brief .dl { display: block; font: 700 11.5px Arial, sans-serif; letter-spacing: 0.03em; margin-bottom: 1px; }
+  .tight .lh-cols, .tight .lh-cols.big { font-size: 14.2px; line-height: 1.38; } .tighter .lh-cols, .tighter .lh-cols.big { font-size: 13.4px; line-height: 1.34; }
+  .lh-pull { margin: 10px 0 4px; padding: 0; border: none; font: 700 22px/1.22 Georgia, serif; text-align: left; } .lh-pull::before { content: '”'; display: block; font: 900 78px/0.62 Georgia, serif; margin-bottom: 2px; }
+  .lh-box { border: none; background: #e4e4e0; padding: 12px 14px 10px; font: 13.5px/1.4 Arial, sans-serif; margin-top: 12px; } .lh-box b { font: 700 16px/1.2 Georgia, serif; letter-spacing: 0; margin-bottom: 6px; }
+  .lh-box ul { margin: 0; padding: 0 0 0 16px; } .lh-box li { margin: 0 0 3px; } .lh-box i { display: block; margin-top: 8px; font: 11px Arial, sans-serif; color: #555; font-style: normal; }
+  .lh-prow { display: flex; gap: 20px; align-items: flex-start; } .lh-prow > .lh-cols { flex: 1 1 0; min-width: 0; } .lh-prow > .lh-box { flex: 0 0 200px; margin-top: 0; }
+  .lh-srow { display: flex; gap: 18px; align-items: flex-start; } .lh-smain { flex: 1 1 0; min-width: 0; } .lh-brief { flex: 0 0 196px; border-left: 1px solid #b9b9b4; padding-left: 14px; }
+  .lh-brief .bh { background: #dfe8f1; color: #1d3c5e; font: 900 15px Arial, sans-serif; letter-spacing: 0.05em; padding: 5px 9px 4px; margin-bottom: 8px; }
+  .lh-brief a { display: block; font: 13px/1.35 Georgia, serif; padding: 0 0 9px; margin-bottom: 9px; border-bottom: 1px solid #b9b9b4; } .lh-brief a:last-child { border-bottom: none; }
+  .lh-brief a b { display: block; font: 700 16px/1.15 Georgia, serif; margin-bottom: 4px; } .lh-brief a i { display: block; font: 700 12px Arial, sans-serif; font-style: normal; margin-top: 4px; }
+  .lh-sivu { display: block; font: 700 12.5px Arial, sans-serif; margin-top: 8px; } .lh-sivu:hover { text-decoration: underline; }
+  .lh-stamp { color: #3f6f9f; border-color: #3f6f9f; }
+  /* the front page */
+  .lh-ftops { display: flex; gap: 12px; margin-bottom: 10px; } .lh-ftop { flex: 1 1 0; display: flex; gap: 10px; align-items: stretch; background: #dfe8f1; padding: 9px 11px; min-height: 96px; box-sizing: border-box; }
+  .lh-ftop > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; } .lh-ftop b { font: 700 18px/1.12 Georgia, serif; } .lh-ftop i, .lh-ftea i { font: 700 12px Arial, sans-serif; font-style: normal; margin-top: 6px; }
+  .lh-ftop .lh-photo { width: 118px; flex: none; height: auto !important; }
+  .lh-mast { display: block; border: none; margin: 0; padding: 0; overflow: visible; white-space: nowrap; }
+  .lh-mast b { display: inline-block; font: 900 84px/0.92 "Arial Black", "Arial", sans-serif; letter-spacing: -2px; transform: scaleX(0.74); transform-origin: 0 0; width: 136%; }
+  .lh-dline { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; font: 700 11.5px Arial, sans-serif; padding: 4px 0 5px; border-bottom: 7px solid #f2c230; margin-bottom: 4px; } .lh-dline .w { font-weight: 400; }
+  .lh-frow { display: flex; gap: 18px; align-items: flex-start; } .lh-fcol { flex: 0 0 196px; font: 14.5px/1.42 Georgia, serif; } .lh-fph { flex: 1 1 0; min-width: 0; }
+  .lh-fteas { display: flex; gap: 0; border-top: 1px solid #1b1b1b; margin-top: 8px; padding-top: 10px; } .lh-ftea { flex: 1 1 0; display: flex; gap: 12px; padding: 0 14px; } .lh-ftea:first-child { padding-left: 0; border-right: 1px solid #b9b9b4; } .lh-ftea:last-child { padding-right: 0; }
+  .lh-ftea > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; } .lh-ftea b { font: 700 22px/1.1 Georgia, serif; } .lh-ftea .lh-photo { width: 130px; flex: none; }
+  .lh-want1 { color: #1d3c5e; font-size: 13px; }
+  .lh-inside { border-top: 1px solid #b9b9b4; margin-top: 10px; padding-top: 6px; font: 13px Georgia, serif; } .lh-inside i, .lh-index i, .lh-teas i { color: #1d3c5e; }
+  .lh-ad.wide { flex-direction: row; background: #e8742a; border: none; margin-top: 12px; height: 132px; color: #fff; } .lh-ad.wide .ad-ph { width: 34%; border-right: none; } .lh-ad.wide .ad-big { color: #fff; font-size: 34px; text-align: left; } .lh-ad.wide .ad-small { color: #fff; text-align: left; } .lh-ad.wide .ad-txt { text-align: left; }
+  /* ads, police, letters, keys, change list: the new colours */
+  .lh-ad { border: none; background: #fbf6e6; box-shadow: inset 0 0 0 1px #c9c4b4; } .lh-ad .ad-ph { border-right: none; } .lh-ad.v .ad-ph, .lh-ad.fill .ad-ph { border-bottom: none; } .lh-ad .ad-tag { background: #1b1b1b; }
+  .lh-ad.cl { background: #fbf8ee; box-shadow: none; border: 1px solid #1b1b1b; outline: none; }
+  .lh-half + .lh-half { border-top: 1px solid #1b1b1b; } .lh-htxt .lh-cols { font-size: 17px; line-height: 1.45; } .lh-htxt .lh-sec { margin-bottom: 8px; } .lh-htxt .lh-sec span { font-size: 13px; }
+  .rp-want { border: none; background: #e4e4e0; } .rp-wt { color: #1b1b1b; } .rp-t .rk { color: #1d3c5e; } .rp-h { border-bottom: 3px solid #1b1b1b; }
+  .ml-l { border-left-color: #3f6f9f; } .ml-r b { color: #1d3c5e; }
+  .lh-lyh b.d { color: #1d3c5e; } .lh-in.even > .lh-lyh { flex: 1 1 auto; } .lh-lyh { font-family: Georgia, serif; font-size: 13px; column-rule: 1px solid #b9b9b4; }
+  .lh-keys kbd { background: #fff; } .lh-boxes .lh-box { font-size: 13.5px; }
 </style>
 </head>
 <body>
@@ -4520,6 +4569,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', '📰 Lehti taitettu uudestaan aamulehden malliin: etusivulle teaserilaatikot, iso nimiö keltaisella viivalla, osastolaput, kuvatekstit kuvaajineen, harmaat faktalaatikot, LYHYESTI-palsta aukeamille ja sivuviittaukset', '10.34'],
   ['30.9.', '🧖 Saunojat juoksevat tien laitaan huutamaan HILJEMPAA, kun ajat lujaa ohi', '10.04'],
   ['30.9.', '🐦 Lintuparvi pyrähtää metsästä, kun ajat lujaa ohi', '10.04'],
   ['30.9.', '👵 Suojatie ja mummo: pysähdy, niin hän ylittää tien ja kiittää (hyvä teko rekisteriin)', '10.04'],
@@ -4793,11 +4843,14 @@ const LH_KK = ['tammikuuta', 'helmikuuta', 'maaliskuuta', 'huhtikuuta', 'toukoku
 function lhDate() { return (CHANGES[0] ? CHANGES[0][0] : '') + '1988'; }
 function lhDay() { const m = /(\d+)\.(\d+)\./.exec(CHANGES[0] ? CHANGES[0][0] : '') || [0, 1, 6], d = new Date(1988, m[2] - 1, +m[1]);   // (the folio's date: "torstaina 29. syyskuuta 1988")
   return ['sunnuntaina', 'maanantaina', 'tiistaina', 'keskiviikkona', 'torstaina', 'perjantaina', 'lauantaina'][d.getDay()] + ' ' + m[1] + '. ' + LH_KK[m[2] - 1] + ' 1988'; }
-function lhMast(big) { return '<div class="lh-mast' + (big ? ' big' : '') + '"><b>YLÄSTÖN SANOMAT</b><span class="lh-red">' + (big ? 'UUSIMMAT JUTUT' : 'YLÄSTÖ 1988') + '</span><i>' + lhDate() + ' · Nro ' + CHANGES.length + ' · 3,50 mk</i></div>'; }
+function lhMast() { return '<div class="lh-mast"><b>YLÄSTÖN SANOMAT</b></div><div class="lh-dline"><span>' + lhDay().toUpperCase() + '</span><span>NRO ' + CHANGES.length + '</span><span>1. VUOSIKERTA</span><span>3,50 MK</span><span class="w">suomiralli.netlify.app</span></div>'; }
+const lhLabel = (t) => '<div class="lh-sec"><span>' + lhEsc(String(t).replace(/^[^A-Za-zÅÄÖåäö0-9]+/, '')) + '</span></div>';   // (the section label: a tinted box with a bar, on a heavy rule — no emoji)
+const lhSivu = (n) => n ? '<a class="lh-sivu" data-go="' + n + '">Sivu ' + n + '</a>' : '';
+let LH_WHERE = {};
 const lhSec = (S) => lhEsc(S.kick.replace(/^[^A-Za-zÅÄÖåäö]+/, ''));   // (the section in the folio: the kicker without its emoji)
-function lhFolio(sec, pno) { return '<div class="lh-folio' + (pno % 2 ? ' r' : '') + '"><span class="pn">' + pno + '</span><b>YLÄSTÖN SANOMAT</b><span class="sec">' + sec + '</span><i>' + lhDay() + '</i></div>'; }
-function lhBox(b) { return b ? '<div class="lh-box"><b>' + lhEsc(b[0]) + '</b>' + b.slice(1).map(lhEsc).join('<br>') + '</div>' : ''; }
-function lhBody(S, cls) { return '<div class="lh-cols ' + cls + '">' + S.body.map((p, i) => '<p>' + (i === 0 ? '<b>YLÄSTÖ.</b> ' + lhHy(lhEsc(p.replace(/^YLÄSTÖ\.\s*/, ''))) : lhHy(lhEsc(p))) + '</p>').join('') + '</div>'; }
+function lhFolio(sec, pno) { return '<div class="lh-folio' + (pno % 2 ? ' r' : '') + '"><span class="pn">' + pno + '</span><b>YLÄSTÖN SANOMAT</b><i>' + lhDay().replace(/^./, c => c.toUpperCase()) + '</i></div>'; }
+function lhBox(b) { return b ? '<div class="lh-box"><b>' + lhEsc(b[0].charAt(0) + b[0].slice(1).toLowerCase()) + '</b><ul>' + b.slice(1).map(t => '<li>' + lhEsc(t) + '</li>').join('') + '</ul><i>Lähde: Ylästön Sanomat</i></div>' : ''; }   // (the fact box: grey, a bold title, bullets, a source line)
+function lhBody(S, cls) { return '<div class="lh-cols ' + cls + '"><span class="dl">YLÄSTÖ</span>' + S.body.map((p, i) => '<p>' + lhHy(lhEsc(i === 0 ? p.replace(/^YLÄSTÖ\.\s*/, '') : p)) + '</p>').join('') + '</div>'; }   // (the dateline on a line of its own, as the paper does it)
 const LH_BY = '<div class="lh-by">Teksti ja kuvat: Ylästön Sanomat</div>';
 function lhQuote(S) { if (S.quote) return S.quote; const c = S.body.join(' ').replace(/^YLÄSTÖ\.\s*/, '').split(/(?<=[.!?])\s+/).filter(t => t.length >= 40 && t.length <= 115);   // (the pull quote: a mid-length sentence from the story)
   return c[1] || c[0] || ''; }
@@ -4822,7 +4875,7 @@ const LH_ADS = [   // the paper's ads: they fill what the stories leave (an odd 
 function lhAdsPage(pno) { const A = (k, h) => { const a = LH_ADS[k], ph = a.img ? '<div class="lh-photo ad-ph"><img data-src="lehti/' + a.img + '" alt=""><span class="lh-miss"></span></div>' : '';
     return '<div class="lh-ad' + (a.img ? ' v' : ' cl') + '" style="height:' + h + 'px;margin:0"><span class="ad-tag">ILMOITUS</span>' + ph + '<div class="ad-txt"><div class="ad-big">' + a.big + '</div><div class="ad-small">' + lhEsc(a.small) + '</div></div></div>'; };
   const I = (b) => LH_ADS.findIndex(a => a.big === b);
-  return lhPg(lhFolio('ILMOITUKSET', pno) + '<span class="lh-kick">📢 ILMOITUKSET</span><h2 class="mid">Pienet ilmoitukset</h2>' +
+  return lhPg(lhFolio('ILMOITUKSET', pno) + lhLabel('ILMOITUKSET') + '<h2 class="mid">Pienet ilmoitukset</h2>' +
     '<div class="lh-adgrid">' + A(I('K-KAUPPA YLÄSTÖ'), 330) + A(I('PIZZA PERILLE'), 330) + A(I('PAULIN KAALI'), 300) + '<div class="lh-adcol">' + A(I('OSTETAAN'), 96) + A(I('KIITOS'), 96) + A(I('VUOKRATAAN'), 96) + '</div></div>' +
     '<div class="lh-adrow">' + A(I('MYYDÄÄN') >= 0 ? LH_ADS.findIndex(a => a.big === 'MYYDÄÄN' && /Kaalia/.test(a.small)) : 0, 92) + A(I('KADONNUT'), 92) + '</div>', 'lh-frame', ' data-noad="1"'); }
 let LH_ADN = 0;
@@ -4833,7 +4886,9 @@ function lhAd(h, avoid) { let A = LH_ADS[LH_ADN++ % LH_ADS.length]; for (let k =
   return '<div class="lh-ad' + (v ? ' v' : '') + (fill ? ' fill' : '') + '"' + st + '>' + tag + '<div class="lh-photo ad-ph"><img data-src="lehti/' + A.img + '" alt=""><span class="lh-miss"></span></div>' + txt + '</div>'; }
 // the front page's lead: the police's rap sheet ("the biggest criminals", filled in live) — unless a main story is newer (n above 9)
 const LH_POLLEAD = { id: '__pol', n: 9, kick: '🚨 POLIISI TIEDOTTAA', title: 'Kylän suurimmat rikolliset', img: ['rikolliset.jpg'],
-  lede: 'Poliisi julkaisee nimet: nämä kuskit ovat sytyttäneet eniten tulipaloja ja ajaneet eniten ihmisten yli. Rekisteri päivittyy joka ajosta.' };
+  lede: 'Poliisi julkaisee nimet: nämä kuskit ovat sytyttäneet eniten tulipaloja ja ajaneet eniten ihmisten yli. Rekisteri päivittyy joka ajosta.',
+  cap: ['Poliisi ja palokunta ehtivät paikalle, kun rallikuski oli taas käynyt kylässä.'],
+  body: ['Vantaan poliisi on koonnut rekisterin kaikista Ylästön kuskeista. Jokainen sytytetty talo, yliajettu kyläläinen ja eläin kirjataan nimen kanssa, ja lista päivittyy joka ajon jälkeen. Rekisterin kärjessä olevaa kuskia etsitään nyt julisteilla kylän sähköpylväissä.'] };
 function lhPlan() {   // the running order: front, (the police page and a page — the lead's), the mains as spreads (newest first), pages, halves in pairs, how to drive + contents, the change list
   const by = (sz) => LEHTI.filter(s => s.size === sz).sort((a, b) => b.n - a.n), mains = by('main'), pages = by('page'), halves = by('half'), P = []; LH_ADN = 0;
   const polLead = !mains.length || LH_POLLEAD.n > mains[0].n, lead = polLead ? LH_POLLEAD : mains[0], seq = [];
@@ -4845,27 +4900,40 @@ function lhPlan() {   // the running order: front, (the police page and a page �
   seq.push(['ads']); seq.push(['mail']);
   const where = {}; let pn = 2;
   for (const it of seq) { if (it[0] === 'pol') where.__pol = pn++; else if (it[0] === 'ads') where.__ads = pn++; else if (it[0] === 'mail') where.__mail = pn++; else if (it[0] === 'main') { where[it[1].id] = pn; pn += 2; } else { where[it[1].id] = pn; if (it[2]) where[it[2].id] = pn; pn++; } }
-  const keysPage = pn++, lyhPage = pn;
+  const keysPage = pn++, lyhPage = pn; LH_WHERE = where; LH_SPREADN = 0;
   P.push(lhFront(lead, where, keysPage, lyhPage));
   for (const it of seq) { const no = P.length + 1; if (it[0] === 'pol') P.push(lhPolice(no)); else if (it[0] === 'ads') P.push(lhAdsPage(no)); else if (it[0] === 'mail') P.push(lhMail(no)); else if (it[0] === 'main') P.push(...lhSpread(it[1], it[1] === lead, no)); else if (it[0] === 'page') P.push(lhPage(it[1], no)); else P.push(lhHalves(it[1], it[2], no)); }
   P.push(lhKeys(where, keysPage, lyhPage, P.length + 1)); P.push(...lhLyhyesti(P.length + 1));
   return lhFitAll(P); }
 const lhPg = (inner, cls, attrs) => '<div class="pv-page ' + cls + '"><div class="lh-in"' + (attrs || '') + '>' + inner + '</div></div>';
-function lhFront(S, where, keysPage, lyhPage) { const t = LEHTI.filter(s => s !== S && s.size === 'main').sort((a, b) => b.n - a.n).slice(0, 3);   // (the teasers: the next main stories; the contents are on the "Näin ajat" page)
-  return lhPg(lhMast(true) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="lh-lead">' + lhEsc(S.title) + '</h2>' + lhImg(S.img[0], 380, 'fx') +
-    '<div class="lh-lede">' + lhEsc(S.lede) + ' <a data-go="' + (S === LH_POLLEAD ? where.__pol : 2) + '"><i>' + (S === LH_POLLEAD ? 'Sivu ' + where.__pol : 'Sivut 2–3') + ' ›</i></a>' +
-      (S === LH_POLLEAD ? '<span class="lh-want1">Etsintäkuulutettu: <b data-rp="w">–</b></span>' : '') + '</div>' +
-    '<div class="lh-teas">' + t.map(s => '<a data-go="' + where[s.id] + '">' + lhImg(s.img[0], 96) + '<b>' + lhEsc(s.title) + '</b><i>s. ' + where[s.id] + '</i></a>').join('') + '</div>' +
-    '<div class="lh-inside"><b>SISÄLLÄ</b><a data-go="' + keysPage + '">Kaikki jutut <i>' + keysPage + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame front', ' data-noad="1"'); }
-function lhSpread(S, lead, pno) {
-  return [lhPg(lhFolio(lhSec(S), pno) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="up">' + lhEsc(S.title) + '</h2><div class="lh-lede">' + lhEsc(S.lede) + '</div>' + LH_BY + lhImg(S.img[0], 520, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>', 'lh-frame'),
-    lhPg(lhFolio(lhSec(S), pno + 1) + lhImg(S.img[1], 470, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[1]) + '</div>' + lhBody(S, 'c3 dc') + lhBox(S.box) + (lead ? '<div class="lh-stamp">PÄÄUUTINEN</div>' : ''), 'lh-frame', lhQ(S))]; }
-function lhPage(S, pno) { return lhPg(lhFolio(lhSec(S), pno) + '<span class="lh-kick">' + lhEsc(S.kick) + '</span><h2 class="mid">' + lhEsc(S.title) + '</h2><div class="lh-lede">' + lhEsc(S.lede) + '</div>' + LH_BY + lhImg(S.img[0], 460, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>' + lhBody(S, 'c2 big dc') + lhBox(S.box), 'lh-frame', lhQ(S)); }
-function lhHalves(a, b, pno) { const one = (S, flip) => '<div class="lh-half' + (flip ? ' flip' : '') + '">' + lhImg(S.img[0], 0, 'h') + '<div class="lh-htxt lh-frame"><div class="lh-in" data-noad="1"><span class="lh-kick">' + lhEsc(S.kick) + '</span><h3>' + lhEsc(S.title) + '</h3>' + lhBody(S, 'c1') + '</div></div></div>';
+function lhFront(S, where, keysPage, lyhPage) {   // as a morning paper's front: two teaser boxes over the masthead, the lead (headline, deck, a text column beside a big photo), two teasers with photos, an ad along the foot
+  const rest = LEHTI.filter(s => s !== S && s.img && s.img[0]).sort((a, b) => b.n - a.n), top = rest.slice(0, 2), low = rest.slice(2, 4), go = S === LH_POLLEAD ? where.__pol : where[S.id] || 2;
+  const tbox = (s, ph) => '<a class="lh-ftop' + (ph ? ' ph' : '') + '" data-go="' + where[s.id] + '"><span><b>' + lhEsc(s.title) + '</b><i>Sivu ' + where[s.id] + '</i></span>' + (ph ? lhImg(s.img[0], 96) : '') + '</a>';
+  const tease = (s) => '<a class="lh-ftea" data-go="' + where[s.id] + '"><span><b>' + lhEsc(s.title) + '</b><i>Sivu ' + where[s.id] + '</i></span>' + lhImg(s.img[0], 130) + '</a>';
+  const ad = LH_ADS.find(a => a.img && a.wide) || LH_ADS.find(a => a.img);
+  return lhPg('<div class="lh-ftops">' + tbox(top[0], false) + tbox(top[1], true) + '</div>' + lhMast() +
+    '<h2 class="lh-lead">' + lhEsc(S.title) + '</h2><div class="lh-deck">' + lhEsc(S.lede.split(/(?<=[.!?])\s+/)[0]) + '</div>' +
+    '<div class="lh-frow"><div class="lh-fcol"><span class="dl">YLÄSTÖ</span>' + lhHy(lhEsc((S.body && S.body[0] ? S.body[0].replace(/^YLÄSTÖ\.\s*/, '') : S.lede).split(/(?<=[.!?])\s+/).slice(0, 3).join(' '))) +
+      (S === LH_POLLEAD ? '<span class="lh-want1">Etsintäkuulutettu: <b data-rp="w">–</b></span>' : '') + lhSivu(go) + '</div>' +
+      '<div class="lh-fph">' + lhImg(S.img[0], 300, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap ? S.cap[0] : S.lede.split(/(?<=[.!?])\s+/)[0]) + '</div></div></div>' +
+    '<div class="lh-fteas">' + low.map(tease).join('') + '</div>' +
+    '<div class="lh-inside"><b>SISÄLLÄ</b><a data-go="' + keysPage + '">Kaikki jutut <i>' + keysPage + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti <i>' + lyhPage + '</i></a></div>' +
+    '<div class="lh-ad wide"><span class="ad-tag">ILMOITUS</span><div class="lh-photo ad-ph"><img data-src="lehti/' + ad.img + '" alt=""><span class="lh-miss"></span></div><div class="ad-txt"><div class="ad-big">' + ad.big + '</div><div class="ad-small">' + lhEsc(ad.small) + '</div></div></div>', 'lh-frame front', ' data-noad="1"'); }
+// "LYHYESTI" on the right of a spread: short items pointing to other stories in the paper, each with its page
+function lhBriefs(S, k) { const pool = LEHTI.filter(s => s !== S && s.size === 'half').sort((a, b) => b.n - a.n); if (!pool.length) return '';
+  const pick = [0, 1, 2].map(j => pool[(k*3 + j) % pool.length]).filter((s, j, A) => A.indexOf(s) === j);
+  return '<div class="lh-brief"><div class="bh">LYHYESTI</div>' + pick.map(s => '<a data-go="' + LH_WHERE[s.id] + '"><b>' + lhEsc(s.title) + '</b><span class="dl">YLÄSTÖ</span>' + lhHy(lhEsc((s.body[0] || '').split(/(?<=[.!?])\s+/)[0])) + '<i>Sivu ' + LH_WHERE[s.id] + '</i></a>').join('') + '</div>'; }
+let LH_SPREADN = 0;
+function lhSpread(S, lead, pno) { const k = LH_SPREADN++;
+  return [lhPg(lhFolio(lhSec(S), pno) + lhLabel(S.kick) + '<h2 class="up">' + lhEsc(S.title) + '</h2><div class="lh-deck">' + lhEsc(S.lede) + '</div>' + lhImg(S.img[0], 520, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>', 'lh-frame'),
+    lhPg(lhFolio(lhSec(S), pno + 1) + lhImg(S.img[1], 420, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[1]) + '</div><div class="lh-srow"><div class="lh-smain">' + lhBody(S, 'c2') + lhBox(S.box) + '</div>' + lhBriefs(S, k) + '</div>' + (lead ? '<div class="lh-stamp">PÄÄUUTINEN</div>' : ''), 'lh-frame', lhQ(S))]; }
+function lhPage(S, pno) { return lhPg(lhFolio(lhSec(S), pno) + lhLabel(S.kick) + '<h2 class="mid">' + lhEsc(S.title) + '</h2><div class="lh-deck">' + lhEsc(S.lede) + '</div>' + lhImg(S.img[0], 460, 'fx') + '<div class="lh-cap">' + lhEsc(S.cap[0]) + '</div>' +
+  (S.box ? '<div class="lh-prow">' + lhBody(S, 'c2 big') + lhBox(S.box) + '</div>' : lhBody(S, 'c3 big')), 'lh-frame', lhQ(S)); }   // (the fact box beside the text, the way the paper sets its "Vinkit" box)
+function lhHalves(a, b, pno) { const one = (S, flip) => '<div class="lh-half' + (flip ? ' flip' : '') + '">' + lhImg(S.img[0], 0, 'h') + '<div class="lh-htxt lh-frame"><div class="lh-in" data-noad="1">' + lhLabel(S.kick) + '<h3>' + lhEsc(S.title) + '</h3>' + lhBody(S, 'c1') + '</div></div></div>';
   return lhPg(lhFolio(lhSec(a) + (b ? ' · ' + lhSec(b) : ''), pno) + one(a, false) + (b ? one(b, true) : '<div class="lh-half">' + lhAd(null, [a.img[0]]) + '</div>'), 'lh-hp'); }   // (an odd half: the other half is an ad)
 function lhPolice(pno) {   // "Poliisi tiedottaa": the rap sheet from the server, filled in when the page is shown (the baked page holds empty rows)
   const rows = (k) => '<table class="rp-t">' + Array.from({ length: 7 }, (_, i) => '<tr data-rp="' + k + i + '"><td class="rk">' + (i + 1) + '.</td><td class="nm">–</td><td class="n"></td></tr>').join('') + '</table>';
-  return lhPg(lhFolio('POLIISI TIEDOTTAA', pno) + '<span class="lh-kick">🚨 POLIISI TIEDOTTAA</span><h2 class="mid">Kylän vaarallisimmat kuskit</h2>' +
+  return lhPg(lhFolio('POLIISI TIEDOTTAA', pno) + lhLabel('POLIISI TIEDOTTAA') + '<h2 class="mid">Kylän vaarallisimmat kuskit</h2>' +
     '<div class="lh-lede">Vantaan poliisi julkaisee nimet: nämä kuskit ovat sytyttäneet eniten tulipaloja ja ajaneet eniten ihmisten yli. Rekisteri päivittyy joka ajosta.</div>' +
     '<div class="rp-want"><div class="rp-wt">ETSINTÄKUULUTUS</div>' + lhImg('poliisi_b.jpg', 200, 'fx lo') + '<div class="rp-wn" data-rp="w">–</div><div class="rp-wd" data-rp="wd">Tiedot haetaan poliisin rekisteristä…</div></div>' +
     '<div class="rp-cols"><div><b class="rp-h">🔥 TUHOPOLTOT</b>' + rows('f') + '</div><div><b class="rp-h">🚶 YLIAJOT</b>' + rows('p') + '</div></div>' +
@@ -4878,7 +4946,7 @@ function mailFetch() { if (!ONLINE.api || MAILPUB.busy || performance.now() - MA
   fetch(ONLINE.api + '/postipub', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { MAILPUB.busy = false; if (!j || !Array.isArray(j.list)) return; MAILPUB.list = j.list; MAILPUB.at = performance.now();
     lhMailFill(document.getElementById('lehti-mini')); if (PAPER.open) lhMailFill(document.querySelector('#paper .pv-stage')); }).catch(() => { MAILPUB.busy = false; }); }
 function lhMail(pno) { const slot = (k) => '<div class="ml-l" data-ml="' + k + '"><div class="ml-t"></div><div class="ml-f"></div><div class="ml-r"><b>Tekijä vastaa:</b> <span></span></div></div>';
-  return lhPg(lhFolio('POSTI', pno) + '<span class="lh-kick">✉ POSTI</span><h2 class="mid">Lukijoiden kirjeet</h2>' +
+  return lhPg(lhFolio('POSTI', pno) + lhLabel('POSTI') + '<h2 class="mid">Lukijoiden kirjeet</h2>' +
     '<div class="lh-lede">Pelaajat kirjoittavat, tekijä vastaa. Kirjoita sinäkin: alkuruudun ✉ LÄHETÄ POSTIA TEKIJÄLLE.</div>' +
     lhImg('kirje.jpg', 230) + '<div class="ml-list">' + [0, 1, 2].map(slot).join('') + '<div class="lh-box ml-empty"><b>POSTILAATIKKO ON AUKI</b>Ensimmäiset kirjeet ovat matkalla. Tekijä lukee jokaisen ja vastaa parhaisiin tällä palstalla.</div></div>', 'lh-frame', ' data-noad="1"'); }
 function lhMailFill(root) { if (!root) return; const L = MAILPUB.list || []; let n = 0;
@@ -4897,7 +4965,7 @@ function lhRapFill(root) { if (!root) return; lhMailFill(root); const L = RAP.li
   else { set('w', 'EI KETÄÄN'); set('wd', 'Kylä on rauhallinen. Toistaiseksi.'); } }
 function lhKeys(where, keysPage, lyhPage, pno) { const K = [['Enter', 'lähtö'], ['↑', 'kaasu'], ['↓', 'jarru / peruutus'], ['← →', 'ohjaus'], ['välilyönti', 'käsijarru'], ['R', 'uusi lähtö'], ['Esc', 'alkuruutu'], ['C', 'kamera'], ['G', 'haamu päälle / pois'], ['E', 'radio: seuraava kanava'], ['1 · 2', 'radio hiljemmalle / lujemmalle'], ['B', 'bassoboost'], ['P', 'tauko'], ['F', 'ulos autosta / jalkaisin'], ['L', 'kieli (alkuruudussa)']];
   const idx = LEHTI.slice().sort((a, b) => where[a.id] - where[b.id] || b.n - a.n).map(s => '<a data-go="' + where[s.id] + '">' + lhEsc(s.title) + ' <i>' + where[s.id] + '</i></a>').join('');
-  return lhPg(lhFolio('OHJEET · SISÄLLYS', pno) + '<span class="lh-kick">📋 OHJEET</span><h2 class="mid">Näin ajat</h2><div class="lh-lede">Pökö 205 ajetaan näppäimistöllä. Peli on tehty tietokoneelle – kännykällä voi lukea lehteä.</div>' +
+  return lhPg(lhFolio('OHJEET · SISÄLLYS', pno) + lhLabel('OHJEET') + '<h2 class="mid">Näin ajat</h2><div class="lh-lede">Pökö 205 ajetaan näppäimistöllä. Peli on tehty tietokoneelle – kännykällä voi lukea lehteä.</div>' +
     '<div class="lh-keys">' + K.map(([k, t]) => '<div><kbd>' + lhEsc(k) + '</kbd><span>' + lhEsc(t) + '</span></div>').join('') + '</div>' +
     '<div class="lh-boxes"><div class="lh-box"><b>GTA-TILA</b>Aja lähdössä oikeaa kaistaa pois radalta – koko kylä on vapaa. R palauttaa kisaan.</div>' +
     '<div class="lh-box"><b>KERRO KAVERILLE</b>suomiralli.netlify.app – QR-koodi on alkuruudussa.</div>' +
@@ -4906,7 +4974,7 @@ function lhKeys(where, keysPage, lyhPage, pno) { const K = [['Enter', 'lähtö']
 function lhLyhyesti(pno) {   // the change list, filled page by page for real: items go into fixed-height columns until a fourth column would open
   const host = document.createElement('div'); host.className = 'lh-measure'; document.body.appendChild(host); const out = [];
   const items = CHANGES.map(([d, t, hm]) => { const e = lhEsc(t), k = e.indexOf(': '); return '<p><b class="d">' + lhEsc(d) + (hm ? ' ' + hm : '') + '</b> ' + (k > 0 && k <= 70 ? '<b>' + e.slice(0, k + 1) + '</b>' + lhHy(e.slice(k + 1)) : lhHy(e)) + '</p>'; });
-  const page = (n, body, last) => lhPg(lhFolio('LYHYESTI', n) + '<span class="lh-kick">📰 LYHYESTI</span><h2 class="mid">' + (n > pno ? 'Lyhyesti (jatkuu)' : 'Lyhyesti: kaikki muutokset') + '</h2><div class="lh-lyh' + (last ? ' bal' : '') + '">' + body + '</div>', last ? 'lh-frame' : 'lh-lyhp');
+  const page = (n, body, last) => lhPg(lhFolio('LYHYESTI', n) + lhLabel('LYHYESTI') + '<h2 class="mid">' + (n > pno ? 'Lyhyesti (jatkuu)' : 'Lyhyesti: kaikki muutokset') + '</h2><div class="lh-lyh' + (last ? ' bal' : '') + '">' + body + '</div>', last ? 'lh-frame' : 'lh-lyhp');
   let cur = [], i = 0;
   while (i < items.length) { host.innerHTML = page(pno + out.length, '', false); const L = host.querySelector('.lh-lyh'); cur = [];
     while (i < items.length) { L.insertAdjacentHTML('beforeend', items[i]); if (L.scrollWidth > L.clientWidth + 2 && cur.length) { L.lastChild.remove(); break; } cur.push(items[i++]); }
@@ -4924,7 +4992,7 @@ function lhFit(F) { const inn = F.querySelector(':scope > .lh-in'); if (!inn) re
   if (fx.length) spread(free());
   if (F.classList.contains('lh-htxt')) { const h3 = inn.querySelector('h3'), c = inn.querySelector('.lh-cols'), wide = () => h3.scrollWidth > h3.clientWidth + 1;   // (a half's text column: the headline grows as far as its longest word allows, then the text, until the column is full)
     const grow = (el, base, lo, hi, ok) => { let k = 1; const set = () => el.style.fontSize = (base*k).toFixed(1) + 'px'; while (k < hi && free() > 24 && ok()) { k += 0.04; set(); } if (free() < 0 || !ok()) { k -= 0.04; set(); } while (!ok() && k > lo) { k -= 0.04; set(); } };
-    grow(h3, 38, 0.6, 1.45, () => !wide()); grow(c, 19, 0.85, 1.25, () => true); }
+    grow(h3, 34, 0.6, 1.5, () => !wide()); grow(c, 17, 0.78, 1.3, () => true); }
   if (free() < -1) { inn.classList.add('tight'); if (fx.length) spread(free()); }
   if (free() < -1) { inn.classList.add('tighter'); if (fx.length) spread(free()); }
   if (free() >= 80 && inn.dataset.q) { const q = document.createElement('div'); q.className = 'lh-pull'; q.textContent = '”' + inn.dataset.q + '”'; const c = inn.querySelector('.lh-cols'); if (c) c.after(q); else inn.appendChild(q); if (free() < 0) q.remove(); }
@@ -4932,7 +5000,7 @@ function lhFit(F) { const inn = F.querySelector(':scope > .lh-in'); if (!inn) re
   F.dataset.free = Math.round(free()); if (free() > 2) { const hang = inn.scrollHeight - inn.offsetHeight; inn.classList.add('even'); inn.style.height = (avail - hang) + 'px'; } }   // (kept on the page: the layout test checks nothing overflows)
 function lhLoadImgs(el) { el.querySelectorAll('img[data-src]').forEach(im => { if (im.src) return; im.onerror = () => im.parentNode.classList.add('miss'); im.onload = () => im.parentNode.classList.add('ok'); im.src = im.dataset.src; }); }
 const LH_VER = 'mail1';   // (the key also covers the layout functions and the styles; bump this only for a change it can't see)
-function lhKey() { const code = [lhPlan, lhFront, lhSpread, lhPage, lhHalves, lhPolice, lhMail, lhAdsPage, lhAd, lhKeys, lhLyhyesti, lhFitAll, lhFit, lhBody, lhImg, lhFolio, lhMast, lhBox, lhQuote].map(String).join('') + [...document.querySelectorAll('style')].map(e => e.textContent).join('');   // (the layout code and the styles too: change either and the baked pages are stale)
+function lhKey() { const code = [lhPlan, lhFront, lhSpread, lhPage, lhHalves, lhPolice, lhMail, lhAdsPage, lhAd, lhKeys, lhLyhyesti, lhFitAll, lhFit, lhBody, lhImg, lhFolio, lhMast, lhBox, lhQuote, lhLabel, lhBriefs, lhSivu].map(String).join('') + [...document.querySelectorAll('style')].map(e => e.textContent).join('');   // (the layout code and the styles too: change either and the baked pages are stale)
   const str = JSON.stringify([LEHTI, CHANGES, LH_ADS, LH_VER, code]); let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 0x01000193);   // (which paper this is: the baked pages must be of this very game)
   return (h >>> 0).toString(16); }
 function lehtiFetch() {   // the paper comes ready-made from the server (lehti/lehti.json, laid out by build.py); laid out here only if that's missing or of another version

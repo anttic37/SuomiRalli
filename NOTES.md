@@ -791,6 +791,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   past → the stick); birds (pool of 14 v-shapes, a flock from woods ≥ 6 trees within 16 m, 45 m ahead, every 9–17 s at > 18 m/s);
   sauna gang (S.road = the route's edge on their side; fast within 75 m → up to 4 run there in a row and shout, 35 s cool).
   t_six, photos t_lh_m. The keys page's contents list shrinks with the story count (13 px − 0.25 px a story over 35, ≥ 9.5).
+- Paper re-set after Antti's Savon Sanomat sample (30.9.): near-white newsprint, Georgia headlines (no caps), lhLabel() = the
+  section label (tinted box + blue bar on a 3 px rule, emoji stripped) instead of the red kick; datelines ("YLÄSTÖ") on their own
+  line (lhBody .dl); captions end "Kuva: Ylästön Sanomat"; grey fact boxes with bullets + source (lhBox), beside the text on
+  pages (.lh-prow); a big ” before pull quotes; spreads' right page = photo + text + a LYHYESTI column of three half stories with
+  their pages (lhBriefs, LH_WHERE); the front = two light-blue teaser boxes over a condensed masthead (Arial Black scaleX .74)
+  + date line on a yellow rule, the lead (headline, deck, a text column + "Sivu N" beside the photo), two photo teasers, an orange
+  wide ad. The CSS is an override block at the end of the paper styles. Half text fit bases: h3 34, text 17.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
