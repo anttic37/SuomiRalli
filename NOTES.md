@@ -811,6 +811,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   has its own paved lay-by ("levike") on Malminrajantie: 13 × 3.9 m off the road edge, laid on the slope both ways, drives like the
   road (inLayby in updateCar), crowd there removed, verge grass under it scaled to 0; the dragster sits in it, nose up the road.
   Candidates skip clearSpot (the crowd's reservations filled the verge) for roadsideOk + LIFE_PLAN + vehicles. t_ajabtn.
+- Dragster, step 1 of Antti's order (30.9.): the new model + its lay-by. LAY (layPlan in buildGridBox, before the scenery):
+  a lane on the driver's left of the start straight, t = −44…+10 m from the grid, off the road edge 0.4 m → 4.4 m out and back
+  (smoothstep), 3.6 m wide; inPaved() includes it so trees, tyre walls, edge posts and the crowd keep off; built in buildDragster
+  as a ribbon on the ground + white edge lines; inLay() drives like the road. The model (makeDragster) is built for its own rigid-
+  body physics to come: root on the ground under the CG, a "body" group, a group per wheel at its hub (spin child, steer y), wing /
+  driver / chute groups (to come off, be thrown out); DRAG_GEOM has the dimensions, wheel positions and radii, mass, CG. Decided
+  for the physics step: stuck on its roof → it catches fire and the driver is thrown out. t_dragmodel (shots). Rally times unchanged.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
