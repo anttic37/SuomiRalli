@@ -872,6 +872,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   in knockOver) sent with the rest; api.mjs keeps r.t (RAP_MAX t 300), GET /rap returns total.t and lumber (top 3). The radio: RADIO.hot
   = a line for what just happened (a tree / a fence), said first by radioNewsLine; the pool gets "Kylästä kaadettu jo N puuta", "Kylän
   pahin metsuri: X", fresh counts. Test t_rapt over serve.mjs. (The paper already had the 'puut' / 'aidat' stories, front-page teasers.)
+- Dragster camera in the forest (30.9., Antti: "kamera pyörii hallitsemattomasti jos ajat dragsterilla metsään"): every felled tree gave
+  the dragster a yaw blow at the trunk, and the camera followed its nose. Now updateCamera, in the dragster, aims at dragCamAngle() (the
+  velocity's heading when going forward > 4 m/s, else the nose; smoothed in DP.camA) and turns at most 1.1 rad/s; the tree's impulse is
+  applied a quarter as far off the centre line. t_dragforest: max yaw 5.6 -> 2.1 rad/s, camera <= 1.1 rad/s. (Full throttle on grass
+  still swings the tail round — the rear slicks spinning lose their side grip.)
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

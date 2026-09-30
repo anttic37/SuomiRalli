@@ -336,7 +336,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 11.59 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 12.07 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4599,6 +4599,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Dragsterin kamera ei enää pyöri metsässä: se seuraa ajosuuntaa eikä keulaa ja kääntyy korkeintaan 60° sekunnissa; puun isku pyöräyttää dragsteria maltillisemmin', '15.07'],
   ['30.9.', 'Puunkaadot uutisiin: radion kylähuhu kertoo heti kaadetusta puusta tai aidasta, ja poliisin rekisteri laskee kaikkien kaatamat puut – radio kertoo kylän pahimman metsurin', '14.59'],
   ['30.9.', 'Puut kaatuvat ja aidat lakoavat, kun niihin ajaa lujaa (hiljaa ne pysyvät pystyssä); kaatuva puu kaataa alle jäävät. Dragsterin tuntuma viritetty: jarrut pienemmät (varjo tekee työn), pakki ryömii, etupito ja ohjaus paremmat', '13.57'],
   ['30.9.', 'Dragsterille oma oikea fysiikka: jousitus, slicksien pito ja sutiminen, keulan nousu wheelie-tukien varaan, siiven painovoima, jarruvarjo – osuma kylkeen pyöräyttää, reunakivi voi kääntää katolleen, siipi ja renkaat irtoavat; katollaan se syttyy ja kuski lentää ulos. Kunnon äänet: Top Fuel -moottori, pamaukset, rytinät. Levike kiinni tiessä, reunakivet ja rengasseinä', '13.33'],
@@ -7979,7 +7980,7 @@ function dragInit(x, z, angle) {
   DP.q.setFromAxisAngle(_dYax, angle); const fx = Math.sin(angle), fz = Math.cos(angle), rx = x, rz = z;   // (x, z: the model's root, on the ground between the axles)
   DP.p.set(rx + fx*DP.cg[2], Y(rx, rz) + DP.cg[1] + 0.03, rz + fz*DP.cg[2]); DP.v.set(0, 0, 0); DP.w.set(0, 0, 0); DP.pp.copy(DP.p); DP.pq.copy(DP.q);
   DP.wh = DRAG_GEOM.wheels.map(W => ({ W, hy: W.r, rot: 0, on: false, load: 0 })); DP.spin = 0; DP.rpm = 1800; DP.slip = 0; DP.scrape = 0; DP.hit = 0; DP.roofT = 0; DP.steer = 0; DP.broken = false; DP.lost = {};
-  DP.ok = true; if (DRAG.carMesh) { const P = DRAG.carMesh.userData.parts; P.wing.visible = P.driver.visible = true; for (const k in P.wheels) P.wheels[k].g.visible = true; } dpSync(); }
+  DP.camA = angle; DP.ok = true; if (DRAG.carMesh) { const P = DRAG.carMesh.userData.parts; P.wing.visible = P.driver.visible = true; for (const k in P.wheels) P.wheels[k].g.visible = true; } dpSync(); }
 function dpSync() { dpW(0, DP.cg[1], 0, _dR); _dF.set(0, 0, 1).applyQuaternion(DP.q); if (Math.hypot(_dF.x, _dF.z) > 0.2) car.angle = Math.atan2(_dF.x, _dF.z);
   car.x = DP.cx = _dR.x; car.z = DP.cz = _dR.z; car.vx = DP.cvx = DP.v.x; car.vz = DP.cvz = DP.v.z; car.speed = DP.v.x*Math.sin(car.angle) + DP.v.z*Math.cos(car.angle); }
 function dpLose(part, vx, vz) {   // torn off: a world-space copy flies free (the rally car's debris), the original hides
@@ -8070,6 +8071,9 @@ function dragPhys(dt, live) {
   // on its roof or its side and stopped: fire, the driver thrown out (the rally car's wreck: the fire engine and the ambulance come)
   _dU.set(0, 1, 0).applyQuaternion(DP.q); if (_dU.y < 0.35 && DP.v.length() < 2.5 && DP.w.length() < 1.5) DP.roofT += dt; else DP.roofT = 0;
   if (DP.roofT > 1.2 && !WRECK.on && gameState === State.RACING) { wreckCar('drag'); DRAG.carMesh.userData.parts.driver.visible = false; DP.broken = true; } }
+function dragCamAngle(dt) {   // the dragster's camera follows where it's going, not where its nose points: a spin in the trees, a tumble, doesn't whirl the view
+  const sp = Math.hypot(car.vx, car.vz), fwd = car.vx*Math.sin(car.angle) + car.vz*Math.cos(car.angle), tgt = sp > 4 && fwd > 0 ? Math.atan2(car.vx, car.vz) : car.angle;
+  if (DP.camA === undefined) DP.camA = car.angle; DP.camA += angDiff(tgt - DP.camA)*Math.min(1, dt*(sp > 4 ? 2.5 : 0.8)); return DP.camA; }
 function dragView() {   // the model drawn between the last two physics steps
   const al = Math.min(1, acc/PHYS_DT), P = DRAG.carMesh.userData.parts; _dQ.copy(DP.pq).slerp(DP.q, al); _dA.copy(DP.pp).lerp(DP.p, al);
   carGroup.quaternion.copy(_dQ); carGroup.position.copy(_dB.set(-DP.cg[0], -DP.cg[1], -DP.cg[2]).applyQuaternion(_dQ).add(_dA));
@@ -9106,7 +9110,8 @@ function knockUpdate() {   // (every physics step: the player's car against the 
     const into = vx*nx + vz*nz, tree = it.kind === 'tree';
     if (into > (tree ? 3.2 : 1.5)) { const fx = Math.cos(it.yaw), fz = -Math.sin(it.yaw), sg = Math.sign(fx*vx + fz*vz) || 1; const ta = (Math.random() < 0.5 ? -1 : 1)*(0.6 + Math.random()*0.35), tc = Math.cos(ta), ts = Math.sin(ta); knockOver(it, tree ? (vx*tc + vz*ts)/sp : fx*sg, tree ? (vz*tc - vx*ts)/sp : fz*sg, sp);   // (a tree forward and off to one side of the car's way — not onto the car going on under it; a fence flat away from it)
       const k = tree ? 0.7 : it.kind === 'hedge' ? 0.88 : 0.95, px = it.x, pz = it.z;
-      if (DRAG.on && DP.ok) { dpImpulse(px, DP.p.y - 0.1, pz, vx*(k - 1)*DP.m, 0, vz*(k - 1)*DP.m); dpSync(); } else { car.vx *= k; car.vz *= k; if (tree) carDamage(nx, nz, into*0.7); } }
+      if (DRAG.on && DP.ok) { const fx2 = Math.sin(car.angle), fz2 = Math.cos(car.angle), al = (px - DP.p.x)*fx2 + (pz - DP.p.z)*fz2, lat = (px - DP.p.x)*fz2 - (pz - DP.p.z)*fx2;   /* (the blow a quarter as far off the centre line: a spin, not a whirl) */
+        dpImpulse(DP.p.x + fx2*al + fz2*lat*0.25, DP.p.y - 0.1, DP.p.z + fz2*al - fx2*lat*0.25, vx*(k - 1)*DP.m, 0, vz*(k - 1)*DP.m); dpSync(); } else { car.vx *= k; car.vz *= k; if (tree) carDamage(nx, nz, into*0.7); } }
     else { car.x -= nx*dep; car.z -= nz*dep; if (into > 0) { car.vx -= nx*into*1.2; car.vz -= nz*into*1.2; } } }); }   // (slowly: it stands, like a post)
 function knockOver(it, dx, dz, sp) { const l = Math.hypot(dx, dz) || 1; it.fall = true; it.dx = dx/l; it.dz = dz/l; it.th = 0; it.w = it.kind === 'tree' ? Math.min(1.2, sp*0.04) : 2 + sp*0.2; it.max = it.kind === 'tree' ? 1.48 : it.kind === 'hedge' ? 1.2 : 1.45; it.landed = false;
   it.p0 = it.ranges.map(([m, i0, n]) => m.geometry.attributes.position.array.slice(i0*3, (i0 + n)*3)); it.n0 = it.ranges.map(([m, i0, n]) => m.geometry.attributes.normal.array.slice(i0*3, (i0 + n)*3));
@@ -9927,9 +9932,10 @@ function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind th
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
   camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two views
   const h=((43+speed*0.5)*(1-camLowK) + (4.2+speed*0.04)*camLowK)*camZoom;
-  let angleDiff=C.angle-camAngle.current;
+  const dragCam = DRAG.on && C === car;
+  let angleDiff=(dragCam ? dragCamAngle(dt) : C.angle)-camAngle.current;
   while(angleDiff>Math.PI)angleDiff-=Math.PI*2; while(angleDiff<-Math.PI)angleDiff+=Math.PI*2;
-  camAngle.current+=angleDiff*1.2*dt;
+  camAngle.current+= dragCam ? Math.max(-1.1*dt, Math.min(1.1*dt, angleDiff*1.2*dt)) : angleDiff*1.2*dt;   // (the dragster: never faster than ~60°/s round)
   const cfx=Math.sin(camAngle.current),cfz=Math.cos(camAngle.current);
   const camDist=((21+speed*0.1)*(1-camLowK) + (10.5+speed*0.1)*camLowK)*camZoom;
   camTarget.set(C.x-cfx*camDist, Y(C.x,C.z)+h, C.z-cfz*camDist);
