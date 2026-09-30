@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 21.30 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 23.45 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -674,10 +674,10 @@ function afBuild(A) { const G = new THREE.Group(), y = A.h;
   A.solid = [{ x: hx, z: hz, yaw: A.a, hw: 1.7, hl: 1.4, kind: 'lm' }, { x: wx, z: wz, yaw: 0, hw: 0.2, hl: 0.2, kind: 'pole' }]; scene.add(G); return G; }
 // the solid things near the car (or the plane): the pines and huts within 70 m become static boxes; re-done every 30 m
 function outerSolids(x, z) { const si = Math.floor(x/30), sj = Math.floor(z/30); if (si === OUT.sx && sj === OUT.sz) return; OUT.sx = si; OUT.sz = sj;
-  for (const b of OUT.sb) staticRemove(b); OUT.sb.length = 0; if (inBase(x, z, -90)) return;
+  for (const b of OUT.sb) staticRemove(b, true); OUT.sb.length = 0; if (inBase(x, z, -90)) return;
   for (let i = Math.floor((x - 70)/60); i <= Math.floor((x + 70)/60); i++) for (let j = Math.floor((z - 70)/60); j <= Math.floor((z + 70)/60); j++)
-    outerTreesAt(i, j, (tx, tz) => { if (Math.hypot(tx - x, tz - z) > 70) return; const b = { x: tx, z: tz, yaw: 0, hw: 0.45, hl: 0.45, kind: 'pine' }; addStaticBox(b); OUT.sb.push(b); });
-  for (const A of airfieldsNear(x, z, AF_L)) if (A.solid) for (const s0 of A.solid) if (Math.hypot(s0.x - x, s0.z - z) < 120) { const b = { ...s0 }; addStaticBox(b); OUT.sb.push(b); } }
+    outerTreesAt(i, j, (tx, tz) => { if (Math.hypot(tx - x, tz - z) > 70) return; const b = { x: tx, z: tz, yaw: 0, hw: 0.45, hl: 0.45, kind: 'pine' }; staticCellsAdd(b); OUT.sb.push(b); });
+  for (const A of airfieldsNear(x, z, AF_L)) if (A.solid) for (const s0 of A.solid) if (Math.hypot(s0.x - x, s0.z - z) < 120) { const b = { ...s0 }; staticCellsAdd(b); OUT.sb.push(b); } }
 function outerUpdate() { if (!worldLifted) return; const cx = camera.position.x, cz = camera.position.z; outerGround(cx, cz); outerForest(cx, cz);
   for (const A of airfieldsNear(cx, cz, 1500)) if (!OUT.afG.has(A.key)) OUT.afG.set(A.key, afBuild(A));
   for (const [k, G] of OUT.afG) { const A = OUT.af.get(k); if (Math.hypot(A.x - cx, A.z - cz) > 2000) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); }); OUT.afG.delete(k); } }
@@ -4701,6 +4701,21 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', '✈🎈 Lentokone törmää kuumailmapalloon oikealla fysiikalla: kova osuma kupuun repäisee pallon (kone menettää vauhtia, pallo sinkoaa ja laskeutuu), hiljainen tönäisy vain heilauttaa, ja koriin osuminen pudottaa koneen – kori heiluu heilurina', '02.13'],
+  ['30.9.', 'Korjauksia: radio ei kaadu, jos soittolista puuttuu; metsän esteiden poisto loputtomassa maailmassa nopeammaksi', '02.13'],
+  ['30.9.', '🌲 Kartta jatkuu loputtomiin: kylän metsä harvenee kumpuilevaksi kankaaksi, ja korvessa on silloin tällöin korpikenttä (800 m kiitorata, koppi, tuulipussi) – lentäessä näytöllä lähimmän kentän suunta ja matka', '00.17'],
+  ['30.9.', '✈ Lentokoneelle uusi malli kuten autolle: pyöreä runko, siipiprofiilit, OH-YLÄ-tunnus, liikkuvat siivekkeet ja peräsimet, pyöränsuojat ja valot – kolarissa kone hajoaa osiin', '23.43'],
+  ['30.9.', '✈ Lentokone Antin merkitsemään paikkaan: maaliviivan takana S-mutkan jälkeen tien vasemmalla puolella, nokka rallitielle – nousu suoraa pitkin', '23.12'],
+  ['30.9.', 'Radioon neljä uutta biisiä: Summer Folded in My Hands, Ankara–Helsinki, Istanbulin yöstä, If You Come Back by Morning', '23.03'],
+  ['30.9.', '✈ Lentokone ensimmäiseen mutkaan lähdön jälkeen, nokka kohti Ylästöntietä; maassa ↑ = kaasu kuin autossa, ↓ nostaa nokan; kamera korkeammalla; siivet oikenevat itsestään ja kylän rajalla kone kaartaa takaisin', '22.56'],
+  ['30.9.', 'Radioon viisi uutta biisiä: Paluulippu, Kartta luokan seinällä, Käsi kädessä rauhan puolesta, Yhdessä rakennamme maailmaa, Antakaa meille tulevaisuus', '22.31'],
+  ['30.9.', 'Radio Ylästölle uusi ohjelma Markkinarako: mainosmies Parko Markkinen keksii kuluttajapörssin, Helsinki-brändin, kannettavan faksin, hissihaastattelun ja hautaamon kanta-asiakkuuden (5 jaksoa)', '22.23'],
+  ['30.9.', '✈ Pienkone K-kaupan mutkan jälkeen Ylästöntien varressa: F koneen vieressä, W kaasu, ↓ nokka ylös, ← → kallistus, A/D sivuperäsin – oikea kevyt lentofysiikka', '22.10'],
+  ['30.9.', 'Mobiilisivun radio soi taas (ja jakonappi, tilastot ja top 5): sivun koodissa oli kirjoitusvirhe, joka pysäytti kaiken', '21.35'],
+  ['30.9.', 'Dragsteri elää: moottori keinuu vääntöä vastaan ja tärisee tyhjäkäynnillä, runko kiertyy, pakoputket väpättää, nokka ja siivet lepattaa vauhdissa, takasiipi painuu, kuski painuu penkkiin, slicksit litistyy lähdössä ja kasvaa vauhdissa', '21.10'],
+  ['30.9.', 'Dragsterin ääni uusiksi: oikea V8-malli (8 sylinteriä oikeassa sytytysjärjestyksessä, pakosarjat soivat, ahtimen ulina) – tyhjäkäynti matala mörinä, ei enää sahaavaa surinaa eikä jatkuvaa rätinää', '20.54'],
+  ['30.9.', 'Lehden taitto kuntoon: oma lehtifontti mukana (teksti ei enää leikkaudu Windowsin Georgialla), tiiviimpi lehtimäinen riviväli, puolikkaissa jutuissa kuva levenee ja otsikko+teksti yhdessä, ajatusviiva ei jää rivin alkuun', '20.23'],
+  ['30.9.', 'Kuski nousee autosta kuljettajan puolelta (vasen), liftari apukuljettajan ovelle; R dragsterissa – ehjässä tai romuna – vie suoraan uuteen dragsteriin', '20.05'],
   ['30.9.', 'Kaikki liekit pienistä liekeistä: räjähdykset, ydinsodan palot ja juhannuskokko – ei enää isoja liekkilevyjä', '19.50'],
   ['30.9.', 'Dragsteri hajoaa pieniksi paloiksi (jokainen tanko ja levy erikseen), ja palat ovat eripainoisia: moottorilohko jää paikalleen, siipi lepattaa, renkaat pomppivat, teräsosat kipinöivät. Tuli koostuu monesta pienestä liekistä eikä leikkaudu seiniin. Dragsterin moottorissa kunnon V8-pörinä, kaasu + jarru = burnout', '19.42'],
   ['30.9.', 'Dragsterin runko hajoaa kovassa kolarissa lyhyiksi paloiksi: kiskot kolmena osana kummaltakin puolelta, ohjaamo, moottorilohko ja takapää omina laatikoinaan', '19.27'],
@@ -4727,19 +4742,6 @@ const CHANGES = [
   ['30.9.', '🐕 Pihakoira hyppää kyytiin, kun pysähdyt sen viereen, ja haukkuu mukana seuraavaan pysähdykseen', '10.04'],
   ['30.9.', '🌭 Makkarakärry: pysähdy viereen, makkara tuodaan ikkunaan, röyh ja savua', '10.04'],
   ['30.9.', '📸 Peltipoliisi: kaksi nopeuskameraa radan varrella, yli 80 km/h välähtää ja kovin lukema kirjataan rekisteriin', '10.04'],
-  ['30.9.', '✈ Lentokone Antin merkitsemään paikkaan: maaliviivan takana S-mutkan jälkeen tien vasemmalla puolella, nokka rallitielle – nousu suoraa pitkin', '23.12'],
-  ['30.9.', '🌲 Kartta jatkuu loputtomiin: kylän metsä harvenee kumpuilevaksi kankaaksi, ja korvessa on silloin tällöin korpikenttä (800 m kiitorata, koppi, tuulipussi) – lentäessä näytöllä lähimmän kentän suunta ja matka', '00.17'],
-  ['30.9.', '✈ Lentokoneelle uusi malli kuten autolle: pyöreä runko, siipiprofiilit, OH-YLÄ-tunnus, liikkuvat siivekkeet ja peräsimet, pyöränsuojat ja valot – kolarissa kone hajoaa osiin', '23.43'],
-  ['30.9.', 'Radioon neljä uutta biisiä: Summer Folded in My Hands, Ankara–Helsinki, Istanbulin yöstä, If You Come Back by Morning', '23.03'],
-  ['30.9.', '✈ Lentokone ensimmäiseen mutkaan lähdön jälkeen, nokka kohti Ylästöntietä; maassa ↑ = kaasu kuin autossa, ↓ nostaa nokan; kamera korkeammalla; siivet oikenevat itsestään ja kylän rajalla kone kaartaa takaisin', '22.56'],
-  ['30.9.', 'Radioon viisi uutta biisiä: Paluulippu, Kartta luokan seinällä, Käsi kädessä rauhan puolesta, Yhdessä rakennamme maailmaa, Antakaa meille tulevaisuus', '22.31'],
-  ['30.9.', 'Radio Ylästölle uusi ohjelma Markkinarako: mainosmies Parko Markkinen keksii kuluttajapörssin, Helsinki-brändin, kannettavan faksin, hissihaastattelun ja hautaamon kanta-asiakkuuden (5 jaksoa)', '22.23'],
-  ['30.9.', '✈ Pienkone K-kaupan mutkan jälkeen Ylästöntien varressa: F koneen vieressä, W kaasu, ↓ nokka ylös, ← → kallistus, A/D sivuperäsin – oikea kevyt lentofysiikka', '22.10'],
-  ['30.9.', 'Mobiilisivun radio soi taas (ja jakonappi, tilastot ja top 5): sivun koodissa oli kirjoitusvirhe, joka pysäytti kaiken', '21.35'],
-  ['30.9.', 'Dragsteri elää: moottori keinuu vääntöä vastaan ja tärisee tyhjäkäynnillä, runko kiertyy, pakoputket väpättää, nokka ja siivet lepattaa vauhdissa, takasiipi painuu, kuski painuu penkkiin, slicksit litistyy lähdössä ja kasvaa vauhdissa', '21.10'],
-  ['30.9.', 'Dragsterin ääni uusiksi: oikea V8-malli (8 sylinteriä oikeassa sytytysjärjestyksessä, pakosarjat soivat, ahtimen ulina) – tyhjäkäynti matala mörinä, ei enää sahaavaa surinaa eikä jatkuvaa rätinää', '20.54'],
-  ['30.9.', 'Lehden taitto kuntoon: oma lehtifontti mukana (teksti ei enää leikkaudu Windowsin Georgialla), tiiviimpi lehtimäinen riviväli, puolikkaissa jutuissa kuva levenee ja otsikko+teksti yhdessä, ajatusviiva ei jää rivin alkuun', '20.23'],
-  ['30.9.', 'Kuski nousee autosta kuljettajan puolelta (vasen), liftari apukuljettajan ovelle; R dragsterissa – ehjässä tai romuna – vie suoraan uuteen dragsteriin', '20.05'],
   ['30.9.', 'Korjauksia: liftarin K-KAUPPA-kyltti isompi ja näkyvissä, jalkaisin poliisi tulee sinun luoksesi eikä tyhjälle autolle, HONK-banderolli aukealle, ufo ei nappaa pakenevaa hirveä', '09.32'],
   ['30.9.', 'Mopopojat lähtevät perään useammin: riittää 15 % ennätyksestä, ja ennen ensimmäistä väliaikaa aina', '08.56'],
   ['30.9.', 'Naamiaisolympialaiset ovat nyt HONK-olympialaiset, ja kentän laidalla on banderolli', '08.56'],
@@ -4982,6 +4984,7 @@ const LEHTI = [
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+  { id: 'pallo', size: 'half', n: 64, kick: '🎈 ILMATILA', title: 'Pienkone repäisi kuumailmapallon', img: ['pallopamaus.jpg'], cap: ['OH-YLÄ sekuntia ennen osumaa. Kupu repesi, kone lensi läpi.'], body: ['Ylästön pienkone lensi täyttä vauhtia kuumailmapallon kupuun. Kangas repesi, pallo alkoi vajota ja laskeutui pellolle. Kone lensi läpi, mutta vauhtia lähti parikymmentä kilometriä tunnissa.', 'Hiljaa tönäisty pallo vain heilahtaa ja lipuu sivuun. Koriin ei kannata osua: se on raskas, ja kone hajoaa. Kori jää heilumaan polttimen alle kuin heiluri.'] },
   { id: 'korpi', size: 'page', n: 63, kick: '🌲 KORPIKENTTÄ', title: 'Metsä jatkuu – ja korvessa on kiitoratoja', lede: 'Kylän takana alkaa metsä, joka ei lopu. Kuusikko harvenee kumpuileviksi kankaiksi, ja siellä täällä korven keskellä on kiitorata ja pieni koppi.',
     img: ['korpikentta.jpg'], cap: ['Hukanahon korpikenttä kylästä itään. Kopin seinässä lukee kentän nimi.'],
     body: ['YLÄSTÖ. Kylän reunalla metsä ei enää lopu seinään. Tiheä kuusikko jatkuu kylän rajan yli ja harvenee vähitellen harvaksi kankaaksi, jota riittää niin pitkälle kuin jaksaa ajaa tai lentää. Autollakin pääsee, mutta kuuset ovat kovia.', 'Harvakseltaan metsän keskellä on raivattu aukea ja 800 metrin kiitorata. Kentän laidalla on pieni punainen koppi, jonka seinässä lukee kentän nimi, ja tuulipussi. Lähin kenttä, Hukanaho, on puolentoista kilometrin päässä kylästä itään.', 'Lentäessä näytön yläreunassa näkyy lähimmän korpikentän suunta ja matka. Laskeudu kiitoradan alkuun hiljaisella kaasulla ja nokka hieman ylhäällä, niin kone pysähtyy radalle. Nousu onnistuu samalta radalta.'],
@@ -6710,7 +6713,7 @@ function radioShow(flash) { const box = document.getElementById('radio'); if (!b
   const TL = $('radio-title');
   if (TL.textContent !== t) { TL.textContent = t; TL.classList.remove('scroll'); requestAnimationFrame(() => { const over = TL.scrollWidth - TL.parentNode.clientWidth; if (over > 0) { TL.style.setProperty('--shift', over + 6); TL.style.setProperty('--dur', (3 + over/25) + 's'); TL.classList.add('scroll'); } }); }
   if (flash) { box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash'); } mradioShow(); }
-function radioPlay() { const R = RADIO; if (!R.el) { R.el = new Audio(); R.el.preload = 'auto'; R.el.addEventListener('ended', () => { R.i = (R.i + 1) % R.list.length; radioTune(); radioPlay(); radioShow(true); });
+function radioPlay() { const R = RADIO; if (!R.list.length || !R.list[R.i]) return;   /* (no playlist — offline, or it hasn't come yet: nothing to play) */ if (!R.el) { R.el = new Audio(); R.el.preload = 'auto'; R.el.addEventListener('ended', () => { R.i = (R.i + 1) % R.list.length; radioTune(); radioPlay(); radioShow(true); });
     if (audio && audio.ctx) { try { const src = audio.ctx.createMediaElementSource(R.el); R.gain = audio.ctx.createGain(); R.shelf = audio.ctx.createBiquadFilter(); R.shelf.type = 'lowshelf'; R.shelf.frequency.value = 140; R.shelf.gain.value = BASS.on || ES.on ? 16 : 0; src.connect(R.gain); R.gain.connect(R.shelf); R.shelf.connect(audio.master); } catch (e) { R.gain = null; } }   // (through the game's mix)
     radioVolume(); }
   R.el.src = 'music/' + encodeURIComponent(R.list[R.i].file); R.el.play().catch(() => {}); if (/koelahetys-11/.test(R.list[R.i].file)) nukeArm(); }
@@ -7647,6 +7650,8 @@ function buildRing() { let sp = null; for (let k = 0; k < 12 && !sp; k++) { cons
 //          by the sports field, two grandstands, the farmer's tractor after whoever flattens his cabbage, two crashed UFOs that
 //          shoot, people standing in the road at a few corners. All on the same parts: Humans, Vehicles, STATIC, FIRES, DISPATCH. ════════
 const X3 = { upd: [], reset: [], bear: null };
+function staticCellsAdd(b) { b._s = 0; const r = Math.hypot(b.hw, b.hl);   // (into the lookup cells only, not STATIC_LIST: the forest's passing boxes)
+  for (let cx = Math.floor((b.x - r)/SC); cx <= Math.floor((b.x + r)/SC); cx++) for (let cz = Math.floor((b.z - r)/SC); cz <= Math.floor((b.z + r)/SC); cz++) { const k = cx*73856093 ^ cz*19349663; let l = STATIC.get(k); if (!l) STATIC.set(k, l = []); l.push(b); } }
 function addStaticBox(b) { STATIC_LIST.push(b); b._s = 0; const r = Math.hypot(b.hw, b.hl);   // (staticBuild's own add, for what is built after it)
   for (let cx = Math.floor((b.x - r)/SC); cx <= Math.floor((b.x + r)/SC); cx++) for (let cz = Math.floor((b.z - r)/SC); cz <= Math.floor((b.z + r)/SC); cz++) { const k = cx*73856093 ^ cz*19349663; let l = STATIC.get(k); if (!l) STATIC.set(k, l = []); l.push(b); } }
 let TREEG = null;   // the scenery's trees (sceneryDebug.trees) in 8 m cells: nothing big goes up through a tree
@@ -8448,6 +8453,36 @@ function planeInit(S) { PLANE.q.setFromAxisAngle(_pA.set(0, 1, 0), S.angle); con
   if (PLANE.mesh) { PLANE.mesh.visible = true; for (const k in PL_BITS) { const o = PLANE.mesh.userData.parts[k]; if (o) o.visible = true; } } planeSolid(); }
 function planeSolid() { if (PLANE.sb) { staticRemove(PLANE.sb); PLANE.sb = null; } if (PLANE.on || !PLANE.mesh) return; const F = _pF.set(0, 0, 1).applyQuaternion(PLANE.q);   // (parked, it's solid: the rally car doesn't drive through it)
   PLANE.sb = { x: PLANE.p.x, z: PLANE.p.z, yaw: Math.atan2(F.x, F.z), hw: 1.3, hl: 2.4, kind: 'lm' }; addStaticBox(PLANE.sb); }
+// ── the plane and the hot-air balloons (30.9., Antti: "koneen pitää törmätä ilmapalloon, oikealla fyssalla"): impulses between two bodies.
+// The envelope is fabric round ~2 t of hot air: the balloon's effective mass is ~3.5 t (basket, crew, burner, fabric, the air inside and the
+// air it pushes aside). A contact exchanges momentum through the reduced mass (the plane's own inertia at the contact point included), but the
+// fabric only takes so much: past ~5000 N·s it tears — the balloon comes down (balloonPop) and the plane goes through, slowed and knocked
+// about. Softly (a nudge) it only bumps off. The basket, the burner and the rigging are a rigid block (600 kg, roped to the rest: ~1.5 t at impact): into that fast = a crash. The whole thing
+// swings as a pendulum (L ≈ 9 m, 3.5 t): a blow's angular impulse over M·L².
+const PB_ENV = [6.4, 7.2, 11.4], PB_TEAR = 5000, PB_M = 3500, PB_BASKET = 1500, PL_PTS_B = [[0, -0.15, 3.1], [4.9, 0.72, 0.2], [-4.9, 0.72, 0.2], [2.5, 0.8, 0.3], [-2.5, 0.8, 0.3], [0, 0.2, -4.8], [0, 0.9, -4.4], [0, 0, 0]];
+function planeVsBalloons() { const P = PLANE; if (P.crashed) return 0; let hard = 0;
+  for (const B of BALLOONS) { const fly = B.mode === 'fly'; if ((!fly && B.mode !== 'fall' && B.mode !== 'down') || Math.abs(B.x - P.p.x) > 30 || Math.abs(B.z - P.p.z) > 30 || Math.abs(B.y + 10 - P.p.y) > 30) continue;
+    let best = null;
+    for (const [bx, by, bz] of PL_PTS_B) { const r = _pV.set(bx, by, bz).applyQuaternion(P.q), px = P.p.x + r.x, py = P.p.y + r.y, pz = P.p.z + r.z;
+      if (fly && !B.torn) { const dx = px - B.x, dy = py - (B.y + PB_ENV[2]), dz = pz - B.z, q = Math.hypot(dx/PB_ENV[0], dy/PB_ENV[1], dz/PB_ENV[0]);   // the envelope: an ellipsoid
+        if (q < 1 && (!best || q - 1 < best.pen)) { const n = new THREE.Vector3(dx/(PB_ENV[0]*PB_ENV[0]), dy/(PB_ENV[1]*PB_ENV[1]), dz/(PB_ENV[0]*PB_ENV[0])).normalize(); best = { pen: q - 1, r: r.clone(), n, env: true, depth: (1 - q)*PB_ENV[0] }; } }
+      const ey = py - (B.y + 2.2); if (Math.abs(px - B.x) < 0.85 && Math.abs(pz - B.z) < 0.85 && Math.abs(ey) < 2.3) {   // the basket, burner and ropes: a rigid block
+        const ox = 0.85 - Math.abs(px - B.x), oz = 0.85 - Math.abs(pz - B.z), n = ox < oz ? new THREE.Vector3(Math.sign(px - B.x) || 1, 0, 0) : new THREE.Vector3(0, 0, Math.sign(pz - B.z) || 1);
+        best = { pen: -2, r: r.clone(), n, env: false, depth: Math.min(ox, oz) }; } }
+    if (!best) continue;
+    const r = best.r, n = best.n, vp = P.v.clone().add(P.w.clone().cross(r)), vb = fly ? B.cv.clone().add(new THREE.Vector3(Math.sin(B.hd)*B.sp, 0, Math.cos(B.hd)*B.sp)) : new THREE.Vector3(0, B.mode === 'fall' ? (B.vy || 0) : 0, 0), vn = vp.sub(vb).dot(n);
+    if (vn >= 0) continue;   // (already parting)
+    const rn = r.clone().cross(n), kP = 1/PL_M + rn.lengthSq()/1200, Mb = best.env ? PB_M : B.mode === 'down' ? 1e6 : PB_BASKET, mu = 1/(kP + 1/Mb), e = best.env ? 0.25 : 0.1;
+    let J = -(1 + e)*vn*mu, torn = false; if (best.env && J > PB_TEAR) { J = PB_TEAR; torn = true; }
+    const imp = n.clone().multiplyScalar(J); P.v.addScaledVector(imp, 1/PL_M); P.w.add(r.clone().cross(imp).multiplyScalar(1/1200));   // (the plane: its velocity and spin)
+    if (!torn) P.p.addScaledVector(n, Math.min(0.3, best.depth*0.3));   // (out of the fabric or the basket, not through it)
+    if (!fly) { if (!best.env && -vn > 7) hard = 99; continue; }   // (a falling or landed basket only stops the plane)
+    B.cv.addScaledVector(imp, -1/Mb); const lever = (B.y + 11.4) - (P.p.y + r.y), Ip = PB_M*81; B.sw.xw += imp.z*lever/Ip; B.sw.zw += -imp.x*lever/Ip;   // (the balloon: pushed, and it swings about its envelope)
+    const now = performance.now(); if (audio && now - (P.bumpT || 0) > 250) { P.bumpT = now; beep(best.env ? 90 : 60, 0.2, Math.min(0.4, J/12000), best.env ? 'triangle' : 'square'); }
+    if (torn) { B.torn = true; balloonPop(B); pizzaMsg(T('✈💥🎈 KONE REPÄISI KUUMAILMAPALLON!'), true); for (let i = 0; i < 14; i++) lifeFx.emit(P.p.x, P.p.y, P.p.z, (Math.random() - 0.5)*6, Math.random()*3, (Math.random() - 0.5)*6, 1 + Math.random(), 1, 2.5, 0.5, 0.9, 0.3, 0.2, 0.95, 0.85, 0.2); }
+    if (!best.env && -vn > 7) hard = 99;   // (into the basket at speed: the plane comes apart)
+  }
+  return hard; }
 const PL_BITS = { fuse: [320, 0.5, 0.15, 0.1], wingL: [45, 0.4, 0.2, 0.5], wingR: [45, 0.4, 0.2, 0.5], tail: [18, 0.4, 0.2, 0.4], prop: [10, 0.5, 0.3, 0.1], gearL: [8, 0.5, 0.3, 0.05], gearR: [8, 0.5, 0.3, 0.05], gearN: [6, 0.5, 0.3, 0.05] };   // mass, grip, bounce, drag
 function planeBreak() { const P = PLANE, Q = P.mesh.userData.parts; P.mesh.updateMatrixWorld(true);   // (a crash: it comes apart like the dragster — each piece a rigid box flying on with the plane's own velocity and spin)
   for (const [k, M] of Object.entries(PL_BITS)) { const o = Q[k]; if (!o || !o.visible) continue; const inv = new THREE.Matrix4().copy(o.matrixWorld).invert(), Mx = new THREE.Matrix4(), bb = new THREE.Box3(), tb = new THREE.Box3();
@@ -8500,6 +8535,7 @@ function planePhys(dt, live) { const P = PLANE; if (P.crashed) { car.vx = car.vz
   { let hit = false; for (const [bx, bz] of [[0, 0], [4.5, 0.3], [-4.5, 0.3]]) { const r = _pV.set(bx, 0, bz).applyQuaternion(P.q), x = P.p.x + r.x, z = P.p.z + r.z, y = P.p.y + r.y - Y(x, z);
       staticNear(x, z, 3, B => { if (hit) return; const dx = x - B.x, dz = z - B.z, c = Math.cos(B.yaw || 0), s = Math.sin(B.yaw || 0), a = dx*c - dz*s, b = dx*s + dz*c, top = B.kind === 'house' ? 8 : B.kind === 'pole' ? 9 : /pine|tree|puu|kuusi/.test(B.kind || '') ? 15 : 4;
         if (Math.abs(a) < B.hw + 0.4 && Math.abs(b) < B.hl + 0.4 && y < top) hit = true; }); } if (hit && V > 5) hard = 99; }
+  hard = Math.max(hard, planeVsBalloons());
   if (hard > 0) { P.crashed = true; boom(P.p.x, P.p.y, P.p.z, true); planeBreak(); P.thr = 0; pizzaMsg(T('💥 LENTOKONE ROMAHTI – R = uusi kone'), true); car.vx = car.vz = car.speed = 0; return; }
   v.addScaledVector(Fo, dt/PL_M); P.p.addScaledVector(v, dt);
   const wb = [w.dot(L), w.dot(U), w.dot(F)], tb = [Tq.dot(L), Tq.dot(U), Tq.dot(F)]; for (let i = 0; i < 3; i++) wb[i] += tb[i]/PL_I[i]*dt;
@@ -8759,7 +8795,10 @@ function alienShoot(U, h, P, wide) {   // a small bolt from the gun: better aime
     B = { m: new THREE.Mesh(_boltGeo, _boltMat) }; B.m.renderOrder = 3; scene.add(B.m); UFO_BOLTS.push(B); }
   Object.assign(B, { live: true, x: x0, y: y0, z: z0, vx: (ax - x0)/L*sp, vy: (ay - y0)/L*sp, vz: (az - z0)/L*sp, t: 0, U, small: true }); B.m.scale.setScalar(0.45); B.m.visible = true; B.m.position.set(x0, y0, z0);
   if (audio && (x0 - car.x)**2 + (z0 - car.z)**2 < 150*150) { beep(1900 + Math.random()*400, 0.12, 0.08, 'sawtooth'); beep(950, 0.14, 0.05, 'square'); } }
-function staticRemove(b) { for (const l of STATIC.values()) { const i = l.indexOf(b); if (i >= 0) l.splice(i, 1); } const i = STATIC_LIST.indexOf(b); if (i >= 0) STATIC_LIST.splice(i, 1); }
+function staticRemove(b, notListed) { const r = Math.hypot(b.hw, b.hl); let found = false;   // (from its own cells, as addStaticBox put it; a full sweep only if it has moved since)
+  for (let cx = Math.floor((b.x - r)/SC); cx <= Math.floor((b.x + r)/SC); cx++) for (let cz = Math.floor((b.z - r)/SC); cz <= Math.floor((b.z + r)/SC); cz++) { const l = STATIC.get(cx*73856093 ^ cz*19349663); if (!l) continue; const i = l.indexOf(b); if (i >= 0) { l.splice(i, 1); found = true; } }
+  if (!found) for (const l of STATIC.values()) { const i = l.indexOf(b); if (i >= 0) l.splice(i, 1); }
+  if (!notListed) { const i = STATIC_LIST.indexOf(b); if (i >= 0) STATIC_LIST.splice(i, 1); } }
 function ufoCapture(U) { if (UFO_CAP.U || U.captured) return; U.captured = true; UFO_CAP.U = U; UFO_CAP.t = 0; UFO_CAP.x = U.x; UFO_CAP.y = U.y; UFO_CAP.z = U.z; staticRemove(U.sb);
   if (!UFO_CAP.beam) { const m = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 3.2, 1, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0x7affb0, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); m.renderOrder = 3; lifeGroup.add(m); UFO_CAP.beam = m; }
   UFO_CAP.beam.visible = false; if (audio) { const { ctx, master } = audio, o = ctx.createOscillator(), g = ctx.createGain(), t0 = ctx.currentTime; o.type = 'sine'; o.frequency.setValueAtTime(180, t0); o.frequency.exponentialRampToValueAtTime(1400, t0 + 2.2); g.gain.setValueAtTime(0.12, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 2.4); o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + 2.5); }
@@ -8837,7 +8876,7 @@ function makeBalloon(cols) { const G = new THREE.Group(), env = new THREE.Group(
   return { G, env, ropes }; }
 function balloonSpot() { for (let k = 0; k < 200; k++) { const p = trackPoints[Math.floor(Math.random()*trackPoints.length)], a = Math.random()*6.3, d = 20 + Math.random()*110, x = p.x + Math.sin(a)*d, z = p.y + Math.cos(a)*d;
   if (Math.abs(x) < 420 && Math.abs(z) < 420 && BALLOONS.every(o => Math.hypot(o.x - x, o.z - z) > 180)) return [x, z]; } return [Math.random()*300 - 150, Math.random()*300 - 150]; }
-function balloonPlace(B) { const [x, z] = balloonSpot(); Object.assign(B, { x, z, hd: Math.random()*6.3, sp: 0.45 + Math.random()*0.3, gs: Y(x, z), mode: 'fly', vy: 0, ft: 0, burn: 0, bt: Math.random()*6, near: false, vx: 0, vz: 0, w: 0, moving: false, yaw: Math.random()*6.3 });
+function balloonPlace(B) { const [x, z] = balloonSpot(); B.cv = new THREE.Vector3(); B.cy = 0; B.torn = false; B.sw = { x: 0, z: 0, xw: 0, zw: 0 }; Object.assign(B, { x, z, hd: Math.random()*6.3, sp: 0.45 + Math.random()*0.3, gs: Y(x, z), mode: 'fly', vy: 0, ft: 0, burn: 0, bt: Math.random()*6, near: false, vx: 0, vz: 0, w: 0, moving: false, yaw: Math.random()*6.3 });
   B.y = B.gs + 30; const M = B.M; if (M.env.parent !== M.G) M.G.add(M.env); M.env.position.set(0, 4.4, 0); M.env.rotation.set(0, 0, 0); M.env.scale.set(1, 1, 1); M.ropes.forEach(r => { r.visible = true; }); balloonSync(B); }
 function balloonSync(B) { const M = B.M; M.G.position.set(B.x, B.y, B.z); M.G.rotation.y = B.yaw; B.sv.x = B.x; B.sv.z = B.z; B.sv.yaw = B.yaw; B.sv.gy = B.y; }
 const pilotTask = (B, i) => ({ kind: 'pilot', update(h, dt, t) { h.x = B.x; h.z = B.z; h.vx = h.vz = 0;
@@ -8862,12 +8901,14 @@ function balloonLand(B) { B.mode = 'down'; const M = B.M, gy = Y(B.x, B.z); B.y 
 function balloonsUpdate(dt) { for (const B of BALLOONS) { B.t += dt; const M = B.M;
   if (B.mode === 'fly') { B.hd += Math.sin(B.t*0.03 + B.ph)*0.02*dt; if (Math.hypot(B.x, B.z) > 430) B.hd += angDiff(Math.atan2(-B.x, -B.z) - B.hd)*0.05*dt;   // back in over the village
     B.x += Math.sin(B.hd)*B.sp*dt; B.z += Math.cos(B.hd)*B.sp*dt; B.yaw += 0.01*dt;
-    const gy = Y(B.x, B.z); B.gs += (gy - B.gs)*Math.min(1, dt*0.15); B.y = Math.max(B.gs + 30 + 9*Math.sin(B.t*0.045 + B.ph), gy + 16);
+    if (B.cv) { const f = Math.exp(-dt/3); B.x += B.cv.x*dt; B.z += B.cv.z*dt; B.cy = (B.cy || 0) + B.cv.y*dt; B.cv.multiplyScalar(f); B.cy *= Math.exp(-dt/5);   // (a knock: the envelope's drag and the burner's trim take it back)
+      const k = 9.81/9, c = 0.6; for (const a of ['x', 'z']) { B.sw[a + 'w'] += (-k*Math.sin(B.sw[a]) - c*B.sw[a + 'w'])*dt; B.sw[a] = Math.max(-1, Math.min(1, B.sw[a] + B.sw[a + 'w']*dt)); } }   // (and it swings like a pendulum, basket under envelope)
+    const gy = Y(B.x, B.z); B.gs += (gy - B.gs)*Math.min(1, dt*0.15); B.y = Math.max(B.gs + 30 + 9*Math.sin(B.t*0.045 + B.ph) + (B.cy || 0), gy + 16);
     if ((B.bt -= dt) <= 0) { B.burn = 1.4 + Math.random()*1.2; B.bt = 7 + Math.random()*10; }
     const d = Math.hypot(B.x - car.x, B.z - car.z);
     if (B.burn > 0) { B.burn -= dt; if (d < 320) for (let k = 0; k < 3; k++) fireFx.emit(B.x + (Math.random() - 0.5)*0.2, B.y + 3.55, B.z + (Math.random() - 0.5)*0.2, 0, 6 + Math.random()*3, 0, 0.22 + Math.random()*0.1, 0.9, 0.5, 1, 1, 0.9, 0.55, 1, 0.45, 0.1);
       if (audio && d < 120 && Math.random() < dt*12) beep(70 + Math.random()*25, 0.12, 0.05*(1 - d/120), 'sawtooth'); }   // the burner's roar
-    M.G.rotation.x = 0.03*Math.sin(B.t*0.53 + B.ph); M.G.rotation.z = 0.03*Math.sin(B.t*0.7);
+    M.G.rotation.x = 0.03*Math.sin(B.t*0.53 + B.ph) + (B.sw ? B.sw.x : 0); M.G.rotation.z = 0.03*Math.sin(B.t*0.7) + (B.sw ? B.sw.z : 0);
     if (d < 65 && !B.near) { B.near = true; if (!BALLOON.popped && gameState !== State.MENU && Math.random() < BALLOON_POP_P) balloonPop(B); } else if (d > 100) B.near = false; }
   else if (B.mode === 'fall') { B.ft += dt; B.vy = Math.max(-16, B.vy - 9.8*dt*(B.ft < 0.5 ? 0.35 : 1)); B.y += B.vy*dt; B.x += Math.sin(B.hd)*B.sp*dt; B.yaw += 0.6*dt;
     const k = Math.min(1, B.ft/1.4); M.env.scale.set(1 - 0.55*k + 0.1*Math.sin(B.ft*9), 1 - 0.6*k, 1 - 0.55*k + 0.1*Math.cos(B.ft*8)); M.env.rotation.z = 0.45*k*Math.sin(B.ph + B.ft); M.env.position.y = 4.4 + 2*k;   // it crumples, streaming above
