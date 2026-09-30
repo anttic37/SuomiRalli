@@ -10,7 +10,7 @@ const fs = require('fs'), path = require('path');
   await page.route('**/three.min.js', r => r.fulfill({ body: fs.readFileSync(require.resolve('three/build/three.min.js')), contentType: 'text/javascript' }));
   await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ body: '', contentType: 'text/css' }));
   await page.goto('file://' + path.resolve(game));
-  await page.waitForFunction(() => typeof lehtiBuild === 'function' && typeof trackPoints !== 'undefined' && trackPoints.length > 10, null, { timeout: 90000 }); await page.evaluate(() => lehtiBuild());
+  await page.waitForFunction(() => typeof lehtiBuild === 'function' && typeof trackPoints !== 'undefined' && trackPoints.length > 10, null, { timeout: 90000 }); await page.evaluate(async () => { await lhFonts(); lehtiBuild(); });   // (the bundled serif first: the layout is measured in it)
   const baked = await page.evaluate(() => JSON.stringify({ key: lhKey(), pages: PAPER.pages }));   // the fitted pages as the game shows them → lehti/lehti.json, which the published game fetches instead of laying the paper out itself
   fs.writeFileSync(path.join(path.dirname(out), 'lehti.json'), baked);
   const n = await page.evaluate(async () => {

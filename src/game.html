@@ -222,6 +222,8 @@
   .pv-page { width: 760px; height: 1000px; box-sizing: border-box; padding: 40px 50px 44px; position: relative; overflow: hidden; color: #1a1814; text-align: left; font-family: "Times New Roman", "Liberation Serif", "DejaVu Serif", serif;
     background: #f1ead8; background-image: radial-gradient(rgba(0,0,0,0.035) 1px, transparent 1px); background-size: 4px 4px; }
   .pv-page a { color: inherit; text-decoration: none; cursor: pointer; }
+  @font-face { font-family: 'YS Serif'; src: url('lehti/fonts/gelasio.woff2') format('woff2'); font-weight: 400 700; font-style: normal; font-display: block; }   /* Gelasio (SIL OFL): Georgia's metrics, bundled — the paper is laid out at build time, so every reader must set it in the same font (Georgia on Windows vs Liberation Serif at the build cut the texts off — Antti, 30.9.) */
+  @font-face { font-family: 'YS Serif'; src: url('lehti/fonts/gelasio-italic.woff2') format('woff2'); font-weight: 400 700; font-style: italic; font-display: block; }
   .lh-measure { position: fixed; left: -20000px; top: 0; visibility: hidden; pointer-events: none; }
   .lh-folio { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid #1a1814; padding-bottom: 5px; margin-bottom: 18px; font: 700 11px Arial, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: #3a3630; }
   .lh-folio.r { flex-direction: row-reverse; } .lh-folio b { font: 900 16px "Times New Roman", "Liberation Serif", serif; letter-spacing: 0; color: #1a1814; } .lh-folio .pn { font: 900 20px "Times New Roman", "Liberation Serif", serif; letter-spacing: 0; color: #1a1814; }
@@ -259,7 +261,7 @@
   .lh-keys kbd { white-space: nowrap; min-width: 40px; text-align: center; padding: 4px 7px; border: 2px solid #1a1814; border-radius: 4px; background: #fffbe8; font: 700 13px "Courier New", monospace; box-shadow: 0 2px 0 #1a1814; }
   .lh-boxes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; } .lh-boxes .lh-box { font-size: 14px; }
   .ml-list { display: flex; flex-direction: column; gap: 14px; margin-top: 14px; height: 436px; overflow: hidden; } .ml-l { display: none; border-left: 4px solid #c3161c; padding: 2px 0 2px 16px; max-height: 136px; overflow: hidden; flex: none; } .ml-l.on { display: block; }
-  .ml-t { font: italic 19px/1.4 Georgia, "Times New Roman", serif; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .ml-f { font: 700 13px Arial, sans-serif; color: #6a6358; margin: 3px 0 5px; }
+  .ml-t { font: italic 19px/1.4 "YS Serif", Georgia, "Times New Roman", serif; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .ml-f { font: 700 13px Arial, sans-serif; color: #6a6358; margin: 3px 0 5px; }
   .ml-r { font: 16px/1.4 "Times New Roman", serif; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .ml-r b { color: #c3161c; font-family: Arial, sans-serif; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
   .ml-empty { margin-top: 6px; }
   .rp-want { border: 3px solid #1a1814; background: #fffbe8; padding: 10px 14px 12px; text-align: center; margin: 4px 0 14px; } .rp-wt { font: 900 24px Arial, sans-serif; letter-spacing: 0.3em; color: #c4201a; margin-bottom: 6px; }
@@ -270,7 +272,7 @@
   .lh-adgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 6px; } .lh-adcol { display: flex; flex-direction: column; gap: 6px; } .lh-adgrid .ad-big { font-size: 30px; } .lh-adgrid .lh-ad.cl .ad-big, .lh-adrow .lh-ad.cl .ad-big { font-size: 17px; letter-spacing: 0.1em; } .lh-adgrid .lh-ad.cl .ad-small, .lh-adrow .lh-ad.cl .ad-small { font-size: 13px; line-height: 1.3; margin-top: 2px; } .lh-adgrid .cl .ad-txt, .lh-adrow .cl .ad-txt { padding: 6px 12px; } .lh-adgrid .cl .ad-tag, .lh-adrow .cl .ad-tag { display: none; }
   .lh-adrow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
   .lh-lyhp > .lh-in { height: 100%; display: flex; flex-direction: column; } .lh-lyhp .lh-lyh { flex: 1 1 0; min-height: 0; column-fill: auto; overflow: hidden; }
-  .lh-lyh { column-count: 3; column-gap: 22px; column-rule: 1px solid rgba(26,24,20,0.28); font: 13.5px/1.38 "Times New Roman", "Liberation Serif", serif; margin-top: 4px; }
+  .lh-lyh { column-count: 3; column-gap: 22px; column-rule: 1px solid rgba(26,24,20,0.28); font: 13.5px/1.28 "Times New Roman", "Liberation Serif", serif; margin-top: 4px; }
   .lh-lyh p { margin: 0 0 7px; padding-bottom: 7px; border-bottom: 1px dotted #a39a86; break-inside: avoid; } .lh-lyh b.d { color: #c4201a; font: 900 11px Arial, sans-serif; letter-spacing: 0.06em; margin-right: 2px; }
   .lh-ad { position: relative; display: flex; border: 3px solid #1a1814; background: #fffbe8; margin-top: 16px; overflow: hidden; box-sizing: border-box; } .lh-ad.v, .lh-ad.fill { flex-direction: column; } .lh-ad.fill { height: 100%; margin-top: 0; flex: 1; }
   .lh-half > .lh-ad.fill { flex: 1 1 0; }
@@ -284,50 +286,50 @@
   /* ── 30.9.: the paper set like a Finnish morning paper (Antti's Savon Sanomat sample): near-white newsprint, heavy serif
      headlines, a tinted section label with a bar on a heavy rule, a light-blue accent, datelines on their own line, grey fact
      boxes with bullets, captions with the photographer, a big quote mark, "Sivu N" references ── */
-  .pv-page { background: #f4f2ec; background-image: radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px); background-size: 4px 4px; padding: 30px 40px 36px; font-family: Georgia, "Times New Roman", "Liberation Serif", "DejaVu Serif", serif; color: #1b1b1b; }
+  .pv-page { background: #f4f2ec; background-image: radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px); background-size: 4px 4px; padding: 30px 40px 36px; font-family: "YS Serif", Georgia, "Times New Roman", "Liberation Serif", "DejaVu Serif", serif; color: #1b1b1b; }
   .lh-folio { gap: 12px; border-bottom: 1px solid #1b1b1b; padding-bottom: 4px; margin-bottom: 12px; font: 700 11px Arial, sans-serif; letter-spacing: 0; text-transform: none; color: #1b1b1b; }
-  .lh-folio b { font: 900 12px Arial, sans-serif; letter-spacing: 0.02em; } .lh-folio .pn { font: 900 15px Arial, sans-serif; } .lh-folio i { font: 11.5px Georgia, serif; color: #333; }
+  .lh-folio b { font: 900 12px Arial, sans-serif; letter-spacing: 0.02em; } .lh-folio .pn { font: 900 15px Arial, sans-serif; } .lh-folio i { font: 11.5px "YS Serif", Georgia, serif; color: #333; }
   .lh-sec { border-bottom: 3px solid #1b1b1b; margin: 0 0 12px; line-height: 0; } .lh-sec span { display: inline-block; line-height: 1; background: #dfe8f1; border-left: 7px solid #3f6f9f; color: #1d3c5e; font: 900 15px Arial, sans-serif; letter-spacing: 0.05em; padding: 5px 12px 4px 9px; margin-bottom: 0; }
-  .pv-page h2 { font: 700 50px/1.02 Georgia, "Times New Roman", serif; letter-spacing: -1px; margin: 0 0 8px; } .pv-page h2.up { font-size: 52px; text-transform: none; letter-spacing: -1.2px; } .pv-page h2.mid { font: 700 42px/1.04 Georgia, "Times New Roman", serif; letter-spacing: -0.8px; }
-  .pv-page h2.lh-lead { font: 700 62px/0.98 Georgia, "Times New Roman", serif; letter-spacing: -1.6px; text-transform: none; margin: 10px 0 8px; }
-  .pv-page h3 { font: 700 30px/1.05 Georgia, "Times New Roman", serif; letter-spacing: -0.5px; }
-  .lh-deck { font: 19px/1.3 Georgia, "Times New Roman", serif; color: #222; margin: 2px 0 12px; } .lh-lede { font: 700 18px/1.3 Georgia, serif; }
+  .pv-page h2 { font: 700 50px/1.02 "YS Serif", Georgia, "Times New Roman", serif; letter-spacing: -1px; margin: 0 0 8px; } .pv-page h2.up { font-size: 52px; text-transform: none; letter-spacing: -1.2px; } .pv-page h2.mid { font: 700 42px/1.04 "YS Serif", Georgia, "Times New Roman", serif; letter-spacing: -0.8px; }
+  .pv-page h2.lh-lead { font: 700 62px/0.98 "YS Serif", Georgia, "Times New Roman", serif; letter-spacing: -1.6px; text-transform: none; margin: 10px 0 8px; }
+  .pv-page h3 { font: 700 30px/1.05 "YS Serif", Georgia, "Times New Roman", serif; letter-spacing: -0.5px; }
+  .lh-deck { font: 19px/1.3 "YS Serif", Georgia, "Times New Roman", serif; color: #222; margin: 2px 0 12px; } .lh-lede { font: 700 18px/1.3 "YS Serif", Georgia, serif; }
   .lh-by { display: none; }
   .lh-photo { border: none; background: #cfd3d6; } .lh-photo img { filter: none; }
-  .lh-cap { font: 12.5px/1.3 Georgia, serif; font-style: normal; color: #333; margin: 5px 0 12px; } .lh-cap::after { content: ' Kuva: Ylästön Sanomat'; font: 11px Georgia, serif; letter-spacing: 0; color: #555; }
-  .lh-cols { font: 15px/1.42 Georgia, "Times New Roman", serif; text-align: left; hyphens: manual; } .lh-cols.big { font-size: 16px; line-height: 1.45; } .lh-cols.c2, .lh-cols.c3 { column-rule: none; column-gap: 20px; }
+  .lh-cap { font: 12.5px/1.3 "YS Serif", Georgia, serif; font-style: normal; color: #333; margin: 5px 0 12px; } .lh-cap::after { content: ' Kuva: Ylästön Sanomat'; font: 11px "YS Serif", Georgia, serif; letter-spacing: 0; color: #555; }
+  .lh-cols { font: 15px/1.3 "YS Serif", Georgia, "Times New Roman", serif; text-align: left; hyphens: manual; } .lh-cols.big { font-size: 16px; line-height: 1.3; } .lh-cols.c2, .lh-cols.c3 { column-rule: none; column-gap: 20px; }
   .lh-cols .dl, .lh-fcol .dl, .lh-brief .dl { display: block; font: 700 11.5px Arial, sans-serif; letter-spacing: 0.03em; margin-bottom: 1px; }
-  .tight .lh-cols, .tight .lh-cols.big { font-size: 14.2px; line-height: 1.38; } .tighter .lh-cols, .tighter .lh-cols.big { font-size: 13.4px; line-height: 1.34; }
-  .lh-pull { margin: 10px 0 4px; padding: 0; border: none; font: 700 22px/1.22 Georgia, serif; text-align: left; } .lh-pull::before { content: '”'; display: block; font: 900 78px/0.62 Georgia, serif; margin-bottom: 2px; }
-  .lh-box { border: none; background: #e4e4e0; padding: 12px 14px 10px; font: 13.5px/1.4 Arial, sans-serif; margin-top: 12px; } .lh-box b { font: 700 16px/1.2 Georgia, serif; letter-spacing: 0; margin-bottom: 6px; }
+  .tight .lh-cols, .tight .lh-cols.big { font-size: 14.2px; line-height: 1.27; } .tighter .lh-cols, .tighter .lh-cols.big { font-size: 13.4px; line-height: 1.24; }
+  .lh-pull { margin: 10px 0 4px; padding: 0; border: none; font: 700 22px/1.22 "YS Serif", Georgia, serif; text-align: left; } .lh-pull::before { content: '”'; display: block; font: 900 78px/0.62 "YS Serif", Georgia, serif; margin-bottom: 2px; }
+  .lh-box { border: none; background: #e4e4e0; padding: 12px 14px 10px; font: 13.5px/1.32 Arial, sans-serif; margin-top: 12px; } .lh-box b { font: 700 16px/1.2 "YS Serif", Georgia, serif; letter-spacing: 0; margin-bottom: 6px; }
   .lh-box ul { margin: 0; padding: 0 0 0 16px; } .lh-box li { margin: 0 0 3px; } .lh-box i { display: block; margin-top: 8px; font: 11px Arial, sans-serif; color: #555; font-style: normal; }
   .lh-prow { display: flex; gap: 20px; align-items: flex-start; } .lh-prow > .lh-cols { flex: 1 1 0; min-width: 0; } .lh-prow > .lh-box { flex: 0 0 200px; margin-top: 0; }
   .lh-srow { display: flex; gap: 18px; align-items: flex-start; } .lh-smain { flex: 1 1 0; min-width: 0; } .lh-brief { flex: 0 0 196px; border-left: 1px solid #b9b9b4; padding-left: 14px; }
   .lh-brief .bh { background: #dfe8f1; color: #1d3c5e; font: 900 15px Arial, sans-serif; letter-spacing: 0.05em; padding: 5px 9px 4px; margin-bottom: 8px; }
-  .lh-brief a { display: block; font: 13px/1.35 Georgia, serif; padding: 0 0 9px; margin-bottom: 9px; border-bottom: 1px solid #b9b9b4; } .lh-brief a:last-child { border-bottom: none; }
-  .lh-brief a b { display: block; font: 700 16px/1.15 Georgia, serif; margin-bottom: 4px; } .lh-brief a i { display: block; font: 700 12px Arial, sans-serif; font-style: normal; margin-top: 4px; }
+  .lh-brief a { display: block; font: 13px/1.28 "YS Serif", Georgia, serif; padding: 0 0 9px; margin-bottom: 9px; border-bottom: 1px solid #b9b9b4; } .lh-brief a:last-child { border-bottom: none; }
+  .lh-brief a b { display: block; font: 700 16px/1.15 "YS Serif", Georgia, serif; margin-bottom: 4px; } .lh-brief a i { display: block; font: 700 12px Arial, sans-serif; font-style: normal; margin-top: 4px; }
   .lh-sivu { display: block; font: 700 12.5px Arial, sans-serif; margin-top: 8px; } .lh-sivu:hover { text-decoration: underline; }
   .lh-stamp { color: #3f6f9f; border-color: #3f6f9f; }
   /* the front page */
   .lh-ftops { display: flex; gap: 12px; margin-bottom: 10px; } .lh-ftop { flex: 1 1 0; display: flex; gap: 10px; align-items: stretch; background: #dfe8f1; padding: 9px 11px; min-height: 96px; box-sizing: border-box; }
-  .lh-ftop > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; } .lh-ftop b { font: 700 18px/1.12 Georgia, serif; } .lh-ftop i, .lh-ftea i { font: 700 12px Arial, sans-serif; font-style: normal; margin-top: 6px; }
+  .lh-ftop > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; } .lh-ftop b { font: 700 18px/1.12 "YS Serif", Georgia, serif; } .lh-ftop i, .lh-ftea i { font: 700 12px Arial, sans-serif; font-style: normal; margin-top: 6px; }
   .lh-ftop .lh-photo { width: 118px; flex: none; height: auto !important; }
   .lh-mast { display: block; border: none; margin: 0; padding: 0; overflow: visible; white-space: nowrap; }
   .lh-mast b { display: inline-block; font: 900 84px/0.92 "Arial Black", "Arial", sans-serif; letter-spacing: -2px; transform: scaleX(0.74); transform-origin: 0 0; width: 136%; }
   .lh-dline { display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; font: 700 11.5px Arial, sans-serif; padding: 4px 0 5px; border-bottom: 7px solid #f2c230; margin-bottom: 4px; } .lh-dline .w { font-weight: 400; }
-  .lh-frow { display: flex; gap: 18px; align-items: flex-start; } .lh-fcol { flex: 0 0 196px; font: 14.5px/1.42 Georgia, serif; } .lh-fph { flex: 1 1 0; min-width: 0; }
+  .lh-frow { display: flex; gap: 18px; align-items: flex-start; } .lh-fcol { flex: 0 0 196px; font: 14.5px/1.3 "YS Serif", Georgia, serif; } .lh-fph { flex: 1 1 0; min-width: 0; }
   .lh-fteas { display: flex; gap: 0; border-top: 1px solid #1b1b1b; margin-top: 8px; padding-top: 10px; } .lh-ftea { flex: 1 1 0; display: flex; gap: 12px; padding: 0 14px; } .lh-ftea:first-child { padding-left: 0; border-right: 1px solid #b9b9b4; } .lh-ftea:last-child { padding-right: 0; }
-  .lh-ftea > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; } .lh-ftea b { font: 700 22px/1.1 Georgia, serif; } .lh-ftea .lh-photo { width: 130px; flex: none; }
+  .lh-ftea > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; } .lh-ftea b { font: 700 20px/1.1 "YS Serif", Georgia, serif; } .lh-ftea .lh-photo { width: 130px; flex: none; }
   .lh-want1 { color: #1d3c5e; font-size: 13px; }
-  .lh-inside { border-top: 1px solid #b9b9b4; margin-top: 10px; padding-top: 6px; font: 13px Georgia, serif; } .lh-inside i, .lh-index i, .lh-teas i { color: #1d3c5e; }
+  .lh-inside { border-top: 1px solid #b9b9b4; margin-top: 10px; padding-top: 6px; font: 13px "YS Serif", Georgia, serif; } .lh-inside i, .lh-index i, .lh-teas i { color: #1d3c5e; }
   .lh-ad.wide { flex-direction: row; background: #e8742a; border: none; margin-top: 12px; height: 132px; color: #fff; } .lh-ad.wide .ad-ph { width: 34%; border-right: none; } .lh-ad.wide .ad-big { color: #fff; font-size: 34px; text-align: left; } .lh-ad.wide .ad-small { color: #fff; text-align: left; } .lh-ad.wide .ad-txt { text-align: left; }
   /* ads, police, letters, keys, change list: the new colours */
   .lh-ad { border: none; background: #fbf6e6; box-shadow: inset 0 0 0 1px #c9c4b4; } .lh-ad .ad-ph { border-right: none; } .lh-ad.v .ad-ph, .lh-ad.fill .ad-ph { border-bottom: none; } .lh-ad .ad-tag { background: #1b1b1b; }
   .lh-ad.cl { background: #fbf8ee; box-shadow: none; border: 1px solid #1b1b1b; outline: none; }
-  .lh-half + .lh-half { border-top: 1px solid #1b1b1b; } .lh-htxt .lh-cols { font-size: 17px; line-height: 1.45; } .lh-htxt .lh-sec { margin-bottom: 8px; } .lh-htxt .lh-sec span { font-size: 13px; }
+  .lh-half + .lh-half { border-top: 1px solid #1b1b1b; } .lh-htxt .lh-cols { font-size: 16px; line-height: 1.3; } .lh-htxt .lh-in.even { justify-content: flex-start; } .lh-htxt .lh-in.even > h3 { margin-top: auto; }   /* (the label up top, the headline and its text together at the foot, level with the photo) */ .lh-htxt .lh-sec { margin-bottom: 8px; } .lh-htxt .lh-sec span { font-size: 13px; }
   .rp-want { border: none; background: #e4e4e0; } .rp-wt { color: #1b1b1b; } .rp-t .rk { color: #1d3c5e; } .rp-h { border-bottom: 3px solid #1b1b1b; }
   .ml-l { border-left-color: #3f6f9f; } .ml-r b { color: #1d3c5e; }
-  .lh-lyh b.d { color: #1d3c5e; } .lh-in.even > .lh-lyh { flex: 1 1 auto; } .lh-lyh { font-family: Georgia, serif; font-size: 13px; column-rule: 1px solid #b9b9b4; }
+  .lh-lyh b.d { color: #1d3c5e; } .lh-in.even > .lh-lyh { flex: 1 1 auto; } .lh-lyh { font-family: "YS Serif", Georgia, serif; font-size: 13px; column-rule: 1px solid #b9b9b4; }
   .lh-keys kbd { background: #fff; } .lh-boxes .lh-box { font-size: 13.5px; }
 </style>
 </head>
@@ -4639,6 +4641,7 @@ const CHANGES = [
   ['30.9.', '🐕 Pihakoira hyppää kyytiin, kun pysähdyt sen viereen, ja haukkuu mukana seuraavaan pysähdykseen', '10.04'],
   ['30.9.', '🌭 Makkarakärry: pysähdy viereen, makkara tuodaan ikkunaan, röyh ja savua', '10.04'],
   ['30.9.', '📸 Peltipoliisi: kaksi nopeuskameraa radan varrella, yli 80 km/h välähtää ja kovin lukema kirjataan rekisteriin', '10.04'],
+  ['30.9.', 'Lehden taitto kuntoon: oma lehtifontti mukana (teksti ei enää leikkaudu Windowsin Georgialla), tiiviimpi lehtimäinen riviväli, puolikkaissa jutuissa kuva levenee ja otsikko+teksti yhdessä, ajatusviiva ei jää rivin alkuun', '20.23'],
   ['30.9.', 'Kuski nousee autosta kuljettajan puolelta (vasen), liftari apukuljettajan ovelle; R dragsterissa – ehjässä tai romuna – vie suoraan uuteen dragsteriin', '20.05'],
   ['30.9.', 'Korjauksia: liftarin K-KAUPPA-kyltti isompi ja näkyvissä, jalkaisin poliisi tulee sinun luoksesi eikä tyhjälle autolle, HONK-banderolli aukealle, ufo ei nappaa pakenevaa hirveä', '09.32'],
   ['30.9.', 'Mopopojat lähtevät perään useammin: riittää 15 % ennätyksestä, ja ennen ensimmäistä väliaikaa aina', '08.56'],
@@ -4924,7 +4927,7 @@ const LEHTI = [
   { id: 'renkaat', size: 'half', n: 41, kick: '🛞 YLEISÖ', title: 'Rengasvallit ja yleisö', img: ['renkaat.jpg'], body: ['Rengaspinot lentävät, yleisö hurraa ja väistää. Mutkissa jotkut seisovat tiellä – ne juoksevat kyllä pois.'] },
 ];
 const PAPER = { pages: [], views: [], v: 0, open: false, two: true, wheelT: 0, tx: 0 };
-const lhEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const lhEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/ ([–—]) /g, '\u00a0$1 ');   // (a dash keeps to the word before it: never alone at the start of a line)
 const lhHy = (s) => s.replace(/[A-Za-zÅÄÖåäö]{6,}/g, (w) => { const V = /[aeiouyåäö]/i; let o = '', last = 0;   // Finnish soft hyphens (a break goes before a consonant that starts a syllable: ral·li·kus·ki), so justified columns don't open rivers
   for (let i = 2; i <= w.length - 2; i++) if (!V.test(w[i]) && V.test(w[i + 1]) && V.test(w.slice(last, i)) && i - last >= 2) { o += w.slice(last, i) + '­'; last = i; } return o + w.slice(last); });
 const lhImg = (f, h, cls) => '<div class="lh-photo ' + (cls || '') + '" style="height:' + h + 'px"><img data-src="lehti/' + f + '" alt=""><span class="lh-miss">KUVA TULOSSA</span></div>';
@@ -5078,10 +5081,15 @@ function lhFit(F) { const inn = F.querySelector(':scope > .lh-in'); if (!inn) re
   const fx = [...inn.querySelectorAll('.lh-photo.fx')], H = (p) => parseFloat(p.style.height), lo = (p) => Math.round(p.offsetWidth*(p.classList.contains('lo') ? 0.26 : 0.36)), hi = (p) => Math.round(p.offsetWidth*0.8);
   const spread = (d) => { for (let k = 0; k < 4 && Math.abs(d) > 0.5; k++) { const open = fx.filter(p => d > 0 ? H(p) < hi(p) : H(p) > lo(p)); if (!open.length) break; const each = d/open.length;
     for (const p of open) { const h0 = H(p), h = Math.max(lo(p), Math.min(hi(p), h0 + each)); p.style.height = Math.round(h) + 'px'; d -= Math.round(h) - h0; } } };
+  for (const c of inn.querySelectorAll('.lh-cols.c2, .lh-cols.c3')) { const lh = parseFloat(getComputedStyle(c).lineHeight) || 20;   /* a short text in columns: fewer columns, so no column holds just a word or two */
+    while (c.offsetHeight < lh*5.5 && (c.classList.contains('c2') || c.classList.contains('c3'))) { if (c.classList.contains('c3')) c.classList.replace('c3', 'c2'); else c.classList.remove('c2'); } }
   if (fx.length) spread(free());
   if (F.classList.contains('lh-htxt')) { const h3 = inn.querySelector('h3'), c = inn.querySelector('.lh-cols'), wide = () => h3.scrollWidth > h3.clientWidth + 1;   // (a half's text column: the headline grows as far as its longest word allows, then the text, until the column is full)
     const grow = (el, base, lo, hi, ok) => { let k = 1; const set = () => el.style.fontSize = (base*k).toFixed(1) + 'px'; while (k < hi && free() > 24 && ok()) { k += 0.04; set(); } if (free() < 0 || !ok()) { k -= 0.04; set(); } while (!ok() && k > lo) { k -= 0.04; set(); } };
-    grow(h3, 34, 0.6, 1.5, () => !wide()); grow(c, 17, 0.78, 1.3, () => true); }
+    const half = F.parentNode, ph = half.querySelector(':scope > .lh-photo');   /* a short story: the photo takes the room, the text column narrows (the body stays body-sized, as in a real paper) */
+    if (ph) { h3.style.fontSize = '34px'; let g = 1.55; while (g < 4.5 && free() > 30 && !wide() && F.offsetWidth > half.offsetWidth*0.3) { g += 0.1; ph.style.flexGrow = g.toFixed(2); } while (g > 1.55 && (free() < 0 || wide())) { g -= 0.1; ph.style.flexGrow = g.toFixed(2); } }
+    grow(h3, 34, 0.6, 1.5, () => !wide()); grow(c, 16, 0.84, 1.1, () => true); }
+  const lead = inn.querySelector('h2.lh-lead'); if (lead && free() < -1) { let f = parseFloat(getComputedStyle(lead).fontSize); while (free() < -1 && f > 44) { f -= 2; lead.style.fontSize = f + 'px'; } if (fx.length) spread(free()); }   // (the front's lead headline: smaller, onto fewer lines, before the text goes tight)
   if (free() < -1) { inn.classList.add('tight'); if (fx.length) spread(free()); }
   if (free() < -1) { inn.classList.add('tighter'); if (fx.length) spread(free()); }
   if (free() >= 80 && inn.dataset.q) { const q = document.createElement('div'); q.className = 'lh-pull'; q.textContent = '”' + inn.dataset.q + '”'; const c = inn.querySelector('.lh-cols'); if (c) c.after(q); else inn.appendChild(q); if (free() < 0) q.remove(); }
@@ -5092,9 +5100,10 @@ const LH_VER = 'mail1';   // (the key also covers the layout functions and the s
 function lhKey() { const code = [lhPlan, lhFront, lhSpread, lhPage, lhHalves, lhPolice, lhMail, lhAdsPage, lhAd, lhKeys, lhLyhyesti, lhFitAll, lhFit, lhBody, lhImg, lhFolio, lhMast, lhBox, lhQuote, lhLabel, lhBriefs, lhSivu].map(String).join('') + [...document.querySelectorAll('style')].map(e => e.textContent).join('');   // (the layout code and the styles too: change either and the baked pages are stale)
   const str = JSON.stringify([LEHTI, CHANGES, LH_ADS, LH_VER, code]); let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 0x01000193);   // (which paper this is: the baked pages must be of this very game)
   return (h >>> 0).toString(16); }
+const lhFonts = () => document.fonts ? Promise.all(['16px "YS Serif"', 'bold 16px "YS Serif"', 'italic 16px "YS Serif"'].map(f => document.fonts.load(f))).catch(() => 0) : Promise.resolve();   // (the paper's own serif, before anything is measured)
 function lehtiFetch() {   // the paper comes ready-made from the server (lehti/lehti.json, laid out by build.py); laid out here only if that's missing or of another version
-  if (PAPER.pages.length) return; if (!/^https?:/.test(location.protocol)) return lehtiBuild();
-  fetch('lehti/lehti.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.key === lhKey() && Array.isArray(j.pages) && j.pages.length) lehtiSet(j.pages, 'valmis'); else lehtiBuild(); }).catch(() => lehtiBuild()); }
+  if (PAPER.pages.length) return; if (!/^https?:/.test(location.protocol)) return lhFonts().then(lehtiBuild);
+  lhFonts().then(() => fetch('lehti/lehti.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.key === lhKey() && Array.isArray(j.pages) && j.pages.length) lehtiSet(j.pages, 'valmis'); else lehtiBuild(); })).catch(() => lehtiBuild()); }
 function lehtiBuild() { if (PAPER.pages.length) return; const t = performance.now(); lehtiSet(lhPlan(), 'taitettu'); PAPER.tb = [t, performance.now() - t]; }   // (laid out here: off the start, or at once on the first open)
 function lehtiSet(pages, src) { if (PAPER.pages.length) return; PAPER.pages = pages; PAPER.src = src;
   const mini = document.getElementById('lehti-mini'); mini.innerHTML = '<div class="lm-scale">' + PAPER.pages[0] + '</div><div class="lm-btn">📰 ' + T('AVAA LEHTI') + '</div>'; lhLoadImgs(mini); lehtiLayout(); mini.classList.add('ready'); lhRapFill(mini); rapFetch(); }
