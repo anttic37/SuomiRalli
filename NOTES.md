@@ -877,6 +877,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   velocity's heading when going forward > 4 m/s, else the nose; smoothed in DP.camA) and turns at most 1.1 rad/s; the tree's impulse is
   applied a quarter as far off the centre line. t_dragforest: max yaw 5.6 -> 2.1 rad/s, camera <= 1.1 rad/s. (Full throttle on grass
   still swings the tail round — the rear slicks spinning lose their side grip.)
+- Radio Ylästö's voices in the news (30.9., Antti gave the four hosts' profiles; the kitchen show's audio did not come with it):
+  Aki Korhonen (Naapurivartti: the USSR admirer, 1980s predictions that go wrong), Kari Lehtinen (Urheilukierros: traditional sports,
+  lost with floorball / snowboarding / sponsors), Seppo Hämäläinen (Merisää ja Euroopan sää, readiness bulletins — the koelähetys
+  line winks at the nuke), Marjatta Väänänen (Marjatan keittiö: microwave, pineapple, jelly, "hamburgeri", the Trabant manual, the DDR
+  phone call). Paper: 'keittio' main n 8.5 (keittio.jpg + radiot.jpg, the four together), 'naapurivartti' page n 60, 'urheilukierros'
+  and 'merisaa' halves; photos t_lh_q (hosts are staged Humans with fixed looks: LOOK in the script). Six NEWS_GOSSIP lines (fi/en/no).
+  Playlist entries may carry show: 'keittio' | 'naapurivartti' | 'urheilukierros' | 'merisaa' → SHOW_STATIONS name on the dial.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
