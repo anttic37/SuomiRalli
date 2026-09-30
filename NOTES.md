@@ -818,6 +818,37 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   body physics to come: root on the ground under the CG, a "body" group, a group per wheel at its hub (spin child, steer y), wing /
   driver / chute groups (to come off, be thrown out); DRAG_GEOM has the dimensions, wheel positions and radii, mass, CG. Decided
   for the physics step: stuck on its roof → it catches fire and the driver is thrown out. t_dragmodel (shots). Rally times unchanged.
+- Dragster step 2 (30.9., Antti: "levike tiehen kiinni, rengasreunat, nyt fysiikka ja kunnon äänet"):
+  - Lay-by: layPlan runs before buildCurbs (in generateTrack) and its inner edge is the road's edge (off = w2 - W/2 + (W - 0.15)*taper);
+    buildCurbs skips kerb blocks whose outer point is inLay; the ribbon sits at Y + ROAD_Y (flush with the road); a dashed line where
+    it leaves the road; its own red/white kerb strip (curbMat_) on the outer edge; a wall of tyre stacks (tires[], added in
+    buildTrackTires after the relax passes) 1.3 m outside it.
+  - Physics DP (only while DRAG.on; updateCar returns into dragPhys, the rally code path is untouched): a 3D rigid body (p = centre of
+    mass at model (0, 0.42, -0.3), v, q, w; diagonal inertia I = [4640, 4860, 620] in the model frame), 2 substeps per 120 Hz step
+    (4 above 40 m/s). Four raycast wheels (DRAG_GEOM hubs, 0.18 m travel, springs 15.5k/31k, dampers, a bump stop) push along the
+    body's up; per tyre a friction ellipse (rear slicks mu 3.6 along / 1.9 across, fronts 1.0 / 1.1, x0.7 gravel, x0.55 grass), rear
+    drive min(38 kN, 2.6 MW / v) split in two, wheelspin = demand over grip (DP.spin, smoke, 0.85 dynamic grip), brakes, reverse,
+    rolling, a standstill hold. Aero: CdA 2.4, the wing's downforce (ClA 1.2, applied at z -2.3), the nose wing (0.6), the chute
+    (CdA 4.5 at z -6). Contacts: DP_PTS hull points (tagged by part: wing / wheel ids / 'bar' = the wheelie bars' little wheels) vs the
+    ground (Y + its normal) and vs static boxes (boxPush) and rocks (rockOut), plus a spine box vs static boxes (poles between points),
+    all as impulses (dpContact: restitution, Coulomb friction, a depth bias) at the point — so off-centre hits spin, kerbs roll it.
+    Hard hits tear off the wing / a wheel (dpLose → the rally car's debris list). Vehicles: obbSat + resolvePair on playerBox(), the
+    velocity change put back as an impulse at the contact (spin). People: boxHitsHumans(..., noRide) (nobody rides its nose). Tyre
+    stacks: updateTires with four circles, their shove comes back through car.* (dragPhys reads any change of car.x/z/vx/vz made by
+    other systems since its last step and applies it to the body). car.x/z = the model root on the ground, car.angle = the body's
+    heading; playerBox()/carBoxPush() use the dragster's 7.7 x 2.1 m box while DRAG.on. dragView() draws carGroup from the body
+    (interpolated between the last two steps, full quaternion), wheel hubs at their suspension height.
+    On its roof or side (up.y < 0.35), stopped for 1.2 s: wreckCar('drag') — fire, the driver thrown out (the driver group hides),
+    fire engine + ambulance; R resets. A broken dragster is towed home when you swap back to the Pökö. Camera: speed capped at 45 m/s
+    for the camera's height/distance in the dragster. DRAG.SPEC / the DRIVE swap are gone.
+    Numbers (t_dragphys): 0-100 km/h 0.95 s, 0-200 1.7 s, 323 km/h in 3 s, nose up ~5-6 deg on the bars, chute ~0.75 g, 25 s of
+    autopilot along the route with no flip, a 40 m/s house hit spins it (w ~10 rad/s) and takes the wing, on its roof -> wreck.
+  - Sound: createDragSynth (audio.dragSynth): sawtooth at the firing rate (rpm/60*4) + a square sub, both through a hard tanh
+    saturator, a lumpy-cam AM at half crank, noise gated at the firing rate, the blower's whine, a scrape band (DP.scrape); pops at
+    the launch, a burst of cracks off the throttle, open-header crackle at idle. The Pökö's engine synth is off while DRAG.on.
+    dragCrashSound (noise thump + clank, rate-limited), dragChuteSound. DP.rpm: the slicks' speed through 5:1, clutch slip >= 5200.
+  - Paper: 'dragster' is a main spread now (n 8; police lead stays), photos dragster.jpg (launch off the lay-by) and dragster_b.jpg
+    (a tumble) from t_lh_o. Tests: t_dragphys (settle / launch / chute / route autopilot / house crash / roof), t_drag still passes.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

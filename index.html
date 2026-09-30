@@ -336,7 +336,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 10.00 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 10.34 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -449,6 +449,7 @@ const I18N = {
   'AIKA KÄY': ['CLOCK RUNNING', 'KLOKKA GÅR'], 'FINAL — FIND FINISH': ['FINAL — FIND FINISH', 'SISTE — FINN MÅL'], 'CHECKPOINT {0}': ['CHECKPOINT {0}', 'SJEKKPUNKT {0}'],
   'KISA': ['RACE', 'LØP'],
   '▶ AJA': ['▶ DRIVE', '▶ KJØR'],
+  '🔥 DRAGSTERI KATOLLAAN – TULESSA, KUSKI LENSI ULOS!': ['🔥 DRAGSTER ON ITS ROOF – ON FIRE, THE DRIVER THROWN OUT!', '🔥 DRAGSTEREN PÅ TAKET – I BRANN, SJÅFØREN SLENGT UT!'],
   '🏁 DRAGSTERI! Hirveät tehot – aika ei kelpaa ennätykseksi': ['🏁 DRAGSTER! Monstrous power – no records with it', '🏁 DRAGSTER! Enorm kraft – ingen rekorder med den'], 'dragsterilla — aika ei kelpaa': ["with the dragster — the time doesn't count", 'med dragsteren — tiden teller ikke'],
   '📸 PELTIPOLIISI NAPSAHTI! {0} km/h': ['📸 SPEED CAMERA FLASHED! {0} km/h', '📸 FARTSKAMERAET BLITSET! {0} km/t'], 'Peltipoliisi: kovin ylinopeus {0} km/h – {1}': ['Speed camera: fastest {0} km/h – {1}', 'Fotoboks: raskeste {0} km/t – {1}'],
   '🌭 MAKKARA! …RÖYH!': ['🌭 SAUSAGE! …BURP!', '🌭 PØLSE! …RAP!'], '🌭 makkara tulossa… {0}': ['🌭 sausage coming… {0}', '🌭 pølse kommer… {0}'],
@@ -1002,7 +1003,7 @@ function generateTrack() {
   markRouteStreets();
   computeZones();
   startDir=new THREE.Vector2(trackPoints[1].x-trackPoints[0].x,trackPoints[1].y-trackPoints[0].y).normalize();
-  computeBarrierMask(); buildCurbs(); buildCornerPatches(); buildFreeFillets(); buildSurfaceSpill(); buildAsphaltDecor();
+  computeBarrierMask(); layPlan(gridIndex()); buildCurbs(); buildCornerPatches(); buildFreeFillets(); buildSurfaceSpill(); buildAsphaltDecor();
   // houses square to their street: turn by the small angle (< 25°) that makes one wall parallel to the nearest street
   BUILDINGS.forEach(B => { if (B.length > 5 || B._snapped) return; let best = null;
     sideRoads.forEach(R => { for (let i = 1; i < R.pts.length; i++) { const a = R.pts[i-1], b = R.pts[i], vx = b.x-a.x, vz = b.y-a.y, L2 = vx*vx+vz*vz || 1;
@@ -1246,6 +1247,7 @@ function buildCurbs() {
       if (barrierOK[i] && barrierOK[ni]) g = grp('common', null);
       else if (curbTag && curbTag[i] && curbTag[ni] && curbTag[i].z === curbTag[ni].z && curbTag[i].p === curbTag[ni].p) g = grp(curbTag[i].z+':'+curbTag[i].p, curbTag[i]);
       else { run = 0; continue; }                             // a gap restarts the pattern cleanly
+      if (inLay(E[i][3], E[i][5], 0.2) || inLay(E[ni][3], E[ni][5], 0.2)) { run = 0; continue; }   // (open onto the dragster's lay-by)
       const a0 = E[i], a1 = E[ni], am = E[(i-1+n)%n], a2 = E[(ni+1)%n];
       const len = Math.hypot(a1[0]-a0[0], a1[2]-a0[2]), m = Math.max(1, Math.round(len/SUB));
       for (let k = 0; k < m; k++) {   // a Catmull-Rom curve through the kerb's edge points, so bends are round, not faceted
@@ -1303,17 +1305,17 @@ function buildGridBox() {
     me.rotation.order = 'YXZ'; me.rotation.set(-Math.PI/2, yaw + Math.PI, 0); me.position.set(p.x + d.x*(at - ht/2) + L.x*w2*0.5*side, ROAD_Y + 0.04, p.y + d.y*(at - ht/2) + L.z*w2*0.5*side); me.renderOrder = 1; me.userData.key = 'grid'; trackMeshGroup.add(me); };
   word([['KISA', 250]], '#ffffff', 1, ahead - 1.0); word([['GTA', 300], ['VAPAA AJO', 110]], '#ffd23c', -1, ahead - 1.0);
   Object.assign(START_SPLIT, { x: sx, z: sz, dx: d.x, dz: d.y, lx: L.x, lz: L.z, hw: w2, prev: null, done: false, ok: true });
-  layPlan(gi);
 }
-// the dragster's lay-by (30.9., Antti's sketch): a lane of its own on the driver's left of the start straight — off the road ~40 m before
-// the grid, 3.6 m wide, a strip of grass between it and the road, back onto the road just short of the KISA line. Planned here, before
-// the scenery, so trees, tyre walls and the crowd keep off it (inPaved); built with the dragster.
+// the dragster's lay-by (30.9., Antti's sketch): a lane of its own on the driver's left of the start straight — widening out of the road
+// ~40 m before the grid, 3.6 m wide and joined straight onto the road (no grass between: Antti, 30.9.), narrowing back in just short of the
+// KISA line; a red-and-white kerb and a wall of tyre stacks along its outer edge. Planned before the kerbs (none between it and the road)
+// and the scenery, so trees, tyre walls and the crowd keep off it (inPaved); built with the dragster.
 const LAY = { pts: [], W: 3.6 };
 function layPlan(gi) { LAY.pts.length = 0; const n = trackPoints.length; if (n < 50) return;
   const ss = (a, b, t) => { const k = Math.max(0, Math.min(1, (t - a)/(b - a))); return k*k*(3 - 2*k); };
   for (let t = -44; t <= 10; t += 1) { const u = t/2.4, i0 = Math.floor(u), f = u - i0, i = ((gi + i0) % n + n) % n, j = (i + 1) % n, p = trackPoints[i], q = trackPoints[j], d0 = getDir(i), d1 = getDir(j);
     let dx = d0.x + (d1.x - d0.x)*f, dz = d0.y + (d1.y - d0.y)*f; const dl = Math.hypot(dx, dz) || 1; dx /= dl; dz /= dl; const w2 = (wAt(i) + (wAt(j) - wAt(i))*f)/2;   // (between the route's points, smoothly)
-    const bx = p.x + (q.x - p.x)*f, bz = p.y + (q.y - p.y)*f, off = w2 + 0.4 + 4.0*ss(-44, -32, t)*(1 - ss(-2, 10, t));   // (from the road's edge out 4 m, along, and back in)
+    const bx = p.x + (q.x - p.x)*f, bz = p.y + (q.y - p.y)*f, off = w2 - LAY.W/2 + (LAY.W - 0.15)*ss(-44, -32, t)*(1 - ss(-2, 10, t));   // (out of the road's edge to its full width, along, and back in: its inner edge is the road's edge)
     LAY.pts.push({ x: bx + dz*off, z: bz - dx*off, dx, dz, t }); } }
 function inLay(x, z, m) { const r = LAY.W/2 + (m || 0); for (const p of LAY.pts) if ((p.x - x)**2 + (p.z - z)**2 < r*r) return true; return false; }
 function buildCheckpoints() {
@@ -3353,6 +3355,7 @@ function walkCamera(dt) { const h = WALK.h, gy = Y(h.x, h.z) + h.hop; WALK.cy +=
   if (Math.hypot(ax - lightAnchor.x, az - lightAnchor.z) > 24) { lightAnchor.x = ax; lightAnchor.z = az; const ay = Y(ax, az); dirLight.position.set(ax + SUN.x, SUN.y + ay, az + SUN.z); dirLight.target.position.set(ax, ay, az); dirLight.target.updateMatrixWorld(); } }
 function updateCar(dt, live = true) {
   const held = POLICE.hold > 0 || WRECK.on || WALK.on; if (held) live = false;   // pulled over: the police have it
+  if (DRAG.on) { dragPhys(dt, live); return; }   // the dragster: its own physics (below, DP)
   const throttle = live && (keys['ArrowUp'] || keys['KeyW']) ? 1 : 0;
   const brake = live && (keys['ArrowDown'] || keys['KeyS']) ? 1 : 0;   /* (not while held: the brake at a standstill is reverse) */
   const steerInput = live ? (((keys['ArrowLeft']||keys['KeyA'])?1:0) - ((keys['ArrowRight']||keys['KeyD'])?1:0)) : 0;
@@ -3991,6 +3994,9 @@ function buildTrackTires() { NBG.n = -1;
     }
     if (!moved) break;
   }
+  // the dragster's lay-by: a wall of tyre stacks along its outer edge, behind the kerb (30.9.)
+  { let last = null; for (const p of LAY.pts) { const o = LAY.W/2 + 1.3, x = p.x + p.dz*o, z = p.z - p.dx*o; if (onRoad(x, z, 0.9) || (last && Math.hypot(x - last[0], z - last[1]) < 1.72)) continue; last = [x, z];
+      const cols = [], base = tires.length % 3 === 0 ? 0 : 1; for (let i = 0; i < 3; i++) cols.push(base); tires.push({ kind: 'tire', x, z, ox: x, oz: z, vx: 0, vz: 0, hop: 0, r: 0.82, cols, inst: [], yaw: Math.random()*6.3, moving: false }); } }
   // a marshal behind every junction wall, facing the race
   geoPick = 16; walls.forEach(({ idx, side, off1 }) => { const [mx, mz] = stackAt(idx, (off1 + 3.7)*side), p = trackPoints[idx]; addPersonChecked(mx, mz, Math.atan2(p.x - mx, p.y - mz)); }); geoPick = -1;
   pushOff();   // the last word: nothing inside the curb margin
@@ -4583,6 +4589,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Dragsterille oma oikea fysiikka: jousitus, slicksien pito ja sutiminen, keulan nousu wheelie-tukien varaan, siiven painovoima, jarruvarjo – osuma kylkeen pyöräyttää, reunakivi voi kääntää katolleen, siipi ja renkaat irtoavat; katollaan se syttyy ja kuski lentää ulos. Kunnon äänet: Top Fuel -moottori, pamaukset, rytinät. Levike kiinni tiessä, reunakivet ja rengasseinä', '13.33'],
   ['30.9.', 'Dragsterille uusi, tarkempi malli (kapeneva nokka, turvakaari ja kuski, ahdin, 8 pakoputkea, slicksit vanteineen, siipi, YLÄSTÖ FUEL -tarrat; pyörät pyörivät ja slicksit savuavat) ja oma levike lähtöruudun vasemmalla puolella', '13.00'],
   ['30.9.', 'Alkuruutuun iso ▶ AJA -nappi. Jalkaisin nuolet oikein päin (oikea vie oikealle). Dragsteri Malminrajantien varteen omalle asfalttilevikkeelle', '12.33'],
   ['30.9.', '🏁 Dragsteri Malminrajantien varressa maalin lähellä: nouse autosta (F), kävele dragsterille ja F – 0–100 alle sekunnissa, jarruvarjo aukeaa kun kaasu nousee. Pökö jää odottamaan; dragsterilla ajettu aika ei kelpaa ennätykseksi', '12.14'],
@@ -4817,10 +4824,10 @@ const LEHTI = [
     img: ['asema.jpg'], cap: ['Poliisiaseman piha. Kolme partioautoa ruuduissaan.'],
     body: ['Juoppo repäisee itsensä irti ja hoippuu karkuun, mutta konstaapelit saavat hänet naama asfalttiin. Partioautoihin ei kannata ajaa – poliisi huomaa sen.'] },
 
-  { id: 'dragster', size: 'page', n: 56, kick: '🏁 DRAGSTERI', title: 'Dragsteri odottaa Malminrajantiellä', lede: 'Lähtöruudun vieressä, omalla levikkeellään Malminrajantien varressa, on pitkä keltainen dragsteri. Nouse Pököstä, kävele sen luo ja paina F: nollasta sataan menee alle sekunti.',
-    img: ['dragster.jpg'], cap: ['Dragsteri kiitää Malminrajantietä ylös. Takaa jää savuvana.'],
-    body: ['YLÄSTÖ. Malminrajantie on suora kuin viivoitin, ja sen varteen on tehty oma levike, jolle joku on pysäköinyt dragsterin: pitkä keltainen runko, pienet etupyörät, valtavat takarenkaat, ahdin ja siipi.', 'Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F uudestaan. Kaasu pohjaan, ja sata tulee täyteen alle sekunnissa. Ohjaus on kuin rekillä.', 'Kun nostat kaasun kovassa vauhdissa, jarruvarjo aukeaa. Pökö odottaa siellä, minne sen jätit: kävele sen luo ja paina F, niin vaihdat takaisin.', 'Ennätyksiä dragsterilla ei saa. Kierros ei kelpaa listalle eikä haamuksi, mutta hauskaa on.'],
-    box: ['NÄIN SE TOIMII', 'F: ulos Pököstä', 'Kävele dragsterille, F: kyytiin', 'Kaasu pohjaan – varjo aukeaa kun nostat', 'Ennätyksiä ei tule'] },
+  { id: 'dragster', size: 'main', n: 8, kick: '🏁 DRAGSTERI', title: 'Dragsterissa on nyt oikea fysiikka', lede: 'Malminrajantien levikkeellä odottava dragsteri ei ole enää lelu. Se nousee keulilleen, sutii, lentää ja pyörii – ja kun se jää katolleen, se syttyy.',
+    img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: slicksit savuavat, keula nousee wheelie-tukien varaan. Sata tulee täyteen alle sekunnissa.', 'Kova osuma 120 km/h vauhdissa: dragsteri kierähtää ilmaan. Siipi ja renkaat voivat irrota.'],
+    body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Siipi ja renkaat irtoavat, jos iskut ovat kovia. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
+    box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – keula nousee, renkaat savuavat', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
   { id: 'liftari', size: 'page', n: 53, kick: '🧍 LIFTARI', title: 'Liftari odottaa kyytiä K-kaupalle', lede: 'Tien varressa seisoo mies pahvikyltin kanssa. Pysähdy, niin hän hyppää kyytiin. Vie hänet K-kaupan pihaan, niin hyvä tekosi kirjataan poliisin rekisteriin.',
     img: ['liftari.jpg'], cap: ['Peukalo pystyssä, kyltissä K-KAUPPA. Rallikuski pysähtyi.'],
     body: ['YLÄSTÖ. Muutama sata metriä ennen K-kauppaa, radan oikealla laidalla, seisoo liftari. Pysähdy hänen viereensä, niin hän kävelee apukuljettajan ovelle ja nousee kyytiin.', 'Minikartalla vilkkuu sininen piste: K-kauppa. Pysähdy kaupan pihaan, niin liftari nousee pois, vilkuttaa kiitokseksi ja menee ostoksille.', 'Jos ajat ohi täyttä vauhtia, hän heristää nyrkkiä. Hyvät teot kirjataan poliisin rekisteriin, ja radio kertoo kylän kiltein kuskin.'],
@@ -5825,13 +5832,13 @@ function walkTo(h, tx, tz, sp, dt) { const dx = tx - h.x, dz = tz - h.z, d = Mat
   const v = Math.min(sp, d*3); h.vx = ux*v; h.vz = uz*v; h.yaw = Math.atan2(ux, uz); h.pose.walk = Math.min(0.6, v*0.35); h.pose.ph += dt*(4 + v*3); return false; }
 function pushOffStacks(h) { forStaticNear(h.x, h.z, t => { if ((t.kind !== 'tire' && t.kind !== 'pig') || t.off) return; const dx = h.x - t.x, dz = h.z - t.z, d = Math.hypot(dx, dz), R = t.r + h.r; if (d < R && d > 1e-4) { h.x = t.x + dx/d*R; h.z = t.z + dz/d*R; } }); }
 // any box moving over people (the rally car, a van, a tractor): the same test, the same result
-function boxHitsHumans(B, bvx, bvz, isPlayer) {
+function boxHitsHumans(B, bvx, bvz, isPlayer, noRide) {
   const sp = Math.hypot(bvx, bvz); if (!isPlayer && sp < 0.8) return;
   forHumansNear(B.x, B.z, B.hl + 1, h => { if (h.gone || h.inside || h.seat || h.ride) return; const hit = boxPush(B, h.x, h.z, h.r); if (!hit) return;
     h.x += hit.nx*hit.ov; h.z += hit.nz*hit.ov; const rel = (h.vx - bvx)*hit.nx + (h.vz - bvz)*hit.nz; if (rel >= 0) return;
     if (sp > 3 && !h.down && (!B.ai || B.kind === 'hevi')) {   // (drivers — responders, the tractor — only ever nudge people)
       const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), lf = (h.x - B.x)*fx + (h.z - B.z)*fz, la = (h.x - B.x)*fz - (h.z - B.z)*fx, vf = bvx*fx + bvz*fz;
-      if (isPlayer && lf > B.hl*0.6 && vf > 5.5 && !h.big) knock(h, bvx, bvz, sp, { ride: { t: 0, dur: 0.45 + Math.random()*0.6, over: vf > 19, b0: 1.45, b: 1.45, a: Math.max(-0.55, Math.min(0.55, la)), vf, ang: car.angle, vx: bvx, vz: bvz, roll: 0 } });   // onto the bonnet
+      if (isPlayer && !noRide && lf > B.hl*0.6 && vf > 5.5 && !h.big) knock(h, bvx, bvz, sp, { ride: { t: 0, dur: 0.45 + Math.random()*0.6, over: vf > 19, b0: 1.45, b: 1.45, a: Math.max(-0.55, Math.min(0.55, la)), vf, ang: car.angle, vx: bvx, vz: bvz, roll: 0 } });   // onto the bonnet
       else { const sd = (la >= 0 ? 1 : -1)*(0.8 + Math.random()*1.2); knock(h, bvx*0.85 + hit.nx*1.2 + fz*sd, bvz*0.85 + hit.nz*1.2 - fx*sd, sp); }   // along at about the speed of what hit them, falling off to a side
       if (isPlayer && h.down) rapCount(h.animal ? 'a' : 'p'); if (isPlayer && h.down && !h.animal) policeIncident('people');
       if (isPlayer) { car.vx *= 0.95; car.vz *= 0.95; const now = performance.now(); if (audio && now - lastThud > 110) { lastThud = now; beep(160 + Math.random()*60, 0.16, Math.min(0.3, sp*0.012), 'triangle'); } } }
@@ -5839,7 +5846,8 @@ function boxHitsHumans(B, bvx, bvz, isPlayer) {
       h.vx = bvx*0.8 + fz*sd; h.vz = bvz*0.8 - fx*sd; h.vy = Math.max(h.vy, 1.2); }
     else { h.vx -= hit.nx*rel; h.vz -= hit.nz*rel; } });
 }
-function playerBox() { return { x: car.x, z: car.z, yaw: car.angle, hw: CAR_HW, hl: CAR_HL }; }
+function playerBox() { if (DRAG.on) return { x: car.x + Math.sin(car.angle)*0.2, z: car.z + Math.cos(car.angle)*0.2, yaw: car.angle, hw: 1.05, hl: 3.85 };   // (the dragster: 7.7 × 2.1 m)
+  return { x: car.x, z: car.z, yaw: car.angle, hw: CAR_HW, hl: CAR_HL }; }
 function carTopAt(b) {   // height of the rally car's top b metres ahead of its centre (the body profile: bonnet, screen, roof, hatch)
   return b > 1.66 ? 0.66 : b > 0.7 ? 0.86 - (b - 0.7)*0.167 : b > 0.04 ? 1.29 - (b - 0.04)*0.65 : b > -1.1 ? 1.33 : b > -1.6 ? 1.33 - (-1.1 - b)*0.86 : 0.4; }
 function rideStep(h, dt) {   // folded onto the bonnet: carried until the car brakes, turns hard or a moment has passed — then off, at the car's speed
@@ -7474,12 +7482,12 @@ function boom(x, y, z, big) {   // an explosion: a ball of flame, sparks, black 
 const WRECK = { on: false, rv: null, driver: null };
 function wreckCar(how) { if (WRECK.on || gameState !== State.RACING) return; WRECK.on = true; esEnd();
   const fx = Math.sin(car.angle), fz = Math.cos(car.angle), gy = Y(car.x, car.z);
-  const RV = WRECK.rv = { kind: 'rally', x: car.x, z: car.z, yaw: car.angle, hw: CAR_HW, hl: CAR_HL, gy, view: { kind: 'mesh', g: carGroup }, fire: null, charred: false, crew: [], vx: 0, vz: 0 };
+  const RV = WRECK.rv = { kind: 'rally', x: car.x, z: car.z, yaw: car.angle, hw: DRAG.on ? 1 : CAR_HW, hl: DRAG.on ? 3.6 : CAR_HL, gy, view: { kind: 'mesh', g: carGroup }, fire: null, charred: false, crew: [], vx: 0, vz: 0 };
   if (how === 'boom') { boom(car.x, gy, car.z, true); for (let r = 0; r < 2; r++) for (const [nx, nz] of [[fx, fz], [-fx, -fz], [fz, -fx], [-fz, fx]]) { for (const p of carParts) p.cool = 0; carDamage(nx, nz, 30); } }
   startFire({ vehicle: RV }); if (RV.fire) RV.fire.level = how === 'boom' ? 1 : 0.6;
   const [dx, dz] = lloc(car.x, car.z, car.angle, -1.4, 0.2), h = new Human({ x: dx, z: dz, yaw: car.angle, rig: makeAdult(0xf2f2ee, 0xf2f2ee, lpick(L_HAIR), { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), temp: true }); h.ao = aoAlloc(); WRECK.driver = h;
-  const k = how === 'boom' ? 9 : 3; knock(h, -fz*k + car.vx*0.3, fx*k + car.vz*0.3, how === 'boom' ? 14 : 6);   // thrown clear out of the driver's door: the ambulance is on its way
-  car.vx *= 0.2; car.vz *= 0.2; esHud(); pizzaMsg(T(how === 'boom' ? '👽 UFO AMPUI AUTON!' : '⚡🔥 ES + KOLARI = TULIPALO!'), true); }
+  const k = how === 'boom' ? 9 : how === 'drag' ? 7 : 3; knock(h, -fz*k + car.vx*0.3, fx*k + car.vz*0.3, how === 'boom' ? 14 : how === 'drag' ? 12 : 6);   // thrown clear out of the driver's door: the ambulance is on its way
+  car.vx *= 0.2; car.vz *= 0.2; esHud(); pizzaMsg(T(how === 'boom' ? '👽 UFO AMPUI AUTON!' : how === 'drag' ? '🔥 DRAGSTERI KATOLLAAN – TULESSA, KUSKI LENSI ULOS!' : '⚡🔥 ES + KOLARI = TULIPALO!'), true); }
 function wreckReset() { if (WRECK.rv && WRECK.rv.charred) charVehicle(WRECK.rv, false); WRECK.on = false; WRECK.rv = null; WRECK.driver = null; }
 
 // ── 1. moose: big, slow, grazing in the woods; now and then one wanders across a road — and stops dead in the lights ──
@@ -7825,13 +7833,12 @@ function makeRallyCar(col, num) { const G = new THREE.Group(), body = lmat(col, 
 // ── the dragster by the finish area: a long, low rail with slicks, a blower and a wing. On foot, F by it and you drive it instead
 //    (the Pökö waits parked where you left it; F by the Pökö swaps back). Monstrous power, poor steering, a parachute when you lift
 //    off at speed. A lap with it doesn't count — no records, no ghost. R: both back in their places. ──
-const DRAG = { on: false, used: false, home: null, park: null, poko: null, carMesh: null, parkMesh: null, pokoMesh: null, sb: null, pokoSb: null, saved: null, hidden: [], chute: 0, chuteM: null,
-  SPEC: { accel: 58, maxSpeed: 125, brake: 16, engineBrake: 1.2, turnRate: 1.15, grip: 3.4, powerSlide: 0.85, powerSlideSpeed: 30, grassPower: 0.35, hbKick: 1.2 } };
+const DRAG = { on: false, used: false, home: null, park: null, poko: null, carMesh: null, parkMesh: null, pokoMesh: null, sb: null, pokoSb: null, hidden: [], chute: 0, chuteM: null };
 // The model, built for a rigid-body physics of its own later (30.9., Antti: "tee malli valmiiksi sitä varten"): the root sits on the
 // ground under the centre of mass; `body` is everything bolted to the chassis; each wheel is its own group pivoting at its hub (spin
 // about x, steer the fronts about y, the suspension moves it in y); the wing, the driver and the chute are separate groups so they
 // can come off / be thrown out. DRAG_GEOM holds the numbers the physics will use.
-const DRAG_GEOM = { len: 7.6, wid: 1.9, hei: 1.5, cgY: 0.55, cgZ: -0.9, mass: 950,
+const DRAG_GEOM = { len: 7.6, wid: 1.9, hei: 1.5, cgY: 0.42, cgZ: -0.3, mass: 950,
   wheels: [{ id: 'FL', x: -0.46, z: 3.3, r: 0.3, w: 0.12, front: true }, { id: 'FR', x: 0.46, z: 3.3, r: 0.3, w: 0.12, front: true },
            { id: 'RL', x: -0.8, z: -2.1, r: 0.64, w: 0.56 }, { id: 'RR', x: 0.8, z: -2.1, r: 0.64, w: 0.56 }] };
 let _dragDecal = null;
@@ -7873,14 +7880,21 @@ function makeDragster() { const G = new THREE.Group(), body = new THREE.Group();
     wheels[W.id] = { g: wg, spin, W }; if (!W.front) beam(0, 0.62 - W.r, 0, -Math.sign(W.x)*(Math.abs(W.x) - 0.3), 0.62 - W.r, 0, 0.05, black, wg); }   // (the axle stub)
   G.userData.parts = { body, wing, driver, chute, wheels }; G.rotation.order = 'YXZ'; return G; }
 function buildDragster() { DRAG.home = null; DRAG.on = false; DRAG.carMesh = DRAG.parkMesh = DRAG.pokoMesh = null; DRAG.lay = null; if (!finishLine || LAY.pts.length < 10) return;
-  // the lay-by: a ribbon over the ground following LAY.pts, asphalt with white edge lines
-  const P = LAY.pts, hw = LAY.W/2, pos = [], idx = [], col = [], line = [], ln = (x0, z0, x1, z1) => line.push(x0, 0, z0, x1, 0, z1);
-  P.forEach((p, k) => { const lx = p.dz, lz = -p.dx; for (const s of [-1, 1]) { const x = p.x + lx*hw*1.08*s, z = p.z + lz*hw*1.08*s; pos.push(x, Y(x, z) + 0.07, z); } if (k) idx.push(2*k - 2, 2*k - 1, 2*k, 2*k - 1, 2*k + 1, 2*k); });
+  // the lay-by: a ribbon at the road's own height following LAY.pts (its inner edge on the road's edge), a dashed line where it leaves the
+  // road, a red-and-white kerb along its outer edge
+  const P = LAY.pts, hw = LAY.W/2, pos = [], idx = [];
+  P.forEach((p, k) => { const lx = p.dz, lz = -p.dx; for (const s of [-1, 1]) { const x = p.x + lx*hw*(s > 0 ? 1.02 : 1)*s, z = p.z + lz*hw*(s > 0 ? 1.02 : 1)*s; pos.push(x, Y(x, z) + ROAD_Y + 0.004, z); } if (k) idx.push(2*k - 2, 2*k - 1, 2*k, 2*k - 1, 2*k + 1, 2*k); });
   const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
   const G = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x4a4a4e, roughness: 0.93, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); G.receiveShadow = true; lifeGroup.add(G);
   const lp = [], lm = new THREE.MeshBasicMaterial({ color: 0xeeeee6, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
-  for (const s of [-1, 1]) { const pts = []; P.forEach(p => { const x = p.x + p.dz*(hw - 0.25)*s, z = p.z - p.dx*(hw - 0.25)*s; pts.push(x, Y(x, z) + 0.09, z); }); for (let k = 0; k + 3 < pts.length; k += 3) lp.push(pts[k], pts[k + 1], pts[k + 2], pts[k + 3], pts[k + 4], pts[k + 5]); }
+  { const pts = []; P.forEach(p => { if (p.t < -34 || p.t > 0) return; const x = p.x - p.dz*(hw - 0.12), z = p.z + p.dx*(hw - 0.12); pts.push(x, Y(x, z) + ROAD_Y + 0.02, z); }); for (let k = 0; k + 3 < pts.length; k += 6) lp.push(pts[k], pts[k + 1], pts[k + 2], pts[k + 3], pts[k + 4], pts[k + 5]); }   // (dashed: 1 m on, 1 m off)
   { const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3)); lifeGroup.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ color: 0xeeeee6 }))); }
+  { const v = [], c = [], ix = [], R = [0.95, 0.2, 0.2], Wt = [0.92, 0.92, 0.9];   // the kerb: flat on the lay-by side, a crest, a face down to the grass; 1.2 m blocks
+    let run = 0; P.forEach((p, k) => { if (k) run += Math.hypot(p.x - P[k - 1].x, p.z - P[k - 1].z); const lx = p.dz, lz = -p.dx, at = (o, y) => { const x = p.x + lx*o, z = p.z + lz*o; return [x, Y(x, z) + y, z]; };
+      const b = v.length/3, cl = Math.floor(run/1.2) % 2 ? Wt : R; v.push(...at(hw - 0.05, ROAD_Y + 0.02), ...at(hw + 0.18, ROAD_Y + 0.12), ...at(hw + 0.4, ROAD_Y + 0.07), ...at(hw + 0.42, -0.05)); for (let q = 0; q < 4; q++) c.push(...cl.map(u => u*(q === 3 ? 0.75 : q === 1 ? 1 : 0.88)));
+      if (k) for (let q = 0; q < 3; q++) ix.push(b - 4 + q, b + q, b - 3 + q, b - 3 + q, b + q, b + 1 + q); });
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3)); g.setIndex(ix); g.computeVertexNormals();
+    const m = new THREE.Mesh(g, curbMat_()); m.receiveShadow = true; lifeGroup.add(m); }
   DRAG.lay = { mesh: G };
   for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i]; if (!h.gone && !h.player && inLay(h.x, h.z, 1.2)) humanRemove(h); }   // (anyone standing on it steps off)
   // parked in the straight part of it, nose along the road (towards the KISA line)
@@ -7898,19 +7912,147 @@ function dragSwap(toDrag) { if (!DRAG.home || DRAG.on === toDrag) return;
   const here = { x: car.x, z: car.z, angle: car.angle }, go = toDrag ? DRAG.park : DRAG.poko;
   if (toDrag) { if (!DRAG.pokoMesh) { DRAG.pokoMesh = carGroup.clone(true); for (const c of [...DRAG.pokoMesh.children]) if (c.name === 'dragster') DRAG.pokoMesh.remove(c); lifeGroup.add(DRAG.pokoMesh); }   // (a snapshot of the Pökö stays parked)
     DRAG.poko = here; DRAG.hidden = carGroup.children.filter(c => c !== DRAG.carMesh && c.visible); DRAG.hidden.forEach(c => c.visible = false); DRAG.carMesh.visible = true;
-    DRAG.saved = {}; for (const k in DRAG.SPEC) { DRAG.saved[k] = DRIVE[k]; DRIVE[k] = DRAG.SPEC[k]; } if (gameState === State.RACING) DRAG.used = true;
+    if (gameState === State.RACING) DRAG.used = true;
     pizzaMsg(T('🏁 DRAGSTERI! Hirveät tehot – aika ei kelpaa ennätykseksi'), true); }
-  else { DRAG.park = here; DRAG.carMesh.visible = false; DRAG.chute = 0; DRAG.chuteM.visible = false; DRAG.hidden.forEach(c => c.visible = true); DRAG.hidden = []; if (DRAG.saved) Object.assign(DRIVE, DRAG.saved); DRAG.saved = null; }
-  DRAG.on = toDrag; car.x = RI.x = go.x; car.z = RI.z = go.z; car.angle = RI.a = go.angle; car.vx = car.vz = car.speed = 0; car.steerSm = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle; dragPlace(); }
+  else { DRAG.park = DP.broken ? { ...DRAG.home } : here; DRAG.carMesh.visible = false; DRAG.chute = 0; DRAG.chuteM.visible = false; DRAG.hidden.forEach(c => c.visible = true); DRAG.hidden = []; }   // (a broken one: towed back to its lay-by)
+  DRAG.on = toDrag; car.x = RI.x = go.x; car.z = RI.z = go.z; car.angle = RI.a = go.angle; car.vx = car.vz = car.speed = 0; car.steerSm = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle; DP.ok = false; if (toDrag) dragInit(car.x, car.z, car.angle); dragPlace(); }
 function dragNear(h) { if (!DRAG.home || !h) return false; const P = DRAG.on ? DRAG.poko : DRAG.park; return !!P && Math.hypot(h.x - P.x, h.z - P.z) < 4.2; }   // (by the parked one: the dragster, or the Pökö while you have the dragster)
-function dragUpdate(dt) { if (!DRAG.on) return; const v = Math.hypot(car.vx, car.vz), lift = !car.throttle, P = DRAG.carMesh.userData.parts, vf = car.vx*Math.sin(car.angle) + car.vz*Math.cos(car.angle);
-  for (const k in P.wheels) { const w = P.wheels[k]; w.spin.rotation.x += vf*dt/w.W.r*(w.W.front ? 1 : (car.throttle && v < 25 ? 1.8 : 1)); if (w.W.front) w.g.rotation.y = car.steerSm*0.35; }   // (the slicks spin up faster than the ground goes by at a launch)
-  if (car.throttle && v > 1 && v < 25 && Math.random() < dt*30) for (const W of DRAG_GEOM.wheels) if (!W.front) { const [x, z] = lloc(car.x, car.z, car.angle, W.x, W.z - 0.4); lifeFx.emit(x, Y(x, z) + 0.3, z, (Math.random() - 0.5)*1.5, 0.8 + Math.random(), (Math.random() - 0.5)*1.5, 1.2 + Math.random(), 0.5, 1.6, 0.4, 0.86, 0.86, 0.88, 0.92, 0.92, 0.93); }   // tyre smoke at the launch
-  if (!DRAG.chute && lift && v > 45) { DRAG.chute = 1; DRAG.chuteM.visible = true; DRAG.chuteM.scale.setScalar(0.2); if (audio) beep(300, 0.2, 0.08, 'triangle'); }   // off the gas at speed: the chute pops
-  if (DRAG.chute) { DRAG.chuteM.scale.setScalar(Math.min(1, DRAG.chuteM.scale.x + dt*3)); const k = Math.min(1, v/40), f = Math.max(0, 1 - dt*1.2*k); car.vx *= f; car.vz *= f; DRAG.chuteM.rotation.z += dt*2;
-    if (v < 4 || car.throttle) { DRAG.chute = 0; DRAG.chuteM.visible = false; } } }
-function dragReset() { if (DRAG.on) { DRAG.on = false; DRAG.carMesh.visible = false; DRAG.chute = 0; if (DRAG.chuteM) DRAG.chuteM.visible = false; DRAG.hidden.forEach(c => c.visible = true); DRAG.hidden = []; if (DRAG.saved) Object.assign(DRIVE, DRAG.saved); DRAG.saved = null; }
-  DRAG.used = false; if (DRAG.home) { DRAG.park = { ...DRAG.home }; dragPlace(); } }
+function dragUpdate(dt) { if (!DRAG.on) return; const v = Math.hypot(car.vx, car.vz), P = DRAG.carMesh.userData.parts;
+  for (const S of DP.wh) { const w = P.wheels[S.W.id]; w.spin.rotation.x += (car.speed + (S.W.front ? 0 : DP.spin))*dt/S.W.r; if (S.W.front) w.g.rotation.y = DP.steer; }   // (the slicks spin up faster than the ground goes by at a launch)
+  if (DP.spin > 2.5 && Math.random() < dt*40) for (const S of DP.wh) if (!S.W.front && S.on) { const [x, z] = lloc(car.x, car.z, car.angle, S.W.x, S.W.z - 0.5); lifeFx.emit(x, Y(x, z) + 0.3, z, (Math.random() - 0.5)*1.5 - car.vx*0.2, 0.8 + Math.random(), (Math.random() - 0.5)*1.5 - car.vz*0.2, 1.2 + Math.random(), 0.5, 1.8, 0.4, 0.86, 0.86, 0.88, 0.92, 0.92, 0.93); }   // tyre smoke
+  if (!DRAG.chute && !car.throttle && v > 45 && !WRECK.on) { DRAG.chute = 1; DRAG.chuteM.visible = true; DRAG.chuteM.scale.setScalar(0.2); dragChuteSound(); }   // off the gas at speed: the chute pops
+  if (DRAG.chute) { DRAG.chuteM.scale.setScalar(Math.min(1, DRAG.chuteM.scale.x + dt*3)); DRAG.chuteM.rotation.z += dt*2; if (v < 4 || car.throttle) { DRAG.chute = 0; DRAG.chuteM.visible = false; } } }
+function dragReset() { if (DRAG.on) { DRAG.on = false; DRAG.carMesh.visible = false; DRAG.chute = 0; if (DRAG.chuteM) DRAG.chuteM.visible = false; DRAG.hidden.forEach(c => c.visible = true); DRAG.hidden = []; }
+  DP.ok = false; DRAG.used = false; if (DRAG.home) { DRAG.park = { ...DRAG.home }; dragPlace(); } }
+// ── the dragster's own physics (30.9., Antti: "ei kisailla, niin oikea fysiikka"): a rigid body in 3D — position, velocity, orientation,
+//    spin — on four raycast wheels with springs and dampers over the real ground. Tyres: a friction ellipse per wheel (the slicks bite
+//    ~3 g along, far less across), rear drive with ~2.6 MW and wheelspin, brakes, aero drag, the wing's downforce, the chute. Everything
+//    else it meets (the ground, houses, poles, rocks) through contact points on its hull with impulses — so a hit off the middle spins
+//    it, a kerb at speed can roll it, a nose-up launch sits on the wheelie bars. Parts come off (the wing, wheels). Stuck on its roof or
+//    its side: it catches fire and the driver is thrown out (wreckCar). The rally car's physics is not touched: this runs only in DRAG.on. ──
+const DP = { ok: false, p: new THREE.Vector3(), v: new THREE.Vector3(), q: new THREE.Quaternion(), w: new THREE.Vector3(), pp: new THREE.Vector3(), pq: new THREE.Quaternion(), qi: new THREE.Quaternion(),
+  m: 950, I: [4640, 4860, 620], cg: [0, 0.42, -0.3], wh: [], lost: {}, spin: 0, rpm: 1800, slip: 0, scrape: 0, hit: 0, roofT: 0, cx: 0, cz: 0, cvx: 0, cvz: 0, steer: 0, thr: 0, spark: 0, broken: false,
+  POWER: 2.6e6, FMAX: 38000, CDA: 2.4, CLA_W: 1.2, CLA_F: 0.6, CDA_CHUTE: 4.5 };
+// hull contact points in the model's own frame: [x, y, z, part]. 'bar' = the wheelie bars' little wheels (they roll)
+const DP_PTS = [[0, 0.3, 4.05], [0, 0.36, 3.2], [0, 0.42, 2.4], [0, 0.46, 1.6], [-0.63, 0.28, 3.95], [0.63, 0.28, 3.95], [-0.55, 0.3, 3.3, 'FL'], [0.55, 0.3, 3.3, 'FR'], [-0.46, 0.62, 3.3, 'FL'], [0.46, 0.62, 3.3, 'FR'],
+  [-0.3, 0.28, 1.0], [0.3, 0.28, 1.0], [-0.3, 0.28, -1.0], [0.3, 0.28, -1.0], [-0.34, 0.8, -0.5], [0.34, 0.8, -0.5], [-0.24, 1.46, -0.45], [0.24, 1.46, -0.45], [0, 1.48, -1.5], [-0.64, 1.12, -1.3], [0.64, 1.12, -1.3],
+  [-1.08, 0.64, -1.46, 'RL'], [-1.08, 0.64, -2.74, 'RL'], [-0.8, 1.28, -2.1, 'RL'], [-1.08, 1.1, -2.1, 'RL'], [1.08, 0.64, -1.46, 'RR'], [1.08, 0.64, -2.74, 'RR'], [0.8, 1.28, -2.1, 'RR'], [1.08, 1.1, -2.1, 'RR'],
+  [-0.97, 2.3, -2.45, 'wing'], [0.97, 2.3, -2.45, 'wing'], [-0.97, 2.3, -3.4, 'wing'], [0.97, 2.3, -3.4, 'wing'], [-0.97, 1.75, -2.95, 'wing'], [0.97, 1.75, -2.95, 'wing'], [0, 0.45, -3.1], [-0.45, 0.12, -3.52, 'bar'], [0.45, 0.12, -3.52, 'bar']];
+const _dA = new THREE.Vector3(), _dB = new THREE.Vector3(), _dU = new THREE.Vector3(), _dF = new THREE.Vector3(), _dR = new THREE.Vector3(), _dQ = new THREE.Quaternion(), _dYax = new THREE.Vector3(0, 1, 0);
+function dpW(lx, ly, lz, out) { return out.set(lx - DP.cg[0], ly - DP.cg[1], lz - DP.cg[2]).applyQuaternion(DP.q).add(DP.p); }   // model point → world
+function dpAng(Lx, Ly, Lz) { _dA.set(Lx, Ly, Lz).applyQuaternion(DP.qi); _dA.x /= DP.I[0]; _dA.y /= DP.I[1]; _dA.z /= DP.I[2]; return _dA.applyQuaternion(DP.q); }   // world angular impulse → change of spin
+function dpImpulse(px, py, pz, jx, jy, jz) { const m = DP.m; DP.v.x += jx/m; DP.v.y += jy/m; DP.v.z += jz/m; const rx = px - DP.p.x, ry = py - DP.p.y, rz = pz - DP.p.z; DP.w.add(dpAng(ry*jz - rz*jy, rz*jx - rx*jz, rx*jy - ry*jx)); }
+function dpK(rx, ry, rz, nx, ny, nz) { const a = dpAng(ry*nz - rz*ny, rz*nx - rx*nz, rx*ny - ry*nx); return 1/DP.m + (a.y*rz - a.z*ry)*nx + (a.z*rx - a.x*rz)*ny + (a.x*ry - a.y*rx)*nz; }   // 1/effective mass along n at r
+function dpVel(px, py, pz, out) { const rx = px - DP.p.x, ry = py - DP.p.y, rz = pz - DP.p.z, w = DP.w; return out.set(DP.v.x + w.y*rz - w.z*ry, DP.v.y + w.z*rx - w.x*rz, DP.v.z + w.x*ry - w.y*rx); }
+// a contact: point (world) against a surface with normal n, `depth` into it → impulses (bounce e, friction mu); returns the closing speed
+function dpContact(px, py, pz, nx, ny, nz, depth, mu, e, h) {
+  const vp = dpVel(px, py, pz, _dB), vn = vp.x*nx + vp.y*ny + vp.z*nz, rx = px - DP.p.x, ry = py - DP.p.y, rz = pz - DP.p.z;
+  const target = Math.max(vn < -2 ? -e*vn : 0, Math.min(2, Math.max(0, depth - 0.005)*0.3/h)); if (vn >= target) return 0;
+  const j = (target - vn)/dpK(rx, ry, rz, nx, ny, nz); const tx = vp.x - nx*vn, ty = vp.y - ny*vn, tz = vp.z - nz*vn, tl = Math.hypot(tx, ty, tz);
+  dpImpulse(px, py, pz, nx*j, ny*j, nz*j);
+  if (tl > 1e-4 && mu > 0) { const ux = tx/tl, uy = ty/tl, uz = tz/tl, jt = Math.min(mu*j, tl/dpK(rx, ry, rz, ux, uy, uz)); dpImpulse(px, py, pz, -ux*jt, -uy*jt, -uz*jt); }
+  return -vn; }
+function dpNormal(x, z, out) { const e = 0.6; return out.set(-(Y(x + e, z) - Y(x - e, z))/(2*e), 1, -(Y(x, z + e) - Y(x, z - e))/(2*e)).normalize(); }
+function dragInit(x, z, angle) {
+  DP.q.setFromAxisAngle(_dYax, angle); const fx = Math.sin(angle), fz = Math.cos(angle), rx = x, rz = z;   // (x, z: the model's root, on the ground between the axles)
+  DP.p.set(rx + fx*DP.cg[2], Y(rx, rz) + DP.cg[1] + 0.03, rz + fz*DP.cg[2]); DP.v.set(0, 0, 0); DP.w.set(0, 0, 0); DP.pp.copy(DP.p); DP.pq.copy(DP.q);
+  DP.wh = DRAG_GEOM.wheels.map(W => ({ W, hy: W.r, rot: 0, on: false, load: 0 })); DP.spin = 0; DP.rpm = 1800; DP.slip = 0; DP.scrape = 0; DP.hit = 0; DP.roofT = 0; DP.steer = 0; DP.broken = false; DP.lost = {};
+  DP.ok = true; if (DRAG.carMesh) { const P = DRAG.carMesh.userData.parts; P.wing.visible = P.driver.visible = true; for (const k in P.wheels) P.wheels[k].g.visible = true; } dpSync(); }
+function dpSync() { dpW(0, DP.cg[1], 0, _dR); _dF.set(0, 0, 1).applyQuaternion(DP.q); if (Math.hypot(_dF.x, _dF.z) > 0.2) car.angle = Math.atan2(_dF.x, _dF.z);
+  car.x = DP.cx = _dR.x; car.z = DP.cz = _dR.z; car.vx = DP.cvx = DP.v.x; car.vz = DP.cvz = DP.v.z; car.speed = DP.v.x*Math.sin(car.angle) + DP.v.z*Math.cos(car.angle); }
+function dpLose(part, vx, vz) {   // torn off: a world-space copy flies free (the rally car's debris), the original hides
+  if (DP.lost[part]) return; DP.lost[part] = true; DP.broken = true; const P = DRAG.carMesh.userData.parts, g = part === 'wing' ? P.wing : P.wheels[part].g; g.updateMatrixWorld(true);
+  const piece = g.clone(true); piece.matrixAutoUpdate = true; g.matrixWorld.decompose(_dp, _dq, _ds); piece.position.copy(_dp); piece.quaternion.copy(_dq); piece.scale.copy(_ds); scene.add(piece); g.visible = false;
+  debris.push({ obj: piece, vx: DP.v.x*0.7 + (vx || 0), vy: 3 + Math.random()*4, vz: DP.v.z*0.7 + (vz || 0), wx: (Math.random() - 0.5)*14, wy: (Math.random() - 0.5)*10, wz: (Math.random() - 0.5)*14, rest: false, r: part === 'wing' ? 1 : 0.7 });
+  sparkBurst(_dp.x, _dp.y, _dp.z, 0, 0, 22, 5); dragCrashSound(1); }
+function dpStep(h, thr, brk, steerIn, hand) {
+  const G = DRAG_GEOM, q = DP.q; DP.qi.copy(q).invert();
+  const U = _dU.set(0, 1, 0).applyQuaternion(q), Fw = _dF.set(0, 0, 1).applyQuaternion(q), Rt = _dR.set(1, 0, 0).applyQuaternion(q);   // (the model's +x is the driver's left)
+  const ux = U.x, uy = U.y, uz = U.z, fx = Fw.x, fy = Fw.y, fz = Fw.z, lx = Rt.x, ly = Rt.y, lz = Rt.z;
+  let Fx = 0, Fy = -9.81*DP.m, Fz = 0, Tx = 0, Ty = 0, Tz = 0;
+  const force = (px, py, pz, gx, gy, gz) => { Fx += gx; Fy += gy; Fz += gz; const rx = px - DP.p.x, ry = py - DP.p.y, rz = pz - DP.p.z; Tx += ry*gz - rz*gy; Ty += rz*gx - rx*gz; Tz += rx*gy - ry*gx; };
+  const sp = DP.v.length(), vf = DP.v.x*fx + DP.v.y*fy + DP.v.z*fz;
+  // the wheels
+  const stMax = 0.45/(1 + Math.abs(vf)*0.06); DP.steer += (steerIn*stMax - DP.steer)*Math.min(1, h*6); const cs = Math.cos(DP.steer), sn = Math.sin(DP.steer);
+  const surf = !(onRoad(DP.p.x, DP.p.z, 0.4) || inLay(DP.p.x, DP.p.z, 0.3)) ? 0.55 : surfaceAt(DP.p.x, DP.p.z) === 'gravel' ? 0.7 : 1;
+  const drive = thr ? Math.min(DP.FMAX, DP.POWER/Math.max(1, Math.abs(vf))) : 0; let spinX = 0, slipY = 0, nRear = 0;
+  for (const S of DP.wh) { const W = S.W; S.on = false; if (DP.lost[W.id] || uy < 0.25) { S.hy += (W.r - 0.1 - S.hy)*Math.min(1, h*10); continue; }
+    const A = dpW(W.x, W.r + 0.08, W.z, _dA), ax = A.x, ay = A.y, az = A.z, gy = Y(ax, az), dist = (ay - gy)/uy, x = 0.18 + W.r - dist;
+    if (x <= 0) { S.hy += (W.r - 0.1 - S.hy)*Math.min(1, h*10); continue; }
+    S.on = true; S.hy = W.r + 0.08 - Math.max(0, Math.min(0.18, dist - W.r));
+    const cx = ax - ux*dist, cy = ay - uy*dist, cz = az - uz*dist, vp = dpVel(cx, cy, cz, _dB), xd = -(vp.x*ux + vp.y*uy + vp.z*uz);
+    const k = W.front ? 15500 : 31000, c = W.front ? 1250 : 2500; let Fs = k*Math.min(x, 0.18) + c*xd; if (x > 0.18) Fs += (x - 0.18)*k*10; Fs = Math.max(0, Fs); S.load = Fs;
+    force(cx, cy, cz, ux*Fs, uy*Fs, uz*Fs);
+    // the tyre: its heading along the ground, the slip velocities, the friction ellipse
+    let wx = fx, wy = fy, wz = fz; if (W.front) { wx = fx*cs + lx*sn; wy = fy*cs + ly*sn; wz = fz*cs + lz*sn; }
+    const n = dpNormal(cx, cz, _dQv), dn = wx*n.x + wy*n.y + wz*n.z; wx -= n.x*dn; wy -= n.y*dn; wz -= n.z*dn; const wl = Math.hypot(wx, wy, wz) || 1; wx /= wl; wy /= wl; wz /= wl;
+    const sx = n.y*wz - n.z*wy, sy = n.z*wx - n.x*wz, sz = n.x*wy - n.y*wx;   // across the tyre
+    const vL = vp.x*wx + vp.y*wy + vp.z*wz, vS = vp.x*sx + vp.y*sy + vp.z*sz, N = Fs;
+    const muX = surf*(W.front ? 1.0 : 3.6), muY = surf*(W.front ? 1.1 : 1.9)*(hand && !W.front ? 0.45 : 1);
+    let fL = 0, fS = -muY*N*Math.tanh(vS/(0.08*Math.abs(vL) + 0.35));
+    if (!W.front) { nRear++; if (hand) fL = -muX*N*0.8*Math.tanh(vL*3); else if (thr) fL = drive/2; else if (brk && vL < 0.5) fL = -2600; }
+    if (brk && vL > 0.5) fL += -muX*N*0.9*Math.tanh(vL*2);
+    if (!thr && !(brk && vL < 0.5)) fL += -N*(W.front ? 0.012 : 0.05)*Math.tanh(vL*3) - (sp < 1.5 && !brk ? N*0.5*Math.tanh(vL*6) : 0);   // rolling, the engine holding it, standing still
+    const e = Math.hypot(fL/(muX*N + 1e-6), fS/(muY*N + 1e-6)); if (e > 1) { const k2 = (e > 1.2 ? 0.85 : 1)/e; fL *= k2; fS *= k2; if (!W.front && thr) spinX = Math.max(spinX, e - 1); }
+    if (Math.abs(vS) > 2.5 && N > 500) slipY = Math.max(slipY, Math.min(1, (Math.abs(vS) - 2.5)/8));
+    force(cx, cy, cz, wx*fL + sx*fS, wy*fL + sy*fS, wz*fL + sz*fS); }
+  DP.spin += ((thr && nRear ? Math.min(45, spinX*60 + (Math.abs(vf) < 3 ? 6 : 0)) : 0) - DP.spin)*Math.min(1, h*(thr ? 4 : 8)); DP.slip = Math.max(slipY, Math.min(1, DP.spin/20));
+  // air: drag at the middle, the wing's and the nose wing's downforce, the chute behind
+  if (sp > 0.5) { const d = 0.6*DP.CDA*sp; Fx -= DP.v.x*d; Fy -= DP.v.y*d; Fz -= DP.v.z*d; const q2 = 0.6*vf*vf;
+    if (!DP.lost.wing) { const P = dpW(0, 2.1, -2.3, _dA), D = q2*DP.CLA_W; force(P.x, P.y, P.z, -ux*D, -uy*D, -uz*D); }
+    { const P = dpW(0, 0.34, 3.95, _dA), D = q2*DP.CLA_F; force(P.x, P.y, P.z, -ux*D, -uy*D, -uz*D); }
+    if (DRAG.chute) { const P = dpW(0, 0.8, -6, _dA), d2 = 0.6*DP.CDA_CHUTE*sp*Math.min(1, DRAG.chuteM.scale.x); force(P.x, P.y, P.z, -DP.v.x*d2, -DP.v.y*d2, -DP.v.z*d2); } }
+  DP.v.x += Fx/DP.m*h; DP.v.y += Fy/DP.m*h; DP.v.z += Fz/DP.m*h; DP.w.add(dpAng(Tx*h, Ty*h, Tz*h)); DP.w.multiplyScalar(1 - 0.15*h);
+  // the hull against the ground and whatever stands on it
+  let lift = 0, hitMax = 0, scr = 0; const boxes = []; staticNear(DP.p.x, DP.p.z, 6, B => { if (B !== DRAG.sb) boxes.push(B); });
+  const rocks = ROCK_HILLS.length && rockNear(DP.p.x, DP.p.z, 5);
+  for (const pt of DP_PTS) { const part = pt[3]; if (part && DP.lost[part]) continue; const P = dpW(pt[0], pt[1], pt[2], _dA), px = P.x, py = P.y, pz = P.z, gy = Y(px, pz);
+    if (py < gy) { const n = dpNormal(px, pz, _dQv), dep = (gy - py)*n.y, bar = part === 'bar', v0 = dpVel(px, py, pz, _dB), v0x = v0.x, v0z = v0.z, vt = Math.hypot(v0x, v0z);
+      const hit = dpContact(px, py, pz, n.x, n.y, n.z, dep, bar ? 0.04 : part && part !== 'wing' ? 0.8 : 0.45, 0.2, h); lift = Math.max(lift, dep);
+      if (!bar) { if (hit > hitMax) hitMax = hit; if (vt > 3) { scr = Math.max(scr, Math.min(1, vt/25)); if (Math.random() < h*40) sparkBurst(px, gy + 0.1, pz, v0x/vt, v0z/vt, 3, 3); }
+        if (part && hit > (part === 'wing' ? 6 : 9)) dpLose(part, (Math.random() - 0.5)*4, (Math.random() - 0.5)*4); } }
+    for (const B of boxes) { const o = boxPush(B, px, pz, 0.12); if (!o) continue; const hit = dpContact(px, py, pz, o.nx, 0, o.nz, o.ov, 0.3, 0.3, h); DP.p.x += o.nx*Math.min(o.ov, 0.3)*0.5; DP.p.z += o.nz*Math.min(o.ov, 0.3)*0.5;
+      if (hit > hitMax) hitMax = hit; if (hit > 3) sparkBurst(px, py, pz, o.nx, o.nz, Math.min(18, 4 + hit*0.8), 4);
+      if (part && part !== 'bar' && hit > (part === 'wing' ? 7 : 12)) dpLose(part, o.nx*hit*0.3, o.nz*hit*0.3);
+      if (B.kind === 'house' && hit >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) { rapCount('f'); policeIncident('fire'); } } }
+    if (rocks) { const o = rockOut(px, pz, 0.3); if (o) { const hit = dpContact(px, py, pz, o.nx, 0, o.nz, o.depth, 0.4, 0.3, h); DP.p.x -= o.nx*Math.min(o.depth, 0.3)*0.5; DP.p.z -= o.nz*Math.min(o.depth, 0.3)*0.5; if (hit > hitMax) hitMax = hit; if (hit > 3) sparkBurst(px, py, pz, -o.nx, -o.nz, 12, 4); } } }
+  { _dA.set(0, 0, 0.2).applyQuaternion(q); const sx = DP.p.x + _dA.x - fx*DP.cg[2], sz = DP.p.z + _dA.z - fz*DP.cg[2], hl = Math.hypot(fx, fz) || 1, S = { x: sx, z: sz, yaw: Math.atan2(fx, fz), hw: 0.3, hl: 3.8*hl };   // the spine (a pole between two hull points)
+    for (const B of boxes) { const o = obbSat(S, B); if (!o) continue; const a = Math.max(-S.hl, Math.min(S.hl, (B.x - sx)*fx/hl + (B.z - sz)*fz/hl)), px = sx + fx/hl*a, pz = sz + fz/hl*a;
+      const hit = dpContact(px, DP.p.y, pz, -o.nx, 0, -o.nz, o.depth, 0.3, 0.3, h); DP.p.x -= o.nx*Math.min(o.depth, 0.3)*0.5; DP.p.z -= o.nz*Math.min(o.depth, 0.3)*0.5; if (hit > hitMax) hitMax = hit;
+      if (hit > 3) sparkBurst(px, DP.p.y, pz, -o.nx, -o.nz, Math.min(18, 4 + hit*0.8), 4); if (B.kind === 'house' && hit >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) { rapCount('f'); policeIncident('fire'); } } } }
+  if (lift > 0.02) DP.p.y += (lift - 0.02)*0.5;   // (a deep dig: out of the ground, not only by impulses)
+  DP.scrape = Math.max(DP.scrape, scr); if (hitMax > DP.hit) DP.hit = hitMax;
+  // integrate
+  DP.p.addScaledVector(DP.v, h); const w = DP.w; _dQ.set(w.x*h*0.5, w.y*h*0.5, w.z*h*0.5, 0).multiply(q); q.set(q.x + _dQ.x, q.y + _dQ.y, q.z + _dQ.z, q.w + _dQ.w).normalize(); }
+const _dQv = new THREE.Vector3();
+function dragPhys(dt, live) {
+  if (!DP.ok) dragInit(car.x, car.z, car.angle);
+  // whatever else moved the car since the last step (a tyre stack's shove, a person, the walker's parking) moves the body too
+  const ex = car.x - DP.cx, ez = car.z - DP.cz; if (ex*ex + ez*ez > 25) { dragInit(car.x, car.z, car.angle); } else { DP.p.x += ex; DP.p.z += ez; DP.v.x += car.vx - DP.cvx; DP.v.z += car.vz - DP.cvz; }
+  const thr = live && (keys['ArrowUp'] || keys['KeyW']) ? 1 : 0, brk = live && (keys['ArrowDown'] || keys['KeyS']) ? 1 : 0, st = live ? (((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0) - ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0)) : 0, hand = !live || keys['Space'];
+  car.throttle = thr; car.steerSm = st; DP.thr = thr; DP.pp.copy(DP.p); DP.pq.copy(DP.q); DP.scrape *= Math.exp(-dt*6); DP.hit = 0;
+  const n = DP.v.lengthSq() > 40*40 ? 4 : 2; for (let i = 0; i < n; i++) dpStep(dt/n, thr, brk, st, hand);
+  if (!isFinite(DP.p.x + DP.p.y + DP.p.z + DP.q.w + DP.w.x + DP.v.x)) dragInit(DRAG.park.x, DRAG.park.z, DRAG.park.angle);   // (never: but a NaN would lose the car for good)
+  if (DP.p.y < Y(DP.p.x, DP.p.z) - 3) { DP.p.y = Y(DP.p.x, DP.p.z) + 1.5; DP.v.y = 0; }
+  // the others: vehicles (a shove with a spin), people, tyre stacks (theirs through car.*)
+  dpSync(); const B = playerBox(); B.vx = car.vx; B.vz = car.vz; B.mass = 1;
+  for (const v of VEHICLES) { if (v.gone) continue; const R = v.hl + 4.6; if (Math.abs(v.x - B.x) > R || Math.abs(v.z - B.z) > R) continue; const hh = obbSat(B, v); if (!hh) continue;
+    const vx0 = B.vx, vz0 = B.vz, imp = resolvePair(B, v, hh, 0.25); v.awake = true; v.moved = true; DP.p.x += B.x - car.x; DP.p.z += B.z - car.z; B.x = car.x; B.z = car.z;
+    const cpx = (v.x + car.x)/2, cpz = (v.z + car.z)/2; dpImpulse(cpx, DP.p.y, cpz, (B.vx - vx0)*DP.m, 0, (B.vz - vz0)*DP.m); B.vx = DP.v.x; B.vz = DP.v.z;
+    if (imp > 0.8) { DP.hit = Math.max(DP.hit, imp); if (imp > 3) sparkBurst(cpx, 0.6 + Y(cpx, cpz), cpz, -hh.nx, -hh.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
+  dpSync(); boxHitsHumans(playerBox(), car.vx, car.vz, true, true); DP.cvx = car.vx; DP.cvz = car.vz;
+  // the engine: the slicks' speed through the drive (5:1), the clutch slipping at a launch; a lope at idle
+  const wr = (Math.max(0, car.speed) + DP.spin)/0.64*60/(2*Math.PI)*5; DP.rpm += ((thr ? Math.max(5200, Math.min(8400, wr)) : Math.max(1700, Math.min(8400, wr*0.9))) - DP.rpm)*Math.min(1, dt*(thr ? 9 : 3));
+  car.onTrack = onRoad(car.x, car.z, 0.4) || inLay(car.x, car.z, 0.3); car.surface = car.onTrack ? surfaceAt(car.x, car.z) : 'grass'; car.drifting = DP.slip > 0.25; car.maxSlip = DP.slip*0.5;
+  if (DP.hit > 4) dragCrashSound(Math.min(1, DP.hit/18));
+  // on its roof or its side and stopped: fire, the driver thrown out (the rally car's wreck: the fire engine and the ambulance come)
+  _dU.set(0, 1, 0).applyQuaternion(DP.q); if (_dU.y < 0.35 && DP.v.length() < 2.5 && DP.w.length() < 1.5) DP.roofT += dt; else DP.roofT = 0;
+  if (DP.roofT > 1.2 && !WRECK.on && gameState === State.RACING) { wreckCar('drag'); DRAG.carMesh.userData.parts.driver.visible = false; DP.broken = true; } }
+function dragView() {   // the model drawn between the last two physics steps
+  const al = Math.min(1, acc/PHYS_DT), P = DRAG.carMesh.userData.parts; _dQ.copy(DP.pq).slerp(DP.q, al); _dA.copy(DP.pp).lerp(DP.p, al);
+  carGroup.quaternion.copy(_dQ); carGroup.position.copy(_dB.set(-DP.cg[0], -DP.cg[1], -DP.cg[2]).applyQuaternion(_dQ).add(_dA));
+  for (const S of DP.wh) { const w = P.wheels[S.W.id]; w.g.position.y = S.hy; }
+  P.wing.visible = !DP.lost.wing; }
 function buildFinishArea() { FINISH_AREA.ctx = null; FINISH_AREA.last = ''; buildDragster(); if (!finishLine) return; const fx = finishLine.position.x, fz = finishLine.position.y;
   // the scoreboard
   // the scoreboards: one by the finish, two more a third and two thirds of the way round (30.9., Antti) — one canvas, one material for all three
@@ -8945,7 +9087,7 @@ function repairCar() {
 }
 // the car as what it is — a box (3.8 × 1.7 m) — against a prop's circle; people count as slim (0.3 m), not their spacing radius
 const CAR_HL = 1.9, CAR_HW = 0.84;
-function carBoxPush(x, z, r) {
+function carBoxPush(x, z, r) { if (DRAG.on) return boxPush(playerBox(), x, z, r);
   const fx = Math.sin(car.angle), fz = Math.cos(car.angle), rx = fz, rz = -fx, dx = x - car.x, dz = z - car.z, lf = dx*fx + dz*fz, lr = dx*rx + dz*rz;
   if (Math.abs(lf) > CAR_HL + r || Math.abs(lr) > CAR_HW + r) return null;
   const cf = Math.max(-CAR_HL, Math.min(CAR_HL, lf)), cr = Math.max(-CAR_HW, Math.min(CAR_HW, lr)), ef = lf - cf, er = lr - cr, d = Math.hypot(ef, er);
@@ -8991,7 +9133,7 @@ function propPair(a, b) {
 function updateTires(dt) {
   if (staticDirty) rebuildStaticGrid();
   const fx = Math.sin(car.angle), fz = Math.cos(car.angle);
-  const circles = [[car.x + fx*0.9, car.z + fz*0.9], [car.x - fx*0.9, car.z - fz*0.9]];
+  const circles = DRAG.on ? [[car.x + fx*3, car.z + fz*3], [car.x + fx*1, car.z + fz*1], [car.x - fx*1, car.z - fz*1], [car.x - fx*2.8, car.z - fz*2.8]] : [[car.x + fx*0.9, car.z + fz*0.9], [car.x - fx*0.9, car.z - fz*0.9]];
   const CR = 0.95;
   // car vs resting props (grid) and vs moving props
   for (const [cx, cz] of circles) forStaticNear(cx, cz, t => propHitByCar(t));
@@ -9238,6 +9380,60 @@ function createTyreSynth(ctx, dest, noiseBuf) {
   return { update };
 }
 
+// ── the dragster's sound (30.9.): a Top Fuel hemi — eight cylinders, four firings a turn, a sawtooth pulse hard into a saturator, a sub an
+//    octave under, a roar of noise gated at the firing rate, the blower's whine; a lumpy idle that crackles out of open headers, a bark
+//    at the launch, a burst of cracks off the throttle; hull scraping the tarmac; crunches in a crash. ──
+function createDragSynth(ctx, dest) {
+  const nb = ctx.createBuffer(1, ctx.sampleRate*2, ctx.sampleRate), nd = nb.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random()*2 - 1;
+  const noise = () => { const s = ctx.createBufferSource(); s.buffer = nb; s.loop = true; s.start(0, Math.random()*1.5); return s; };
+  const osc = (type, f) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.start(); return o; };
+  const gain = (v, to) => { const g = ctx.createGain(); g.gain.value = v; if (to) g.connect(to); return g; };
+  const filt = (type, f, Q, to) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = Q; if (to) b.connect(to); return b; };
+  const out = gain(0, dest), lp = filt('lowpass', 900, 0.7, out), body = filt('peaking', 90, 1.2, lp); body.gain.value = 8;
+  const shaper = ctx.createWaveShaper(); { const c = new Float32Array(2048); for (let i = 0; i < 2048; i++) { const x = i/1023.5 - 1; c[i] = Math.tanh(x*4)/Math.tanh(4); } shaper.curve = c; shaper.oversample = '2x'; } shaper.connect(body);
+  const drive = gain(1, shaper);
+  const fire = osc('sawtooth', 120), fireG = gain(0.55, drive); fire.connect(fireG);
+  const lope = osc('sine', 15), lopeD = gain(0.35); lope.connect(lopeD); lopeD.connect(fireG.gain);   // (the lumpy cam: every other turn weaker)
+  const sub = osc('square', 60), subG = gain(0.22, drive); sub.connect(subG);
+  const rn = noise(), rnBP = filt('bandpass', 300, 0.8), rnG = gain(0.1, drive); rn.connect(rnBP); rnBP.connect(rnG); const gate = osc('sine', 120), gateD = gain(0.1); gate.connect(gateD); gateD.connect(rnG.gain);
+  const whine = osc('triangle', 900), whG = gain(0, out); whine.connect(whG);
+  const sc = noise(), scBP = filt('bandpass', 3200, 1.2), scG = gain(0, dest); sc.connect(scBP); scBP.connect(scG);   // the hull on tarmac
+  const popBus = gain(1, dest);
+  let rs = 7; const rand = () => (rs = (rs*16807) % 2147483647)/2147483647;
+  function pop(t, s) { const src = ctx.createBufferSource(); src.buffer = nb; const bp = filt('bandpass', 500 + rand()*1500, 0.7), g = gain(0), d = 0.03 + rand()*0.06;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.5*s, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + d); src.connect(bp); bp.connect(g); g.connect(popBus); src.start(t, rand()*1.5); src.stop(t + d + 0.02);
+    const th = ctx.createOscillator(); th.type = 'sine'; th.frequency.setValueAtTime(80 + rand()*50, t); th.frequency.exponentialRampToValueAtTime(35, t + 0.08); const tg = gain(0);
+    tg.gain.setValueAtTime(0.0001, t); tg.gain.exponentialRampToValueAtTime(0.5*s, t + 0.004); tg.gain.exponentialRampToValueAtTime(0.0001, t + 0.1); th.connect(tg); tg.connect(popBus); th.start(t); th.stop(t + 0.12); }
+  const P = []; const track = (p, v) => { const o = { p, v, s: false }; P.push(o); return o; };
+  const pF = track(fire.frequency, 120), pS = track(sub.frequency, 60), pL = track(lope.frequency, 15), pLD = track(lopeD.gain, 0.35), pG = track(gate.frequency, 120), pRB = track(rnBP.frequency, 300), pRG = track(rnG.gain, 0.1),
+        pDr = track(drive.gain, 1), pLP = track(lp.frequency, 900), pW = track(whine.frequency, 900), pWG = track(whG.gain, 0), pSc = track(scG.gain, 0), pScF = track(scBP.frequency, 3200), pOut = track(out.gain, 0);
+  const ease = (o, v, dt, tau) => { o.v += (v - o.v)*(1 - Math.exp(-dt/tau)); };
+  let prevThr = 0, burst = -1, nextPop = 0;
+  function update(s, t, dt) {
+    const rpm = Math.max(900, s.rpm), crank = rpm/60, f = crank*4, idle = Math.max(0, Math.min(1, (3000 - rpm)/1300)), thr = s.thr ? 1 : 0;
+    const jit = 1 + (rand() - 0.5)*0.08*idle;   // (the idle hunts)
+    ease(pF, f*jit, dt, 0.015); ease(pS, f/2*jit, dt, 0.015); ease(pL, crank/2, dt, 0.02); ease(pLD, 0.1 + 0.45*idle, dt, 0.1); ease(pG, f, dt, 0.015);
+    ease(pRB, 200 + f*1.6, dt, 0.03); ease(pRG, 0.06 + 0.3*thr, dt, 0.03); ease(pDr, 0.9 + 3.2*thr + rpm/8000, dt, 0.03);
+    ease(pLP, 480 + rpm*0.12 + thr*(1600 + rpm*0.35), dt, 0.03); ease(pW, crank*16, dt, 0.03); ease(pWG, s.on ? 0.012 + 0.03*thr*rpm/8000 : 0, dt, 0.05);
+    ease(pSc, s.on ? 0.22*s.scrape : 0, dt, 0.04); ease(pScF, 2200 + 3000*s.scrape, dt, 0.05);
+    ease(pOut, s.on ? (0.2 + 0.28*thr + 0.08*rpm/8000)*(s.volume == null ? 1 : s.volume) : 0, dt, 0.02);
+    for (const o of P) { if (!o.s) { o.p.setValueAtTime(o.v, t); o.s = true; } else o.p.linearRampToValueAtTime(o.v, t + dt); }
+    if (!s.on) { prevThr = 0; return; }
+    if (thr && !prevThr) { pop(t, 1.2); pop(t + 0.03, 0.9); }   // the bark as it lights up
+    if (!thr && prevThr && rpm > 3500) { burst = t + 0.9; nextPop = t + 0.02; }
+    if (thr) burst = -1;
+    if (t < burst && t >= nextPop) { pop(t, 0.5 + rand()*0.6); nextPop = t + 0.025 + rand()*0.08; }
+    else if (!thr && idle > 0.5 && rand() < dt*5) pop(t + rand()*dt, 0.25 + rand()*0.25);   // open headers at idle
+    prevThr = thr; }
+  return { update, pop: (s) => pop(ctx.currentTime, s || 1) };
+}
+let _dcrashT = 0;
+function dragCrashSound(s) { if (!audio) return; const now = performance.now(); if (now - _dcrashT < 140) return; _dcrashT = now; const { ctx, master } = audio, t = ctx.currentTime;
+  const src = ctx.createBufferSource(); src.buffer = audio.noiseBuf; const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 700 + s*1500; const g = ctx.createGain(), d = 0.2 + s*0.35;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25 + 0.5*s, t + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, t + d); src.connect(lp); lp.connect(g); g.connect(master); src.start(t, Math.random()*0.5); src.stop(t + d + 0.02);
+  beep(70 + Math.random()*40, 0.25 + s*0.3, 0.2 + 0.3*s, 'square'); if (s > 0.4) beep(900 + Math.random()*700, 0.12, 0.06*s, 'triangle'); }   // (a thump and a clank of metal)
+function dragChuteSound() { if (!audio) return; const { ctx, master } = audio, t = ctx.currentTime, src = ctx.createBufferSource(); src.buffer = audio.noiseBuf; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.setValueAtTime(400, t); bp.frequency.exponentialRampToValueAtTime(1800, t + 0.4); bp.Q.value = 0.9;
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.35, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6); src.connect(bp); bp.connect(g); g.connect(master); src.start(t); src.stop(t + 0.65); beep(180, 0.15, 0.3, 'triangle'); }   // the pop, the whoosh as it fills
 function initAudio() {
   if (audio) return;
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -9260,7 +9456,8 @@ function initAudio() {
   noise2.connect(grFilter); grFilter.connect(grGain); grGain.connect(master);
   noise2.start();
   
-  audio = { ctx, engineSynth, tyreSynth, scGain, grGain, master };
+  const dragSynth = createDragSynth(ctx, master);
+  audio = { ctx, engineSynth, tyreSynth, scGain, grGain, master, dragSynth, noiseBuf: buf };
   if (ctx.state === 'suspended') ctx.resume();
 }
 
@@ -9284,7 +9481,8 @@ function updateAudio(dt) {
   const racing = gameState === State.RACING;
   const kmh = Math.abs(car.speed) * 3.6;
   // engine: same rpm and gear as the tachometer; idles on the grid and after the finish, silent in the menu
-  engineSynth.update({ rpm: engine.rpmDisp, throttle: !!engine.throttle, gear: engine.gear, on: gameState !== State.MENU, volume: racing ? 1 : 0.8 }, t, Math.min(0.1, Math.max(0.001, dt || 1/60)));
+  engineSynth.update({ rpm: engine.rpmDisp, throttle: !!engine.throttle, gear: engine.gear, on: gameState !== State.MENU && !DRAG.on, volume: racing ? 1 : 0.8 }, t, Math.min(0.1, Math.max(0.001, dt || 1/60)));
+  audio.dragSynth.update({ rpm: DP.rpm, thr: racing && DRAG.on && !WALK.on && !WRECK.on ? DP.thr : 0, on: DRAG.on && gameState !== State.MENU && !WRECK.on, scrape: DP.scrape, volume: WALK.on ? 0.5 : 1 }, t, Math.min(0.1, Math.max(0.001, dt || 1/60)));
   
   // Screech when drifting on tarmac — volume scales with slip depth
   const screech = (racing && car.drifting && car.onTrack && Math.abs(car.speed) > 6)
@@ -9651,7 +9849,7 @@ let camAdj = 0, _clTopFrac = 1, _clT = 0; const _camV = new THREE.Vector3();
 const _camWalker = { x: 0, z: 0, angle: 0, vx: 0, vz: 0 };
 function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind the car, no speed lead — Antti asked it back (the later lead + auto look-ahead went too top-down)
   const C = WALK.on && WALK.h ? Object.assign(_camWalker, { x: WALK.h.x, z: WALK.h.z, angle: WALK.camA, vx: WALK.h.vx || 0, vz: WALK.h.vz || 0 }) : car;   // (on foot: the same camera, high up, on the walker — Antti, 29.9.)
-  const speed=Math.sqrt(C.vx*C.vx+C.vz*C.vz);
+  const speed=Math.min(DRAG.on ? 45 : Infinity, Math.sqrt(C.vx*C.vx+C.vz*C.vz));   // (the dragster at 400 km/h: the camera as at 160)
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
   camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two views
   const h=((43+speed*0.5)*(1-camLowK) + (4.2+speed*0.04)*camLowK)*camZoom;
@@ -9902,6 +10100,7 @@ function loop(time) {
     const al = Math.min(1, acc/PHYS_DT); let da = car.angle - RI.a; while (da > Math.PI) da -= 2*Math.PI; while (da < -Math.PI) da += 2*Math.PI;
     rx = RI.x + (car.x - RI.x)*al; rz = RI.z + (car.z - RI.z)*al; ra = RI.a + da*al; car.x = rx; car.z = rz; car.angle = ra;
     carGroup.position.set(rx, Y(rx, rz) + BASS.hopY + ABD.carY, rz); carGroup.rotation.y = ra; }
+  if (DRAG.on && DP.ok) dragView();
   U_TIME.value = performance.now()/1000; skyDome.position.copy(camera.position);
   updateMarks(dt); updateDust(dt); updateDebris(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); flowFx(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
   if (gameState !== State.MENU && (MM_TICK = (MM_TICK + 1) % 2) === 0) drawMinimap();   // (30 Hz is plenty for the map: half the 2D canvas uploads)
