@@ -3360,8 +3360,8 @@ function walkPunch(h) {   // a swing at whoever stands in front: they run off, a
   walkMsg(T('👊 PAM!'), '#ffd23a');
   if (!best.animal && worldT - (WALK.copT || -99) > 12) { WALK.copT = worldT; policeSpawn(1); policeMsg(T('🚨 JOKU SOITTI POLIISIT!'), true); } }
 function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on || POLICE.hold > 0 || Math.hypot(car.vx, car.vz) > 3) return false;
-  const [x, z] = lloc(car.x, car.z, car.angle, -1.35, 0.3);
-  const h = WALK.h = new Human({ x, z, yaw: car.angle - Math.PI/2, rig: makeAdult(0xf2f2ee, 0xf2f2ee, 0x5a3a1e, { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), task: playerWalkTask(), temp: true });
+  const [x, z] = lloc(car.x, car.z, car.angle, 1.35, 0.3);   // the driver's door: local +x is the car's left
+  const h = WALK.h = new Human({ x, z, yaw: car.angle + Math.PI/2, rig: makeAdult(0xf2f2ee, 0xf2f2ee, 0x5a3a1e, { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), task: playerWalkTask(), temp: true });
   h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.camA = camAngle.current; WALK.spPrev = true; WALK.punchT = 0; WALK.downT = 0; WALK.stam = 1; WALK.puff = false; WALK.ft = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
   const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ'); cpd.style.color = '#ffe9a8'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 1800); return true; }
 function walkIn(force) { if (!WALK.on) return false; const h = WALK.h; if (!force && (h.down || Math.hypot(h.x - car.x, h.z - car.z) > 3.8)) return false;
@@ -4639,6 +4639,7 @@ const CHANGES = [
   ['30.9.', '🐕 Pihakoira hyppää kyytiin, kun pysähdyt sen viereen, ja haukkuu mukana seuraavaan pysähdykseen', '10.04'],
   ['30.9.', '🌭 Makkarakärry: pysähdy viereen, makkara tuodaan ikkunaan, röyh ja savua', '10.04'],
   ['30.9.', '📸 Peltipoliisi: kaksi nopeuskameraa radan varrella, yli 80 km/h välähtää ja kovin lukema kirjataan rekisteriin', '10.04'],
+  ['30.9.', 'Kuski nousee autosta kuljettajan puolelta (vasen), liftari apukuljettajan ovelle; R dragsterissa – ehjässä tai romuna – vie suoraan uuteen dragsteriin', '20.05'],
   ['30.9.', 'Korjauksia: liftarin K-KAUPPA-kyltti isompi ja näkyvissä, jalkaisin poliisi tulee sinun luoksesi eikä tyhjälle autolle, HONK-banderolli aukealle, ufo ei nappaa pakenevaa hirveä', '09.32'],
   ['30.9.', 'Mopopojat lähtevät perään useammin: riittää 15 % ennätyksestä, ja ennen ensimmäistä väliaikaa aina', '08.56'],
   ['30.9.', 'Naamiaisolympialaiset ovat nyt HONK-olympialaiset, ja kentän laidalla on banderolli', '08.56'],
@@ -6923,7 +6924,7 @@ function policeAI(v, dt) {
 }
 const officerTask = (v) => ({ kind: 'officer', update(h, dt, t) {
   if (POLICE.hold > 0.6) { const W = POLICE.walker && WALK.on && WALK.h && !WALK.h.gone ? WALK.h : null;   // a finger wagged at the driver's window — or at you, on foot, face to face
-    const [tx, tz] = W ? [W.x + Math.sin(W.yaw)*1.1, W.z + Math.cos(W.yaw)*1.1] : lloc(car.x, car.z, car.angle, -1.4, 0.35), fx = W ? W.x : car.x, fz = W ? W.z : car.z;
+    const [tx, tz] = W ? [W.x + Math.sin(W.yaw)*1.1, W.z + Math.cos(W.yaw)*1.1] : lloc(car.x, car.z, car.angle, 1.4, 0.35), fx = W ? W.x : car.x, fz = W ? W.z : car.z;
     if (Math.hypot(tx - h.x, tz - h.z) < 0.5 || walkTo(h, tx, tz, W ? 3.4 : 2.2, dt)) { h.vx = h.vz = 0; h.yaw = Math.atan2(fx - h.x, fz - h.z); h.pose.armR = -1.45 + Math.sin(t*8)*0.22; h.pose.armL = -0.2; } return; }
   const [bx, bz] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 0.4); if (walkTo(h, bx, bz, 2.2, dt) || v.gone) humanRemove(h); } });
 function policeBust(v) { POLICE.hold = 7; POLICE.caughtT = 0; POLICE.walker = WALK.on; policeMsg(T('🚨 KIINNI! POLIISI PUHUTTELEE…'), true);
@@ -7551,8 +7552,8 @@ function wreckCar(how) { if (WRECK.on || gameState !== State.RACING) return; WRE
   const RV = WRECK.rv = { kind: 'rally', x: car.x, z: car.z, yaw: car.angle, hw: DRAG.on ? 1 : CAR_HW, hl: DRAG.on ? 3.6 : CAR_HL, gy, view: { kind: 'mesh', g: carGroup }, fire: null, charred: false, crew: [], vx: 0, vz: 0 };
   if (how === 'boom') { boom(car.x, gy, car.z, true); for (let r = 0; r < 2; r++) for (const [nx, nz] of [[fx, fz], [-fx, -fz], [fz, -fx], [-fz, fx]]) { for (const p of carParts) p.cool = 0; carDamage(nx, nz, 30); } }
   startFire({ vehicle: RV }); if (RV.fire) RV.fire.level = how === 'boom' ? 1 : 0.6;
-  const [dx, dz] = lloc(car.x, car.z, car.angle, -1.4, 0.2), h = new Human({ x: dx, z: dz, yaw: car.angle, rig: makeAdult(0xf2f2ee, 0xf2f2ee, lpick(L_HAIR), { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), temp: true }); h.ao = aoAlloc(); WRECK.driver = h;
-  const k = how === 'boom' ? 9 : how === 'drag' || how === 'dragboom' ? 7 : 3; knock(h, -fz*k + car.vx*0.3, fx*k + car.vz*0.3, how === 'boom' ? 14 : how === 'drag' || how === 'dragboom' ? 12 : 6);   // thrown clear out of the driver's door: the ambulance is on its way
+  const [dx, dz] = lloc(car.x, car.z, car.angle, 1.4, 0.2), h = new Human({ x: dx, z: dz, yaw: car.angle, rig: makeAdult(0xf2f2ee, 0xf2f2ee, lpick(L_HAIR), { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), temp: true }); h.ao = aoAlloc(); WRECK.driver = h;
+  const k = how === 'boom' ? 9 : how === 'drag' || how === 'dragboom' ? 7 : 3; knock(h, fz*k + car.vx*0.3, -fx*k + car.vz*0.3, how === 'boom' ? 14 : how === 'drag' || how === 'dragboom' ? 12 : 6);   // thrown clear out of the driver's door: the ambulance is on its way
   car.vx *= 0.2; car.vz *= 0.2; esHud(); pizzaMsg(T(how === 'boom' ? '👽 UFO AMPUI AUTON!' : how === 'drag' ? '🔥 DRAGSTERI KATOLLAAN – TULESSA, KUSKI LENSI ULOS!' : how === 'dragboom' ? '💥 DRAGSTERI HAJOSI KAPPALEIKSI!' : '⚡🔥 ES + KOLARI = TULIPALO!'), true); }
 function wreckReset() { if (WRECK.rv && WRECK.rv.charred) charVehicle(WRECK.rv, false); WRECK.on = false; WRECK.rv = null; WRECK.driver = null; }
 
@@ -8899,7 +8900,7 @@ const hitchTask = () => ({ kind: 'hitch', update(h, dt, t) { const st = h.st || 
       if (!racing || WALK.on || WRECK.on) { HITCH.wait = 0; return; }
       if (cd < 9 && cs < 1.5) { HITCH.wait += dt; if (HITCH.wait > 0.5) { st.mode = 'walk'; pizzaMsg(T('🧍 LIFTARI: ”K-KAUPALLE, KIITOS!”'), true); } }
       else HITCH.wait = 0; return; }
-    if (st.mode === 'walk') { const rx = Math.cos(car.angle), rz = -Math.sin(car.angle), fx = Math.sin(car.angle), fz = Math.cos(car.angle), tx = car.x + rx*1.45 + fx*0.1, tz = car.z + rz*1.45 + fz*0.1;   // the passenger's door
+    if (st.mode === 'walk') { const rx = Math.cos(car.angle), rz = -Math.sin(car.angle), fx = Math.sin(car.angle), fz = Math.cos(car.angle), tx = car.x - rx*1.45 + fx*0.1, tz = car.z - rz*1.45 + fz*0.1;   // the passenger's door (right, local -x)
       if (cs > 3 || cd > 16 || !racing) { st.mode = 'home'; return; }
       h.pose.armL = -1.2; if (Math.hypot(tx - h.x, tz - h.z) < 0.7 || walkTo(h, tx, tz, 2.6, dt)) { h.vx = h.vz = 0; h.inside = true; HITCH.aboard = true; st.mode = 'aboard'; if (sign) sign.visible = false;
         pizzaMsg(T('🧍 LIFTARI KYYDISSÄ – VIE HÄNET K-KAUPALLE'), true); hitchHud(T('🧍 liftari → K-kauppa')); if (audio) { beep(520, 0.1, 0.2, 'square'); setTimeout(() => beep(390, 0.12, 0.2, 'square'), 110); } } return; }
@@ -9743,6 +9744,7 @@ function startRace(newTrack) {
   FLOW.on = false; FLOW.mopo = true; for (const v of VEHICLES) v.dodge = null;
   if (audio && audio.ctx.state === 'suspended') audio.ctx.resume();
   if (newTrack) generateTrack();
+  const wasDrag = DRAG.on && gameState === State.RACING;   // (R in the dragster, whole or in bits: straight into a fresh one at its lay-by — Antti, 30.9.)
   resetCar();
   checkpoints.forEach(cp=>cp.passed=false);
   walkIn(true); dragReset(); knockReset(); rbClear(); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
@@ -9759,6 +9761,7 @@ function startRace(newTrack) {
   lapStarted = false; prevStartS = null; ghostStartRun();
   repairCar(); smokeFx.clear(); flameFx.clear(); sparkFx.clear(); smokeGear = 1; carBody.dirt = 0; carBody.vx = carBody.vz = 0;
   pickTimeOfDay();
+  if (wasDrag && DRAG.home) { dragSwap(true); DRAG.used = true; }   // (the Pökö waits on the grid)
 }
 
 function updateCountdown(dt) {

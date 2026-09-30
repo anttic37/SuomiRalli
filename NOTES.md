@@ -935,6 +935,7 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - Every flame from small ones (30.9., Antti: "liekit enemmän pieniä, ei isoja levyjä"; soft particles as in three's webgpu example were
   weighed and left out — r128 WebGL would need a second depth pass): boom() 150×k flames at ~1×k (was 70 at 2.2×k), the nuke's burning
   shells 70/s at ~1.1 (was 30/s at 2.2), the kokko twice the rate at ~0.55× the size; house/vehicle fires were done before.
+- 30.9. Exit side: a render with a marker at lloc(+1.8, 0) showed local +x is the car's LEFT (driver's side). walkOut, the wrecked driver (and his knock), the officer at the window now use +x; the hitchhiker's passenger door −x. R while DRAG.on (whole or broken): startRace remembers it and ends with dragSwap(true) + DRAG.used — a fresh dragster at the lay-by, the Pökö parked on the grid (t_dragr).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
