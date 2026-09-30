@@ -770,6 +770,11 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
     drops. Moose reset clears abd/inside. t_abd.
   - Photos: t_lh_k (liftari, juliste, mopot, ufo_hirvi via lhrun.sh), t_lh_l (menu radio page shot scaled 2.6×, cropped
     1000×625 round the radio → huhu.jpg). Stories liftari/ufo_hirvi (page), mopot/juliste/huhu (half), kirje updated.
+- 30.9. morning (Antti): three scoreboards (buildFinishArea: the finish + trackPoints a third and two thirds round from it,
+  finishLot, one shared canvas/material; SCOREBOARDS), "PAULIN KAALI" board at every cabbage field (paulinKaali, edge nearest the
+  route, P.sign) and the farmer is Pauli in every message/ad/story; the costume games are the HONK-olympialaiset (banner at the
+  stage back, O.banner); moped boys chase on FLOW.mopo too (a split within 15 % of the record, or before the first split).
+  t_boards (shots of all of it; nearVis objects need the car moved near before view()).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
