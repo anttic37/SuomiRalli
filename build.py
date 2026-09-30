@@ -12,6 +12,13 @@ open(p('test', 'editor.js'), 'w', encoding='utf-8').write(re.findall(r'<script>(
 open(p('test', 'game.js'), 'w', encoding='utf-8').write(re.findall(r'<script>(.*?)</script>', src, re.S)[-1])
 r = subprocess.run(['node', '--check', p('test', 'game.js')], capture_output=True, text=True)
 if r.returncode: print(r.stderr[-1500:]); sys.exit(1)
+# every inline script of the pages people open (the game's head too, the editor, the phone page): a syntax error kills the whole page
+import tempfile
+for f in ['src/game.html', 'editor.html', 'mobiili.html']:
+    for k, js in enumerate(re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>', open(p(f), encoding='utf-8').read(), re.S)):
+        with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8') as t: t.write(js)
+        r = subprocess.run(['node', '--check', t.name], capture_output=True, text=True); os.unlink(t.name)
+        if r.returncode: print(f, 'script', k, r.stderr[-1500:]); sys.exit(1)
 r = subprocess.run(['node', p('test', 'edbuild.js'), p('index.html')], capture_output=True, text=True)
 print(r.stdout.strip() or r.stderr[-800:])
 # the route for the server's cut check: every track version's points + widths in netlify/lib/tracks.mjs (older tracks kept)
