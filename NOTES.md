@@ -903,6 +903,13 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   everything off + boom + wreckCar('dragboom') ("DRAGSTERI HAJOSI KAPPALEIKSI"). No gearbox (like a real Top Fuel: direct drive and a
   slipper clutch): its own cluster base (drawClusterBaseDrag: 9000 rpm red from 8000, 500 km/h), gear "1", no shift light.
   Photos: t_lh_r → dragster.jpg (flames at the launch), dragster_b.jpg (came apart against a house).
+- Dragster step 4 (30.9., Antti: "ei näy varjot kaikista osista, ei jää sladijälkiä, eikä se hajonnut millään"): the rods (beam():
+  rails, cage, pipes, wing struts, wheelie bars) now cast shadows — the same shadow map as everything else, they just lacked the flag.
+  Skid marks: spawnMarks(WH, hw) takes wheels and a half-width (defaults = the Pökö's); dragUpdate lays DRAG_REAR_MARKS at 0.27 with
+  both slicks down on wheelspin, a slide, braking, the handbrake or grass; marks on the lay-by sit at road height (inLay). Breaking:
+  DP_LOSE lower (wing 5, fwing 5, wheels 7/8, pipes 7, cage 8, nose/engine 10), dpHitPart adds up smaller blows (DP.dmg; off at
+  2.2 × the threshold), dpPartAt(x, z) finds the piece at a spine hit (poles), a tree's blow or a vehicle's; a whole-car break-up at
+  a change of speed > 24. t_dragbreak: 43 km/h into a house takes the nose, 65 a wheel and the front wing, 119 km/h takes it apart.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

@@ -4613,6 +4613,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Dragsteri: kaikki osat heittävät varjon (myös putket, turvakaari ja siiven tuet), leveät slicksit jättävät mustat jäljet lähdöstä, jarrutuksesta ja luisuista, ja se hajoaa paljon helpommin: osumat kertyvät, ja keula, siivet, pyörät, kone ja putket irtoavat myös pylväästä, puusta tai toisesta autosta', '18.47'],
   ['30.9.', 'Dragsteri: kunnon liekit putkista (isot kaasulla, paukkeet kun kaasu nousee), hajoaa osiin (keula, etusiipi, kaari, kone, putket – ja kovassa kolarissa koko auto), oma mittaristo 9000 rpm / 500 km/h. Levike samaa asfalttia kuin tie', '18.16'],
   ['30.9.', 'Radion biiseissä pelkkä nimi (esim. Kesä ei kysy); toimittajana Ylen musiikkitoimitus', '18.09'],
   ['30.9.', 'Keittiöjaksoille nimet (Marjatta kokkaa: mikroaaltouunin ihme, ananas sopii kaikkeen, hyytelö juhlapöytään, hamburgeri ja tako, avaruusateria); radiossa näkyy pelkkä biisin nimi', '17.59'],
@@ -7909,7 +7910,7 @@ function dragDecal() { if (_dragDecal) return _dragDecal; const c = document.cre
 function makeDragster() { const G = new THREE.Group(), body = new THREE.Group(); G.add(body); body.name = 'body';
   const yel = lmat(0xf2c21a, 0.3), black = lmat(0x141414, 0.6), chrome = lmat(0xd8dade, 0.18), red = lmat(0xc8201e, 0.4), alu = lmat(0x9aa0a8, 0.35), rubber = lmat(0x161616, 0.85), skin = lmat(0xe8b795, 0.7);
   const beam = (x0, y0, z0, x1, y1, z1, r, m, par) => { const L = Math.hypot(x1 - x0, y1 - y0, z1 - z0), me = new THREE.Mesh(lgeo('rod' + r, () => new THREE.CylinderGeometry(r, r, 1, 6)), m); me.scale.y = L; me.position.set((x0 + x1)/2, (y0 + y1)/2, (z0 + z1)/2);
-    me.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(x1 - x0, y1 - y0, z1 - z0).normalize()); (par || body).add(me); return me; };
+    me.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(x1 - x0, y1 - y0, z1 - z0).normalize()); me.castShadow = true; (par || body).add(me); return me; };
   // the pieces a crash can tear off, each its own group (at the body's origin, so nothing moves): the nose, the front wing, the cage,
   // the engine with its blower, the pipes of each bank (the wing, the wheels and the driver below)
   const grp = (n) => { const g = new THREE.Group(); g.name = n; body.add(g); return g; }, nose = grp('nose'), fwing = grp('fwing'), cage = grp('cage'), engine = grp('engine'), pipesL = grp('pipesL'), pipesR = grp('pipesR');
@@ -7984,6 +7985,8 @@ function dragSwap(toDrag) { if (!DRAG.home || DRAG.on === toDrag) return;
 function dragNear(h) { if (!DRAG.home || !h) return false; const P = DRAG.on ? DRAG.poko : DRAG.park; return !!P && Math.hypot(h.x - P.x, h.z - P.z) < 4.2; }   // (by the parked one: the dragster, or the Pökö while you have the dragster)
 function dragUpdate(dt) { if (!DRAG.on) return; const v = Math.hypot(car.vx, car.vz), P = DRAG.carMesh.userData.parts;
   for (const S of DP.wh) { const w = P.wheels[S.W.id]; w.spin.rotation.x += (car.speed + (S.W.front ? 0 : DP.spin))*dt/S.W.r; if (S.W.front) w.g.rotation.y = DP.steer; }   // (the slicks spin up faster than the ground goes by at a launch)
+  { const rear = DP.wh.filter(S => !S.W.front && S.on && !DP.lost[S.W.id]).length === 2, sp = Math.hypot(car.vx, car.vz), brk = (keys['ArrowDown'] || keys['KeyS']) && car.speed > 4, hand = keys['Space'] && sp > 3;
+    if (rear && !WALK.on && (DP.spin > 1.5 || DP.slip > 0.2 || brk || hand || (!car.onTrack && sp > 3.5))) spawnMarks(DRAG_REAR_MARKS, 0.27); else endMarks(); }   // (black lines off a launch, a slide, a stop; ruts on grass)
   if (DP.spin > 2.5 && Math.random() < dt*40) for (const S of DP.wh) if (!S.W.front && S.on) { const [x, z] = lloc(car.x, car.z, car.angle, S.W.x, S.W.z - 0.5); lifeFx.emit(x, Y(x, z) + 0.3, z, (Math.random() - 0.5)*1.5 - car.vx*0.2, 0.8 + Math.random(), (Math.random() - 0.5)*1.5 - car.vz*0.2, 1.2 + Math.random(), 0.5, 1.8, 0.4, 0.86, 0.86, 0.88, 0.92, 0.92, 0.93); }   // tyre smoke
   // the zoomies: eight pipes blowing flame — tall and yellow under load, a lick at idle, a gout off the throttle (the pops)
   if (!WRECK.on && !DP.lost.engine) { const thr = car.throttle && !WALK.on, rpmK = Math.min(1, DP.rpm/8000), M = DRAG.carMesh.matrixWorld; DP.flameT = (DP.flameT || 0) + dt;
@@ -8012,7 +8015,8 @@ const DP_PTS = [[0, 0.3, 4.05, 'nose'], [0, 0.36, 3.2, 'nose'], [0, 0.42, 2.4, '
   [-0.3, 0.28, 1.0], [0.3, 0.28, 1.0], [-0.3, 0.28, -1.0], [0.3, 0.28, -1.0], [-0.34, 0.8, -0.5], [0.34, 0.8, -0.5], [-0.24, 1.46, -0.45, 'cage'], [0.24, 1.46, -0.45, 'cage'], [0, 1.48, -1.5, 'engine'], [-0.64, 1.12, -1.3, 'pipesL'], [0.64, 1.12, -1.3, 'pipesR'],
   [-1.08, 0.64, -1.46, 'RL'], [-1.08, 0.64, -2.74, 'RL'], [-0.8, 1.28, -2.1, 'RL'], [-1.08, 1.1, -2.1, 'RL'], [1.08, 0.64, -1.46, 'RR'], [1.08, 0.64, -2.74, 'RR'], [0.8, 1.28, -2.1, 'RR'], [1.08, 1.1, -2.1, 'RR'],
   [-0.97, 2.3, -2.45, 'wing'], [0.97, 2.3, -2.45, 'wing'], [-0.97, 2.3, -3.4, 'wing'], [0.97, 2.3, -3.4, 'wing'], [-0.97, 1.75, -2.95, 'wing'], [0.97, 1.75, -2.95, 'wing'], [0, 0.45, -3.1], [-0.45, 0.12, -3.52, 'bar'], [0.45, 0.12, -3.52, 'bar']];
-const DP_PARTS = ['wing', 'FL', 'FR', 'RL', 'RR', 'nose', 'fwing', 'cage', 'engine', 'pipesL', 'pipesR'], DP_LOSE = { wing: 6, FL: 9, FR: 9, RL: 9, RR: 9, nose: 14, fwing: 7, cage: 11, engine: 12, pipesL: 9, pipesR: 9 };   // (the impact speed that tears each off, on the ground; against a wall +3)
+const DRAG_REAR_MARKS = [[-0.8, -2.1], [0.8, -2.1]];
+const DP_PARTS = ['wing', 'FL', 'FR', 'RL', 'RR', 'nose', 'fwing', 'cage', 'engine', 'pipesL', 'pipesR'], DP_LOSE = { wing: 5, FL: 7, FR: 7, RL: 8, RR: 8, nose: 10, fwing: 5, cage: 8, engine: 10, pipesL: 7, pipesR: 7 };   // (the impact speed that tears each off at once; smaller knocks add up: dpHitPart)
 const _dA = new THREE.Vector3(), _dB = new THREE.Vector3(), _dU = new THREE.Vector3(), _dF = new THREE.Vector3(), _dR = new THREE.Vector3(), _dQ = new THREE.Quaternion(), _dYax = new THREE.Vector3(0, 1, 0);
 function dpW(lx, ly, lz, out) { return out.set(lx - DP.cg[0], ly - DP.cg[1], lz - DP.cg[2]).applyQuaternion(DP.q).add(DP.p); }   // model point → world
 function dpAng(Lx, Ly, Lz) { _dA.set(Lx, Ly, Lz).applyQuaternion(DP.qi); _dA.x /= DP.I[0]; _dA.y /= DP.I[1]; _dA.z /= DP.I[2]; return _dA.applyQuaternion(DP.q); }   // world angular impulse → change of spin
@@ -8031,10 +8035,16 @@ function dpNormal(x, z, out) { const e = 0.6; return out.set(-(Y(x + e, z) - Y(x
 function dragInit(x, z, angle) {
   DP.q.setFromAxisAngle(_dYax, angle); const fx = Math.sin(angle), fz = Math.cos(angle), rx = x, rz = z;   // (x, z: the model's root, on the ground between the axles)
   DP.p.set(rx + fx*DP.cg[2], Y(rx, rz) + DP.cg[1] + 0.03, rz + fz*DP.cg[2]); DP.v.set(0, 0, 0); DP.w.set(0, 0, 0); DP.pp.copy(DP.p); DP.pq.copy(DP.q);
-  DP.wh = DRAG_GEOM.wheels.map(W => ({ W, hy: W.r, rot: 0, on: false, load: 0 })); DP.spin = 0; DP.rpm = 1800; DP.slip = 0; DP.scrape = 0; DP.hit = 0; DP.roofT = 0; DP.steer = 0; DP.broken = false; DP.lost = {};
+  DP.wh = DRAG_GEOM.wheels.map(W => ({ W, hy: W.r, rot: 0, on: false, load: 0 })); DP.spin = 0; DP.rpm = 1800; DP.slip = 0; DP.scrape = 0; DP.hit = 0; DP.roofT = 0; DP.steer = 0; DP.broken = false; DP.lost = {}; DP.dmg = {};
   DP.camA = angle; DP.ok = true; if (DRAG.carMesh) { const P = DRAG.carMesh.userData.parts; P.driver.visible = true; for (const k of DP_PARTS) (P.wheels[k] ? P.wheels[k].g : P[k]).visible = true; } dpSync(); }
 function dpSync() { dpW(0, DP.cg[1], 0, _dR); _dF.set(0, 0, 1).applyQuaternion(DP.q); if (Math.hypot(_dF.x, _dF.z) > 0.2) car.angle = Math.atan2(_dF.x, _dF.z);
   car.x = DP.cx = _dR.x; car.z = DP.cz = _dR.z; car.vx = DP.cvx = DP.v.x; car.vz = DP.cvz = DP.v.z; car.speed = DP.v.x*Math.sin(car.angle) + DP.v.z*Math.cos(car.angle); }
+function dpPartAt(px, pz) {   // which piece is at a world point (roughly, by where it is along and across the body)
+  _dB.set(px - DP.p.x, 0, pz - DP.p.z).applyQuaternion(_dQ.copy(DP.q).invert()); const z = _dB.z + DP.cg[2], x = _dB.x;
+  if (z > 3.6) return 'fwing'; if (z > 2.9) return Math.abs(x) > 0.3 ? (x < 0 ? 'FL' : 'FR') : 'nose'; if (z > 0.6) return 'nose'; if (z > -1.1) return 'cage';
+  if (z > -1.9) return Math.abs(x) > 0.45 ? (x < 0 ? 'pipesL' : 'pipesR') : 'engine'; if (z > -2.8) return Math.abs(x) > 0.5 ? (x < 0 ? 'RL' : 'RR') : 'wing'; return 'wing'; }
+function dpHitPart(part, hit, vx, vz) { if (!part || !DP_LOSE[part] || DP.lost[part] || hit < 3) return; DP.dmg[part] = (DP.dmg[part] || 0) + hit - 3;   // a blow to a piece: off at once if hard enough, else the dents add up
+  if (hit > DP_LOSE[part] || DP.dmg[part] > DP_LOSE[part]*2.2) dpLose(part, vx, vz); }
 function dpLose(part, vx, vz) {   // torn off: a world-space copy flies free (the rally car's debris), the original hides
   if (DP.lost[part]) return; DP.lost[part] = true; DP.broken = true; const P = DRAG.carMesh.userData.parts, g = P.wheels[part] ? P.wheels[part].g : P[part]; if (!g || !g.visible) return; g.updateMatrixWorld(true);
   const piece = g.clone(true); piece.matrixAutoUpdate = true; g.matrixWorld.decompose(_dp, _dq, _ds); piece.position.copy(_dp); piece.quaternion.copy(_dq); piece.scale.copy(_ds); scene.add(piece); g.visible = false;
@@ -8085,16 +8095,16 @@ function dpStep(h, thr, brk, steerIn, hand) {
     if (py < gy) { const n = dpNormal(px, pz, _dQv), dep = (gy - py)*n.y, bar = part === 'bar', v0 = dpVel(px, py, pz, _dB), v0x = v0.x, v0z = v0.z, vt = Math.hypot(v0x, v0z);
       const hit = dpContact(px, py, pz, n.x, n.y, n.z, dep, bar ? 0.04 : part && part !== 'wing' ? 0.8 : 0.45, 0.2, h); lift = Math.max(lift, dep);
       if (!bar) { if (hit > hitMax) hitMax = hit; if (vt > 3) { scr = Math.max(scr, Math.min(1, vt/25)); if (Math.random() < h*40) sparkBurst(px, gy + 0.1, pz, v0x/vt, v0z/vt, 3, 3); }
-        if (part && DP_LOSE[part] && hit > DP_LOSE[part]) dpLose(part, (Math.random() - 0.5)*4, (Math.random() - 0.5)*4); } }
+        dpHitPart(part, hit, (Math.random() - 0.5)*4, (Math.random() - 0.5)*4); } }
     for (const B of boxes) { const o = boxPush(B, px, pz, 0.12); if (!o) continue; const hit = dpContact(px, py, pz, o.nx, 0, o.nz, o.ov, 0.3, 0.3, h); DP.p.x += o.nx*Math.min(o.ov, 0.3)*0.5; DP.p.z += o.nz*Math.min(o.ov, 0.3)*0.5;
       if (hit > hitMax) hitMax = hit; if (hit > 3) sparkBurst(px, py, pz, o.nx, o.nz, Math.min(18, 4 + hit*0.8), 4);
-      if (part && DP_LOSE[part] && hit > DP_LOSE[part] + 3) dpLose(part, o.nx*hit*0.3, o.nz*hit*0.3);
+      dpHitPart(part, hit, o.nx*hit*0.3, o.nz*hit*0.3);
       if (B.kind === 'house' && hit >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) { rapCount('f'); policeIncident('fire'); } } }
     if (rocks) { const o = rockOut(px, pz, 0.3); if (o) { const hit = dpContact(px, py, pz, o.nx, 0, o.nz, o.depth, 0.4, 0.3, h); DP.p.x -= o.nx*Math.min(o.depth, 0.3)*0.5; DP.p.z -= o.nz*Math.min(o.depth, 0.3)*0.5; if (hit > hitMax) hitMax = hit; if (hit > 3) sparkBurst(px, py, pz, -o.nx, -o.nz, 12, 4); } } }
   { _dA.set(0, 0, 0.2).applyQuaternion(q); const sx = DP.p.x + _dA.x - fx*DP.cg[2], sz = DP.p.z + _dA.z - fz*DP.cg[2], hl = Math.hypot(fx, fz) || 1, S = { x: sx, z: sz, yaw: Math.atan2(fx, fz), hw: 0.3, hl: 3.8*hl };   // the spine (a pole between two hull points)
     for (const B of boxes) { const o = obbSat(S, B); if (!o) continue; const a = Math.max(-S.hl, Math.min(S.hl, (B.x - sx)*fx/hl + (B.z - sz)*fz/hl)), px = sx + fx/hl*a, pz = sz + fz/hl*a;
       const hit = dpContact(px, DP.p.y, pz, -o.nx, 0, -o.nz, o.depth, 0.3, 0.3, h); DP.p.x -= o.nx*Math.min(o.depth, 0.3)*0.5; DP.p.z -= o.nz*Math.min(o.depth, 0.3)*0.5; if (hit > hitMax) hitMax = hit;
-      if (hit > 3) sparkBurst(px, DP.p.y, pz, -o.nx, -o.nz, Math.min(18, 4 + hit*0.8), 4); if (B.kind === 'house' && hit >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) { rapCount('f'); policeIncident('fire'); } } } }
+      if (hit > 3) { sparkBurst(px, DP.p.y, pz, -o.nx, -o.nz, Math.min(18, 4 + hit*0.8), 4); dpHitPart(dpPartAt(px, pz), hit, -o.nx*hit*0.3, -o.nz*hit*0.3); } if (B.kind === 'house' && hit >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) { rapCount('f'); policeIncident('fire'); } } } }
   if (lift > 0.02) DP.p.y += (lift - 0.02)*0.5;   // (a deep dig: out of the ground, not only by impulses)
   DP.scrape = Math.max(DP.scrape, scr); if (hitMax > DP.hit) DP.hit = hitMax;
   // integrate
@@ -8114,13 +8124,13 @@ function dragPhys(dt, live) {
   for (const v of VEHICLES) { if (v.gone) continue; const R = v.hl + 4.6; if (Math.abs(v.x - B.x) > R || Math.abs(v.z - B.z) > R) continue; const hh = obbSat(B, v); if (!hh) continue;
     const vx0 = B.vx, vz0 = B.vz, imp = resolvePair(B, v, hh, 0.25); v.awake = true; v.moved = true; DP.p.x += B.x - car.x; DP.p.z += B.z - car.z; B.x = car.x; B.z = car.z;
     const cpx = (v.x + car.x)/2, cpz = (v.z + car.z)/2; dpImpulse(cpx, DP.p.y, cpz, (B.vx - vx0)*DP.m, 0, (B.vz - vz0)*DP.m); B.vx = DP.v.x; B.vz = DP.v.z;
-    if (imp > 0.8) { DP.hit = Math.max(DP.hit, Math.hypot(B.vx - vx0, B.vz - vz0));   /* (what it takes: the dragster's own change of speed, not the closing speed of the two) */ if (imp > 3) sparkBurst(cpx, 0.6 + Y(cpx, cpz), cpz, -hh.nx, -hh.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
+    if (imp > 0.8) { const dv = Math.hypot(B.vx - vx0, B.vz - vz0); DP.hit = Math.max(DP.hit, dv); dpHitPart(dpPartAt(v.x - hh.nx*1.5, v.z - hh.nz*1.5), dv*1.6, -hh.nx*dv*0.3, -hh.nz*dv*0.3);   /* (what it takes: the dragster's own change of speed, not the closing speed of the two) */ if (imp > 3) sparkBurst(cpx, 0.6 + Y(cpx, cpz), cpz, -hh.nx, -hh.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
   dpSync(); boxHitsHumans(playerBox(), car.vx, car.vz, true, true); DP.cvx = car.vx; DP.cvz = car.vz;
   // the engine: the slicks' speed through the drive (5:1), the clutch slipping at a launch; a lope at idle
   const wr = (Math.max(0, car.speed) + DP.spin)/0.64*60/(2*Math.PI)*5; DP.rpm += ((thr ? Math.max(5200, Math.min(8400, wr)) : Math.max(1700, Math.min(8400, wr*0.9))) - DP.rpm)*Math.min(1, dt*(thr ? 9 : 3));
   car.onTrack = onRoad(car.x, car.z, 0.4) || inLay(car.x, car.z, 0.3); car.surface = car.onTrack ? surfaceAt(car.x, car.z) : 'grass'; car.drifting = DP.slip > 0.25; car.maxSlip = DP.slip*0.5;
   if (DP.hit > 4) dragCrashSound(Math.min(1, DP.hit/18));
-  if (DP.hit > 26 && !WRECK.on && gameState === State.RACING) {   // a crash that hard: it comes apart — every piece off, flying, the driver out, the chassis on fire
+  if (DP.hit > 24 && !WRECK.on && gameState === State.RACING) {   // a crash that hard: it comes apart — every piece off, flying, the driver out, the chassis on fire
     for (const k of DP_PARTS) dpLose(k, (Math.random() - 0.5)*DP.hit*0.5, (Math.random() - 0.5)*DP.hit*0.5); boom(car.x, Y(car.x, car.z), car.z, false);
     wreckCar('dragboom'); DRAG.carMesh.userData.parts.driver.visible = false; }
   // on its roof or its side and stopped: fire, the driver thrown out (the rally car's wreck: the fire engine and the ambulance come)
@@ -9166,7 +9176,7 @@ function knockUpdate() {   // (every physics step: the player's car against the 
     if (into > (tree ? 3.2 : 1.5)) { const fx = Math.cos(it.yaw), fz = -Math.sin(it.yaw), sg = Math.sign(fx*vx + fz*vz) || 1; const ta = (Math.random() < 0.5 ? -1 : 1)*(0.6 + Math.random()*0.35), tc = Math.cos(ta), ts = Math.sin(ta); knockOver(it, tree ? (vx*tc + vz*ts)/sp : fx*sg, tree ? (vz*tc - vx*ts)/sp : fz*sg, sp);   // (a tree forward and off to one side of the car's way — not onto the car going on under it; a fence flat away from it)
       const k = tree ? 0.7 : it.kind === 'hedge' ? 0.88 : 0.95, px = it.x, pz = it.z;
       if (DRAG.on && DP.ok) { const fx2 = Math.sin(car.angle), fz2 = Math.cos(car.angle), al = (px - DP.p.x)*fx2 + (pz - DP.p.z)*fz2, lat = (px - DP.p.x)*fz2 - (pz - DP.p.z)*fx2;   /* (the blow a quarter as far off the centre line: a spin, not a whirl) */
-        dpImpulse(DP.p.x + fx2*al + fz2*lat*0.25, DP.p.y - 0.1, DP.p.z + fz2*al - fx2*lat*0.25, vx*(k - 1)*DP.m, 0, vz*(k - 1)*DP.m); dpSync(); } else { car.vx *= k; car.vz *= k; if (tree) carDamage(nx, nz, into*0.7); } }
+        dpImpulse(DP.p.x + fx2*al + fz2*lat*0.25, DP.p.y - 0.1, DP.p.z + fz2*al - fx2*lat*0.25, vx*(k - 1)*DP.m, 0, vz*(k - 1)*DP.m); dpHitPart(dpPartAt(px, pz), into*0.8, -nx*2, -nz*2); dpSync(); } else { car.vx *= k; car.vz *= k; if (tree) carDamage(nx, nz, into*0.7); } }
     else { car.x -= nx*dep; car.z -= nz*dep; if (into > 0) { car.vx -= nx*into*1.2; car.vz -= nz*into*1.2; } } }); }   // (slowly: it stands, like a post)
 function knockOver(it, dx, dz, sp) { const l = Math.hypot(dx, dz) || 1; it.fall = true; it.dx = dx/l; it.dz = dz/l; it.th = 0; it.w = it.kind === 'tree' ? Math.min(1.2, sp*0.04) : 2 + sp*0.2; it.max = it.kind === 'tree' ? 1.48 : it.kind === 'hedge' ? 1.2 : 1.45; it.landed = false;
   it.p0 = it.ranges.map(([m, i0, n]) => m.geometry.attributes.position.array.slice(i0*3, (i0 + n)*3)); it.n0 = it.ranges.map(([m, i0, n]) => m.geometry.attributes.normal.array.slice(i0*3, (i0 + n)*3));
@@ -9334,18 +9344,18 @@ function markSegment(L0x, L0z, R0x, R0z, L1x, L1z, R1x, R1z, y, dark, grass) {
   for (let k = 0; k < 18; k += 3) markPos[o+k+1] += Y(markPos[o+k], markPos[o+k+2]);   // each corner on the ground under it
   markBirth.fill(U_MARKT.value, i*6, i*6 + 6); markLo = Math.min(markLo, i); markHi = Math.max(markHi, i);
 }
-function spawnMarks() {
+function spawnMarks(WH, hw) { WH = WH || REAR_WHEELS; hw = hw || MARK_HW;   // (the dragster: its own wheels, its wide slicks)
   const cosA = Math.cos(car.angle), sinA = Math.sin(car.angle);
   const gravel = car.surface === 'gravel';
   for (let mi = 0; mi < 2; mi++) {
-    const [lx, lz] = REAR_WHEELS[mi], wx = car.x + cosA*lx + sinA*lz, wz = car.z - sinA*lx + cosA*lz, M = lastMark[mi];
+    const [lx, lz] = WH[mi], wx = car.x + cosA*lx + sinA*lz, wz = car.z - sinA*lx + cosA*lz, M = lastMark[mi];
     if (!M.on) { M.on = true; M.x = wx; M.z = wz; M.fresh = true; continue; }
     const dx = wx - M.x, dz = wz - M.z, d = Math.hypot(dx, dz);
     if (d < 0.25) continue;                                   // grow in ~25 cm steps
     if (d > 3) { M.x = wx; M.z = wz; M.fresh = true; continue; }   // teleport / restart: new strip
-    const nx = -dz/d, nz = dx/d, y = (onRoad(wx, wz, 0) ? ROAD_Y + 0.07 : 0.06);
-    const Lx = wx + nx*MARK_HW, Lz = wz + nz*MARK_HW, Rx = wx - nx*MARK_HW, Rz = wz - nz*MARK_HW;
-    if (M.fresh) { M.lx = M.x + nx*MARK_HW; M.lz = M.z + nz*MARK_HW; M.rx = M.x - nx*MARK_HW; M.rz = M.z - nz*MARK_HW; M.fresh = false; }
+    const nx = -dz/d, nz = dx/d, y = (onRoad(wx, wz, 0) || (LAY.pts.length && inLay(wx, wz, 0)) ? ROAD_Y + 0.07 : 0.06);   // (the dragster's lay-by sits at road height too)
+    const Lx = wx + nx*hw, Lz = wz + nz*hw, Rx = wx - nx*hw, Rz = wz - nz*hw;
+    if (M.fresh) { M.lx = M.x + nx*hw; M.lz = M.z + nz*hw; M.rx = M.x - nx*hw; M.rz = M.z - nz*hw; M.fresh = false; }
     markSegment(M.lx, M.lz, M.rx, M.rz, Lx, Lz, Rx, Rz, y, !car.onTrack ? 0.74 : gravel ? 0.72 : MARK_DARK, !car.onTrack);   // welded: starts exactly where the last one ended
     M.x = wx; M.z = wz; M.lx = Lx; M.lz = Lz; M.rx = Rx; M.rz = Rz;
   }
