@@ -4641,6 +4641,7 @@ const CHANGES = [
   ['30.9.', '🐕 Pihakoira hyppää kyytiin, kun pysähdyt sen viereen, ja haukkuu mukana seuraavaan pysähdykseen', '10.04'],
   ['30.9.', '🌭 Makkarakärry: pysähdy viereen, makkara tuodaan ikkunaan, röyh ja savua', '10.04'],
   ['30.9.', '📸 Peltipoliisi: kaksi nopeuskameraa radan varrella, yli 80 km/h välähtää ja kovin lukema kirjataan rekisteriin', '10.04'],
+  ['30.9.', 'Dragsteri elää: moottori keinuu vääntöä vastaan ja tärisee tyhjäkäynnillä, runko kiertyy, pakoputket väpättää, nokka ja siivet lepattaa vauhdissa, takasiipi painuu, kuski painuu penkkiin, slicksit litistyy lähdössä ja kasvaa vauhdissa', '21.10'],
   ['30.9.', 'Dragsterin ääni uusiksi: oikea V8-malli (8 sylinteriä oikeassa sytytysjärjestyksessä, pakosarjat soivat, ahtimen ulina) – tyhjäkäynti matala mörinä, ei enää sahaavaa surinaa eikä jatkuvaa rätinää', '20.54'],
   ['30.9.', 'Lehden taitto kuntoon: oma lehtifontti mukana (teksti ei enää leikkaudu Windowsin Georgialla), tiiviimpi lehtimäinen riviväli, puolikkaissa jutuissa kuva levenee ja otsikko+teksti yhdessä, ajatusviiva ei jää rivin alkuun', '20.23'],
   ['30.9.', 'Kuski nousee autosta kuljettajan puolelta (vasen), liftari apukuljettajan ovelle; R dragsterissa – ehjässä tai romuna – vie suoraan uuteen dragsteriin', '20.05'],
@@ -8011,7 +8012,7 @@ function dragUpdate(dt) { if (!DRAG.on) return; const v = Math.hypot(car.vx, car
     if (!thr && DP.wasThr && DP.rpm > 3500) DP.gout = 0.35; DP.wasThr = thr; if (DP.gout > 0) DP.gout -= dt;
     const rate = thr ? 55 + 70*rpmK : DP.gout > 0 ? 45 : 5;
     for (const sx of [-1, 1]) { if (DP.lost[sx < 0 ? 'pipesL' : 'pipesR']) continue; for (let k = 0; k < 4; k++) { if (Math.random() > rate*dt) continue;
-      _dA.set(sx*0.62, 1.12, -1.26 - k*0.2).applyMatrix4(M); _dB.set(sx*0.29, 0.4, -0.06).normalize().transformDirection(M);
+      const MP = P[sx < 0 ? 'pipesL' : 'pipesR'].matrixWorld; _dA.set(sx*0.62, 1.12, -1.26 - k*0.2).applyMatrix4(MP); _dB.set(sx*0.29, 0.4, -0.06).normalize().transformDirection(MP);   /* (from the pipes as they rock) */
       const big = thr ? 0.7 + 0.8*rpmK : DP.gout > 0 ? 1 : 0.35, sp = (thr ? 6 + 8*rpmK : 4)*(0.8 + Math.random()*0.4), blue = !thr && DP.gout <= 0;
       flameFx2.emit(_dA.x, _dA.y, _dA.z, _dB.x*sp + car.vx*0.95, _dB.y*sp + 0.5, _dB.z*sp + car.vz*0.95, 0.08 + 0.1*big*Math.random() + 0.05, 0.28*big + 0.1, 0.55*big + 0.1, 0.95,
         blue ? 0.45 : 1, blue ? 0.6 : 0.85, blue ? 1 : 0.35, blue ? 0.2 : 0.95, blue ? 0.3 : 0.25, blue ? 0.9 : 0.05); } } }
@@ -8211,11 +8212,31 @@ function dragPhys(dt, live) {
 function dragCamAngle(dt) {   // the dragster's camera follows where it's going, not where its nose points: a spin in the trees, a tumble, doesn't whirl the view
   const sp = Math.hypot(car.vx, car.vz), fwd = car.vx*Math.sin(car.angle) + car.vz*Math.cos(car.angle), tgt = sp > 4 && fwd > 0 ? Math.atan2(car.vx, car.vz) : car.angle;
   if (DP.camA === undefined) DP.camA = car.angle; DP.camA += angDiff(tgt - DP.camA)*Math.min(1, dt*(sp > 4 ? 2.5 : 0.8)); return DP.camA; }
-function dragView() {   // the model drawn between the last two physics steps
+function dragView(fdt) {   // the model drawn between the last two physics steps
   const al = Math.min(1, acc/PHYS_DT), P = DRAG.carMesh.userData.parts; _dQ.copy(DP.pq).slerp(DP.q, al); _dA.copy(DP.pp).lerp(DP.p, al);
   carGroup.quaternion.copy(_dQ); carGroup.position.copy(_dB.set(-DP.cg[0], -DP.cg[1], -DP.cg[2]).applyQuaternion(_dQ).add(_dA));
   for (const S of DP.wh) { const w = P.wheels[S.W.id]; w.g.position.y = S.hy; }
-  P.wing.visible = !DP.lost.wing; }
+  P.wing.visible = !DP.lost.wing; dragAlive(P, fdt); }
+// the dragster lives (the look only — DP's rigid body is untouched): the engine rocks on its mounts against the torque and shakes
+// with the lumpy idle, the chassis twists, the zoomies buzz, the long nose and the wings flutter at speed and the rear wing leans
+// back under the load, the driver is pressed into the seat, the slicks squat at the launch and grow tall at speed (as top fuel
+// tyres do). Its own clock and a sine noise (no Math.random: seeded runs stay the same)
+const _alV = new THREE.Vector3(), DRAG_LIVE = { t: 0, a: 0, pv: 0, thr: 0 };
+function dpRot(g, px, py, pz, rx, ry, rz, dx, dy, dz) { g.rotation.set(rx, ry, rz); _alV.set(px, py, pz).applyEuler(g.rotation); g.position.set(px - _alV.x + (dx || 0), py - _alV.y + (dy || 0), pz - _alV.z + (dz || 0)); }
+function dragAlive(P, fdt) { const L = DRAG_LIVE, dt = Math.min(0.05, Math.max(0, fdt || 0)); L.t += dt;   /* (the frame's own dt: the same in a stepped test) */
+  const run = !WRECK.on && DRAG.on, rpm = DP.rpm, v = Math.hypot(car.vx, car.vz), t = L.t, idle = Math.max(0, Math.min(1, (2600 - rpm)/1400)), crank = rpm/60;
+  L.thr += ((run ? DP.thr || 0 : 0) - L.thr)*Math.min(1, dt*6); if (dt > 0) L.a += (Math.max(-40, Math.min(40, (v - L.pv)/dt)) - L.a)*Math.min(1, dt*5); L.pv = v;
+  const n = (k) => Math.sin(t*k*1.7 + 3*Math.sin(t*k*0.37)), sp = Math.min(1, v/45);
+  const lope = run ? Math.pow(0.5 + 0.5*Math.sin(t*crank*Math.PI), 4)*idle*(0.6 + 0.4*n(0.9)) : 0, buzz = run ? (0.0015 + 0.0045*L.thr)*(1 - 0.5*idle) : 0;
+  const roll = run ? -0.05*L.thr + 0.02*lope*n(1.3) + buzz*n(37)*3 : 0;   // (the engine: rolls against the crank's torque, lurches at the lope)
+  for (const k of ['engine', 'block', 'pipesL', 'pipesR']) if (!DP.lost[k]) dpRot(P[k], 0, 0.62, -1.55, buzz*n(29 + k.length)*2, 0, roll + (k[0] === 'p' ? buzz*n(41 + k.length)*4 : 0), buzz*n(31), buzz*n(23) + lope*0.006, 0);
+  P.body.position.y = lope*0.005 + buzz*n(19)*0.4; P.body.rotation.z = run ? -0.008*L.thr + 0.004*lope*n(1.1) : 0;   // (the whole chassis twists a little with it)
+  if (!DP.lost.wing) dpRot(P.wing, 0, 0.7, -2.45, -Math.min(0.07, v*v*0.000014) + (0.005*n(13) + 0.003*n(21))*sp + buzz*n(17)*2, 0, 0.004*n(7)*sp);   // (leans back under the downforce, flutters)
+  const dip = Math.max(-0.015, Math.min(0.022, L.a*0.0005)) + 0.004*n(11)*sp + lope*0.004;   // (the long nose lags the launch, bobs at speed)
+  for (const k of ['nose', 'noseF', 'fwing']) if (!DP.lost[k]) dpRot(P[k], 0, 0.46, -0.4, dip + (k === 'fwing' ? 0.008*n(17)*sp : k === 'noseF' ? 0.3*dip : 0), 0, 0);
+  if (P.driver.visible) P.driver.position.set(buzz*n(27)*0.5, lope*0.01 + buzz*n(25), -Math.max(-0.06, Math.min(0.08, L.a*0.0022)));   // (pressed into the seat; thrown at the belts under the chute)
+  for (const S of DP.wh) { if (S.W.front) continue; const w = P.wheels[S.W.id]; if (!w) continue; const sq = run ? Math.max(0, Math.min(1, L.a/25))*Math.max(0, 1 - v/30) : 0, sy = 1 - 0.1*sq + 0.07*Math.min(1, v*v/6400);
+    w.g.scale.set(1, sy, 2 - sy); w.g.position.y = S.hy - S.W.r*(1 - sy); } }
 function buildFinishArea() { FINISH_AREA.ctx = null; FINISH_AREA.last = ''; buildDragster(); if (!finishLine) return; const fx = finishLine.position.x, fz = finishLine.position.y;
   // the scoreboard
   // the scoreboards: one by the finish, two more a third and two thirds of the way round (30.9., Antti) — one canvas, one material for all three
@@ -10371,7 +10392,7 @@ function loop(time) {
     const al = Math.min(1, acc/PHYS_DT); let da = car.angle - RI.a; while (da > Math.PI) da -= 2*Math.PI; while (da < -Math.PI) da += 2*Math.PI;
     rx = RI.x + (car.x - RI.x)*al; rz = RI.z + (car.z - RI.z)*al; ra = RI.a + da*al; car.x = rx; car.z = rz; car.angle = ra;
     carGroup.position.set(rx, Y(rx, rz) + BASS.hopY + ABD.carY, rz); carGroup.rotation.y = ra; }
-  if (DRAG.on && DP.ok) dragView();
+  if (DRAG.on && DP.ok) dragView(dt);
   U_TIME.value = performance.now()/1000; skyDome.position.copy(camera.position);
   updateMarks(dt); updateDust(dt); updateDebris(dt); rbUpdate(dt); knockAnim(dt); updateSmoke(dt); worldUpdate(Math.min(dt, 0.05)); updateCarBody(dt); flowFx(dt); updateCamera(dt); updateHUD(dt); updateGhost(dt); updateAudio(dt);
   if (gameState !== State.MENU && (MM_TICK = (MM_TICK + 1) % 2) === 0) drawMinimap();   // (30 Hz is plenty for the map: half the 2D canvas uploads)
