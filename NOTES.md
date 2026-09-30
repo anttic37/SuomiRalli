@@ -921,6 +921,17 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - Dragster chassis in short pieces (30.9., Antti: "tosi pitkiä osia, pilko pieniin"): the rails are three 2 m lengths a side (railL0..2 / railR0..2), the
   cockpit tub (with its decals), the engine block and the tail (chute pack + wheelie bars) are groups of their own — DP_CHASSIS, only a
   break-up (DP.hit > 24) takes them; RB.max 28. t_rbparts: 21 pieces, all resting on the ground.
+- Smaller pieces, materials, fire, the rumble (30.9., Antti: "vieläkin pitkiä paloja; pienempiä liekkejä jotka yhdessä iso, eivät leikkaa;
+  osat eripainoisia, eri kitka; kunnon brrom-pörinä"): groups with userData.split (rails — 5 × 1.2 m a side —, the nose — 4 × 1.15 m —,
+  cage, pipes, front wing, wing, tail, engine) come apart into their rods and plates, one box each (dpPiece: the bounding box in the
+  object's own frame, its world scale — the rods are scaled cylinders). DP_MAT per part: mass (shared among its bits), friction,
+  bounce, air drag; the blow's speed ∝ sqrt(30/mass) (light bits fly further); air drag slows wide light bits; steel (mu < 0.4) sparks
+  when it skids on tarmac. RB.max 48. Fire: the atlas particle systems (fireFx, flameFx2; pools 2000/1600) pull each point toward the
+  camera by its radius in the vertex shader (mv.z += size*0.5) — no hard cut where a flame meets the ground or a wall; fires emit 2.25×
+  as many flames at 0.55× the size (firesUpdate, fireIgnite). The dragster's synth: a deep cross-plane burble (a sawtooth at half the
+  crank through a 120–400 Hz lowpass, lumpy AM) plus a 70 Hz body peak, a hungrier idle hunt; levels: idle rms ~0.21 (the Pökö's
+  0.05), full ~0.29 (0.24). Burnout: throttle + brake locks the fronts and spins the rears on a small share of their grip (it stays put),
+  rpm 7800 — the rev you can hear. t_burn renders both synths offline (OfflineAudioContext) and measures them.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

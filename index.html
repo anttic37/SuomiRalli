@@ -340,7 +340,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 16.27 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 16.42 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4610,6 +4610,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Dragsteri hajoaa pieniksi paloiksi (jokainen tanko ja levy erikseen), ja palat ovat eripainoisia: moottorilohko jää paikalleen, siipi lepattaa, renkaat pomppivat, teräsosat kipinöivät. Tuli koostuu monesta pienestä liekistä eikä leikkaudu seiniin. Dragsterin moottorissa kunnon V8-pörinä, kaasu + jarru = burnout', '19.42'],
   ['30.9.', 'Dragsterin runko hajoaa kovassa kolarissa lyhyiksi paloiksi: kiskot kolmena osana kummaltakin puolelta, ohjaamo, moottorilohko ja takapää omina laatikoinaan', '19.27'],
   ['30.9.', 'Dragsterin irtoavat osat ovat nyt oikeita laatikoita omalla fysiikallaan: ne pyörivät oman keskipisteensä ympäri, putoavat, kaatuvat kulmiltaan, liukuvat ja jäävät makaamaan maahan. Pitkä keula on kahdessa osassa', '19.14'],
   ['30.9.', 'Dragsteri: kaikki osat heittävät varjon (myös putket, turvakaari ja siiven tuet), leveät slicksit jättävät mustat jäljet lähdöstä, jarrutuksesta ja luisuista, ja se hajoaa paljon helpommin: osumat kertyvät, ja keula, siivet, pyörät, kone ja putket irtoavat myös pylväästä, puusta tai toisesta autosta', '18.47'],
@@ -4875,7 +4876,7 @@ const LEHTI = [
   { id: 'dragster', size: 'main', n: 8, kick: '🏁 DRAGSTERI', title: 'Dragsterissa on nyt oikea fysiikka', lede: 'Malminrajantien levikkeellä odottava dragsteri ei ole enää lelu. Se nousee keulilleen, sutii, lentää ja pyörii – ja kun se jää katolleen, se syttyy.',
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
-    box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+    box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
   { id: 'liftari', size: 'page', n: 53, kick: '🧍 LIFTARI', title: 'Liftari odottaa kyytiä K-kaupalle', lede: 'Tien varressa seisoo mies pahvikyltin kanssa. Pysähdy, niin hän hyppää kyytiin. Vie hänet K-kaupan pihaan, niin hyvä tekosi kirjataan poliisin rekisteriin.',
     img: ['liftari.jpg'], cap: ['Peukalo pystyssä, kyltissä K-KAUPPA. Rallikuski pysähtyi.'],
     body: ['YLÄSTÖ. Muutama sata metriä ennen K-kauppaa, radan oikealla laidalla, seisoo liftari. Pysähdy hänen viereensä, niin hän kävelee apukuljettajan ovelle ja nousee kyytiin.', 'Minikartalla vilkkuu sininen piste: K-kauppa. Pysähdy kaupan pihaan, niin liftari nousee pois, vilkuttaa kiitokseksi ja menee ostoksille.', 'Jos ajat ohi täyttä vauhtia, hän heristää nyrkkiä. Hyvät teot kirjataan poliisin rekisteriin, ja radio kertoo kylän kiltein kuskin.'],
@@ -5286,7 +5287,7 @@ function makeParticleSystem(max, additive, soft, atlas) {
   geo.setAttribute('rot', new THREE.BufferAttribute(rot, 1).setUsage(THREE.DynamicDrawUsage));
   const mat = new THREE.ShaderMaterial({
     uniforms: { map: { value: atlas ? makeFlameAtlas() : makePuffTexture(soft) }, uScale: { value: 400 }, uLit: { value: soft ? 1 : 0 } },
-    vertexShader: 'attribute float size; attribute float alpha; attribute vec3 col; attribute float rot; varying float vA; varying vec3 vC; varying float vR; uniform float uScale; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); gl_PointSize = size*uScale/max(0.5,-mv.z); gl_Position = projectionMatrix*mv; vA = alpha; vC = col; vR = rot; }',
+    vertexShader: 'attribute float size; attribute float alpha; attribute vec3 col; attribute float rot; varying float vA; varying vec3 vC; varying float vR; uniform float uScale; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); gl_PointSize = size*uScale/max(0.5,-mv.z); ' + (atlas ? 'mv.z = min(mv.z + size*0.5, -0.3); ' : '') + 'gl_Position = projectionMatrix*mv; vA = alpha; vC = col; vR = rot; }',
     fragmentShader: 'uniform sampler2D map; uniform float uLit; varying float vA; varying vec3 vC; varying float vR; void main(){ vec2 p = gl_PointCoord - 0.5; float c = cos(vR), s = sin(vR); ' + (atlas ? 'float fr = mod(floor(vR), 16.0); vec2 q = (vec2(mod(fr, 4.0), 3.0 - floor(fr/4.0)) + vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y))*0.25;' : 'vec2 q = vec2(c*p.x - s*p.y, s*p.x + c*p.y) + 0.5;') + ' vec4 t = texture2D(map, q); float a = t.a*vA; if (a < 0.01) discard; float lit = mix(1.0, 1.18 - 0.42*gl_PointCoord.y, uLit); gl_FragColor = vec4(vC*t.rgb*lit, a); }',
     transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending });
   const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = additive ? 3 : 2; scene.add(pts);
@@ -6360,7 +6361,7 @@ function balesUpdate(dt) { if (!BALES.length || !BALE.im) return;
 
 // ════════ FIRES ════════
 const FIRES = [];
-const fireFx = makeParticleSystem(900, true, false, true), flameFx2 = makeParticleSystem(700, false, false, true), emberFx = makeParticleSystem(500, true, false);
+const fireFx = makeParticleSystem(2000, true, false, true), flameFx2 = makeParticleSystem(1600, false, false, true), emberFx = makeParticleSystem(500, true, false);
 function startFire(o) {
   let f;
   if (o.vehicle) { const v = o.vehicle; if (v.fire) return; f = { v, x: v.x, z: v.z, yaw: v.yaw, hw: v.hw, hl: v.hl, h: v.kind === 'bus' || v.kind === 'fire' || v.kind === 'heli' ? 2.8 : 1.5, kind: 'vehicle' }; f.y0 = () => v.gy; v.fire = f; }
@@ -6375,7 +6376,7 @@ function startFire(o) {
 }
 function fireIgnite(f) {   // it goes up with a whoomp: a burst of flame out of it, sparks, a first gout of smoke
   const y0 = f.y0(), big = f.kind === 'house' ? 1 : 0.6;
-  for (let i = 0; i < 34*big; i++) { const [px, py, pz] = fireSpot(f, y0), a = Math.random()*6.3, sp = 1 + Math.random()*3; flameFx2.emit(px, py, pz, Math.cos(a)*sp, 2 + Math.random()*3, Math.sin(a)*sp, 0.5 + Math.random()*0.5, 1.6 + Math.random()*1.4*big, 0.5, 0.95, 1, 0.75, 0.25, 0.9, 0.2, 0.04); }
+  for (let i = 0; i < 60*big; i++) { const [px, py, pz] = fireSpot(f, y0), a = Math.random()*6.3, sp = 1 + Math.random()*3; flameFx2.emit(px, py, pz, Math.cos(a)*sp, 2 + Math.random()*3, Math.sin(a)*sp, 0.5 + Math.random()*0.5, 0.9 + Math.random()*0.8*big, 0.5, 0.95, 1, 0.75, 0.25, 0.9, 0.2, 0.04); }
   for (let i = 0; i < 40*big; i++) { const [px, py, pz] = fireSpot(f, y0); emberFx.emit(px, py, pz, (Math.random() - 0.5)*6, 3 + Math.random()*6, (Math.random() - 0.5)*6, 1 + Math.random()*1.5, 0.12, 0.05, 1, 1, 0.85, 0.4, 1, 0.3, 0.05); }
   if (audio && (f.x - car.x)**2 + (f.z - car.z)**2 < 120*120) { beep(62, 0.7, 0.3, 'sawtooth'); beep(95, 0.35, 0.15, 'triangle'); } }
 // where the flames come from: out of the roof and the windows of a house, out of the body of a vehicle
@@ -6396,10 +6397,10 @@ function firesUpdate(dt) {
       if (f.B && f.B.soot) f.B.soot.material.opacity = Math.min(0.62, f.B.soot.material.opacity + dt*f.level*0.012);
       if (f.v && !f.v.charred && f.t > 12) charVehicle(f.v, true); }
     const y0 = f.y0(), near = (f.x - car.x)**2 + (f.z - car.z)**2 < 320*320, big = f.kind === 'house' ? 1 : f.h > 2 ? 0.8 : 0.55;
-    if (near) { f.acc += dt; const rate = f.out ? (f.steam > 0 ? 7 : 0) : 120*big*(0.3 + f.level);
+    if (near) { f.acc += dt; const rate = f.out ? (f.steam > 0 ? 7 : 0) : 270*big*(0.3 + f.level);   // (many small flames that make one big fire, not a few big sprites)
       while (rate && f.acc > 1/rate) { f.acc -= 1/rate;
         if (f.out) { const [px, pz] = lloc(f.x, f.z, f.yaw, (Math.random() - 0.5)*2*f.hw*0.8, (Math.random() - 0.5)*2*f.hl*0.8); lifeFx.emit(px, y0 + f.h*0.8, pz, 0.3, 0.9 + Math.random()*0.5, 0.15, 4 + Math.random()*2, 0.6, 3.5, 0.35, 0.85, 0.86, 0.88, 0.95, 0.95, 0.96); continue; }   // steam
-        const [px, py, pz, vx, vy, vz, sz] = fireSpot(f, y0), s = sz*(0.75 + f.level*0.7)*(0.8 + Math.random()*0.5), R = Math.random();
+        const [px, py, pz, vx, vy, vz, sz] = fireSpot(f, y0), s = sz*(0.75 + f.level*0.7)*(0.8 + Math.random()*0.5)*0.55, R = Math.random();
         if (R < 0.42) flameFx2.emit(px, py, pz, vx + (Math.random() - 0.5)*0.6, vy + Math.random()*1.4, vz + (Math.random() - 0.5)*0.6, 0.5 + Math.random()*0.45, s*2.3, s*0.9, 0.95, 1.0, 0.55, 0.12, 0.85, 0.18, 0.04);   // the body of the flame
         else if (R < 0.8) fireFx.emit(px, py, pz, vx + (Math.random() - 0.5)*0.5, vy + 0.4 + Math.random()*1.4, vz + (Math.random() - 0.5)*0.5, 0.35 + Math.random()*0.35, s*1.7, s*0.6, 0.95, 1.0, 0.9, 0.45, 1.0, 0.4, 0.08);    // its bright heart
         else if (R < 0.9) emberFx.emit(px, py + 0.5, pz, (Math.random() - 0.5)*1.8, 2.5 + Math.random()*3, (Math.random() - 0.5)*1.8, 1.4 + Math.random()*1.6, 0.13, 0.05, 1.0, 1.0, 0.8, 0.35, 1.0, 0.3, 0.05);   // embers
@@ -7914,9 +7915,10 @@ function makeDragster() { const G = new THREE.Group(), body = new THREE.Group();
   // the engine with its blower, the pipes of each bank (the wing, the wheels and the driver below)
   const grp = (n) => { const g = new THREE.Group(); g.name = n; body.add(g); return g; }, nose = grp('nose'), noseF = grp('noseF'), fwing = grp('fwing'), cage = grp('cage'), engine = grp('engine'), pipesL = grp('pipesL'), pipesR = grp('pipesR');
   // the rails (three lengths a side: a hard crash breaks the chassis itself into short pieces) and the long tapered nose (two pieces)
-  const rails = {}; for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) { const t0 = k/3, t1 = (k + 1)/3, L = (t) => [sx*(0.3 - 0.16*t), 0.38 - 0.04*t, -2.3 + 6*t], a = L(t0), b = L(t1), n = 'rail' + (sx < 0 ? 'L' : 'R') + k; rails[n] = grp(n); beam(...a, ...b, 0.045, black, rails[n]); }
+  const rails = { railL: grp('railL'), railR: grp('railR') }; for (const sx of [-1, 1]) for (let k = 0; k < 5; k++) { const L = (t) => [sx*(0.3 - 0.16*t), 0.38 - 0.04*t, -2.3 + 6*t], a = L(k/5), b = L((k + 1)/5); beam(...a, ...b, 0.045, black, rails[sx < 0 ? 'railL' : 'railR']); }   // (five 1.2 m lengths a side)
   const tub = grp('tub'), block = grp('block'), tail = grp('tail');
-  for (const [k, r0, r1, z, gp] of [['dnoseF', 0.1, 0.22, 2.7, noseF], ['dnoseR', 0.22, 0.34, 0.4, nose]]) { const m = new THREE.Mesh(lgeo(k, () => { const g = new THREE.CylinderGeometry(r0, r1, 2.3, 12, 1); g.rotateX(Math.PI/2); g.scale(1, 0.62, 1); return g; }), yel); m.position.set(0, 0.46, z); m.castShadow = true; gp.add(m); }   // (in two: short pieces when it breaks)
+  for (let k = 0; k < 4; k++) { const z1 = 3.85 - k*1.15, z0 = z1 - 1.15, r = (z) => 0.1 + (3.85 - z)/4.6*0.24, key = 'dnose' + k, m = new THREE.Mesh(lgeo(key, () => { const g = new THREE.CylinderGeometry(r(z1), r(z0), 1.15, 12, 1); g.rotateX(Math.PI/2); g.scale(1, 0.62, 1); return g; }), yel);
+    m.position.set(0, 0.46, (z0 + z1)/2); m.castShadow = true; (k < 2 ? noseF : nose).add(m); }   // (four 1.15 m lengths: short pieces when it breaks)
   lmesh(lbox(1.25, 0.05, 0.34), red, 0, 0.34, 3.95, fwing); for (const sx of [-1, 1]) lmesh(lbox(0.04, 0.2, 0.38), red, sx*0.62, 0.42, 3.95, fwing);   // the front wing, its end plates
   // the cockpit, the cage, the driver
   lmesh(lbox(0.66, 0.42, 1.3), yel, 0, 0.6, -0.5, tub);
@@ -7943,6 +7945,7 @@ function makeDragster() { const G = new THREE.Group(), body = new THREE.Group();
     if (W.front) for (let k = 0; k < 6; k++) { const sp = lmesh(lbox(0.02, W.r*1.5, 0.02), chrome, 0, 0, 0, spin, false); sp.rotation.x = k*Math.PI/6; }   // spokes
     else { const lip = lmesh(lcyl(W.r*0.62, 0.04, 14), chrome, Math.sign(W.x)*(W.w/2 + 0.01), 0, 0, spin, false); lip.rotation.z = Math.PI/2; }
     wheels[W.id] = { g: wg, spin, W }; if (!W.front) beam(0, 0.62 - W.r, 0, -Math.sign(W.x)*(Math.abs(W.x) - 0.3), 0.62 - W.r, 0, 0.05, black, wg); }   // (the axle stub)
+  for (const g of [rails.railL, rails.railR, nose, noseF, cage, pipesL, pipesR, fwing, wing, tail, engine]) g.userData.split = true;   // (torn off, these come apart into their rods and plates)
   G.userData.parts = { body, wing, driver, chute, wheels, ...rails, tub, block, tail, nose, noseF, fwing, cage, engine, pipesL, pipesR }; G.rotation.order = 'YXZ'; return G; }
 function buildDragster() { DRAG.home = null; DRAG.on = false; DRAG.carMesh = DRAG.parkMesh = DRAG.pokoMesh = null; DRAG.lay = null; if (!finishLine || LAY.pts.length < 10) return;
   // the lay-by: a ribbon at the road's own height following LAY.pts (its inner edge on the road's edge), a dashed line where it leaves the
@@ -8015,7 +8018,12 @@ const DP_PTS = [[0, 0.3, 4.05, 'noseF'], [0, 0.36, 3.2, 'noseF'], [0, 0.42, 2.4,
   [-0.3, 0.28, 1.0], [0.3, 0.28, 1.0], [-0.3, 0.28, -1.0], [0.3, 0.28, -1.0], [-0.34, 0.8, -0.5], [0.34, 0.8, -0.5], [-0.24, 1.46, -0.45, 'cage'], [0.24, 1.46, -0.45, 'cage'], [0, 1.48, -1.5, 'engine'], [-0.64, 1.12, -1.3, 'pipesL'], [0.64, 1.12, -1.3, 'pipesR'],
   [-1.08, 0.64, -1.46, 'RL'], [-1.08, 0.64, -2.74, 'RL'], [-0.8, 1.28, -2.1, 'RL'], [-1.08, 1.1, -2.1, 'RL'], [1.08, 0.64, -1.46, 'RR'], [1.08, 0.64, -2.74, 'RR'], [0.8, 1.28, -2.1, 'RR'], [1.08, 1.1, -2.1, 'RR'],
   [-0.97, 2.3, -2.45, 'wing'], [0.97, 2.3, -2.45, 'wing'], [-0.97, 2.3, -3.4, 'wing'], [0.97, 2.3, -3.4, 'wing'], [-0.97, 1.75, -2.95, 'wing'], [0.97, 1.75, -2.95, 'wing'], [0, 0.45, -3.1], [-0.45, 0.12, -3.52, 'bar'], [0.45, 0.12, -3.52, 'bar']];
-const DRAG_REAR_MARKS = [[-0.8, -2.1], [0.8, -2.1]], DP_CHASSIS = ['railL0', 'railL1', 'railL2', 'railR0', 'railR1', 'railR2', 'tub', 'block', 'tail'];   // (only a break-up takes these)
+const DRAG_REAR_MARKS = [[-0.8, -2.1], [0.8, -2.1]], DP_CHASSIS = ['railL', 'railR', 'tub', 'block', 'tail'];
+// what each piece is made of: its mass (kg, shared out among its rods and plates), friction, bounce, air drag (a light wide panel flutters
+// down, the engine block drops like a stone and stays, a wheel bounces, steel skids with sparks)
+const DP_MAT = { FL: [12, 0.9, 0.5, 0.05], FR: [12, 0.9, 0.5, 0.05], RL: [55, 0.95, 0.45, 0.12], RR: [55, 0.95, 0.45, 0.12], wing: [22, 0.35, 0.2, 1.2], fwing: [6, 0.35, 0.2, 0.5],
+  noseF: [10, 0.3, 0.15, 0.25], nose: [14, 0.3, 0.15, 0.3], cage: [18, 0.3, 0.3, 0.05], engine: [70, 0.45, 0.1, 0.1], pipesL: [16, 0.3, 0.3, 0.04], pipesR: [16, 0.3, 0.3, 0.04],
+  railL: [40, 0.3, 0.3, 0.05], railR: [40, 0.3, 0.3, 0.05], tub: [45, 0.45, 0.15, 0.4], block: [180, 0.5, 0.05, 0.1], tail: [18, 0.4, 0.2, 0.1] };   // (only a break-up takes these)
 const DP_PARTS = ['wing', 'FL', 'FR', 'RL', 'RR', 'noseF', 'nose', 'fwing', 'cage', 'engine', 'pipesL', 'pipesR'], DP_LOSE = { wing: 5, FL: 7, FR: 7, RL: 8, RR: 8, noseF: 8, nose: 10, fwing: 5, cage: 8, engine: 10, pipesL: 7, pipesR: 7 };   // (the impact speed that tears each off at once; smaller knocks add up: dpHitPart)
 const _dA = new THREE.Vector3(), _dB = new THREE.Vector3(), _dU = new THREE.Vector3(), _dF = new THREE.Vector3(), _dR = new THREE.Vector3(), _dQ = new THREE.Quaternion(), _dYax = new THREE.Vector3(0, 1, 0);
 function dpW(lx, ly, lz, out) { return out.set(lx - DP.cg[0], ly - DP.cg[1], lz - DP.cg[2]).applyQuaternion(DP.q).add(DP.p); }   // model point → world
@@ -8045,21 +8053,25 @@ function dpPartAt(px, pz) {   // which piece is at a world point (roughly, by wh
   if (z > -1.9) return Math.abs(x) > 0.45 ? (x < 0 ? 'pipesL' : 'pipesR') : 'engine'; if (z > -2.8) return Math.abs(x) > 0.5 ? (x < 0 ? 'RL' : 'RR') : 'wing'; return 'wing'; }
 function dpHitPart(part, hit, vx, vz) { if (!part || !DP_LOSE[part] || DP.lost[part] || hit < 3) return; DP.dmg[part] = (DP.dmg[part] || 0) + hit - 3;   // a blow to a piece: off at once if hard enough, else the dents add up
   if (hit > DP_LOSE[part] || DP.dmg[part] > DP_LOSE[part]*2.2) dpLose(part, vx, vz); }
-function dpLose(part, vx, vz) {   // torn off: a box of its own size flies free (RB, above), the original hides
+function dpLose(part, vx, vz) {   // torn off: boxes of their own size fly free (RB, below) — a group of rods comes apart into its rods — the original hides
   if (DP.lost[part]) return; DP.lost[part] = true; DP.broken = true; const P = DRAG.carMesh.userData.parts, g = P.wheels[part] ? P.wheels[part].g : P[part]; if (!g || !g.visible) return; g.updateMatrixWorld(true);
-  const inv = new THREE.Matrix4().copy(g.matrixWorld).invert(), M = new THREE.Matrix4(), bb = new THREE.Box3(), tb = new THREE.Box3();   // (its bounding box in its own frame)
-  g.traverse(o => { if (!o.isMesh || !o.visible) return; if (!o.geometry.boundingBox) o.geometry.computeBoundingBox(); tb.copy(o.geometry.boundingBox).applyMatrix4(M.multiplyMatrices(inv, o.matrixWorld)); bb.union(tb); });
-  if (bb.isEmpty()) return; const c = bb.getCenter(new THREE.Vector3()), hs = bb.getSize(new THREE.Vector3()).multiplyScalar(0.5);
-  const piece = g.clone(true); piece.visible = true; piece.position.copy(c).multiplyScalar(-1); piece.quaternion.identity(); piece.scale.set(1, 1, 1); piece.traverse(o => { if (o.isMesh) o.castShadow = true; });
-  const box = new THREE.Group(); g.matrixWorld.decompose(_dp, _dq, _ds); box.position.copy(c).applyMatrix4(g.matrixWorld); box.quaternion.copy(_dq); box.add(piece); scene.add(box); g.visible = false;
-  const vp = dpVel(box.position.x, box.position.y, box.position.z, _dB).clone();   // (its speed where it was on the car, plus the blow)
-  rbAdd(box, hs.x, hs.y, hs.z, vp.add(new THREE.Vector3((vx || 0)*0.6, 1.5 + Math.random()*2.5, (vz || 0)*0.6)), DP.w.clone().add(new THREE.Vector3((Math.random() - 0.5)*5, (Math.random() - 0.5)*5, (Math.random() - 0.5)*5)));
-  sparkBurst(box.position.x, box.position.y, box.position.z, 0, 0, 22, 5); dragCrashSound(1); }
+  const bits = g.userData.split ? g.children.filter(c => c.visible !== false) : [g], M0 = DP_MAT[part] || [20, 0.5, 0.25, 0.1];
+  for (const o of bits) dpPiece(o, M0[0]/bits.length, M0, vx, vz);
+  g.visible = false; _dA.setFromMatrixPosition(g.matrixWorld); sparkBurst(_dA.x, _dA.y, _dA.z, 0, 0, 22, 5); dragCrashSound(1); }
+function dpPiece(o, mass, M0, vx, vz) {   // one rigid box from an object: its bounding box in its own frame, re-centred in a container
+  const inv = new THREE.Matrix4().copy(o.matrixWorld).invert(), M = new THREE.Matrix4(), bb = new THREE.Box3(), tb = new THREE.Box3();
+  o.traverse(c => { if (!c.isMesh || !c.visible) return; if (!c.geometry.boundingBox) c.geometry.computeBoundingBox(); tb.copy(c.geometry.boundingBox).applyMatrix4(M.multiplyMatrices(inv, c.matrixWorld)); bb.union(tb); });
+  if (bb.isEmpty()) return; o.matrixWorld.decompose(_dp, _dq, _ds); const S = _ds.clone(), c = bb.getCenter(new THREE.Vector3()), hs = bb.getSize(new THREE.Vector3()).multiplyScalar(0.5).multiply(S);
+  const piece = o.clone(true); piece.visible = true; piece.position.copy(c).multiply(S).multiplyScalar(-1); piece.quaternion.identity(); piece.scale.copy(S); piece.traverse(k => { if (k.isMesh) k.castShadow = true; });
+  const box = new THREE.Group(); box.position.copy(c).applyMatrix4(o.matrixWorld); box.quaternion.copy(_dq); box.add(piece); scene.add(box);
+  const kick = Math.sqrt(30/Math.max(3, mass)), vp = dpVel(box.position.x, box.position.y, box.position.z, _dB).clone();   // (the same blow sends a light piece further)
+  vp.add(new THREE.Vector3(((vx || 0)*0.6 + (Math.random() - 0.5)*3)*kick, (1 + Math.random()*2.5)*kick, ((vz || 0)*0.6 + (Math.random() - 0.5)*3)*kick));
+  rbAdd(box, hs.x, hs.y, hs.z, vp, DP.w.clone().add(new THREE.Vector3((Math.random() - 0.5)*6, (Math.random() - 0.5)*6, (Math.random() - 0.5)*6).multiplyScalar(kick)), { m: mass, mu: M0[1], e: M0[2], drag: M0[3] }); }
 // ── loose pieces as boxes (30.9., Antti: "osat kieppuu ihan oudosti", "laatikoita tavallaan"): every piece torn off the dragster is a rigid
 //    box of its own size (its bounding box in its own frame, centred on it) — the same impulse physics as the dragster itself: gravity,
 //    its corners and long edges against the ground and against houses and poles, bounce, friction, spin that follows from where it hits.
 //    So a long piece lands on an end, topples and lies flat; a wheel rolls off and settles. They stay until R. ──
-const RB = { list: [], max: 28 };
+const RB = { list: [], max: 48 };
 const _rA = new THREE.Vector3(), _rB = new THREE.Vector3(), _rN = new THREE.Vector3(), _rQ = new THREE.Quaternion();
 function rbAng(b, Lx, Ly, Lz) { _rA.set(Lx, Ly, Lz).applyQuaternion(b.qi); _rA.x /= b.I[0]; _rA.y /= b.I[1]; _rA.z /= b.I[2]; return _rA.applyQuaternion(b.q); }
 function rbImp(b, px, py, pz, jx, jy, jz) { b.v.x += jx/b.m; b.v.y += jy/b.m; b.v.z += jz/b.m; const rx = px - b.p.x, ry = py - b.p.y, rz = pz - b.p.z; b.w.add(rbAng(b, ry*jz - rz*jy, rz*jx - rx*jz, rx*jy - ry*jx)); }
@@ -8070,18 +8082,19 @@ function rbContact(b, px, py, pz, nx, ny, nz, depth, mu, e, h) {
   const j = (target - vn)/rbK(b, rx, ry, rz, nx, ny, nz), tx = vx - nx*vn, ty = vy - ny*vn, tz = vz - nz*vn, tl = Math.hypot(tx, ty, tz); rbImp(b, px, py, pz, nx*j, ny*j, nz*j);
   if (tl > 1e-4) { const ux = tx/tl, uy = ty/tl, uz = tz/tl, jt = Math.min(mu*j, tl/rbK(b, rx, ry, rz, ux, uy, uz)); rbImp(b, px, py, pz, -ux*jt, -uy*jt, -uz*jt); }
   return -vn; }
-function rbAdd(obj, hx, hy, hz, v, w) {   // obj: centred on the box, oriented with it
-  hx = Math.max(0.04, hx); hy = Math.max(0.04, hy); hz = Math.max(0.04, hz); const m = Math.max(6, Math.min(140, 8*hx*hy*hz*260)), pts = [];
+function rbAdd(obj, hx, hy, hz, v, w, mat) {   // obj: centred on the box, oriented with it; mat: { m, mu, e, drag }
+  hx = Math.max(0.04, hx); hy = Math.max(0.04, hy); hz = Math.max(0.04, hz); const m = mat && mat.m ? Math.max(1.5, mat.m) : Math.max(6, Math.min(140, 8*hx*hy*hz*260)), pts = [];
   const n = (e) => Math.max(1, Math.ceil(e*2/0.6));   // (points along every edge, ≤ 0.6 m apart: a long piece rests on its whole length)
   for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) pts.push([sx*hx, sy*hy, sz*hz]);
   for (const [a, b, c] of [[0, 1, 2], [1, 0, 2], [2, 0, 1]]) { const H = [hx, hy, hz], k = n(H[a]); for (let i = 1; i < k; i++) for (const s1 of [-1, 1]) for (const s2 of [-1, 1]) { const p = [0, 0, 0]; p[a] = -H[a] + 2*H[a]*i/k; p[b] = s1*H[b]; p[c] = s2*H[c]; pts.push(p); } }
-  const b = { obj, p: obj.position.clone(), q: obj.quaternion.clone(), qi: obj.quaternion.clone().invert(), v: v.clone(), w: w.clone(), m, I: [m/3*(hy*hy + hz*hz), m/3*(hx*hx + hz*hz), m/3*(hx*hx + hy*hy)], pts, r: Math.hypot(hx, hy, hz), still: 0, sleep: false };
+  const b = { obj, p: obj.position.clone(), q: obj.quaternion.clone(), qi: obj.quaternion.clone().invert(), v: v.clone(), w: w.clone(), m, I: [m/3*(hy*hy + hz*hz), m/3*(hx*hx + hz*hz), m/3*(hx*hx + hy*hy)], pts, r: Math.hypot(hx, hy, hz), still: 0, sleep: false, mu: mat ? mat.mu : 0.55, e: mat ? mat.e : 0.25, drag: mat ? mat.drag : 0.1 };
   RB.list.push(b); if (RB.list.length > RB.max) { const o = RB.list.shift(); o.sleep = true; } return b; }
 function rbStep(b, h, boxes, lift) {
-  b.v.y -= 9.81*h; b.w.multiplyScalar(1 - 0.4*h); b.qi.copy(b.q).invert(); let hitMax = 0;
+  b.v.y -= 9.81*h; b.w.multiplyScalar(1 - (0.4 + b.drag)*h); b.qi.copy(b.q).invert(); let hitMax = 0; { const sp = b.v.length(), k = Math.min(0.5, b.drag*sp*0.6/b.m*h*20); if (sp > 0.5) b.v.multiplyScalar(1 - k); }   // (air: a light wide piece loses its speed, flutters)
   for (const P of b.pts) { _rB.set(P[0], P[1], P[2]).applyQuaternion(b.q).add(b.p); const x = _rB.x, y = _rB.y, z = _rB.z, gy = Y(x, z) + lift;
-    if (y < gy) { terrainNormal(x, z, _tn); const hit = rbContact(b, x, y, z, _tn.x, _tn.y, _tn.z, (gy - y)*_tn.y, 0.55, 0.25, h); if (hit > hitMax) hitMax = hit; if (gy - y > 0.02) b.p.y += (gy - y - 0.02)*0.3; }
-    for (const B of boxes) { const o = boxPush(B, x, z, 0.03); if (!o) continue; rbContact(b, x, y, z, o.nx, 0, o.nz, o.ov, 0.4, 0.3, h); b.p.x += o.nx*Math.min(o.ov, 0.2)*0.4; b.p.z += o.nz*Math.min(o.ov, 0.2)*0.4; } }
+    if (y < gy) { terrainNormal(x, z, _tn); const hit = rbContact(b, x, y, z, _tn.x, _tn.y, _tn.z, (gy - y)*_tn.y, b.mu, b.e, h); if (hit > hitMax) hitMax = hit;
+      if (b.mu < 0.4 && lift && Math.hypot(b.v.x, b.v.z) > 4 && Math.random() < h*25) sparkBurst(x, gy + 0.05, z, b.v.x, b.v.z, 3, 3);   /* (steel skidding on tarmac) */ if (gy - y > 0.02) b.p.y += (gy - y - 0.02)*0.3; }
+    for (const B of boxes) { const o = boxPush(B, x, z, 0.03); if (!o) continue; rbContact(b, x, y, z, o.nx, 0, o.nz, o.ov, b.mu, b.e + 0.05, h); b.p.x += o.nx*Math.min(o.ov, 0.2)*0.4; b.p.z += o.nz*Math.min(o.ov, 0.2)*0.4; } }
   const wl = b.w.length(); if (wl > 18) b.w.multiplyScalar(18/wl);   // (a light piece hit on a corner: no propeller)
   b.p.addScaledVector(b.v, h); const w = b.w; _rQ.set(w.x*h*0.5, w.y*h*0.5, w.z*h*0.5, 0).multiply(b.q); b.q.set(b.q.x + _rQ.x, b.q.y + _rQ.y, b.q.z + _rQ.z, b.q.w + _rQ.w).normalize();
   return hitMax; }
@@ -8118,13 +8131,14 @@ function dpStep(h, thr, brk, steerIn, hand) {
     const vL = vp.x*wx + vp.y*wy + vp.z*wz, vS = vp.x*sx + vp.y*sy + vp.z*sz, N = Fs;
     const muX = surf*(W.front ? 1.0 : 3.6), muY = surf*(W.front ? 1.4 : 1.9)*(hand && !W.front ? 0.45 : 1);
     let fL = 0, fS = -muY*N*Math.tanh(vS/(0.08*Math.abs(vL) + 0.35));
-    if (!W.front) { nRear++; if (hand) fL = -muX*N*0.8*Math.tanh(vL*3); else if (thr) fL = drive/2; else if (brk && vL < 0.5) fL = vL > -3.4 ? -1400 : 0; }   // (reverse: a crawl, ~12 km/h)
-    if (brk && vL > 0.5) fL += -Math.min(muX, 1.25)*N*0.9*Math.tanh(vL*2);   // (a dragster's brakes are small: the chute does the real work)
+    if (!W.front) { nRear++; if (hand) fL = -muX*N*0.8*Math.tanh(vL*3); else if (thr) fL = brk ? Math.min(drive/2, 0.12*muX*N)*Math.tanh(3 - vL) : drive/2; else if (brk && vL < 0.5) fL = vL > -3.4 ? -1400 : 0; }   // (throttle + brake: a burnout)   // (reverse: a crawl, ~12 km/h)
+    if (brk && vL > 0.5) fL += -Math.min(muX, 1.25)*N*0.9*Math.tanh(vL*2);
+    if (brk && thr && W.front) fL = -muX*N*2.5*Math.tanh(vL*6);   // (the fronts locked for the burnout)   // (a dragster's brakes are small: the chute does the real work)
     if (!thr && !(brk && vL < 0.5)) fL += -N*(W.front ? 0.012 : 0.05)*Math.tanh(vL*3) - (sp < 1.5 && !brk ? N*0.5*Math.tanh(vL*6) : 0);   // rolling, the engine holding it, standing still
     const e = Math.hypot(fL/(muX*N + 1e-6), fS/(muY*N + 1e-6)); if (e > 1) { const k2 = (e > 1.2 ? 0.85 : 1)/e; fL *= k2; fS *= k2; if (!W.front && thr) spinX = Math.max(spinX, e - 1); }
     if (Math.abs(vS) > 2.5 && N > 500) slipY = Math.max(slipY, Math.min(1, (Math.abs(vS) - 2.5)/8));
     force(cx, cy, cz, wx*fL + sx*fS, wy*fL + sy*fS, wz*fL + sz*fS); }
-  DP.spin += ((thr && nRear ? Math.min(45, spinX*60 + (Math.abs(vf) < 3 ? 6 : 0)) : 0) - DP.spin)*Math.min(1, h*(thr ? 4 : 8)); DP.slip = Math.max(slipY, Math.min(1, DP.spin/20));
+  DP.spin += ((thr && nRear ? Math.min(45, spinX*60 + (Math.abs(vf) < 3 ? 6 : 0) + (brk ? 30 : 0)) : 0) - DP.spin)*Math.min(1, h*(thr ? 4 : 8)); DP.slip = Math.max(slipY, Math.min(1, DP.spin/20));
   // air: drag at the middle, the wing's and the nose wing's downforce, the chute behind
   if (sp > 0.5) { const d = 0.6*DP.CDA*sp; Fx -= DP.v.x*d; Fy -= DP.v.y*d; Fz -= DP.v.z*d; const q2 = 0.6*vf*vf;
     if (!DP.lost.wing) { const P = dpW(0, 2.1, -2.3, _dA), D = q2*DP.CLA_W; force(P.x, P.y, P.z, -ux*D, -uy*D, -uz*D); }
@@ -8170,7 +8184,7 @@ function dragPhys(dt, live) {
     if (imp > 0.8) { const dv = Math.hypot(B.vx - vx0, B.vz - vz0); DP.hit = Math.max(DP.hit, dv); dpHitPart(dpPartAt(v.x - hh.nx*1.5, v.z - hh.nz*1.5), dv*1.6, -hh.nx*dv*0.3, -hh.nz*dv*0.3);   /* (what it takes: the dragster's own change of speed, not the closing speed of the two) */ if (imp > 3) sparkBurst(cpx, 0.6 + Y(cpx, cpz), cpz, -hh.nx, -hh.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
   dpSync(); boxHitsHumans(playerBox(), car.vx, car.vz, true, true); DP.cvx = car.vx; DP.cvz = car.vz;
   // the engine: the slicks' speed through the drive (5:1), the clutch slipping at a launch; a lope at idle
-  const wr = (Math.max(0, car.speed) + DP.spin)/0.64*60/(2*Math.PI)*5; DP.rpm += ((thr ? Math.max(5200, Math.min(8400, wr)) : Math.max(1700, Math.min(8400, wr*0.9))) - DP.rpm)*Math.min(1, dt*(thr ? 9 : 3));
+  const wr = (Math.max(0, car.speed) + DP.spin)/0.64*60/(2*Math.PI)*5; DP.rpm += ((thr ? (brk ? 7800 : Math.max(5200, Math.min(8400, wr))) : Math.max(1700, Math.min(8400, wr*0.9))) - DP.rpm)*Math.min(1, dt*(thr ? 9 : 3));
   car.onTrack = onRoad(car.x, car.z, 0.4) || inLay(car.x, car.z, 0.3); car.surface = car.onTrack ? surfaceAt(car.x, car.z) : 'grass'; car.drifting = DP.slip > 0.25; car.maxSlip = DP.slip*0.5;
   if (DP.hit > 4) dragCrashSound(Math.min(1, DP.hit/18));
   if (DP.hit > 24 && !WRECK.on && gameState === State.RACING) {   // a crash that hard: it comes apart — every piece off, flying, the driver out, the chassis on fire
@@ -9583,6 +9597,8 @@ function createDragSynth(ctx, dest) {
   const lope = osc('sine', 15), lopeD = gain(0.35); lope.connect(lopeD); lopeD.connect(fireG.gain);   // (the lumpy cam: every other turn weaker)
   const sub = osc('square', 60), subG = gain(0.22, drive); sub.connect(subG);
   const rn = noise(), rnBP = filt('bandpass', 300, 0.8), rnG = gain(0.1, drive); rn.connect(rnBP); rnBP.connect(rnG); const gate = osc('sine', 120), gateD = gain(0.1); gate.connect(gateD); gateD.connect(rnG.gain);
+  const rum = osc('sawtooth', 30), rumLP = filt('lowpass', 160, 1.4), rumG = gain(0.3), rumAM = osc('sine', 7), rumD = gain(0.25); rum.connect(rumLP); rumLP.connect(rumG); rumG.connect(out); rumAM.connect(rumD); rumD.connect(rumG.gain);   // (the brrom: a deep burble, half the crank, lumpy)
+  const thump = filt('peaking', 70, 1.1, null); thump.gain.value = 9; lp.disconnect(); lp.connect(thump); thump.connect(out);
   const whine = osc('triangle', 900), whG = gain(0, out); whine.connect(whG);
   const sc = noise(), scBP = filt('bandpass', 3200, 1.2), scG = gain(0, dest); sc.connect(scBP); scBP.connect(scG);   // the hull on tarmac
   const popBus = gain(1, dest);
@@ -9592,18 +9608,20 @@ function createDragSynth(ctx, dest) {
     const th = ctx.createOscillator(); th.type = 'sine'; th.frequency.setValueAtTime(80 + rand()*50, t); th.frequency.exponentialRampToValueAtTime(35, t + 0.08); const tg = gain(0);
     tg.gain.setValueAtTime(0.0001, t); tg.gain.exponentialRampToValueAtTime(0.5*s, t + 0.004); tg.gain.exponentialRampToValueAtTime(0.0001, t + 0.1); th.connect(tg); tg.connect(popBus); th.start(t); th.stop(t + 0.12); }
   const P = []; const track = (p, v) => { const o = { p, v, s: false }; P.push(o); return o; };
-  const pF = track(fire.frequency, 120), pS = track(sub.frequency, 60), pL = track(lope.frequency, 15), pLD = track(lopeD.gain, 0.35), pG = track(gate.frequency, 120), pRB = track(rnBP.frequency, 300), pRG = track(rnG.gain, 0.1),
+  const pRF = track(rum.frequency, 30), pRA = track(rumAM.frequency, 7), pRUG = track(rumG.gain, 0.3), pRL = track(rumLP.frequency, 160),
+        pF = track(fire.frequency, 120), pS = track(sub.frequency, 60), pL = track(lope.frequency, 15), pLD = track(lopeD.gain, 0.35), pG = track(gate.frequency, 120), pRB = track(rnBP.frequency, 300), pRG = track(rnG.gain, 0.1),
         pDr = track(drive.gain, 1), pLP = track(lp.frequency, 900), pW = track(whine.frequency, 900), pWG = track(whG.gain, 0), pSc = track(scG.gain, 0), pScF = track(scBP.frequency, 3200), pOut = track(out.gain, 0);
   const ease = (o, v, dt, tau) => { o.v += (v - o.v)*(1 - Math.exp(-dt/tau)); };
   let prevThr = 0, burst = -1, nextPop = 0;
   function update(s, t, dt) {
     const rpm = Math.max(900, s.rpm), crank = rpm/60, f = crank*4, idle = Math.max(0, Math.min(1, (3000 - rpm)/1300)), thr = s.thr ? 1 : 0;
-    const jit = 1 + (rand() - 0.5)*0.08*idle;   // (the idle hunts)
+    const jit = 1 + (rand() - 0.5)*0.14*idle;   // (the idle hunts: brrom… brrom)
+    ease(pRF, crank*0.5*jit, dt, 0.015); ease(pRA, crank*0.25, dt, 0.03); ease(pRUG, 0.28 + 0.35*thr + 0.2*idle, dt, 0.03); ease(pRL, 120 + rpm*0.03 + thr*120, dt, 0.03);
     ease(pF, f*jit, dt, 0.015); ease(pS, f/2*jit, dt, 0.015); ease(pL, crank/2, dt, 0.02); ease(pLD, 0.1 + 0.45*idle, dt, 0.1); ease(pG, f, dt, 0.015);
     ease(pRB, 200 + f*1.6, dt, 0.03); ease(pRG, 0.06 + 0.3*thr, dt, 0.03); ease(pDr, 0.9 + 3.2*thr + rpm/8000, dt, 0.03);
     ease(pLP, 480 + rpm*0.12 + thr*(1600 + rpm*0.35), dt, 0.03); ease(pW, crank*16, dt, 0.03); ease(pWG, s.on ? 0.012 + 0.03*thr*rpm/8000 : 0, dt, 0.05);
     ease(pSc, s.on ? 0.22*s.scrape : 0, dt, 0.04); ease(pScF, 2200 + 3000*s.scrape, dt, 0.05);
-    ease(pOut, s.on ? (0.2 + 0.28*thr + 0.08*rpm/8000)*(s.volume == null ? 1 : s.volume) : 0, dt, 0.02);
+    ease(pOut, s.on ? (0.085 + 0.15*thr + 0.05*rpm/8000)*(s.volume == null ? 1 : s.volume) : 0, dt, 0.02);   // (a lumpy idle about 3× the Pökö's, full song a little over it)
     for (const o of P) { if (!o.s) { o.p.setValueAtTime(o.v, t); o.s = true; } else o.p.linearRampToValueAtTime(o.v, t + dt); }
     if (!s.on) { prevThr = 0; return; }
     if (thr && !prevThr) { pop(t, 1.2); pop(t + 0.03, 0.9); }   // the bark as it lights up
