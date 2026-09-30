@@ -910,6 +910,14 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   DP_LOSE lower (wing 5, fwing 5, wheels 7/8, pipes 7, cage 8, nose/engine 10), dpHitPart adds up smaller blows (DP.dmg; off at
   2.2 × the threshold), dpPartAt(x, z) finds the piece at a spine hit (poles), a tree's blow or a vehicle's; a whole-car break-up at
   a change of speed > 24. t_dragbreak: 43 km/h into a house takes the nose, 65 a wheel and the front wing, 119 km/h takes it apart.
+- Dragster pieces as boxes (30.9., Antti: "osat kieppuu ihan oudosti – laatikoita tavallaan; oliko meillä fysiikkamoottoria?"): there
+  is no external physics engine (no Box2D/Box3D/Cannon/Ammo) — vehicles are 2D boxes (obbSat/resolvePair), the dragster its own 3D rigid
+  body (DP), and now RB: every piece dpLose tears off becomes a rigid box sized from its bounding box in its own frame, re-centred in a
+  container (the old debris spun round the car's origin — the 4.6 m nose swung like a blade). rbAdd/rbStep/rbUpdate: gravity, sample
+  points on the corners and ≤ 0.6 m along every edge against the ground (terrain normal, + ROAD_Y on roads / the lay-by) and static
+  boxes, the same impulse contact as the dragster (restitution 0.25, friction 0.55), spin capped at 18 rad/s, asleep after 0.6 s still;
+  mass from the volume, box inertia. rbClear() on R. The nose is two pieces now (noseF front 2.3 m, nose rear 2.3 m). t_rbparts: a
+  45 m/s crash, 12 pieces, all resting on the ground after 5 s, none sunk or floating.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
