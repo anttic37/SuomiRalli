@@ -918,6 +918,9 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
   boxes, the same impulse contact as the dragster (restitution 0.25, friction 0.55), spin capped at 18 rad/s, asleep after 0.6 s still;
   mass from the volume, box inertia. rbClear() on R. The nose is two pieces now (noseF front 2.3 m, nose rear 2.3 m). t_rbparts: a
   45 m/s crash, 12 pieces, all resting on the ground after 5 s, none sunk or floating.
+- Dragster chassis in short pieces (30.9., Antti: "tosi pitkiä osia, pilko pieniin"): the rails are three 2 m lengths a side (railL0..2 / railR0..2), the
+  cockpit tub (with its decals), the engine block and the tail (chute pack + wheelie bars) are groups of their own — DP_CHASSIS, only a
+  break-up (DP.hit > 24) takes them; RB.max 28. t_rbparts: 21 pieces, all resting on the ground.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

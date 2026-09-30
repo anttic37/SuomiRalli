@@ -4613,6 +4613,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Dragsterin runko hajoaa kovassa kolarissa lyhyiksi paloiksi: kiskot kolmena osana kummaltakin puolelta, ohjaamo, moottorilohko ja takapää omina laatikoinaan', '19.27'],
   ['30.9.', 'Dragsterin irtoavat osat ovat nyt oikeita laatikoita omalla fysiikallaan: ne pyörivät oman keskipisteensä ympäri, putoavat, kaatuvat kulmiltaan, liukuvat ja jäävät makaamaan maahan. Pitkä keula on kahdessa osassa', '19.14'],
   ['30.9.', 'Dragsteri: kaikki osat heittävät varjon (myös putket, turvakaari ja siiven tuet), leveät slicksit jättävät mustat jäljet lähdöstä, jarrutuksesta ja luisuista, ja se hajoaa paljon helpommin: osumat kertyvät, ja keula, siivet, pyörät, kone ja putket irtoavat myös pylväästä, puusta tai toisesta autosta', '18.47'],
   ['30.9.', 'Dragsteri: kunnon liekit putkista (isot kaasulla, paukkeet kun kaasu nousee), hajoaa osiin (keula, etusiipi, kaari, kone, putket – ja kovassa kolarissa koko auto), oma mittaristo 9000 rpm / 500 km/h. Levike samaa asfalttia kuin tie', '18.16'],
@@ -7915,18 +7916,19 @@ function makeDragster() { const G = new THREE.Group(), body = new THREE.Group();
   // the pieces a crash can tear off, each its own group (at the body's origin, so nothing moves): the nose, the front wing, the cage,
   // the engine with its blower, the pipes of each bank (the wing, the wheels and the driver below)
   const grp = (n) => { const g = new THREE.Group(); g.name = n; body.add(g); return g; }, nose = grp('nose'), noseF = grp('noseF'), fwing = grp('fwing'), cage = grp('cage'), engine = grp('engine'), pipesL = grp('pipesL'), pipesR = grp('pipesR');
-  // the rails and the long tapered nose (a stretched cylinder, flattened)
-  for (const sx of [-1, 1]) beam(sx*0.3, 0.38, -2.3, sx*0.14, 0.34, 3.7, 0.045, black);
+  // the rails (three lengths a side: a hard crash breaks the chassis itself into short pieces) and the long tapered nose (two pieces)
+  const rails = {}; for (const sx of [-1, 1]) for (let k = 0; k < 3; k++) { const t0 = k/3, t1 = (k + 1)/3, L = (t) => [sx*(0.3 - 0.16*t), 0.38 - 0.04*t, -2.3 + 6*t], a = L(t0), b = L(t1), n = 'rail' + (sx < 0 ? 'L' : 'R') + k; rails[n] = grp(n); beam(...a, ...b, 0.045, black, rails[n]); }
+  const tub = grp('tub'), block = grp('block'), tail = grp('tail');
   for (const [k, r0, r1, z, gp] of [['dnoseF', 0.1, 0.22, 2.7, noseF], ['dnoseR', 0.22, 0.34, 0.4, nose]]) { const m = new THREE.Mesh(lgeo(k, () => { const g = new THREE.CylinderGeometry(r0, r1, 2.3, 12, 1); g.rotateX(Math.PI/2); g.scale(1, 0.62, 1); return g; }), yel); m.position.set(0, 0.46, z); m.castShadow = true; gp.add(m); }   // (in two: short pieces when it breaks)
   lmesh(lbox(1.25, 0.05, 0.34), red, 0, 0.34, 3.95, fwing); for (const sx of [-1, 1]) lmesh(lbox(0.04, 0.2, 0.38), red, sx*0.62, 0.42, 3.95, fwing);   // the front wing, its end plates
   // the cockpit, the cage, the driver
-  lmesh(lbox(0.66, 0.42, 1.3), yel, 0, 0.6, -0.5, body);
-  { const dec = new THREE.MeshStandardMaterial({ map: dragDecal(), roughness: 0.4 }); for (const sx of [-1, 1]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.28), dec); m.position.set(sx*0.335, 0.62, -0.3); m.rotation.y = sx*Math.PI/2; body.add(m); } }
+  lmesh(lbox(0.66, 0.42, 1.3), yel, 0, 0.6, -0.5, tub);
+  { const dec = new THREE.MeshStandardMaterial({ map: dragDecal(), roughness: 0.4 }); for (const sx of [-1, 1]) { const m = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.28), dec); m.position.set(sx*0.335, 0.62, -0.3); m.rotation.y = sx*Math.PI/2; tub.add(m); } }
   for (const sx of [-1, 1]) { beam(sx*0.3, 0.8, 0.1, sx*0.24, 1.42, -0.35, 0.03, chrome, cage); beam(sx*0.3, 0.8, -0.95, sx*0.24, 1.42, -0.55, 0.03, chrome, cage); } beam(-0.24, 1.42, -0.45, 0.24, 1.42, -0.45, 0.03, chrome, cage);
   const driver = new THREE.Group(); driver.name = 'driver'; body.add(driver); lmesh(lbox(0.44, 0.34, 0.5), lmat(0x2a3a8a, 0.7), 0, 0.92, -0.55, driver);   // the driver, his own group: thrown out in a wreck
   { const hel = new THREE.Mesh(lgeo('dhelmet', () => new THREE.SphereGeometry(0.17, 12, 10)), red); hel.position.set(0, 1.2, -0.48); hel.castShadow = true; driver.add(hel); lmesh(lbox(0.2, 0.07, 0.03), lmat(0x1c2630, 0.1), 0, 1.2, -0.31, driver, false); }
   // the engine: block, valve covers, the blower with its belt, the injector hat, eight zoomies a side
-  lmesh(lbox(0.62, 0.42, 1.0), black, 0, 0.66, -1.55, body); for (const sx of [-1, 1]) lmesh(lbox(0.12, 0.08, 0.9), chrome, sx*0.24, 0.9, -1.55, engine);
+  lmesh(lbox(0.62, 0.42, 1.0), black, 0, 0.66, -1.55, block); for (const sx of [-1, 1]) lmesh(lbox(0.12, 0.08, 0.9), chrome, sx*0.24, 0.9, -1.55, engine);
   lmesh(lbox(0.46, 0.3, 0.7), alu, 0, 1.02, -1.55, engine); lmesh(lbox(0.5, 0.08, 0.74), chrome, 0, 1.18, -1.55, engine); lmesh(lbox(0.06, 0.34, 0.36), black, 0, 0.92, -1.08, engine);
   lmesh(lbox(0.4, 0.2, 0.3), red, 0, 1.32, -1.5, engine); lmesh(lbox(0.44, 0.06, 0.34), chrome, 0, 1.44, -1.5, engine);
   for (const sx of [-1, 1]) for (let k = 0; k < 4; k++) beam(sx*0.33, 0.72, -1.2 - k*0.2, sx*0.62, 1.12, -1.26 - k*0.2, 0.035, chrome, sx < 0 ? pipesL : pipesR);
@@ -7934,7 +7936,7 @@ function makeDragster() { const G = new THREE.Group(), body = new THREE.Group();
   const wing = new THREE.Group(); wing.name = 'wing'; body.add(wing);
   for (const sx of [-0.5, 0.5]) beam(sx, 0.7, -2.45, sx, 2.05, -2.85, 0.03, black, wing);
   lmesh(lbox(1.9, 0.06, 0.8), red, 0, 2.12, -2.9, wing); lmesh(lbox(1.9, 0.05, 0.3), red, 0, 1.98, -3.2, wing); for (const sx of [-1, 1]) lmesh(lbox(0.04, 0.55, 0.95), black, sx*0.97, 2.02, -2.95, wing);
-  lmesh(lbox(0.3, 0.3, 0.34), black, 0, 0.55, -2.95, body); for (const sx of [-1, 1]) beam(sx*0.35, 0.4, -2.95, sx*0.45, 0.25, -3.5, 0.025, alu);   // chute pack, wheelie bars
+  lmesh(lbox(0.3, 0.3, 0.34), black, 0, 0.55, -2.95, tail); for (const sx of [-1, 1]) beam(sx*0.35, 0.4, -2.95, sx*0.45, 0.25, -3.5, 0.025, alu, tail);   // chute pack, wheelie bars
   const chute = new THREE.Mesh(new THREE.ConeGeometry(1.1, 1.6, 14, 1, true), new THREE.MeshStandardMaterial({ color: 0xf4f4f0, roughness: 0.8, side: THREE.DoubleSide })); chute.name = 'chute'; chute.rotation.x = -Math.PI/2; chute.position.set(0, 0.8, -4.4); chute.visible = false; body.add(chute);
   // the wheels: a group each at its hub
   const wheels = {};
@@ -7944,7 +7946,7 @@ function makeDragster() { const G = new THREE.Group(), body = new THREE.Group();
     if (W.front) for (let k = 0; k < 6; k++) { const sp = lmesh(lbox(0.02, W.r*1.5, 0.02), chrome, 0, 0, 0, spin, false); sp.rotation.x = k*Math.PI/6; }   // spokes
     else { const lip = lmesh(lcyl(W.r*0.62, 0.04, 14), chrome, Math.sign(W.x)*(W.w/2 + 0.01), 0, 0, spin, false); lip.rotation.z = Math.PI/2; }
     wheels[W.id] = { g: wg, spin, W }; if (!W.front) beam(0, 0.62 - W.r, 0, -Math.sign(W.x)*(Math.abs(W.x) - 0.3), 0.62 - W.r, 0, 0.05, black, wg); }   // (the axle stub)
-  G.userData.parts = { body, wing, driver, chute, wheels, nose, noseF, fwing, cage, engine, pipesL, pipesR }; G.rotation.order = 'YXZ'; return G; }
+  G.userData.parts = { body, wing, driver, chute, wheels, ...rails, tub, block, tail, nose, noseF, fwing, cage, engine, pipesL, pipesR }; G.rotation.order = 'YXZ'; return G; }
 function buildDragster() { DRAG.home = null; DRAG.on = false; DRAG.carMesh = DRAG.parkMesh = DRAG.pokoMesh = null; DRAG.lay = null; if (!finishLine || LAY.pts.length < 10) return;
   // the lay-by: a ribbon at the road's own height following LAY.pts (its inner edge on the road's edge), a dashed line where it leaves the
   // road, a red-and-white kerb along its outer edge
@@ -8016,7 +8018,7 @@ const DP_PTS = [[0, 0.3, 4.05, 'noseF'], [0, 0.36, 3.2, 'noseF'], [0, 0.42, 2.4,
   [-0.3, 0.28, 1.0], [0.3, 0.28, 1.0], [-0.3, 0.28, -1.0], [0.3, 0.28, -1.0], [-0.34, 0.8, -0.5], [0.34, 0.8, -0.5], [-0.24, 1.46, -0.45, 'cage'], [0.24, 1.46, -0.45, 'cage'], [0, 1.48, -1.5, 'engine'], [-0.64, 1.12, -1.3, 'pipesL'], [0.64, 1.12, -1.3, 'pipesR'],
   [-1.08, 0.64, -1.46, 'RL'], [-1.08, 0.64, -2.74, 'RL'], [-0.8, 1.28, -2.1, 'RL'], [-1.08, 1.1, -2.1, 'RL'], [1.08, 0.64, -1.46, 'RR'], [1.08, 0.64, -2.74, 'RR'], [0.8, 1.28, -2.1, 'RR'], [1.08, 1.1, -2.1, 'RR'],
   [-0.97, 2.3, -2.45, 'wing'], [0.97, 2.3, -2.45, 'wing'], [-0.97, 2.3, -3.4, 'wing'], [0.97, 2.3, -3.4, 'wing'], [-0.97, 1.75, -2.95, 'wing'], [0.97, 1.75, -2.95, 'wing'], [0, 0.45, -3.1], [-0.45, 0.12, -3.52, 'bar'], [0.45, 0.12, -3.52, 'bar']];
-const DRAG_REAR_MARKS = [[-0.8, -2.1], [0.8, -2.1]];
+const DRAG_REAR_MARKS = [[-0.8, -2.1], [0.8, -2.1]], DP_CHASSIS = ['railL0', 'railL1', 'railL2', 'railR0', 'railR1', 'railR2', 'tub', 'block', 'tail'];   // (only a break-up takes these)
 const DP_PARTS = ['wing', 'FL', 'FR', 'RL', 'RR', 'noseF', 'nose', 'fwing', 'cage', 'engine', 'pipesL', 'pipesR'], DP_LOSE = { wing: 5, FL: 7, FR: 7, RL: 8, RR: 8, noseF: 8, nose: 10, fwing: 5, cage: 8, engine: 10, pipesL: 7, pipesR: 7 };   // (the impact speed that tears each off at once; smaller knocks add up: dpHitPart)
 const _dA = new THREE.Vector3(), _dB = new THREE.Vector3(), _dU = new THREE.Vector3(), _dF = new THREE.Vector3(), _dR = new THREE.Vector3(), _dQ = new THREE.Quaternion(), _dYax = new THREE.Vector3(0, 1, 0);
 function dpW(lx, ly, lz, out) { return out.set(lx - DP.cg[0], ly - DP.cg[1], lz - DP.cg[2]).applyQuaternion(DP.q).add(DP.p); }   // model point → world
@@ -8037,7 +8039,7 @@ function dragInit(x, z, angle) {
   DP.q.setFromAxisAngle(_dYax, angle); const fx = Math.sin(angle), fz = Math.cos(angle), rx = x, rz = z;   // (x, z: the model's root, on the ground between the axles)
   DP.p.set(rx + fx*DP.cg[2], Y(rx, rz) + DP.cg[1] + 0.03, rz + fz*DP.cg[2]); DP.v.set(0, 0, 0); DP.w.set(0, 0, 0); DP.pp.copy(DP.p); DP.pq.copy(DP.q);
   DP.wh = DRAG_GEOM.wheels.map(W => ({ W, hy: W.r, rot: 0, on: false, load: 0 })); DP.spin = 0; DP.rpm = 1800; DP.slip = 0; DP.scrape = 0; DP.hit = 0; DP.roofT = 0; DP.steer = 0; DP.broken = false; DP.lost = {}; DP.dmg = {};
-  DP.camA = angle; DP.ok = true; if (DRAG.carMesh) { const P = DRAG.carMesh.userData.parts; P.driver.visible = true; for (const k of DP_PARTS) (P.wheels[k] ? P.wheels[k].g : P[k]).visible = true; } dpSync(); }
+  DP.camA = angle; DP.ok = true; if (DRAG.carMesh) { const P = DRAG.carMesh.userData.parts; P.driver.visible = true; for (const k of DP_PARTS.concat(DP_CHASSIS)) (P.wheels[k] ? P.wheels[k].g : P[k]).visible = true; } dpSync(); }
 function dpSync() { dpW(0, DP.cg[1], 0, _dR); _dF.set(0, 0, 1).applyQuaternion(DP.q); if (Math.hypot(_dF.x, _dF.z) > 0.2) car.angle = Math.atan2(_dF.x, _dF.z);
   car.x = DP.cx = _dR.x; car.z = DP.cz = _dR.z; car.vx = DP.cvx = DP.v.x; car.vz = DP.cvz = DP.v.z; car.speed = DP.v.x*Math.sin(car.angle) + DP.v.z*Math.cos(car.angle); }
 function dpPartAt(px, pz) {   // which piece is at a world point (roughly, by where it is along and across the body)
@@ -8060,7 +8062,7 @@ function dpLose(part, vx, vz) {   // torn off: a box of its own size flies free 
 //    box of its own size (its bounding box in its own frame, centred on it) — the same impulse physics as the dragster itself: gravity,
 //    its corners and long edges against the ground and against houses and poles, bounce, friction, spin that follows from where it hits.
 //    So a long piece lands on an end, topples and lies flat; a wheel rolls off and settles. They stay until R. ──
-const RB = { list: [], max: 18 };
+const RB = { list: [], max: 28 };
 const _rA = new THREE.Vector3(), _rB = new THREE.Vector3(), _rN = new THREE.Vector3(), _rQ = new THREE.Quaternion();
 function rbAng(b, Lx, Ly, Lz) { _rA.set(Lx, Ly, Lz).applyQuaternion(b.qi); _rA.x /= b.I[0]; _rA.y /= b.I[1]; _rA.z /= b.I[2]; return _rA.applyQuaternion(b.q); }
 function rbImp(b, px, py, pz, jx, jy, jz) { b.v.x += jx/b.m; b.v.y += jy/b.m; b.v.z += jz/b.m; const rx = px - b.p.x, ry = py - b.p.y, rz = pz - b.p.z; b.w.add(rbAng(b, ry*jz - rz*jy, rz*jx - rx*jz, rx*jy - ry*jx)); }
@@ -8175,7 +8177,7 @@ function dragPhys(dt, live) {
   car.onTrack = onRoad(car.x, car.z, 0.4) || inLay(car.x, car.z, 0.3); car.surface = car.onTrack ? surfaceAt(car.x, car.z) : 'grass'; car.drifting = DP.slip > 0.25; car.maxSlip = DP.slip*0.5;
   if (DP.hit > 4) dragCrashSound(Math.min(1, DP.hit/18));
   if (DP.hit > 24 && !WRECK.on && gameState === State.RACING) {   // a crash that hard: it comes apart — every piece off, flying, the driver out, the chassis on fire
-    for (const k of DP_PARTS) dpLose(k, (Math.random() - 0.5)*DP.hit*0.5, (Math.random() - 0.5)*DP.hit*0.5); boom(car.x, Y(car.x, car.z), car.z, false);
+    for (const k of DP_PARTS.concat(DP_CHASSIS)) dpLose(k, (Math.random() - 0.5)*DP.hit*0.5, (Math.random() - 0.5)*DP.hit*0.5); boom(car.x, Y(car.x, car.z), car.z, false);
     wreckCar('dragboom'); DRAG.carMesh.userData.parts.driver.visible = false; }
   // on its roof or its side and stopped: fire, the driver thrown out (the rally car's wreck: the fire engine and the ambulance come)
   _dU.set(0, 1, 0).applyQuaternion(DP.q); if (_dU.y < 0.35 && DP.v.length() < 2.5 && DP.w.length() < 1.5) DP.roofT += dt; else DP.roofT = 0;
