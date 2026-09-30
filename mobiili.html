@@ -183,7 +183,7 @@ fetch('music/playlist.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : 
   songs.forEach((s, i) => { R.list.push(s); if (i % 2 === 1 && k < talk.length) R.list.push(talk[k++]); }); while (k < talk.length) R.list.push(talk[k++]); radioShow(); }).catch(() => {});
 function radioShow() { const t = R.list[R.i]; if (!R.on || !t) { $('fq').textContent = '-- . -'; $('st').textContent = R.list.length ? 'VIRTA POIS · PAINA ▶' : 'EI KUULUVUUTTA'; $('ti').innerHTML = '&nbsp;'; return; }
   const st = SHOW[t.show] || (t.sport ? SHOW.sport : t.weather ? SHOW.weather : STN[(R.i*3) % STN.length]), fq = (87.6 + ((R.i*7 + 3) % 20) + ((R.i*3) % 10)/10).toFixed(1);
-  $('fq').textContent = fq + ' MHz'; $('st').textContent = st.toUpperCase(); $('ti').textContent = (t.talk ? '🎙 ' : '♪ ') + t.title + (t.talk ? '' : ' – ' + (t.artist || '')); }
+  $('fq').textContent = fq + ' MHz'; $('st').textContent = st.toUpperCase(); $('ti').textContent = (t.talk ? '🎙 ' : '♪ ') + t.title;   // (just the title, as on the game's radio) }
 function radioGo(d) { if (!R.list.length) return; R.i = (R.i + d + R.list.length) % R.list.length; R.el.src = 'music/' + R.list[R.i].file; if (R.on) R.el.play().catch(() => {}); radioShow(); }
 $('play').onclick = () => { if (!R.list.length) { toast('Radio virittyy… kokeile hetken päästä'); return; } R.on = !R.on; $('play').textContent = R.on ? '⏸' : '▶';
   if (R.on) { if (!R.el.src) R.el.src = 'music/' + R.list[R.i].file; R.el.play().catch(() => {}); } else R.el.pause(); radioShow(); };
