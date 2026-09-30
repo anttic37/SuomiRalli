@@ -336,7 +336,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 10.57 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 11.59 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -458,6 +458,12 @@ const I18N = {
   '🧖 SAUNOJAT: ”HILJEMPAA!”': ['🧖 SAUNA GANG: "SLOW DOWN!"', '🧖 BADSTUEGJENGEN: «SAKTE NÅ!»'],
   'Tuntematon kuski': ['Unknown driver', 'Ukjent sjåfør'],
   'KYLÄHUHU': ['VILLAGE RUMOUR', 'BYGDESLADDER'], '{0} johtaa ennätyslistaa ajalla {1}': ['{0} leads the record list with {1}', '{0} leder rekordlista med {1}'], '{0} ajoi tänään {1}': ['{0} drove {1} today', '{0} kjørte {1} i dag'],
+  'Kylästä kaadettu jo {0} puuta – metsänomistajat raivoissaan': ['{0} trees felled in the village so far – the forest owners are furious', '{0} trær felt i bygda så langt – skogeierne er rasende'],
+  'Kylän pahin metsuri: {0}, {1} puuta nurin': ['The village\'s worst lumberjack: {0}, {1} trees down', 'Bygdas verste tømmerhogger: {0}, {1} trær felt'],
+  'Tuore tieto: rallikuski kaatoi juuri {0} puuta': ['Just in: a rally driver has just felled {0} trees', 'Siste nytt: en rallysjåfør felte nettopp {0} trær'],
+  'Tuore tieto: rallikuski kaatoi juuri puun metsässä': ['Just in: a rally driver has just felled a tree in the woods', 'Siste nytt: en rallysjåfør felte nettopp et tre i skogen'],
+  'Pihan omistaja soitti: rallikuski ajoi aidan läpi': ['A home owner called: a rally driver drove through the fence', 'En huseier ringte: en rallysjåfør kjørte gjennom gjerdet'],
+  'Pihan omistaja soitti: aita nurin, {0} väliä': ['A home owner called: fence flattened, {0} sections', 'En huseier ringte: gjerdet flatt, {0} felt'],
   'Ylästössä ajettu jo {0} kisaa, kuskeja {1}': ['{0} races driven in Ylästö, {1} drivers', '{0} løp kjørt i Ylästö, {1} sjåfører'], 'Kylässä palanut jo {0} taloa – palokunta pyytää rauhoittumaan': ['{0} houses burnt in the village – the fire brigade asks everyone to calm down', '{0} hus brent i bygda – brannvesenet ber alle roe seg'],
   'Yliajettuja kyläläisiä jo {0} – ambulanssikuski väsynyt': ['{0} villagers run over – the ambulance driver is tired', '{0} bygdefolk påkjørt – ambulansesjåføren er sliten'], 'Poliisi etsii kuskia {0} – ei saa lähestyä': ['Police are looking for {0} – do not approach', 'Politiet leter etter {0} – ikke nærm deg'],
   'Kylän kiltein kuski: {0}, {1} kyytiä liftareille': ['Kindest driver in the village: {0}, {1} lifts for hitchhikers', 'Bygdas snilleste sjåfør: {0}, {1} haik-skyss'], 'Tuore tieto: joku sytytti juuri {0} taloa': ['Just in: someone has set {0} houses on fire', 'Siste: noen har satt fyr på {0} hus'],
@@ -4557,14 +4563,14 @@ function oppPick(others, myT, mine) {
   if (!pick.length && mine) pick = [mine];       // (alone on the board: your own best, under your name)
   return pick.sort((a, b) => b.t - a.t); }       // nearest first
 // ── the police's rap sheet: fires the driver set, people and animals they ran over → /api/rap (as deltas), and the list back for the paper's "Poliisi tiedottaa" ──
-const RAP = { f: 0, p: 0, a: 0, h: 0, v: 0, vSent: 0, sent: { f: 0, p: 0, a: 0, h: 0 }, life: { f: 0, p: 0, a: 0, h: 0 }, list: null, at: -1e9, busy: false };   // (h: rides given to hitchhikers — the good deeds)
-try { const l = JSON.parse(localStorage.getItem('ylasto1988-rekisteri') || 'null'); if (l) for (const k of ['f', 'p', 'a', 'h']) RAP.life[k] = Math.max(0, l[k] | 0); } catch (e) {}
+const RAP = { f: 0, p: 0, a: 0, h: 0, t: 0, v: 0, vSent: 0, sent: { f: 0, p: 0, a: 0, h: 0, t: 0 }, life: { f: 0, p: 0, a: 0, h: 0, t: 0 }, list: null, at: -1e9, busy: false };   // (h: rides given to hitchhikers — the good deeds; t: trees felled)
+try { const l = JSON.parse(localStorage.getItem('ylasto1988-rekisteri') || 'null'); if (l) for (const k of ['f', 'p', 'a', 'h', 't']) RAP.life[k] = Math.max(0, l[k] | 0); } catch (e) {}
 function rapCount(k) { if (gameState === State.MENU) return;   // (the race, GTA, after the finish line: all of it counts)
   RAP[k]++; RAP.life[k]++; try { localStorage.setItem('ylasto1988-rekisteri', JSON.stringify(RAP.life)); } catch (e) {} }
 function rapSend(beacon) {   // → a promise that settles when the server has it (so the paper's list, fetched after, includes it)
-  if (!ONLINE.api || !ONLINE.id) return Promise.resolve(); const d = { f: RAP.f - RAP.sent.f, p: RAP.p - RAP.sent.p, a: RAP.a - RAP.sent.a, h: RAP.h - RAP.sent.h, v: RAP.v > RAP.vSent ? RAP.v : 0 }, name = ONLINE.name || '';
-  if (!d.f && !d.p && !d.a && !d.h && !d.v && (!name || name === RAP.sentName || !(RAP.life.f + RAP.life.p + RAP.life.a + RAP.life.h))) return Promise.resolve();   // (nothing new — or only a name given since: then the name goes, to put it on the old rows)
-  const body = JSON.stringify({ id: ONLINE.id, name, ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a, h: RAP.h }; RAP.vSent = Math.max(RAP.vSent, RAP.v); RAP.sentName = name; RAP.at = -1e9;
+  if (!ONLINE.api || !ONLINE.id) return Promise.resolve(); const d = { f: RAP.f - RAP.sent.f, p: RAP.p - RAP.sent.p, a: RAP.a - RAP.sent.a, h: RAP.h - RAP.sent.h, t: RAP.t - RAP.sent.t, v: RAP.v > RAP.vSent ? RAP.v : 0 }, name = ONLINE.name || '';
+  if (!d.f && !d.p && !d.a && !d.h && !d.t && !d.v && (!name || name === RAP.sentName || !(RAP.life.f + RAP.life.p + RAP.life.a + RAP.life.h + RAP.life.t))) return Promise.resolve();   // (nothing new — or only a name given since: then the name goes, to put it on the old rows)
+  const body = JSON.stringify({ id: ONLINE.id, name, ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a, h: RAP.h, t: RAP.t }; RAP.vSent = Math.max(RAP.vSent, RAP.v); RAP.sentName = name; RAP.at = -1e9;
   try { if (beacon && navigator.sendBeacon) { navigator.sendBeacon(ONLINE.api + '/rap', body); return Promise.resolve(); } return fetch(ONLINE.api + '/rap', { method: 'POST', body, keepalive: true }).catch(() => {}); } catch (e) { return Promise.resolve(); } }
 function rapFetch() { if (!ONLINE.api || RAP.busy || performance.now() - RAP.at < 60000) return; RAP.busy = true;
   fetch(ONLINE.api + '/rap', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { RAP.busy = false; if (!j || !Array.isArray(j.fires)) return; RAP.list = j; RAP.at = performance.now(); posterRefresh(); mailFetch(); lhRapFill(document.getElementById('lehti-mini')); if (PAPER.open) lhRapFill(document.querySelector('#paper .pv-stage')); }).catch(() => { RAP.busy = false; }); }
@@ -4593,6 +4599,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['30.9.', 'Puunkaadot uutisiin: radion kylähuhu kertoo heti kaadetusta puusta tai aidasta, ja poliisin rekisteri laskee kaikkien kaatamat puut – radio kertoo kylän pahimman metsurin', '14.59'],
   ['30.9.', 'Puut kaatuvat ja aidat lakoavat, kun niihin ajaa lujaa (hiljaa ne pysyvät pystyssä); kaatuva puu kaataa alle jäävät. Dragsterin tuntuma viritetty: jarrut pienemmät (varjo tekee työn), pakki ryömii, etupito ja ohjaus paremmat', '13.57'],
   ['30.9.', 'Dragsterille oma oikea fysiikka: jousitus, slicksien pito ja sutiminen, keulan nousu wheelie-tukien varaan, siiven painovoima, jarruvarjo – osuma kylkeen pyöräyttää, reunakivi voi kääntää katolleen, siipi ja renkaat irtoavat; katollaan se syttyy ja kuski lentää ulos. Kunnon äänet: Top Fuel -moottori, pamaukset, rytinät. Levike kiinni tiessä, reunakivet ja rengasseinä', '13.33'],
   ['30.9.', 'Dragsterille uusi, tarkempi malli (kapeneva nokka, turvakaari ja kuski, ahdin, 8 pakoputkea, slicksit vanteineen, siipi, YLÄSTÖ FUEL -tarrat; pyörät pyörivät ja slicksit savuavat) ja oma levike lähtöruudun vasemmalla puolella', '13.00'],
@@ -6568,12 +6575,15 @@ function mradioShow() { const box = document.getElementById('mradio'); if (!box)
 const NEWS_GOSSIP = ['Paulin kaalimaalla uusi sato – Pauli päivystää traktorilla pellon laidalla', 'Pizzeria muistuttaa: kylmä pizza ei ole pizza', 'Ufohavaintoja Ylästöntien päässä – asukkaat hämmästyneitä',
   'K-kaupassa ES-tarjous: pysähdy pihaan', 'Mopopojat pyytävät ajamaan hiljempaa', 'Hirvivaroitus koko kylään', 'Liftari odottaa kyytiä K-kaupalle', 'Saunaporukan savu näkyy Tikkurilaan asti',
   'Postiauto myöhässä – kuski pelkää rallia', 'Kuumailmapallo nähty kylän yllä', 'Palokunta harjoittelee metsään ajoa', 'Betoniporsaita varastettu – palkkio löytäjälle'];
-function radioNewsLine() { const L = [], nm = (r) => r.name || T('Tuntematon kuski'), row0 = ONLINE.list && ONLINE.list[0];
+function radioNewsLine() { if (RADIO.hot) { const t = RADIO.hot; RADIO.hot = null; RADIO.newsLast = t; return '📻 ' + T('KYLÄHUHU') + ': ' + t; }   // (something just happened: that first)
+  const L = [], nm = (r) => r.name || T('Tuntematon kuski'), row0 = ONLINE.list && ONLINE.list[0];
   if (row0) L.push(T('{0} johtaa ennätyslistaa ajalla {1}', row0.name, formatTime(row0.t)));
   const today = new Date().toISOString().slice(0, 10), fresh = (ONLINE.list || []).filter(r => r.d === today); if (fresh.length) { const r = fresh[Math.floor(Math.random()*fresh.length)]; L.push(T('{0} ajoi tänään {1}', r.name, formatTime(r.t))); }
   if (STATS_LAST && STATS_LAST.starts > 0) L.push(T('Ylästössä ajettu jo {0} kisaa, kuskeja {1}', Math.round(STATS_LAST.starts).toLocaleString('fi-FI'), STATS_LAST.drivers));
   const RL = RAP.list; if (RL && RL.total) { if (RL.total.f) L.push(T('Kylässä palanut jo {0} taloa – palokunta pyytää rauhoittumaan', RL.total.f)); if (RL.total.p) L.push(T('Yliajettuja kyläläisiä jo {0} – ambulanssikuski väsynyt', RL.total.p));
     const w = rapWanted(); if (w) L.push(T('Poliisi etsii kuskia {0} – ei saa lähestyä', w.name)); if (RL.speed && RL.speed[0]) L.push(T('Peltipoliisi: kovin ylinopeus {0} km/h – {1}', RL.speed[0].n, nm(RL.speed[0]))); if (RL.kind && RL.kind[0]) L.push(T('Kylän kiltein kuski: {0}, {1} kyytiä liftareille', nm(RL.kind[0]), RL.kind[0].n)); }
+  if (RL && RL.total && RL.total.t) L.push(T('Kylästä kaadettu jo {0} puuta – metsänomistajat raivoissaan', RL.total.t)); if (RL && RL.lumber && RL.lumber[0]) L.push(T('Kylän pahin metsuri: {0}, {1} puuta nurin', nm(RL.lumber[0]), RL.lumber[0].n));
+  if (RAP.t > 1) L.push(T('Tuore tieto: rallikuski kaatoi juuri {0} puuta', RAP.t)); if (KNOCK.fences > 1) L.push(T('Pihan omistaja soitti: aita nurin, {0} väliä', KNOCK.fences));
   if (RAP.f > 0) L.push(T('Tuore tieto: joku sytytti juuri {0} taloa', RAP.f)); if (RAP.p > 0) L.push(T('Tuore tieto: {0} kyläläistä jäi juuri auton alle', RAP.p));
   if (FLOW.n > 0) L.push(T('Hälytysajoneuvoja ajanut metsään: {0}', FLOW.n));
   L.push(T(NEWS_GOSSIP[Math.floor(Math.random()*NEWS_GOSSIP.length)]));
@@ -9077,7 +9087,7 @@ function updateSmoke(dt) {
 //    The tree costs the car a good part of its speed (the Pökö gets dented; the dragster is spun by the blow), a fence little. Anyone
 //    the tree lands on is knocked down. The scenery is merged geometry: each tree / fence section is one Merger object (its oid);
 //    knockBuild finds each one's vertex runs in the merged meshes, knockAnim rotates those vertices (positions and normals) in place. ──
-const KNOCK = { items: [], grid: new Map(), falling: [], down: [], C: 8 };
+const KNOCK = { items: [], grid: new Map(), falling: [], down: [], C: 8, fences: 0 };
 const knockKey = (cx, cz) => cx*73856093 ^ cz*19349663;
 function knockBuild() { KNOCK.grid.clear(); KNOCK.falling.length = 0; KNOCK.down.length = 0; const items = KNOCK.items; if (!items.length) return;
   let maxO = 0; for (const it of items) { it.ranges = []; if (it.oid > maxO) maxO = it.oid; } const map = new Int32Array(maxO + 1).fill(-1); items.forEach((it, k) => { map[it.oid] = k; });
@@ -9100,7 +9110,7 @@ function knockUpdate() {   // (every physics step: the player's car against the 
     else { car.x -= nx*dep; car.z -= nz*dep; if (into > 0) { car.vx -= nx*into*1.2; car.vz -= nz*into*1.2; } } }); }   // (slowly: it stands, like a post)
 function knockOver(it, dx, dz, sp) { const l = Math.hypot(dx, dz) || 1; it.fall = true; it.dx = dx/l; it.dz = dz/l; it.th = 0; it.w = it.kind === 'tree' ? Math.min(1.2, sp*0.04) : 2 + sp*0.2; it.max = it.kind === 'tree' ? 1.48 : it.kind === 'hedge' ? 1.2 : 1.45; it.landed = false;
   it.p0 = it.ranges.map(([m, i0, n]) => m.geometry.attributes.position.array.slice(i0*3, (i0 + n)*3)); it.n0 = it.ranges.map(([m, i0, n]) => m.geometry.attributes.normal.array.slice(i0*3, (i0 + n)*3));
-  KNOCK.falling.push(it); KNOCK.down.push(it); const y = it.py;
+  KNOCK.falling.push(it); KNOCK.down.push(it); const y = it.py; if (it.kind === 'tree') { rapCount('t'); RADIO.hot = RAP.t > 1 ? T('Tuore tieto: rallikuski kaatoi juuri {0} puuta', RAP.t) : T('Tuore tieto: rallikuski kaatoi juuri puun metsässä'); } else { KNOCK.fences++; RADIO.hot = KNOCK.fences > 1 ? T('Pihan omistaja soitti: aita nurin, {0} väliä', KNOCK.fences) : T('Pihan omistaja soitti: rallikuski ajoi aidan läpi'); }   // (the village gossip: the radio, the police register)
   if (it.kind === 'tree') { for (let i = 0; i < 26; i++) lifeFx.emit(it.x + (Math.random() - 0.5)*2, y + 2 + Math.random()*3, it.z + (Math.random() - 0.5)*2, (Math.random() - 0.5)*3 + it.dx*2, Math.random()*2, (Math.random() - 0.5)*3 + it.dz*2, 1.4 + Math.random(), 0.35, 0.25, 0.9, 0.3, 0.5, 0.2, 0.35, 0.45, 0.2);   // leaves and needles
     knockSound(1); } else { for (let i = 0; i < 8; i++) lifeFx.emit(it.x + (Math.random() - 0.5)*it.hl*2, y + 0.5, it.z, (Math.random() - 0.5)*2, 1 + Math.random(), (Math.random() - 0.5)*2, 0.8, 0.3, 0.6, 0.6, 0.6, 0.55, 0.45, 0.7, 0.66, 0.6); knockSound(it.kind === 'hedge' ? 0.2 : 0.4); } }
 function knockPose(it, dirty) { const ax = it.dz, az = -it.dx, c = Math.cos(it.th), s = Math.sin(it.th), px = it.x, py = it.py, pz = it.z;   // rotate about the foot, round the axis across the fall
@@ -9122,7 +9132,7 @@ function knockLand(it) {   // the crown hits the ground: a thud, dust, and anyon
 function knockSound(s) { if (!audio) return; const { ctx, master } = audio, t = ctx.currentTime, src = ctx.createBufferSource(); src.buffer = audio.noiseBuf; const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1400 + Math.random()*900; bp.Q.value = 1.4;
   const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.2 + 0.4*s, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12 + 0.25*s); src.connect(bp); bp.connect(g); g.connect(master); src.start(t, Math.random()*0.5); src.stop(t + 0.45);
   beep(120 + Math.random()*40, 0.12, 0.15 + 0.2*s, 'square'); }   // (the crack of wood, a knock)
-function knockReset() { if (!KNOCK.down.length) return; const dirty = new Map();
+function knockReset() { KNOCK.fences = 0; if (!KNOCK.down.length) return; const dirty = new Map();
   for (const it of KNOCK.down) { it.th = 0; knockPose(it, dirty); it.fall = false; it.w = 0; it.p0 = it.n0 = null; } KNOCK.down.length = 0; KNOCK.falling.length = 0; knockFlush(dirty); }
 function updateDebris(dt) {
   for (let i = 0; i < carParts.length; i++) if (carParts[i].cool > 0) carParts[i].cool -= dt;
