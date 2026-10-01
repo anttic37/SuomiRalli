@@ -19,9 +19,9 @@
   .hud-value { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: #fff; font-variant-numeric: tabular-nums; }
   .hud-value.speed { color: #ff4444; }
   .hud-sub { font-size: 11px; color: #555; font-variant-numeric: tabular-nums; }
-  #ghost-delta { position: fixed; top: 43%; left: 50%; transform: translate(-50%, -50%); font-size: 30px; font-weight: 800; letter-spacing: 2px; opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.25s; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
-  #pizza-msg { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 800; letter-spacing: 1px; color: #ffb347; text-shadow: 0 2px 6px rgba(0,0,0,0.7); opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.3s; white-space: nowrap; }
-  #police-msg { position: fixed; top: 22%; left: 50%; transform: translate(-50%, -50%); font-size: 26px; font-weight: 800; letter-spacing: 1px; color: #6a9aff; text-shadow: 0 2px 6px rgba(0,0,0,0.8); opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.3s; white-space: nowrap; }
+  #ghost-delta { position: fixed; top: 245px; left: 50%; transform: translate(-50%, -50%); font-size: 20px; font-weight: 800; letter-spacing: 2px; opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.25s; text-shadow: 0 2px 6px rgba(0,0,0,0.6); }
+  #pizza-msg { position: fixed; top: 185px; left: 50%; transform: translate(-50%, -50%); font-size: 18px; font-weight: 800; letter-spacing: 1px; color: #ffb347; text-shadow: 0 2px 6px rgba(0,0,0,0.7); opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.3s; white-space: nowrap; }
+  #police-msg { position: fixed; top: 155px; left: 50%; transform: translate(-50%, -50%); font-size: 18px; font-weight: 800; letter-spacing: 1px; color: #6a9aff; text-shadow: 0 2px 6px rgba(0,0,0,0.8); opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.3s; white-space: nowrap; }
   #flow-hud { display: none; position: fixed; top: 122px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 800; letter-spacing: 0.3em; color: #ffd23a; text-shadow: 0 1px 4px rgba(0,0,0,0.8); pointer-events: none; z-index: 20; }
   #police-hud { display: none; position: fixed; top: 86px; left: 50%; transform: translateX(-50%); padding: 6px 16px; font-size: 14px; font-weight: 800; letter-spacing: 0.25em; color: #fff; border-radius: 4px; pointer-events: none; z-index: 20; animation: policeFlash 0.6s steps(1) infinite; }
   @keyframes policeFlash { 0% { background: #1a4ad8; } 50% { background: #d81a1a; } }
@@ -84,7 +84,7 @@
   /* the keys on the start screen */
   #keys { margin: clamp(10px, 2vh, 18px) auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; max-width: min(760px, 92vw); font-size: clamp(9px, 1.2vw, 11px); color: #8a8a86; letter-spacing: 0.06em; }
   #keys span { white-space: nowrap; } #keys kbd { font: inherit; font-weight: 700; color: #e8e8e4; padding: 1px 6px; margin-right: 5px; border: 1px solid #444; border-bottom-width: 2px; border-radius: 3px; background: #151515; }
-  #checkpoint-display { position: fixed; top: 38%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #fff; opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.1s; }
+  #checkpoint-display { position: fixed; top: 215px; left: 50%; transform: translate(-50%, -50%); font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #fff; opacity: 0; pointer-events: none; z-index: 20; transition: opacity 0.1s; }
   #countdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 110px; font-weight: 800; letter-spacing: -4px; color: #fff; opacity: 0; pointer-events: none; z-index: 30; }
   #overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow-y: auto; overflow-x: hidden; padding: 16px 0; z-index: 100; background: #0a0a0a; transition: opacity 0.5s; }
   #overlay > .deco.top { margin-top: auto; }   /* (auto margins centre it when it fits, and it scrolls from the top when it doesn't) */
@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 17.53 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 18.24 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -436,6 +436,7 @@ const I18N = {
   '😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!': ['😰 THE CAR’S ALL ALONE – SOMEONE COULD TAKE IT!', '😰 BILEN STÅR ALENE – NOEN KAN TA DEN!'],
   '😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!': ['😱 TOO SCARED TO GO FURTHER – THEY’LL STEAL THE CAR!', '😱 TØR IKKE GÅ LENGRE – BILEN BLIR STJÅLET!'],
   '😮‍💨 PUUSKUTTAA…': ['😮‍💨 OUT OF BREATH…', '😮‍💨 ANDPUSTEN…'],
+  '💥 SELITTÄMÄTÖN VIKA – R = uusi kone': ['💥 UNEXPLAINED FAILURE – R = new plane', '💥 OFÖRKLARLIGT FEL – R = nytt plan'],
   '🔥 ENNÄTYSVAUHTI': ['🔥 RECORD PACE', '🔥 REKORDFART'],
   'JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ': ['ON FOOT · F = BACK IN THE CAR · SPACE = PUNCH', 'TIL FOTS · F = TILBAKE I BILEN · MELLOMROM = SLÅ'], '👊 PAM!': ['👊 POW!', '👊 PANG!'], '🚨 JOKU SOITTI POLIISIT!': ['🚨 SOMEONE CALLED THE POLICE!', '🚨 NOEN RINGTE POLITIET!'],
   '☢️ YDINSOTA ALKOI!': ['☢️ NUCLEAR WAR HAS BEGUN!', '☢️ ATOMKRIGEN HAR BEGYNT!'],
@@ -3725,17 +3726,17 @@ const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0, stam: 1
 // Fear: past 90 m from the car they get nervous (slower, looking back over the shoulder); at 140 m they won't go on — it'll be stolen.
 const WALK_FEAR = 90, WALK_MAX = 140;
 function centerMsg(t, col, ms) { const cpd = document.getElementById('checkpoint-display'); if (!cpd) return; cpd.textContent = t; cpd.style.color = col || '#ffe9a8'; cpd.style.opacity = 1; clearTimeout(centerMsg.tm); centerMsg.tm = setTimeout(() => cpd.style.opacity = 0, ms || 1600); }   // (the one centre-screen message: a new one isn't cut short by an old one's fade)
-const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WALK;   // the arrows move you the way they point on the screen (the camera holds still while you walk), Shift runs, Space punches
-  const ix = -INPUT.steer(), iz = (INPUT.thr() ? 1 : 0) - (INPUT.brk() ? 1 : 0), wantRun = keys['ShiftLeft'] || keys['ShiftRight'];
+const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WALK;   // the arrows move you the way they point on the screen (the camera holds still while you walk), runs by default, Shift creeps, Space punches
+  const ix = -INPUT.steer(), iz = (INPUT.thr() ? 1 : 0) - (INPUT.brk() ? 1 : 0), sneak = keys['ShiftLeft'] || keys['ShiftRight'], wantRun = !sneak;
   const A = W.camA, mx = Math.sin(A)*iz - Math.cos(A)*ix, mz = Math.cos(A)*iz + Math.sin(A)*ix,   /* (screen right = (−cos A, sin A): a bigger heading is a left turn) */ ml = Math.hypot(mx, mz), fwd = ml > 0.01 ? 1 : 0;
   if (fwd) h.yaw += angDiff(Math.atan2(mx, mz) - h.yaw)*Math.min(1, dt*12);   // (turns to where it goes, quickly)
   if (INPUT.hand() && !W.spPrev && !h.down && !h.ride) walkPunch(h); W.spPrev = INPUT.hand(); if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; }
   if (W.stam < 0.02) W.puff = true; else if (W.stam > 0.35) W.puff = false;
   const run = wantRun && fwd > 0 && !W.puff, dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz), fear = Math.max(0, Math.min(1, (d - WALK_FEAR)/(WALK_MAX - WALK_FEAR)));
-  W.stam = Math.max(0, Math.min(1, W.stam + (run ? -dt/6 : dt*(fwd ? 0.07 : 0.14))));
-  let sp = fwd ? (run ? 6.8 : W.puff ? 1.6 : 3.6) : 0;
+  W.stam = Math.max(0, Math.min(1, W.stam + (run ? -dt/40 : dt*(fwd ? 0.1 : 0.14))));   // (runs by default: forty seconds flat out before the puffing)
+  let sp = fwd ? (run ? 6.8 : W.puff ? 1.6 : sneak ? 1.5 : 3.6) : 0;   // (Shift: creeping, bent a little)
   const away = (Math.sin(h.yaw)*dx + Math.cos(h.yaw)*dz)/(d || 1); if (away > 0 && sp) sp *= 1 - 0.6*fear;   // (nervous: dragging their feet going further off)
-  h.vx = Math.sin(h.yaw)*sp; h.vz = Math.cos(h.yaw)*sp; h.tilt = W.puff ? 0.28 : 0;
+  h.vx = Math.sin(h.yaw)*sp; h.vz = Math.cos(h.yaw)*sp; h.tilt = W.puff ? 0.28 : sneak && fwd ? 0.18 : 0;
   if (W.puff) { h.pose.armL = h.pose.armR = -0.6; if (!fwd) h.tilt = 0.45 + 0.05*Math.sin(t*9); if ((W.pt -= dt) <= 0) { W.pt = 0.55; if (audio) beep(170 + Math.random()*40, 0.2, 0.04, 'triangle'); } }   // hands on knees, panting
   if (W.puff && !W.saidPuff) { W.saidPuff = true; centerMsg(T('😮‍💨 PUUSKUTTAA…')); } else if (!W.puff) W.saidPuff = false;
   if (d > WALK_FEAR) { h.sway = 0.25*Math.sin(t*2.2)*fear; if (!W.saidFear) { W.saidFear = true; centerMsg(T('😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!'), '#ffb080'); } } else { W.saidFear = false; h.sway = 0; }
@@ -4995,6 +4996,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Jalkaisin kuski juoksee oletuksena, Shift pohjassa hiippailee. Viestit pienemmällä ja ylempänä, eivät enää ruudun keskellä. Kone ei käänny itsestään: kartan reunan yli lentävä kone räjähtää – selittämätön vika', '21.23'],
   ['1.10.', 'Kylän ulkopuolinen maailma (loputon metsä, korpikentät, maaseudun tiet, kylät, maatilat ja järvet) pois päältä toistaiseksi – pelaaja kertoi pelin lagaavan. Kone kääntyy taas kylän reunalla takaisin', '20.53'],
   ['1.10.', 'Tarkistuskierros: koko peli vanhaa versiota vastaan 174 testillä; pikkukorjaus: vapaasta ajosta poistuttaessa kotiin palaavat liikenneautot eivät enää ole ihmisille hetken "näkymättömiä"', '19.27'],
   ['1.10.', 'Lähihaku yhdellä ruudukolla: ihmiset, talot ja tolpat sekä nyt myös ajoneuvot (liikenne ~10 % kevyempää); sijoittelun kysymykset (onko auto/varattu paikka/talo lähellä) yhteisinä apureina; maalatut tekstit yhdestä välimuistista; katujen nimet kerran per nimi ja puolella resoluutiolla – näyttömuistia ~35 Mt vähemmän, ero ei näy', '15.42'],
@@ -5246,8 +5248,8 @@ const LEHTI = [
     body: ['Valo tulee eri suunnasta, varjot pitenevät ja taivas vaihtaa väriä. Illalla ikkunat hehkuvat ja saunan piipussa näkyy kiukaan loimu.'] },
   { id: 'jalan', size: 'page', n: 12, kick: '🚶 JALKAISIN', title: 'F – ja kuski nousee autosta', lede: 'Pysähdy, paina F, ja kävele – nuolet vievät sinne minne osoittavat. Välilyönti lyö, ja lyöty juoksee karkuun. Joku soittaa aina poliisit.',
     img: ['jalan.jpg'], cap: ['Kuski jaloittelee kylän raitilla. Auto odottaa käsijarru päällä.'],
-    body: ['Jalkaisin kuski on ihan tavallinen kyläläinen: hän törmäilee aitoihin ja kaatuu, jos joku ajaa päälle. Hän nousee kyllä itse.', 'Shiftillä pääsee juoksemaan, mutta se väsyttää. Yli 90 metrin päässä autosta kuski alkaa pelätä, että joku vie sen. 140 metrin jälkeen ei uskalla kauemmas.', 'Kyläläisiä ei kannata lyödä: poliisi tulee paikalle, ja lyöty pakenee paikalta niin kovaa kuin pääsee.'],
-    box: ['NÄPPÄIMET', 'F = ulos / takaisin autoon', 'Nuolet = kävely · Shift = juoksu', 'Välilyönti = lyö (poliisi tulee)'] },
+    body: ['Jalkaisin kuski on ihan tavallinen kyläläinen: hän törmäilee aitoihin ja kaatuu, jos joku ajaa päälle. Hän nousee kyllä itse.', 'Kuski juoksee itsestään, mutta pitkä juoksu väsyttää. Shift pohjassa hän hiippailee hiljaa. Yli 90 metrin päässä autosta kuski alkaa pelätä, että joku vie sen. 140 metrin jälkeen ei uskalla kauemmas.', 'Kyläläisiä ei kannata lyödä: poliisi tulee paikalle, ja lyöty pakenee paikalta niin kovaa kuin pääsee.'],
+    box: ['NÄPPÄIMET', 'F = ulos / takaisin autoon', 'Nuolet = juoksu · Shift = hiippailu', 'Välilyönti = lyö (poliisi tulee)'] },
   { id: 'es', size: 'page', n: 13, kick: '⚡ ES', title: 'ES-juoma: tuplanopeus 40 sekunniksi', lede: 'K-kaupan edessä on ES-piste. Pysähdy, myyjä tuo tölkin – ja auto kulkee kaksi kertaa niin kovaa.',
     img: ['es.jpg'], cap: ['ES-kyltti K-kaupan edessä. Tanssijat houkuttelevat pysähtymään.'],
     body: ['Nopeus tuplaantuu 40 sekunniksi. Mutta varo: kolari ES:n vaikutuksen alaisena sytyttää auton, ja kuski lentää ulos.'] },
@@ -7018,7 +7020,7 @@ const pizzaTask = (S) => ({ kind: 'pizza', update(h, dt) { const st = h.st || (h
 function pizzaDelivered(h) { PIZZA.got = true; PIZZA.k = PIZZA.BOOST; h.view.g.userData.box.visible = false; h.st.mode = 'back'; pizzaMsg(T('🍕 PIZZA! auto +10 %'), true); beep(660, 0.12, 0.3, 'square'); setTimeout(() => beep(990, 0.25, 0.3, 'square'), 130);
   const el = document.getElementById('pizza-hud'); if (el) el.textContent = '🍕 +10 %'; }
 let pizzaMsgT = null;
-function pizzaMsg(t, big) { const el = document.getElementById('pizza-msg'); if (!el) return; if (el.__t !== t) { el.__t = t; el.textContent = t; } el.style.opacity = 1; el.style.fontSize = big ? '38px' : '26px';
+function pizzaMsg(t, big) { const el = document.getElementById('pizza-msg'); if (!el) return; if (el.__t !== t) { el.__t = t; el.textContent = t; } el.style.opacity = 1; el.style.fontSize = big ? '24px' : '18px';
   clearTimeout(pizzaMsgT); pizzaMsgT = setTimeout(() => { el.style.opacity = 0; el.__t = null; }, big ? 2500 : 400); }
 function pizzaUpdate(dt) {
   for (let i = PIZZA_SIGNS.length - 1; i >= 0; i--) { const G = PIZZA_SIGNS[i]; if (!G.parent) { PIZZA_SIGNS.splice(i, 1); continue; } G.userData.spin.rotation.y += dt*0.9; }
@@ -7322,7 +7324,7 @@ function lpReset() { LP.wait = 0; if (LP.seller) LP.seller.st = { mode: 'home' }
 //          the slate is clean. Well clear of them for 10 s, or over the line, and they give up. ════════
 const POLICE = { n: 0, lastT: -99, cars: [], hold: 0, tree: null, treeT: -99, lostT: 0, caughtT: 0 };
 let policeMsgT = null;
-function policeMsg(t, big) { const el = document.getElementById('police-msg'); if (!el) return; el.textContent = t; el.style.opacity = 1; el.style.fontSize = big ? '38px' : '26px';
+function policeMsg(t, big) { const el = document.getElementById('police-msg'); if (!el) return; el.textContent = t; el.style.opacity = 1; el.style.fontSize = big ? '24px' : '18px';
   clearTimeout(policeMsgT); policeMsgT = setTimeout(() => { el.style.opacity = 0; }, big ? 2600 : 1800); }
 function policeIncident(kind) {
   if (gameState !== State.RACING || POLICE.hold > 0 || worldT - POLICE.lastT < 4 || (BASS.on && kind === 'people')) return;   /* (a crowd that throws itself at the car isn't the driver's doing) */ POLICE.lastT = worldT; POLICE.n++;   // (one pile-up is one incident)
@@ -8876,7 +8878,7 @@ function planePhys(dt, live) { const P = PLANE; if (P.crashed) { car.vx = car.vz
   const ease = (x, t, r) => x + Math.max(-r*dt, Math.min(r*dt, t - x));
   P.de = ease(P.de, (pitchUp ? 1 : 0) - (pitchDn ? 1 : 0) || (P.edge ? Math.min(0.35, Math.abs(P.bank || 0)*0.4) : 0), 3); let daT = (k('ArrowRight') ? 1 : 0) - (k('ArrowLeft') ? 1 : 0); const cx = HG.x0 + HG.n*HG.step/2, cz = HG.z0 + HG.n*HG.step/2, edge = Math.min(P.p.x - HG.x0, HG.x0 + HG.n*HG.step - P.p.x, P.p.z - HG.z0, HG.z0 + HG.n*HG.step - P.p.z);
   const bankNow = Math.asin(Math.max(-1, Math.min(1, -_pL.set(1, 0, 0).applyQuaternion(P.q).y)));   // (+ = left wing down)
-  P.edge = !OUTER_WORLD && P.air && edge < 320 && P.p.y - Y(P.p.x, P.p.z) > 35;   /* (with the world beyond the village on there's no edge: the turn-back assist is off) */   /* (not low down just off the runway: a wingtip would hit) */
+  P.edge = false;   /* (no turn-back assist: Antti — the plane never turns by itself; over the map's edge it blows up instead, below) */   /* (not low down just off the runway: a wingtip would hit) */
   if (P.edge && !daT) {   /* the edge of the map: it banks back towards the village by itself; a left turn wants a left bank (this bank measure is + to the left) */ const Fh = _pF.set(0, 0, 1).applyQuaternion(P.q), err = Math.atan2(Math.sin(Math.atan2(cx - P.p.x, cz - P.p.z) - Math.atan2(Fh.x, Fh.z)), Math.cos(Math.atan2(cx - P.p.x, cz - P.p.z) - Math.atan2(Fh.x, Fh.z))), bank = Math.asin(Math.max(-1, Math.min(1, -_pL.set(1, 0, 0).applyQuaternion(P.q).y)));
     daT = Math.max(-1, Math.min(1, (bank - (Math.abs(err) > 0.2 ? Math.sign(err)*0.75 : 0))*2)); P.bank = bank; } else P.bank = 0;
   if (!daT && !P.edge && P.air) daT = Math.max(-0.6, Math.min(0.6, bankNow*1.2 - P.w.dot(_pF.set(0, 0, 1).applyQuaternion(P.q))*0.4));   // (hands off the stick: a gentle wing leveller, so it doesn't roll away on its own)
@@ -8902,8 +8904,8 @@ function planePhys(dt, live) { const P = PLANE; if (P.crashed) { car.vx = car.vz
   { let hit = false; for (const [bx, bz] of [[0, 0], [4.5, 0.3], [-4.5, 0.3]]) { const r = _pV.set(bx, 0, bz).applyQuaternion(P.q), x = P.p.x + r.x, z = P.p.z + r.z, y = P.p.y + r.y - Y(x, z);
       staticNear(x, z, 3, B => { if (hit) return; const dx = x - B.x, dz = z - B.z, c = Math.cos(B.yaw || 0), s = Math.sin(B.yaw || 0), a = dx*c - dz*s, b = dx*s + dz*c, top = B.kind === 'house' ? 8 : B.kind === 'pole' ? 9 : /pine|tree|puu|kuusi/.test(B.kind || '') ? 15 : 4;
         if (Math.abs(a) < B.hw + 0.4 && Math.abs(b) < B.hl + 0.4 && y < top) hit = true; }); } if (hit && V > 5) hard = 99; }
-  hard = Math.max(hard, planeVsBalloons());
-  if (hard > 0) { P.crashed = true; boom(P.p.x, P.p.y, P.p.z, true); planeBreak(); P.thr = 0; pizzaMsg(wet ? T('🌊 LENTOKONE SYÖKSYI JÄRVEEN – R = uusi kone') : T('💥 LENTOKONE ROMAHTI – R = uusi kone'), true); car.vx = car.vz = car.speed = 0; return; }
+  hard = Math.max(hard, planeVsBalloons()); const lost = !OUTER_WORLD && P.air && !inBase(P.p.x, P.p.z, 0); if (lost) hard = 99;   // (over the edge of the map: an unexplained failure)
+  if (hard > 0) { P.crashed = true; boom(P.p.x, P.p.y, P.p.z, true); planeBreak(); P.thr = 0; pizzaMsg(lost ? T('💥 SELITTÄMÄTÖN VIKA – R = uusi kone') : wet ? T('🌊 LENTOKONE SYÖKSYI JÄRVEEN – R = uusi kone') : T('💥 LENTOKONE ROMAHTI – R = uusi kone'), true); car.vx = car.vz = car.speed = 0; return; }
   v.addScaledVector(Fo, dt/PL_M); P.p.addScaledVector(v, dt);
   const wb = [w.dot(L), w.dot(U), w.dot(F)], tb = [Tq.dot(L), Tq.dot(U), Tq.dot(F)]; for (let i = 0; i < 3; i++) wb[i] += tb[i]/PL_I[i]*dt;
   if (onGround && V < 0.3 && !P.thr) { wb[0] *= 0.8; wb[1] *= 0.8; wb[2] *= 0.8; }
