@@ -1,5 +1,5 @@
 const { chromium, devices } = require('playwright-core');
-(async () => { const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--autoplay-policy=no-user-gesture-required'] });
+(async () => { const b = await chromium.launch({ executablePath: process.env.PW_CHROME || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--autoplay-policy=no-user-gesture-required'] });
   await fetch('http://localhost:8799/api/rap', { method: 'POST', body: JSON.stringify({ id: 'abcdefgh1234', name: 'Testi-Timo', f: 7, t: 42 }) });
   const out = {};
   const m = await b.newContext({ ...devices['Pixel 5'] }); const p = await m.newPage(); const errs = []; p.on('pageerror', e => errs.push(String(e))); p.on('console', x => { if (x.type() === 'error') errs.push(x.text()); });
