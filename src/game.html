@@ -168,7 +168,7 @@
   #name-status { width: 100%; font-size: 12px; color: #aaa; min-height: 1.2em; }
   @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
   #minimap { position: fixed; bottom: 24px; right: 24px; width: 140px; height: 140px; z-index: 10; pointer-events: none; opacity: 0.5; }
-  #cluster { position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: none; width: min(280px, 40vw); aspect-ratio: 2 / 1; }
+  #cluster { display: none; position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: none; width: min(280px, 40vw); aspect-ratio: 2 / 1; }
   #controls-hint { position: fixed; bottom: 24px; left: 32px; z-index: 10; pointer-events: none; display: flex; gap: 16px; opacity: 0.25; }
   .key-hint { font-size: 9px; letter-spacing: 2px; color: #888; text-transform: uppercase; }
   /* ── Ylästön Sanomat: the paper on the start screen (left), the share QR on the right; the viewer ── */
@@ -3540,16 +3540,16 @@ function roadInfo(x, z) {
   if (_tpRef !== trackPoints || _tpLen !== trackPoints.length) _tpBuild();
   const gx = Math.floor(x/TPC), gz = Math.floor(z/TPC);
   let bi = -1, bd = Infinity;
-  for (let r = 0; r < 400; r++) {
+  const cell = (cx, cz) => { const b = _tpGrid.get((cx*73856093) ^ (cz*19349663)); if (b) for (const i of b) { const p = trackPoints[i], dx = p.x-x, dz = p.y-z, d = dx*dx+dz*dz; if (d < bd) { bd = d; bi = i; } } };
+  for (let r = 0; r < 12; r++) {   // (rings out to ~70 m, only each ring's edge cells — it used to walk the whole square every ring: seconds at boot)
     // ring r: once a hit exists, stop when the ring is provably farther than it
     if (bi >= 0) { const ringMin = (r-1)*TPC; if (ringMin > 0 && ringMin*ringMin > bd) break; }
-    for (let ox = -r; ox <= r; ox++) for (let oz = -r; oz <= r; oz++) {
-      if (Math.max(Math.abs(ox), Math.abs(oz)) !== r) continue;
-      const b = _tpGrid.get(((gx+ox)*73856093) ^ ((gz+oz)*19349663)); if (!b) continue;
-      for (const i of b) { const p = trackPoints[i], dx = p.x-x, dz = p.y-z, d = dx*dx+dz*dz; if (d < bd) { bd = d; bi = i; } }
-    }
+    if (r === 0) { cell(gx, gz); continue; }
+    for (let o = -r; o <= r; o++) { cell(gx+o, gz-r); cell(gx+o, gz+r); }
+    for (let o = -r+1; o <= r-1; o++) { cell(gx-r, gz+o); cell(gx+r, gz+o); }
   }
-  if (bi < 0) { for (let i = 0; i < trackPoints.length; i++) { const dx = trackPoints[i].x-x, dz = trackPoints[i].y-z, d = dx*dx+dz*dz; if (d < bd) { bd = d; bi = i; } } }
+  if (bi >= 0) { const ringMin = 11*TPC; if (ringMin*ringMin < bd) bi = -1; }   // (a hit not yet proven nearest: the full scan below decides)
+  if (bi < 0) { bd = Infinity; for (let i = 0; i < trackPoints.length; i++) { const dx = trackPoints[i].x-x, dz = trackPoints[i].y-z, d = dx*dx+dz*dz; if (d < bd) { bd = d; bi = i; } } }
   return { idx: bi, d2: bd };
 }
 
@@ -4999,6 +4999,8 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Uusi kamera: auton takana ja yläviistossa; paikallaan kamera nousee ylös ja kauas, ja laskeutuu tasaisesti takakameraksi 80 km/h:iin mennessä. C = vanha yläkamera. Nopeusmittarit pois alareunasta, auto näkyy alempana', '21.36'],
+  ['1.10.', 'Peli käynnistyy noin sekunnin nopeammin (lähimmän reittipisteen haku ja huoltoalueen paikan etsintä nopeammiksi); hiiren rulla / trackpad zoomaa tasaisesti eikä enää hyppien', '21.36'],
   ['1.10.', 'Jätehuolto: vihreä pyörällinen roskapönttö jokaisen talon eteen ja roska-auto, joka kiertää täydet pöntöt – lastaaja taluttaa pöntön perään, nostaa ja puristin jyskyttää. Ralliauto lennättää pöntön', '21.35'],
   ['1.10.', 'Jalkaisin kuski juoksee oletuksena, Shift pohjassa hiippailee. Viestit pienemmällä ja ylempänä, eivät enää ruudun keskellä. Kone ei käänny itsestään: kartan reunan yli lentävä kone räjähtää – selittämätön vika', '21.23'],
   ['1.10.', 'Kylän ulkopuolinen maailma (loputon metsä, korpikentät, maaseudun tiet, kylät, maatilat ja järvet) pois päältä toistaiseksi – pelaaja kertoi pelin lagaavan. Kone kääntyy taas kylän reunalla takaisin', '20.53'],
@@ -5844,7 +5846,15 @@ function batchFill() {
     if (n !== B.im.count) ch = true; B.im.count = n; B.im.visible = n > 0;
     if (n && ch) { /* (parked grills, bikes, poles: nothing changed, nothing uploaded) */ B.im.instanceMatrix.updateRange.count = n*16; B.im.instanceMatrix.needsUpdate = true; B.im.instanceColor.updateRange.count = n*3; B.im.instanceColor.needsUpdate = true; } }
 }
-scene.onBeforeRender = (r, sc, cam) => { batchFill(); bodyFill(cam); };
+// small far detail (roadside tufts/lupins, yard cars) is left out past where it's a pixel or two — the chase camera sees the horizon (1.10.)
+const FAR_DETAIL = { verge: 220, yardcars: 320 }; let _fdList = null, _fdKey = '';
+function farDetail(cam) { const key = trackMeshGroup.children.length + ':' + yardCarMeshes.length + ':' + (yardCarMeshes[0] && yardCarMeshes[0].id);
+  if (!_fdList || key !== _fdKey) { _fdKey = key; _fdList = trackMeshGroup.children.filter(o => o.isInstancedMesh && o.userData.key === 'verge').concat(yardCarMeshes); }
+  const cx = cam.position.x, cz = cam.position.z;
+  for (const o of _fdList) { const S = o.geometry.boundingSphere; if (!S) continue; const far = Math.hypot(S.center.x - cx, S.center.z - cz) - S.radius > FAR_DETAIL[o.userData.key];
+    if (far === !!o.userData.farHid) continue;
+    if (far) { if (o.visible) { o.visible = false; o.userData.farHid = true; } } else { o.visible = true; o.userData.farHid = false; } } }   // (hidden by something else meanwhile — the nuke — it stays so)
+scene.onBeforeRender = (r, sc, cam) => { batchFill(); bodyFill(cam); farDetail(cam); };
 const lifeFx = makeParticleSystem(1300, false, true), saunaFx = makeParticleSystem(900, false, true), waterFx = makeParticleSystem(700, false, true);
 const WIND_YAW = 0.95;                       // flags fly towards the north-east-ish
 let crashAt = null;                          // last hard hit: { x, z, t, onRoute }
@@ -8437,10 +8447,12 @@ function buildGrandstands() { STANDS.length = 0; MAKKARA.carts.length = 0; const
 //    three team boxes on an asphalt lot: a canopy, a rally car with its number, tyres, a toolbox, a mechanic at the engine, a van ──
 const FINISH_AREA = { ctx: null, tex: null, last: '' }, SCOREBOARDS = [];
 function finishLot(cx, cz, W, D, rMin, rMax, loose) { let best = null;   // an open, level lot near (cx, cz), its long side facing the route
+  const TG = new Map(); for (const t of tires) { const k = Math.floor(t.x/4)*73856093 ^ Math.floor(t.z/4)*19349663; let l = TG.get(k); if (!l) TG.set(k, l = []); l.push(t); }   // (the tyres in 4 m cells: it used to scan all ~1400 per sample)
+  const tyreAt = (px, pz) => { for (let i = Math.floor((px - 1.8)/4); i <= Math.floor((px + 1.8)/4); i++) for (let j = Math.floor((pz - 1.8)/4); j <= Math.floor((pz + 1.8)/4); j++) { const l = TG.get(i*73856093 ^ j*19349663); if (l) for (const t of l) if (Math.abs(t.x - px) < 1.8 && Math.abs(t.z - pz) < 1.8) return true; } return false; };
   for (let k = 0; k < 900; k++) { const a = Math.random()*6.3, r = rMin + Math.random()*(rMax - rMin), x = cx + Math.sin(a)*r, z = cz + Math.cos(a)*r, ri = roadInfo(x, z), p = trackPoints[ri.idx], dr = Math.sqrt(ri.d2);
     if (dr < wAt(ri.idx)/2 + D/2 + 3 || dr > wAt(ri.idx)/2 + D/2 + (loose ? 30 : 16)) continue; const yaw = Math.atan2(p.x - x, p.y - z); let ok = true, lo = 1e9, hi = -1e9;
     for (let u = -W/2; u <= W/2 + 0.01 && ok; u += 2) for (let v = -D/2; v <= D/2 + 0.01 && ok; v += 2) { const [px, pz] = lloc(x, z, yaw, u, v);
-      if (onRoad(px, pz, 0.8) || treeNear(px, pz, 1.4) || !clearSpot(px, pz, 0.6) || tires.some(t => Math.abs(t.x - px) < 1.8 && Math.abs(t.z - pz) < 1.8) || planWithin(px, pz, 1)) ok = false;
+      if (onRoad(px, pz, 0.8) || treeNear(px, pz, 1.4) || !clearSpot(px, pz, 0.6) || tyreAt(px, pz) || planWithin(px, pz, 1)) ok = false;
       else { const g = H(px, pz); lo = Math.min(lo, g); hi = Math.max(hi, g); } }
     if (!ok || hi - lo > (loose ? 2.4 : 1.6)) continue; const sc = -r*0.3 - (hi - lo)*6 - dr*0.2; if (!best || sc > best.sc) best = { x, z, yaw, sc, base: lo }; if (k > 300 && best) break; }
   return best; }
@@ -9656,7 +9668,7 @@ function nukeHit() { NUKE.hit = true; const S = NUKE.saved = { stat: [], veh: []
   BALLOONS.forEach(B => { if (B.mode === 'fly') balloonPop(B); });
   // the world: black ground, dark roads, a brown sky, dim orange light
   const gm = groundMesh.userData.mat; S.mats.push([gm, gm.color.getHex()]); gm.color.setHex(0x7a4c3a);   // (× the green land texture: a burnt brown-black)
-  trackMeshGroup.children.forEach(o => { if (o.isInstancedMesh && o.userData.key === 'verge' && o.visible) { o.visible = false; S.life.push(o); } });   // the grass by the road: burnt away
+  trackMeshGroup.children.forEach(o => { if (o.isInstancedMesh && o.userData.key === 'verge' && (o.visible || o.userData.farHid)) { o.visible = false; o.userData.farHid = false; S.life.push(o); } });   // the grass by the road: burnt away
   trackMeshGroup.traverse(o => { if (o.isMesh && o.material && o.material.color && !S.mats.some(m => m[0] === o.material)) { S.mats.push([o.material, o.material.color.getHex()]); o.material.color.multiplyScalar(0.55); } });
   skyU.uHor.value.setHex(0x7a5a3e); skyU.uZen.value.setHex(0x3a2e28); skyU.uGlow.value.setHex(0xff8a3a); scene.fog.color.setHex(0x8a6a50); scene.fog.near = 160; scene.fog.far = 780; scene.background.setHex(0x5a4434);
   dirLight.color.setHex(0xffb070); dirLight.intensity *= 0.9; hemiLight.color.setHex(0xb08a68); hemiLight.groundColor.setHex(0x4a3a2c); hemiLight.intensity *= 1.1; ambLight.intensity *= 1.4;
@@ -10564,7 +10576,7 @@ addEventListener('keydown', e => {
   if (e.code==='KeyF' && !e.repeat) PLAYER.use();   // (in and out of rides, on foot: PLAYER)
   if (e.code==='Digit1' || e.code==='Numpad1') radioVol(-1);   // radio quieter / louder
   if (e.code==='Digit2' || e.code==='Numpad2') radioVol(1);
-  if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; centerMsg(T(camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'), '#ffe9a8', 900); }
+  if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; camZoomTarget = 1; centerMsg(T(camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'), '#ffe9a8', 900); }
   if (e.code==='KeyG' && !e.repeat) { ghostEnabled = !ghostEnabled; centerMsg(T(ghost ? (ghostEnabled ? 'HAAMU PÄÄLLÄ' : 'HAAMU POIS') : 'EI HAAMUA VIELÄ'), '#bfe2ff', 900); }   // restart any time: back to the grid, countdown again
 });
 addEventListener('keyup', e => keys[e.code]=false);
@@ -10572,6 +10584,7 @@ addEventListener('keyup', e => keys[e.code]=false);
 const camAngle = { current: 0 };
 
 function startRace(newTrack) {
+  camZoomTarget = 1;   // (a new race starts from the normal camera distance)
   FLOW.on = false; FLOW.mopo = true; for (const v of VEHICLES) v.dodge = null;
   if (audio && audio.ctx.state === 'suspended') audio.ctx.resume();
   if (newTrack) generateTrack();
@@ -10877,44 +10890,70 @@ function updateCheckpoints(fdt) {
 const camPos=new THREE.Vector3(),camLookAt=new THREE.Vector3(),camTarget=new THREE.Vector3();
 const lightAnchor = { x: 1e9, z: 1e9 };
 // Mouse wheel zoom (out = further/higher). Smoothed toward a target.
-let camZoom = 1, camZoomTarget = 1, camLow = false, camLowK = 0;   // C: low chase camera behind the car (shows the hills)
+let camZoom = 1, camZoomTarget = 1, camLow = true, camLowK = 1;   // the chase camera behind the car (1.10.: the default); C: the old high view
 addEventListener('wheel', e => {
   e.preventDefault();
-  camZoomTarget = Math.min(3.2, Math.max(0.6, camZoomTarget * (e.deltaY > 0 ? 1.12 : 1/1.12)));
+  const d = e.deltaMode === 1 ? e.deltaY*33 : e.deltaY;   // (by how far it scrolled: a Mac trackpad sends dozens of small events a swipe, each was a full 12 % step)
+  camZoomTarget = Math.min(2.5, Math.max(0.7, camZoomTarget * Math.exp(Math.max(-100, Math.min(100, d))*0.0011)));
 }, { passive: false });
 
 // where the car sits on screen (high view): in the lower part, but always above the gauge cluster — a slow correction of the look-ahead
 let camAdj = 0, _clTopFrac = 1, _clT = 0; const _camV = new THREE.Vector3();
 const _camWalker = { x: 0, z: 0, angle: 0, vx: 0, vz: 0 };
-function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind the car, no speed lead — Antti asked it back (the later lead + auto look-ahead went too top-down)
+// the chase camera's line of sight car → camera: how far along it (0…1) a house, a shop or the ground first gets in the way
+function camBlock(x0, y0, z0, x1, y1, z1) { let t = 1;
+  for (let k = 1; k <= 6; k++) { const f = k/7, x = x0 + (x1 - x0)*f, z = z0 + (z1 - z0)*f; if (y0 + (y1 - y0)*f < Y(x, z) + 0.5) { t = Math.min(t, f - 1/7); break; } }   // (a crest between)
+  const dx = x1 - x0, dz = z1 - z0, L = Math.hypot(dx, dz) || 1;
+  staticNear((x0 + x1)/2, (z0 + z1)/2, L/2 + 1, B => { if (B.kind !== 'house' && B.kind !== 'lm') return;
+    const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), ax = x0 - B.x, az = z0 - B.z, hw = B.hw + 0.4, hl = B.hl + 0.4;   // (the segment in the box's frame: slabs)
+    const pf = ax*fx + az*fz, pr = ax*fz - az*fx, df = dx*fx + dz*fz, dr = dx*fz - dz*fx; let a = 0, b = 1;
+    for (const [p, d, h] of [[pf, df, hl], [pr, dr, hw]]) { if (Math.abs(d) < 1e-9) { if (Math.abs(p) > h) return; continue; } let u = (-h - p)/d, v = (h - p)/d; if (u > v) [u, v] = [v, u]; a = Math.max(a, u); b = Math.min(b, v); if (a > b) return; }
+    const top = B.kind === 'house' ? (B.wallTop || 3) + (B.roofH || 1) : 4.5, ya = y0 + (y1 - y0)*a, yb = y0 + (y1 - y0)*b;
+    if (Math.min(ya, yb) < Y(B.x, B.z) + top) t = Math.min(t, a); });
+  return t; }
+// The camera hangs on a boom behind the car: a length L (growing a little with speed) at an elevation angle el above the car's pivot
+// (1 m over the ground), and looks at a point la m ahead, lu m above the pivot. Only the heading (sideways) is smoothed; along the boom
+// nothing lags, so the car sits at the same place on screen at every speed. Hills: the pivot follows the ground (bumps filtered),
+// a crest under the camera lifts it, a house or a crest between pulls it in.
+const CAM_RIGS = {
+  chase: { L: 26, Lv: 0.2, el: 0.68, la: 14, lav: 0.15, lu: -0.8 },   // (20 m back, 17 m up at rest; the car at ~80 % of the screen height)
+  high:  { L: 47.8, Lv: 0.45, el: 1.12, la: 15, lav: 0.2, lu: -1 },     // (C: the old high view, 21 m back, 43 m up)
+};
+const CAM = { py: null, vs: 0, pull: 1, lift: 0, ah: 0 }, CAM_FULL = 80/3.6;
+function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, auton taakse fiksummin"): the chase boom by default, C = the high one
   if (PLAYER.R.camera) { PLAYER.R.camera(dt); return; }   // (a ride with a camera of its own: the plane's chase camera along its nose)
-  const C = WALK.on && WALK.h ? Object.assign(_camWalker, { x: WALK.h.x, z: WALK.h.z, angle: WALK.camA, vx: WALK.h.vx || 0, vz: WALK.h.vz || 0 }) : car;   // (on foot: the same camera, high up, on the walker — Antti, 29.9.)
+  const C = WALK.on && WALK.h ? Object.assign(_camWalker, { x: WALK.h.x, z: WALK.h.z, angle: WALK.camA, vx: WALK.h.vx || 0, vz: WALK.h.vz || 0 }) : car;   // (on foot: the same camera on the walker — Antti, 29.9.)
   const speed=Math.min(C === car && PLAYER.R.camSpeedCap || Infinity, Math.sqrt(C.vx*C.vx+C.vz*C.vz));   // (the dragster at 400 km/h: the camera as at 160)
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
-  camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two views
-  const h=((43+speed*0.5)*(1-camLowK) + (4.2+speed*0.04)*camLowK)*camZoom;
+  camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two rigs
+  const K = camLowK, A = CAM_RIGS.chase, B = CAM_RIGS.high; let R = K; const mix = (k) => A[k]*R + B[k]*(1 - R);   // (R: how far along from the high rig to the chase one)
+  // heading (sideways): turns after the car, the chase rig a little into a slide (the way it's going)
   const rideCam = C === car && PLAYER.R.camAngle;   // (a ride may steer the camera's heading itself: the dragster's calm one)
-  const angleDiff = angDiff((rideCam ? rideCam(dt) : C.angle) - camAngle.current);
-  camAngle.current+= rideCam ? Math.max(-1.1*dt, Math.min(1.1*dt, angleDiff*1.2*dt)) : angleDiff*1.2*dt;   // (the dragster: never faster than ~60°/s round)
-  const cfx=Math.sin(camAngle.current),cfz=Math.cos(camAngle.current);
-  const camDist=((21+speed*0.1)*(1-camLowK) + (10.5+speed*0.1)*camLowK)*camZoom;
-  camTarget.set(C.x-cfx*camDist, Y(C.x,C.z)+h, C.z-cfz*camDist);
-  camTarget.y = Math.max(camTarget.y, Y(camTarget.x, camTarget.z) + 2.2);   // never under a crest behind the car
-  camPos.lerp(camTarget,1-Math.pow(0.15,dt));
-  camPos.y = Math.max(camPos.y, Y(camPos.x, camPos.z) + 1.6);
-  const la=(15+speed*0.2)*(1-camLowK) + (13+speed*0.35)*camLowK;
-  // look into the drift: blend look direction toward velocity direction
+  let want = rideCam ? rideCam(dt) : C.angle;
+  if (!rideCam && C === car && speed > 5) { const dv = angDiff(Math.atan2(C.vx, C.vz) - C.angle); if (Math.cos(dv) > 0) want += Math.max(-0.6, Math.min(0.6, dv))*0.45*K; }   // (not when reversing)
+  const angleDiff = angDiff(want - camAngle.current);
+  camAngle.current+= rideCam ? Math.max(-1.1*dt, Math.min(1.1*dt, angleDiff*1.2*dt)) : angleDiff*Math.min(1, (1.2 + 2.4*K)*dt);   // (the dragster: never faster than ~60°/s round)
+  const fx = Math.sin(camAngle.current), fz = Math.cos(camAngle.current), gy = Y(C.x, C.z);
+  // the boom
+  CAM.vs += (speed - CAM.vs)*Math.min(1, 1.5*dt);
+  R = K*Math.min(1, CAM.vs/CAM_FULL);   // (1.10., Antti: standing still the camera is up at the high rig, coming down linearly to the chase one by 80 km/h)
+  if (CAM.py === null || Math.abs(gy + 1 - CAM.py) > 6) CAM.py = gy + 1;   // (a start, a reset, a teleport: straight there)
+  CAM.py += (gy + 1 - CAM.py)*Math.min(1, 8*dt);
+  const el = mix('el'), ce = Math.cos(el), se = Math.sin(el);
+  let L = (mix('L') + mix('Lv')*CAM.vs)*(C === car ? 1 : 1 - 0.4*K)*camZoom;   // (on foot: a shorter boom)
+  if (R > 0.01) { const t = camBlock(C.x, CAM.py + 0.3, C.z, C.x - fx*L*ce, CAM.py + L*se, C.z - fz*L*ce);   // a house or a crest in between: in (fast), back out (slowly)
+    const pw = Math.max(0.3, t); CAM.pull += (pw - CAM.pull)*Math.min(1, (pw < CAM.pull ? 10 : 1.5)*dt); L *= 1 - (1 - CAM.pull)*R; }
+  camPos.set(C.x - fx*L*ce, CAM.py + L*se, C.z - fz*L*ce);
+  const need = Math.max(0, Y(camPos.x, camPos.z) + 1.5 - camPos.y);   // ground right under the camera: lift it (fast up, slowly down)
+  CAM.lift += (need - CAM.lift)*Math.min(1, (need > CAM.lift ? 12 : 2)*dt); camPos.y = Math.max(camPos.y + CAM.lift, Y(camPos.x, camPos.z) + 0.8);
+  // the look point: ahead along the heading, leaning into a drift; up a hill ahead it rises with the road
   let lookAng = camAngle.current;
-  if (speed > 6) {
-    const vAng = Math.atan2(C.vx, C.vz);
-    const dAng = angDiff(vAng - C.angle);
-    lookAng = camAngle.current + Math.max(-0.5, Math.min(0.5, dAng)) * 0.55;
-  }
-  const lfx = Math.sin(lookAng), lfz = Math.cos(lookAng);
-  const lt=new THREE.Vector3(C.x+lfx*la, Y(C.x,C.z)*(1-camLowK) + (Y(C.x+lfx*la, C.z+lfz*la) + 1.4)*camLowK, C.z+lfz*la);
-  camLookAt.lerp(lt,1-Math.pow(0.1,dt));
+  if (speed > 6) { const dAng = angDiff(Math.atan2(C.vx, C.vz) - C.angle); lookAng += Math.max(-0.5, Math.min(0.5, dAng))*0.55*(1 - 0.6*K); }
+  const lfx = Math.sin(lookAng), lfz = Math.cos(lookAng), la = mix('la') + mix('lav')*CAM.vs;
+  CAM.ah += (Y(C.x + lfx*la, C.z + lfz*la) - gy - CAM.ah)*Math.min(1, 4*dt);
+  camLookAt.set(C.x + lfx*la, CAM.py + mix('lu') + CAM.ah*0.6*R, C.z + lfz*la);
   camera.position.copy(camPos); camera.lookAt(camLookAt);
-  
+
   // Speed FOV: widens slightly at speed
   const targetFov = 50 + Math.min(speed, 45) * 0.22;
   camera.fov += (targetFov - camera.fov) * Math.min(2 * dt, 1);
@@ -11092,7 +11131,7 @@ function updateHUD(dt){
   // instrument cluster
   updateEngine(dt);
   if (!clusterCtx) { clusterEl = document.getElementById('cluster'); if (clusterEl && clusterEl.getContext) { clusterEl.width = CL_W; clusterEl.height = CL_H; clusterCtx = clusterEl.getContext('2d'); } }
-  if (clusterCtx) drawCluster(clusterCtx);
+  if (clusterCtx && clusterEl.offsetParent) drawCluster(clusterCtx);   // (1.10.: the gauges are hidden — the car sits lower on screen)
 }
 
 // ════════════════════════════════════════
@@ -11167,8 +11206,8 @@ let BOOTED = false;
 function boot() { if (BOOTED) return; BOOTED = true;
   generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); renderChangelog(); lehtiInit(); postiInit(); radioLoad();   // (the ground is built by the terrain lift inside generateTrack)
   { const el = document.getElementById('terrain-label'); if (el) el.textContent = HEIGHT_RAW ? 'maanmittauslaitoksen korkeusmalli' : 'väliaikaiset mäet ' + PLACEHOLDER_AMP + '×'; }
-  camPos.set(car.x-Math.sin(car.angle)*25, 45, car.z-Math.cos(car.angle)*25);
-  camLookAt.set(car.x, Y(car.x,car.z), car.z);
+  camPos.set(car.x-Math.sin(car.angle)*10.5, Y(car.x,car.z) + 17.3, car.z-Math.cos(car.angle)*20.2);
+  camLookAt.set(car.x+Math.sin(car.angle)*14, Y(car.x,car.z) + 0.2, car.z+Math.cos(car.angle)*14);
   camera.position.copy(camPos);
   requestAnimationFrame(loop);
 }
