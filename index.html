@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 11.13 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 12.42 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -764,6 +764,11 @@ function outShed(HM, S, x, z, w, d, th, wallM, roofM, h, o) { o = o || {}; const
 function* mergerIntoGen(HM, G) { HM.fuse(k => /^(trim|door\d*|glass|sokkeli|step)$/.test(k) ? 'n' : 's'); yield;   // (a mesh a step: the merging is the costly part of a village)
   for (const key of Object.keys(HM.groups)) { const g = HM.groups[key], m = new THREE.Mesh(HM.geometryOf(key), g.mat); m.castShadow = !/^(trim|door\d*|glass|step)$/.test(g.key); m.receiveShadow = true; m.userData.key = g.key || key; m.userData.shared = true; G.add(m); yield; } }
 // signs (a canvas texture each: village names, the shop) — kept with the place's group and disposed with it
+// ── a texture painted once on a canvas and kept by its key (vehicle lettering, signs, decals): draw(g, w, h, c) paints it. Something
+//    new that is painted uses this rather than its own `let _x = null` cache ──
+const CANVAS_TEX = new Map();
+function canvasTex(key, w, h, draw, o) { let t = CANVAS_TEX.get(key); if (t) return t; const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h, c);
+  t = new THREE.CanvasTexture(c); t.keep = true; if (o) Object.assign(t, o); CANVAS_TEX.set(key, t); return t; }
 const SIGN_TEX = new Map();   // (a sign's texture made once per text: the names come round again)
 function featSign(G, text, x, y, z, yaw, w, h, bg, fg) { const sk = text + bg + fg; let tex = SIGN_TEX.get(sk); if (!tex) { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d'); g.fillStyle = bg; g.fillRect(0, 0, 256, 64); g.strokeStyle = fg; g.lineWidth = 4; g.strokeRect(4, 4, 248, 56);
   g.fillStyle = fg; g.font = '900 ' + (text.length > 11 ? 30 : 36) + 'px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 128, 34);
@@ -3546,19 +3551,21 @@ function roadInfo(x, z) {
 // ════════════════════════════════════════
 const STREET_LABELS = [];
 
+const LABEL_TEX = new Map();   // one texture per street name (a long street carries its name several times); 120 px high: ~48 px a metre on the road
 function makeLabelTexture(text) {
+  const had = LABEL_TEX.get(text); if (had) return had;
   const c = document.createElement('canvas');
   const ctx = c.getContext('2d');
-  const font = "900 180px 'JetBrains Mono', 'Arial Black', Impact, sans-serif";
+  const font = "900 90px 'JetBrains Mono', 'Arial Black', Impact, sans-serif";
   ctx.font = font;
-  const w = Math.ceil(ctx.measureText(text).width) + 80;
-  c.width = w; c.height = 240;
+  const w = Math.ceil(ctx.measureText(text).width) + 40;
+  c.width = w; c.height = 120;
   ctx.font = font; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
   ctx.fillStyle = '#f4f2ea';
-  ctx.fillText(text, w/2, 128);
+  ctx.fillText(text, w/2, 64);
   const tex = new THREE.CanvasTexture(c);
   tex.anisotropy = 8;
-  return { tex, aspect: w / 240 };
+  const L = { tex, aspect: w / 120 }; LABEL_TEX.set(text, L); return L;
 }
 const labelMeshes = [];
 let labelFootprints = [];   // {x,z,r} circles covering each placed label
@@ -3599,7 +3606,7 @@ function addLabel(pts, closed, text, ax, az, roadHalfW) {
   if (!closed) {   // side-street label must fit along its own street
     let len = 0; for (let i = 1; i < n; i++) len += Math.hypot(pts[i].x-pts[i-1].x, pts[i].y-pts[i-1].y);
     ht = Math.min(ht, (len*0.85) / aspect);
-    if (ht < 2.2) { tex.dispose(); return false; }
+    if (ht < 2.2) return false;
   }
   // candidate anchors along the road, nearest-first
   const offsets = [0, 8, -8, 16, -16, 26, -26, 38, -38, 52, -52];
@@ -3643,11 +3650,10 @@ function addLabel(pts, closed, text, ax, az, roadHalfW) {
       }
     }
   }
-  tex.dispose();
   return false;   // no clean spot — better no label than an overlapping one
 }
 function buildStreetLabels() {
-  labelMeshes.forEach(m => { m.material.map.dispose(); m.material.dispose(); m.geometry.dispose(); trackMeshGroup.remove(m); });
+  labelMeshes.forEach(m => { m.material.dispose(); m.geometry.dispose(); trackMeshGroup.remove(m); }); LABEL_TEX.forEach(L => L.tex.dispose()); LABEL_TEX.clear();   // (drawn again: the real font may have come in)
   labelMeshes.length = 0; labelFootprints = [];
   STREET_LABELS.forEach(L => { const wx=(L.px[0]-MAP_CX)*MAP_SCALE, wz=(L.px[1]-MAP_CY)*MAP_SCALE; addLabel(trackPoints, true, L.text, wx, wz, wAt(roadInfo(wx,wz).idx)*0.5); });
   // every named street gets its own name at its midpoint, and again every ~300 m on long streets (route streets included)
@@ -4986,6 +4992,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Lähihaku yhdellä ruudukolla: ihmiset, talot ja tolpat sekä nyt myös ajoneuvot (liikenne ~10 % kevyempää); sijoittelun kysymykset (onko auto/varattu paikka/talo lähellä) yhteisinä apureina; maalatut tekstit yhdestä välimuistista; katujen nimet kerran per nimi ja puolella resoluutiolla – näyttömuistia ~35 Mt vähemmän, ero ei näy', '15.42'],
   ['1.10.', 'Muiden kulkuneuvojen ohjaus yhteisistä osista: poliisi, traktori, hevibussi, jäätelö- ja postiauto käyttävät samaa tienseurantaa, jumista peruutusta ja takaa-ajoa; mopot, postinkantajan pyörä ja lasten pyörät saman kuskikomponentin; Pökö ja dragsteri kysyvät alustan samasta paikasta (dragsteri tuntee nyt maaseudun soratiet). Poliisit odottavat kiinnioton jälkeen, että konstaapeli on autossa, eivätkä enää puske pysäytettyä autoa (ennen ne saattoivat rysäyttää sitä ja syttyä)', '14.13'],
   ['1.10.', 'Pelaajan ajoneuvot yhteen paikkaan: Pökö, dragsteri ja lentokone ovat nyt saman rajapinnan takana (fysiikka, kamera, ääni, törmäyslaatikko, sisään ja ulos, R), ohjaimet luetaan yhdestä kohdasta – uuden ajoneuvon lisääminen on yksi merkintä', '12.56'],
   ['1.10.', 'Koodin siivous: kuollut koodi pois (vanha kävelykamera, käyttämättömät animaatio- ja lippuapurit, rengasvallien vanhat ihmisproput), auton törmäyslaatikko yhdellä yhteisellä funktiolla, ruudun keskiviestit yhdellä apurilla (uusi viesti ei enää sammu vanhan ajastimeen), korpikenttien muistivuoto korjattu', '11.32'],
@@ -6136,17 +6143,11 @@ function rgDijkstra(src) { const { nodes, adj } = roadGraph(), n = nodes.length,
 let _glowTex = null;
 function glowTex() { if (_glowTex) return _glowTex; const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
   gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(255,255,255,0.6)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return (_glowTex = new THREE.CanvasTexture(c)); }
-let _ambSide = null;
-function ambSideTex() { if (_ambSide) return _ambSide; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
-  g.fillStyle = '#d8342a'; g.fillRect(40, 34, 60, 20); g.fillRect(60, 14, 20, 60);   // red cross
-  g.font = 'bold 40px Arial'; g.fillStyle = '#d8342a'; g.textBaseline = 'middle'; g.fillText('SAIRAANKULJETUS', 120, 46); return (_ambSide = new THREE.CanvasTexture(c)); }
-let _ambFront = null;
-function ambFrontTex() { if (_ambFront) return _ambFront; const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d');
-  g.translate(256, 0); g.scale(-1, 1); g.font = 'bold 40px Arial'; g.fillStyle = '#d8342a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('AMBULANSSI', 128, 34);   // mirrored: reads right in a mirror
-  return (_ambFront = new THREE.CanvasTexture(c)); }
-let _ambSign = null;
-function ambSignTex() { if (_ambSign) return _ambSign; const c = document.createElement('canvas'); c.width = 128; c.height = 32; const g = c.getContext('2d');
-  g.fillStyle = '#f6f6f2'; g.fillRect(0, 0, 128, 32); g.fillStyle = '#d8342a'; g.fillRect(56, 4, 16, 24); g.fillRect(44, 10, 40, 12); return (_ambSign = new THREE.CanvasTexture(c)); }
+function ambSideTex() { return canvasTex('ambSide', 512, 128, (g, w, h, c) => { g.fillStyle = '#d8342a'; g.fillRect(40, 34, 60, 20); g.fillRect(60, 14, 20, 60);   // red cross
+  g.font = 'bold 40px Arial'; g.fillStyle = '#d8342a'; g.textBaseline = 'middle'; g.fillText('SAIRAANKULJETUS', 120, 46); }); }
+function ambFrontTex() { return canvasTex('ambFront', 256, 64, (g, w, h, c) => { g.translate(256, 0); g.scale(-1, 1); g.font = 'bold 40px Arial'; g.fillStyle = '#d8342a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('AMBULANSSI', 128, 34);   // mirrored: reads right in a mirror
+  }); }
+function ambSignTex() { return canvasTex('ambSign', 128, 32, (g, w, h, c) => { g.fillStyle = '#f6f6f2'; g.fillRect(0, 0, 128, 32); g.fillStyle = '#d8342a'; g.fillRect(56, 4, 16, 24); g.fillRect(44, 10, 40, 12); }); }
 // 1980s Finnish ambulance on an estate-car chassis: long bonnet, sloped screen, high white box, red bands, two blue beacons
 function makeAmbulance() {
   const G = new THREE.Group(), white = lmat(0xf4f4f0, 0.4), red = lmat(0xd33a2c, 0.5), glass = lmat(0x223040, 0.15), frost = lmat(0xdde4e8, 0.3), black = lmat(0x141414, 0.8),
@@ -6264,11 +6265,29 @@ function resolvePair(A, B, h, e) {   // bodies with x, z, vx, vz, mass (Infinity
   return -rv;
 }
 
+// ════════ GRID: the one "what's near here" — a spatial hash of square cells, for people (HGRID), houses/poles/rocks (STATIC) and
+//          vehicles (VGRID). Things that stay put go into every cell they reach (add/remove, multi: near() visits each once); things
+//          that move are put again each frame into the cell of their centre (reset + put). A new kind of thing that needs "what's
+//          near" gets a Grid, not its own loop over everything. ════════
+let _gridStamp = 0;
+class Grid {
+  constructor(cell, multi) { this.c = cell; this.m = new Map(); this.used = []; this.multi = !!multi; }
+  cell(cx, cz, make) { const k = cx*73856093 ^ cz*19349663; let l = this.m.get(k); if (!l && make) this.m.set(k, l = []); return l; }
+  add(o, x, z, r) { o._s = 0; const c = this.c; for (let cx = Math.floor((x - r)/c); cx <= Math.floor((x + r)/c); cx++) for (let cz = Math.floor((z - r)/c); cz <= Math.floor((z + r)/c); cz++) this.cell(cx, cz, true).push(o); }
+  remove(o, x, z, r) { const c = this.c; let found = false;
+    for (let cx = Math.floor((x - r)/c); cx <= Math.floor((x + r)/c); cx++) for (let cz = Math.floor((z - r)/c); cz <= Math.floor((z + r)/c); cz++) { const l = this.cell(cx, cz); if (!l) continue; const i = l.indexOf(o); if (i >= 0) { l.splice(i, 1); found = true; } }
+    if (!found) for (const l of this.m.values()) { const i = l.indexOf(o); if (i >= 0) l.splice(i, 1); }   // (it has moved since it went in: a full sweep)
+    return found; }
+  clear() { this.m.clear(); this.used.length = 0; }
+  reset() { for (const l of this.used) l.length = 0; this.used.length = 0; }   // (the cell lists are reused frame to frame)
+  put(o, x, z) { const l = this.cell(Math.floor(x/this.c), Math.floor(z/this.c), true); if (!l.length) this.used.push(l); l.push(o); }
+  near(x, z, r, fn) { const c = this.c, c0 = Math.floor((x - r)/c), c1 = Math.floor((x + r)/c), d0 = Math.floor((z - r)/c), d1 = Math.floor((z + r)/c), st = this.multi ? ++_gridStamp : 0;
+    for (let cx = c0; cx <= c1; cx++) for (let cz = d0; cz <= d1; cz++) { const l = this.m.get(cx*73856093 ^ cz*19349663); if (!l) continue;
+      for (let i = 0; i < l.length; i++) { const o = l[i]; if (st) { if (o._s === st) continue; o._s = st; } fn(o); } } } }
+
 // ════════ HUMANS ════════
-const HUMANS = [], HGRID = new Map(), HGRID_USED = [], HC = 3;
-const hkey = (x, z) => Math.floor(x/HC)*73856093 ^ Math.floor(z/HC)*19349663;
-function forHumansNear(x, z, r, fn) { const c0 = Math.floor((x - r)/HC), c1 = Math.floor((x + r)/HC), d0 = Math.floor((z - r)/HC), d1 = Math.floor((z + r)/HC);
-  for (let cx = c0; cx <= c1; cx++) for (let cz = d0; cz <= d1; cz++) { const l = HGRID.get(cx*73856093 ^ cz*19349663); if (l) for (const h of l) fn(h); } }
+const HUMANS = [], HGRID = new Grid(3);
+function forHumansNear(x, z, r, fn) { HGRID.near(x, z, r, fn); }
 class Human {
   constructor(o) {
     this.x = o.x; this.z = o.z; this.yaw = o.yaw || 0; this.vx = 0; this.vz = 0; this.vy = 0; this.hop = 0; this.tilt = 0; this.roll = 0; this.spin = 0; this.sway = 0;
@@ -6378,7 +6397,7 @@ function humanBump(h) {   // (within 130 m of the car, and once when put down: f
   if (!TREEG) treeNear(0, 0, 0); bumpCircles(h, TREEG, t => t[2] ? 0.28 : 0.22);   // tree trunks
   if (!YARDG) { YARDG = new Map(); for (const t of YARD_SOLID) { const k = Math.floor(t[0]/8)*7919 + Math.floor(t[1]/8); let l = YARDG.get(k); if (!l) YARDG.set(k, l = []); l.push(t); } }
   bumpCircles(h, YARDG, t => t[2]);
-  for (const v of VEHICLES) { if (v.gone || Math.abs(v.x - h.x) > 7 || Math.abs(v.z - h.z) > 7) continue; const c = boxPush(v, h.x, h.z, h.r); if (!c) continue; h.x += c.nx*c.ov; h.z += c.nz*c.ov; const vn = h.vx*c.nx + h.vz*c.nz; if (vn < 0) { h.vx -= c.nx*vn; h.vz -= c.nz*vn; } }
+  forVehiclesNear(h.x, h.z, 7, v => { if (v.gone || Math.abs(v.x - h.x) > 7 || Math.abs(v.z - h.z) > 7) return; const c = boxPush(v, h.x, h.z, h.r); if (!c) return; h.x += c.nx*c.ov; h.z += c.nz*c.ov; const vn = h.vx*c.nx + h.vz*c.nz; if (vn < 0) { h.vx -= c.nx*vn; h.vz -= c.nz*vn; } });
   if (h.down) return;
   forHumansNear(h.x, h.z, 1, o => { if (o === h || o.down || o.gone || o.inside || o.seat || o.ride) return; const dx = h.x - o.x, dz = h.z - o.z, R = (h.r + o.r)*0.8, d2 = dx*dx + dz*dz; if (d2 >= R*R || d2 < 1e-8) return;
     const d = Math.sqrt(d2), k = (o.vx || o.vz) ? 0.5 : 1; h.x += dx/d*(R - d)*k; h.z += dz/d*(R - d)*k; }); }
@@ -6387,8 +6406,7 @@ let carStillT = 0;
 function activeCrash() { return crashAt && worldT - crashAt.t < 16 && Math.hypot(car.x - crashAt.x, car.z - crashAt.z) < 20 ? crashAt : null; }
 let HFRAME = 0;
 function humansUpdate(dt0) { HFRAME++;
-  for (const l of HGRID_USED) l.length = 0; HGRID_USED.length = 0;   // (the cell lists are reused frame to frame)
-  for (const h of HUMANS) { if (h.gone || h.inside || h.seat || h.ride) continue; const k = hkey(h.x, h.z); let l = HGRID.get(k); if (!l) HGRID.set(k, l = []); if (!l.length) HGRID_USED.push(l); l.push(h); }
+  HGRID.reset(); for (const h of HUMANS) { if (h.gone || h.inside || h.seat || h.ride) continue; HGRID.put(h, h.x, h.z); }
   const t = worldT;
   for (let i = 0; i < HUMANS.length; i++) { const h = HUMANS[i]; if (h.gone) continue;
     const dx = h.x - car.x, dz = h.z - car.z, d2 = dx*dx + dz*dz, near = h.player || d2 < 240*240, P = h.pose; let dt = dt0;
@@ -6533,7 +6551,11 @@ const fireTask = (v, i) => ({ kind: 'firefighter', update(h, dt, t) {
 // engines: engine and brakes, a steered bicycle for the yaw, tyres that grip up to a limit (a shove makes it slide and spin,
 // then the tyres catch it again), parked = wheels locked. A driver only works the pedals and the wheel:
 //   v.ctrl = { thr −1…1 (minus = reverse), brk 0…1, steer −1…1 (plus = right), hand (parked) }
-const VEHICLES = [], VDIRTY = new Set();
+const VEHICLES = [], VDIRTY = new Set(), VGRID = new Grid(12), VG = { n: -1, dirty: true };
+// vehicles near a point: the grid is put together again once per physics step (and when one is added, removed or put back home);
+// within the step they move under a metre, so 2 m slack. Callers still check the exact distance themselves.
+function forVehiclesNear(x, z, r, fn) { if (VG.dirty || VG.n !== VEHICLES.length) { VGRID.reset(); for (const v of VEHICLES) if (!v.gone) VGRID.put(v, v.x, v.z); VG.n = VEHICLES.length; VG.dirty = false; }
+  VGRID.near(x, z, r + 2, fn); }
 const _vq = new THREE.Quaternion(), _vp = new THREE.Vector3(), _vs = new THREE.Vector3(1, 1, 1), _vm = new THREE.Matrix4();
 const VSPEC = {   // mass (the rally car = 1), engine m/s², brakes m/s², top speed, wheelbase, steering lock (rad), tyre grip m/s², how fast the tyres take the yaw back
   car:       { mass: 1.15, accel: 5.0, brake: 8,   vmax: 18, wb: 2.5,  steer: 0.6,  lat: 8.0, yawK: 6 },
@@ -6588,16 +6610,16 @@ function collideCarWorld() {
   staticNear(P.x, P.z, 4, B => { const h = obbSat(P, B); if (!h) return; P.x -= h.nx*h.depth; P.z -= h.nz*h.depth; const into = P.vx*h.nx + P.vz*h.nz;
     if (into > 0) { P.vx -= h.nx*into*1.3; P.vz -= h.nz*into*1.3; carDamage(h.nx, h.nz, into); if (into > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + into*0.8), 4);
       if (B.kind === 'house' && into >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) { rapCount('f'); policeIncident('fire'); } } } });
-  for (const v of VEHICLES) { if (v.gone) continue; const R = v.hl + CAR_HL + 0.6; if (Math.abs(v.x - P.x) > R || Math.abs(v.z - P.z) > R) continue;
-    const h = obbSat(P, v); if (!h) continue; const imp = resolvePair(P, v, h, 0.25); v.awake = true; v.moved = true;
-    if (imp > 0.8) { carDamage(h.nx, h.nz, imp); if (imp > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
+  forVehiclesNear(P.x, P.z, 5.1 + CAR_HL + 0.6, v => { if (v.gone) return; const R = v.hl + CAR_HL + 0.6; if (Math.abs(v.x - P.x) > R || Math.abs(v.z - P.z) > R) return;
+    const h = obbSat(P, v); if (!h) return; const imp = resolvePair(P, v, h, 0.25); v.awake = true; v.moved = true;
+    if (imp > 0.8) { carDamage(h.nx, h.nz, imp); if (imp > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } });
   car.x = P.x; car.z = P.z; car.vx = P.vx; car.vz = P.vz;
   boxHitsHumans(playerBox(), car.vx, car.vz, true);
 }
 function vehicleVsWorld(v) {   // a vehicle that moves: other vehicles (each moving pair once), houses, tyre stacks, people
-  for (const o of VEHICLES) { if (o === v || o.gone) continue; if ((o.ai || o.awake) && o._i < v._i) continue;
-    const R = o.hl + v.hl + 0.5; if (Math.abs(o.x - v.x) > R || Math.abs(o.z - v.z) > R) continue;
-    const h = obbSat(v, o); if (!h) continue; const imp = resolvePair(v, o, h, 0.2); if (imp > 0.2) { o.awake = true; o.moved = true; } if (imp > 5) { vehicleHit(o, imp*0.7); vehicleHit(v, imp*0.7); } }
+  forVehiclesNear(v.x, v.z, v.hl + 5.6, o => { if (o === v || o.gone) return; if ((o.ai || o.awake) && o._i < v._i) return;
+    const R = o.hl + v.hl + 0.5; if (Math.abs(o.x - v.x) > R || Math.abs(o.z - v.z) > R) return;
+    const h = obbSat(v, o); if (!h) return; const imp = resolvePair(v, o, h, 0.2); if (imp > 0.2) { o.awake = true; o.moved = true; } if (imp > 5) { vehicleHit(o, imp*0.7); vehicleHit(v, imp*0.7); } });
   staticNear(v.x, v.z, v.hl + 1, B => { if (v.kind === 'hevi' && B.hw < 1.6 && B.hl < 1.6) return; const h = obbSat(v, B); if (!h) return;   /* (the gig bus goes straight through poles and signs) */ v.x -= h.nx*h.depth; v.z -= h.nz*h.depth; const into = v.vx*h.nx + v.vz*h.nz; if (into > 0) { v.vx -= h.nx*into*1.2; v.vz -= h.nz*into*1.2; v.w *= 0.5; if (into > 5) vehicleHit(v, into); } });
   if (ROCK_HILLS.length && rockNear(v.x, v.z, v.hl + 2)) { const fx = Math.sin(v.yaw), fz = Math.cos(v.yaw);   // the granite: nose, middle, tail
     for (const s of [v.hl*0.95, 0, -v.hl*0.95]) { const o = rockOut(v.x + fx*s, v.z + fz*s, 0.5); if (!o) continue; v.x -= o.nx*o.depth; v.z -= o.nz*o.depth; const into = v.vx*o.nx + v.vz*o.nz; if (into > 0) { v.vx -= o.nx*into*1.2; v.vz -= o.nz*into*1.2; v.w *= 0.5; if (into > 5) vehicleHit(v, into); } } }
@@ -6607,6 +6629,7 @@ function vehicleVsWorld(v) {   // a vehicle that moves: other vehicles (each mov
   boxHitsHumans(v, v.vx, v.vz, false);
 }
 function vehiclesPhysics(dt) {   // fixed step: everything driving or knocked about
+  VG.dirty = true;
   for (let i = 0; i < VEHICLES.length; i++) VEHICLES[i]._i = i;
   for (const v of VEHICLES) { if (v.gone || v.nuked || !(v.ai || v.awake)) continue;
     vehicleStep(v, dt); vehicleVsWorld(v); v.moved = true;
@@ -6659,8 +6682,9 @@ function fastFollow(v, dt, vmax, o = FF_POLICE) {
   let vT = bendSpeed(v, vmax, o.d0, o.d1, o.step, 8, 8, (turn) => Math.min(vmax, Math.sqrt(v.spec.lat*o.grip*12/Math.max(turn, 0.01))), 2*v.spec.brake*o.bk);
   if (o.offCap && v.offPath > o.offCap[0]) vT = Math.min(vT, o.offCap[1]);
   let off = 0; if (o.avoid) { const sy = Math.sin(v.yaw), cy = Math.cos(v.yaw);   // a vehicle standing in the way (a parked ambulance, a bus, a tractor)
-    for (const q of o.avoidCar ? VEHICLES.concat([{ x: car.x, z: car.z, yaw: car.angle, hw: 0.9, hl: 2.2 }]) : VEHICLES) { if (q === v || q.gone) continue; const dx = q.x - v.x, dz = q.z - v.z; if (Math.abs(dx) > 34 || Math.abs(dz) > 34) continue; const f = sy*dx + cy*dz; if (f < -1 || f > 20 + sp*0.6) continue;
-      const l = cy*dx - sy*dz, dy = q.yaw - v.yaw, need = v.hw + q.hw*Math.abs(Math.cos(dy)) + q.hl*Math.abs(Math.sin(dy)) + 0.9; if (Math.abs(l) >= need) continue; const o2 = (l > 0 ? -1 : 1)*(need - Math.abs(l)); if (Math.abs(o2) > Math.abs(off)) off = o2; }
+    const round = (q) => { if (q === v || q.gone) return; const dx = q.x - v.x, dz = q.z - v.z; if (Math.abs(dx) > 34 || Math.abs(dz) > 34) return; const f = sy*dx + cy*dz; if (f < -1 || f > 20 + sp*0.6) return;
+      const l = cy*dx - sy*dz, dy = q.yaw - v.yaw, need = v.hw + q.hw*Math.abs(Math.cos(dy)) + q.hl*Math.abs(Math.sin(dy)) + 0.9; if (Math.abs(l) >= need) return; const o2 = (l > 0 ? -1 : 1)*(need - Math.abs(l)); if (Math.abs(o2) > Math.abs(off)) off = o2; };
+    forVehiclesNear(v.x, v.z, 34, round); if (o.avoidCar) round({ x: car.x, z: car.z, yaw: car.angle, hw: 0.9, hl: 2.2 });
     if (off) { vT = Math.min(vT, 11); C.steer = steerToward(v, lx + cy*off, lz - sy*off); } }
   if (!off) C.steer = steerToward(v, lx, lz); speedTo(v, vT); return vT; }
 // stuck: it wants to go (vT > want) but isn't moving (|vF| < slow) for `after` s → back out for `back` s with the wheel the other way.
@@ -6695,9 +6719,9 @@ function driveAlong(v, dt, vmax) {
   const latOf = (x, z, s) => { const [px0, pz0] = pathAt(v, s), [px1, pz1] = pathAt(v, s + 1), py = Math.atan2(px1 - px0, pz1 - pz0); return [(x - px0)*Math.cos(py) - (z - pz0)*Math.sin(py), py]; };
   const [latNow] = latOf(v.x, v.z, v.s); let lo = -3.2, hi = 3.2, close = false;
   const reach = 18 + v.hl + Math.max(0, v.vF - 8)*2.2;   // (faster: it looks further ahead — a swerve at 13 m/s takes ~20 m)
-  for (const o of VEHICLES) { if (o === v || o.gone || o === v.follow) continue; const dx = o.x - v.x, dz = o.z - v.z; if (Math.abs(dx) > reach + 8 || Math.abs(dz) > reach + 8) continue;
-    const f = sy*dx + cy*dz; if (f < -v.hl - o.hl || f > reach) continue; const [l, py] = latOf(o.x, o.z, v.s + Math.max(0, f)), dyaw = o.yaw - py, ext = o.hw*Math.abs(Math.cos(dyaw)) + o.hl*Math.abs(Math.sin(dyaw)), need = v.hw + ext + 0.4;
-    if (Math.abs(l - v.sw) >= need && Math.abs(l - latNow) >= need) continue; if (l > 0) hi = Math.min(hi, l - need); else lo = Math.max(lo, l + need); if (f < reach - 4) close = true; }
+  forVehiclesNear(v.x, v.z, reach + 8, o => { if (o === v || o.gone || o === v.follow) return; const dx = o.x - v.x, dz = o.z - v.z; if (Math.abs(dx) > reach + 8 || Math.abs(dz) > reach + 8) return;
+    const f = sy*dx + cy*dz; if (f < -v.hl - o.hl || f > reach) return; const [l, py] = latOf(o.x, o.z, v.s + Math.max(0, f)), dyaw = o.yaw - py, ext = o.hw*Math.abs(Math.cos(dyaw)) + o.hl*Math.abs(Math.sin(dyaw)), need = v.hw + ext + 0.4;
+    if (Math.abs(l - v.sw) >= need && Math.abs(l - latNow) >= need) return; if (l > 0) hi = Math.min(hi, l - need); else lo = Math.max(lo, l + need); if (f < reach - 4) close = true; });
   if (v.ghostT > 0) { v.ghostT -= dt; lo = -3.2; hi = 3.2; }                                      // stuck too long: push through
   let swT = v.passT > 0 ? 2.9*v.passSide : (v.swBias || 0);   /* (swBias: traffic keeping right for an oncoming one) */ if (lo > hi) { vT = 0; swT = v.sw; v.stuckT = (v.stuckT || 0) + dt; } else { swT = Math.max(lo, Math.min(hi, swT)); v.stuckT = 0; }
   if (close && Math.abs(latNow - swT) > 0.35) vT = Math.min(vT, 3.5);                             // not lined up for the gap yet: slow
@@ -6710,7 +6734,7 @@ function driveAlong(v, dt, vmax) {
 }
 // turning round in the street: forward on full lock, back on the other lock, until it faces the way out. true when done.
 function clearAt(v, d) { const fx = Math.sin(v.yaw), fz = Math.cos(v.yaw), rx = fz, rz = -fx;
-  for (const l of [-v.hw, 0, v.hw]) { const x = v.x + fx*d + rx*l, z = v.z + fz*d + rz*l; if (!onRoad(x, z, 2.5)) return false; let hit = false; staticNear(x, z, 1, B => { if (!hit && boxPush(B, x, z, 0.4)) hit = true; }); if (hit) return false;
+  for (const l of [-v.hw, 0, v.hw]) { const x = v.x + fx*d + rx*l, z = v.z + fz*d + rz*l; if (!onRoad(x, z, 2.5)) return false; let hit = staticHit(x, z, 1, 0.4); if (hit) return false;
     if (VEHICLES.some(o => o !== v && !o.gone && boxPush(o, x, z, 0.4))) return false; }
   return true; }
 function turnAround(v, dt) {
@@ -6747,11 +6771,10 @@ function tractorAI(P) {
 }
 
 // ════════ HOUSES, LANDMARKS, POLES: solid ════════
-const STATIC = new Map(), SC = 10; let STATIC_LIST = [], _stamp = 0;
+const STATIC = new Grid(10, true); let STATIC_LIST = [];
 function staticBuild() {
   STATIC.clear(); STATIC_LIST = [];
-  const add = (b) => { STATIC_LIST.push(b); b._s = 0; const r = Math.hypot(b.hw, b.hl);
-    for (let cx = Math.floor((b.x - r)/SC); cx <= Math.floor((b.x + r)/SC); cx++) for (let cz = Math.floor((b.z - r)/SC); cz <= Math.floor((b.z + r)/SC); cz++) { const k = cx*73856093 ^ cz*19349663; let l = STATIC.get(k); if (!l) STATIC.set(k, l = []); l.push(b); } };
+  const add = (b) => { STATIC_LIST.push(b); STATIC.add(b, b.x, b.z, Math.hypot(b.hw, b.hl)); };
   BUILDINGS.forEach((B, bi) => { if (B.length > 5 || Math.min(B[2], B[3]) < 2) return; const w = B[2], d = B[3], longW = Math.max(w, d), shortW = Math.min(w, d), aspect = longW/shortW; let wallTop, roofH;
     if (longW < 4.5 || shortW < 3.0) { wallTop = 2.2; roofH = 0.25; }
     else { const era = (longW <= 7.2 && aspect <= 1.5) || (longW <= 8.5 && aspect <= 1.7 && bi % 5 < 2) ? 'rinta' : (aspect >= 1.55 && longW >= 6.5 && (bi % 3 !== 0)) ? 'matala' : 'kasari';
@@ -6762,8 +6785,7 @@ function staticBuild() {
   SOLID_RECTS.forEach(([x, z, yaw, w, l]) => { if (w > 1) return; add({ x, z, yaw, hw: w/2, hl: l/2, kind: 'pole' }); });   // power poles (cars and buses are vehicles)
   ROCK_BOULDERS.forEach(b => add({ x: b.x, z: b.z, yaw: b.yaw, hw: b.hw, hl: b.hl, kind: 'rock' }));   // the boulders at the foot of the rock
 }
-function staticNear(x, z, r, fn) { _stamp++; const c0 = Math.floor((x - r)/SC), c1 = Math.floor((x + r)/SC), d0 = Math.floor((z - r)/SC), d1 = Math.floor((z + r)/SC);
-  for (let cx = c0; cx <= c1; cx++) for (let cz = d0; cz <= d1; cz++) { const l = STATIC.get(cx*73856093 ^ cz*19349663); if (l) for (const b of l) { if (b._s === _stamp) continue; b._s = _stamp; fn(b); } } }
+function staticNear(x, z, r, fn) { STATIC.near(x, z, r, fn); }
 
 
 // ════════ HAY BALES ════════
@@ -6944,9 +6966,7 @@ function makeCrew(kind) {
   if (kind === 'medic') return makeAdult(0xf4f4f4, 0x24304a, lpick(L_HAIR), { sel: { hair: lpick([0, 0, 4, 2]), top: 2, bottom: 2, longSleeve: 1, longPants: 1 }, acc: 0xff6a12, shoes: 0x1c1c20 });
   return makeAdult(0x1c2536, 0x1c2536, 0x1a1410, { sel: { hat: 4, top: 10, bottom: 3, longSleeve: 1, longPants: 1 }, acc: 0xf0c020, shoes: 0x1c1c20, w: 1.06 });   // firefighter: dark kit, yellow helmet, reflective bands
 }
-let _fireSide = null;
-function fireSideTex() { if (_fireSide) return _fireSide; const c = document.createElement('canvas'); c.width = 512; c.height = 96; const g = c.getContext('2d');
-  g.font = 'bold 54px Arial'; g.fillStyle = '#f4f4f0'; g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillText('PALOKUNTA', 256, 50); return (_fireSide = new THREE.CanvasTexture(c)); }
+function fireSideTex() { return canvasTex('fireSide', 512, 96, (g, w, h, c) => { g.font = 'bold 54px Arial'; g.fillStyle = '#f4f4f0'; g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillText('PALOKUNTA', 256, 50); }); }
 // 1980s Finnish fire engine: red cab-over truck, white band, equipment lockers with roller shutters, ladder on the roof, blue beacons
 function makeFireEngine() {
   const G = new THREE.Group(), red = lmat(0xc4201a, 0.45), white = lmat(0xf2f2ee, 0.45), glass = lmat(0x223040, 0.15), black = lmat(0x141414, 0.8), alu = lmat(0xc8ccd0, 0.3), shutter = lmat(0xb01c16, 0.55), chrome = lmat(0xc8c8c8, 0.25);
@@ -7135,7 +7155,7 @@ function makeHeviBus() {
   return G; }
 function heviSpawn() { const { nodes, adj } = roadGraph(); if (!nodes.length) return; const fx = Math.sin(car.angle), fz = Math.cos(car.angle); let best = -1, bs = -1e9;
   for (let k = 0; k < 500; k++) { const i = Math.floor(Math.random()*nodes.length), n = nodes[i], dx = n.x - car.x, dz = n.z - car.z, d = Math.hypot(dx, dz);
-    if (d < 110 || d > 230 || adj[i].length !== 2 || n.hw < 2.8 || Math.abs(n.x) > 540 || Math.abs(n.z) > 540) continue; if (VEHICLES.some(v => Math.hypot(v.x - n.x, v.z - n.z) < 14)) continue;
+    if (d < 110 || d > 230 || adj[i].length !== 2 || n.hw < 2.8 || Math.abs(n.x) > 540 || Math.abs(n.z) > 540) continue; if (vehicleWithin(n.x, n.z, 14)) continue;
     const sc = Math.random()*80 - (dx*fx + dz*fz)*0.4; if (sc > bs) { bs = sc; best = i; } }   // (mostly from behind: it comes up on you)
   if (best < 0) return; const n = nodes[best], q = nodes[adj[best][0][0]], G = makeHeviBus(); lifeGroup.add(G);
   const v = new Vehicle({ kind: 'hevi', x: n.x, z: n.z, yaw: Math.atan2(q.x - n.x, q.z - n.z), hw: 1.3, hl: 5.1, view: { kind: 'mesh', g: G }, axle: [1.13, 2.8, -2.6], temp: true, ai: heviAI });
@@ -7308,9 +7328,7 @@ function policeTree(fresh) { if (!fresh && POLICE.tree && worldT - POLICE.treeT 
   const { nodes } = roadGraph(), d0 = Math.hypot(nodes[si].x - Q.x, nodes[si].z - Q.z), seeds = [];   // every street node near the car counts (off the road the nearest one can be on a street that joins far away)
   for (let i = 0; i < nodes.length; i++) { const d = Math.hypot(nodes[i].x - Q.x, nodes[i].z - Q.z); if (d < d0 + 30) seeds.push([i, d*1.5]); }
   POLICE.tree = rgDijkstra(seeds); POLICE.tree.src = si; POLICE.treeT = worldT; return POLICE.tree; }
-let _polTex = null;
-function polTex() { if (_polTex) return _polTex; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
-  g.font = 'bold 92px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#16389a'; g.fillText('POLIISI', 256, 68); return (_polTex = new THREE.CanvasTexture(c)); }
+function polTex() { return canvasTex('polTex', 512, 128, (g, w, h, c) => { g.font = 'bold 92px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#16389a'; g.fillText('POLIISI', 256, 68); }); }
 function makePoliceCar() {   // a boxy 80s saloon: white, a blue band, POLIISI on the doors, a light bar with two blue domes
   const G = new THREE.Group(), white = lmat(0xf2f2ee, 0.35), blue = lmat(0x16389a, 0.45), glass = lmat(0x1e2a36, 0.15), black = lmat(0x141414, 0.8), hub = lmat(0xc8c8c8, 0.35);
   G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z, rx, sh) => { const me = lmesh(lbox(w, h, d), m, x, y, z, G, sh); if (rx) me.rotation.x = rx; return me; };
@@ -7386,10 +7404,10 @@ const EXTRA = { queue: null };
 const distRoute = (x, z) => Math.sqrt(roadInfo(x, z).d2);
 function clearSpot(x, z, r) {   // nothing standing here: no road, house, shop, pole, car, person or planned prop within r
   if (onRoad(x, z, r + 0.5)) return false; const ri = roadInfo(x, z); if (Math.sqrt(ri.d2) < wAt(ri.idx)/2 + 3 + r) return false;
-  let hit = false; staticNear(x, z, r + 3, B => { if (!hit && boxPush(B, x, z, r + 0.3)) hit = true; }); if (hit) return false;
-  if (VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < r + 2.4)) return false;
+  let hit = staticHit(x, z, r + 3, r + 0.3); if (hit) return false;
+  if (vehicleWithin(x, z, r + 2.4)) return false;
   if (HUMANS.some(h => Math.hypot(h.x - x, h.z - z) < r + 0.7)) return false;
-  return !LIFE_PLAN.some(P => Math.hypot(P.x - x, P.z - z) < r + 2.5 + (P.r || 0)) && !inPaved(x, z); }
+  return !planWithin(x, z, r + 2.5) && !inPaved(x, z); }
 const spreadPick = (list, n, gap) => { const out = []; for (const c of list) { if (out.length >= n) break; if (out.some(o => Math.hypot(o.x - c.x, o.z - c.z) < gap)) continue; out.push(c); } return out; };
 const shuffled = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const inPolyXZ = (P, x, z) => { let c = false; for (let a = 0, b = P.length - 1; a < P.length; b = a++) if (((P[a][1] > z) !== (P[b][1] > z)) && (x < (P[b][0] - P[a][0])*(z - P[a][1])/(P[b][1] - P[a][1]) + P[a][0])) c = !c; return c; };
@@ -7481,7 +7499,7 @@ function lifeExtrasBuild() {
     if (Math.random() < 0.6) { const L = { fx: fx + ox*0.55, fz: fz + oz*0.55, yaw: Math.atan2(-ox, -oz), ph: Math.random()*6 }; new Human({ x: L.fx, z: L.fz, yaw: L.yaw, rig: makeAdult(lpick(L_SHIRTS), lpick(L_PANTS), lpick(L_HAIR)), task: ladderTask(L) }); } }
   // broken-down cars in yards: four parked cars near the route smoke from under the bonnet, the owner bent over the engine
   const cars = shuffled(VEHICLES.filter(v => v.kind === 'car' && v.view.c && !v.view.c.street && near(v.x, v.z, 18, 140)));
-  const roomAt = (x, z) => { let hit = false; staticNear(x, z, 3, B => { if (!hit && boxPush(B, x, z, 0.9)) hit = true; }); return !hit && !onRoad(x, z, 0.4); };
+  const roomAt = (x, z) => { let hit = staticHit(x, z, 3, 0.9); return !hit && !onRoad(x, z, 0.4); };
   for (const v of spreadPick(cars.filter(v => [1, -1].some(e => roomAt(...lloc(v.x, v.z, v.yaw, 0, e*(v.hl + 0.7))))), 4, 140)) {   // the "bonnet" is whichever end has room to stand at
     const e = roomAt(...lloc(v.x, v.z, v.yaw, 0, v.hl + 0.7)) ? 1 : -1, [tx, tz] = lloc(v.x, v.z, v.yaw, 0.15*e, e*(v.hl + 0.55));
     EMITTERS.push({ v, end: e, x: v.x, z: v.z, y: 0, kind: 'breakdown', acc: 0 }); new Human({ x: tx, z: tz, yaw: v.yaw + (e > 0 ? Math.PI : 0), rig: makeAdult(lpick(L_SHIRTS), lpick(L_PANTS), lpick(L_HAIR)), task: fixTask(v, e) }); }
@@ -7513,6 +7531,11 @@ function lifeExtrasReset() { const Q = EXTRA.queue; if (Q) { Q.order = Q.all.fil
 //          Humans with tasks (knocked over → ambulance), props on lifeGroup, one updater per set piece in X2.upd. ════════
 const X2 = { upd: [], reset: [], flying: [] };
 const reserve = (kind, p, r) => LIFE_PLAN.push({ kind, x: p[0], z: p[1], r, x2: true });
+// ── where can something go? The questions every builder asks, in one place: a vehicle within d, a planned/reserved place
+//    (LIFE_PLAN: its own radius + d; reserved: only those reserve() put down), a house/pole/rock box within reach ──
+function vehicleWithin(x, z, d) { return VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < d); }
+function planWithin(x, z, d, reserved) { return LIFE_PLAN.some(P => (!reserved || P.x2) && Math.hypot(P.x - x, P.z - z) < (P.r || 0) + d); }
+function staticHit(x, z, reach, r) { let hit = false; staticNear(x, z, reach, B => { if (!hit && boxPush(B, x, z, r)) hit = true; }); return hit; }
 const chaikin = (P, n) => { for (let k = 0; k < n; k++) { const Q = [P[0]]; for (let i = 0; i < P.length - 1; i++) { const a = P[i], b = P[i+1]; Q.push([a[0]*0.75 + b[0]*0.25, a[1]*0.75 + b[1]*0.25], [a[0]*0.25 + b[0]*0.75, a[1]*0.25 + b[1]*0.75]); } Q.push(P[P.length - 1]); P = Q; } return P; };
 function polyLine(pts) { const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i-1] + Math.hypot(pts[i][0] - pts[i-1][0], pts[i][1] - pts[i-1][1])); const total = cum[cum.length - 1];
   return { pts, total, at(s) { s = Math.max(0, Math.min(total, s)); let i = 1; while (i < cum.length - 1 && cum[i] < s) i++; const a = pts[i-1], b = pts[i], u = (s - cum[i-1])/((cum[i] - cum[i-1]) || 1); return [a[0] + (b[0] - a[0])*u, a[1] + (b[1] - a[1])*u, Math.atan2(b[0] - a[0], b[1] - a[1])]; } }; }
@@ -7523,7 +7546,7 @@ function streetStretches(minL, maxL, far) {   // stretches of side street that k
         out.push({ P, w: R.w, mid: { x: m[0], z: m[1] } }); } run = []; };
     for (let i = 1; i < R.pts.length; i++) { const a = R.pts[i-1], b = R.pts[i], n = Math.max(1, Math.ceil(Math.hypot(b.x - a.x, b.y - a.y)/3));
       for (let k = i === 1 ? 0 : 1; k <= n; k++) { const x = a.x + (b.x - a.x)*k/n, z = a.y + (b.y - a.y)*k/n;
-        if (distRoute(x, z) >= far && Math.abs(x) < 560 && Math.abs(z) < 560 && !VEHICLES.some(v => Math.abs(v.x - x) < 3.5 && Math.abs(v.z - z) < 3.5) && !LIFE_PLAN.some(P => P.x2 && Math.hypot(P.x - x, P.z - z) < (P.r || 0) + 4)) run.push([x, z]); else flush(); } }
+        if (distRoute(x, z) >= far && Math.abs(x) < 560 && Math.abs(z) < 560 && !VEHICLES.some(v => Math.abs(v.x - x) < 3.5 && Math.abs(v.z - z) < 3.5) && !planWithin(x, z, 4, true)) run.push([x, z]); else flush(); } }
     flush(); }
   return shuffled(out); }
 function openSpot(r, a, b) { for (let k = 0; k < 700; k++) { const p = trackPoints[Math.floor(Math.random()*trackPoints.length)], an = Math.random()*6.3, d = a + Math.random()*(b - a), x = p.x + Math.sin(an)*d, z = p.y + Math.cos(an)*d;
@@ -7679,7 +7702,7 @@ function buildPostman(st) { const L = polyLine(chaikin(st.P, 2)), stops = [], mb
   for (let s = 6; s < L.total - 6; s += 3) { if (stops.length && s - stops[stops.length - 1].s < 22) continue; const [x, z, py] = L.at(s);
     let side = 0; staticNear(x, z, 22, B => { if (side || B.kind !== 'house') return; const l = (B.x - x)*Math.cos(py) - (B.z - z)*Math.sin(py), f = (B.x - x)*Math.sin(py) + (B.z - z)*Math.cos(py); if (Math.abs(l) > st.w/2 + 5 && Math.abs(f) < 7) side = Math.sign(l); });
     if (!side) continue; const [mx, mz] = lloc(x, z, py, side*(st.w/2 + 0.55), 0), [stx, stz] = lloc(x, z, py, side*(st.w/2 - 0.05), 0);
-    let hit = false; staticNear(mx, mz, 2, B => { if (!hit && boxPush(B, mx, mz, 0.4)) hit = true; }); if (hit || VEHICLES.some(v => Math.hypot(v.x - mx, v.z - mz) < 3)) continue;
+    let hit = staticHit(mx, mz, 2, 0.4); if (hit || vehicleWithin(mx, mz, 3)) continue;
     stops.push({ s, mx, mz, stx, stz }); const b = new THREE.Group(); lmesh(lbox(0.08, 1.05, 0.08, 0.525), lmat(0x6a5a44, 0.8), 0, 0, 0, b); lmesh(lbox(0.34, 0.28, 0.26), lmat(lpick([0x2f6a3a, 0x8a2a2a, 0x3a4a6a, 0x6a6a6a, 0xd8b030]), 0.5), 0, 1.18, 0, b);
     lmesh(lbox(0.2, 0.02, 0.02), lmat(0xf0f0f0, 0.4), 0, 1.24, side*-0.14, b, false); b.position.set(mx, Y(mx, mz), mz); b.rotation.y = py; mboxes.add(b); }
   if (stops.length < 2) return false; lifeGroup.add(mboxes); nearVis(mboxes, st.mid.x, st.mid.z);
@@ -7758,7 +7781,7 @@ function iceVanAI(V) { return serviceVanAI(V, { vmax: 8,
 function buildIceVan() { const { nodes, adj } = roadGraph(); if (!nodes.length) return;
   const cand = []; for (let k = 0; k < 400 && cand.length < 30; k++) { const i = Math.floor(Math.random()*nodes.length), n = nodes[i], d = distRoute(n.x, n.z); if (d < 30 || d > 130 || Math.abs(n.x) > 520 || Math.abs(n.z) > 520 || !adj[i].length) continue;
     const b = nodes[adj[i][0][0]], yaw = Math.atan2(b.x - n.x, b.z - n.z), o = Math.min(1.4, Math.max(0.8, n.hw - 1.4)), x = n.x + Math.cos(yaw)*o, z = n.z - Math.sin(yaw)*o;
-    if (VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < 7) || LIFE_PLAN.some(P => P.x2 && Math.hypot(P.x - x, P.z - z) < (P.r || 0) + 8)) continue;
+    if (vehicleWithin(x, z, 7) || planWithin(x, z, 8, true)) continue;
     let homes = 0; staticNear(x, z, 30, B => { if (B.kind === 'house') homes++; }); cand.push({ x, z, yaw, homes: homes + Math.random()*3 }); }
   if (!cand.length) return; cand.sort((a, b) => b.homes - a.homes); const c = cand[0]; reserve('ice', [c.x, c.z], 4);
   const V = { mode: 'stop', t: 14, order: [], kids: [], cones: [], blocks: [] }, G = makeIceVan(); lifeGroup.add(G);
@@ -7786,7 +7809,7 @@ function laundryUpdate(W, dt, t) { const near = (W.x - car.x)**2 + (W.z - car.z)
     W.t -= dt; const wife = W.wife; if ((W.t <= 0 || (cd < 16 && cs > 14)) && W.hs.m === 'hang' && !wife.down && !wife.gone) { const gust = cd < 16 ? 1 : 0;
       W.st = 'fly'; W.ft = 0; W.px = x; W.pz = z; W.py = W.y0 + 1.86; W.vx = Math.sin(WIND_YAW)*2.8 + gust*car.vx*0.12; W.vz = Math.cos(WIND_YAW)*2.8 + gust*car.vz*0.12; W.vy = 2.0; } return; }
   if (W.st === 'fly') { W.ft += dt; W.vy = Math.max(-0.6, W.vy - 1.2*dt); W.px += W.vx*dt; W.pz += W.vz*dt; W.py += W.vy*dt;
-    let hit = false; staticNear(W.px, W.pz, 1, B => { if (!hit && boxPush(B, W.px, W.pz, 0.5)) hit = true; }); if (hit) { W.vx *= -0.2; W.vz *= -0.2; }
+    let hit = staticHit(W.px, W.pz, 1, 0.5); if (hit) { W.vx *= -0.2; W.vz *= -0.2; }
     const gy = Y(W.px, W.pz); if ((W.py - 1.0 <= gy && W.vy < 0) || W.ft > 9) { W.st = 'ground'; W.gyaw = W.yaw + W.ft; }
     else { sh.position.set(W.px, W.py, W.pz); sh.rotation.set(0.9*Math.sin(W.ft*3.1) - 0.6, W.yaw + W.ft*0.8, 0.5*Math.sin(W.ft*2.3)); return; } }
   if (W.st === 'ground') { sh.position.set(W.px, Y(W.px, W.pz) + roadLift(W.px, W.pz) + 0.03, W.pz); sh.rotation.set(-Math.PI/2, W.gyaw || 0, 0); return; }
@@ -7971,10 +7994,8 @@ function buildRing() { let sp = null; for (let k = 0; k < 12 && !sp; k++) { cons
 //          by the sports field, two grandstands, the farmer's tractor after whoever flattens his cabbage, two crashed UFOs that
 //          shoot, people standing in the road at a few corners. All on the same parts: Humans, Vehicles, STATIC, FIRES, DISPATCH. ════════
 const X3 = { upd: [], reset: [], bear: null };
-function staticCellsAdd(b) { b._s = 0; const r = Math.hypot(b.hw, b.hl);   // (into the lookup cells only, not STATIC_LIST: the forest's passing boxes)
-  for (let cx = Math.floor((b.x - r)/SC); cx <= Math.floor((b.x + r)/SC); cx++) for (let cz = Math.floor((b.z - r)/SC); cz <= Math.floor((b.z + r)/SC); cz++) { const k = cx*73856093 ^ cz*19349663; let l = STATIC.get(k); if (!l) STATIC.set(k, l = []); l.push(b); } }
-function addStaticBox(b) { STATIC_LIST.push(b); b._s = 0; const r = Math.hypot(b.hw, b.hl);   // (staticBuild's own add, for what is built after it)
-  for (let cx = Math.floor((b.x - r)/SC); cx <= Math.floor((b.x + r)/SC); cx++) for (let cz = Math.floor((b.z - r)/SC); cz <= Math.floor((b.z + r)/SC); cz++) { const k = cx*73856093 ^ cz*19349663; let l = STATIC.get(k); if (!l) STATIC.set(k, l = []); l.push(b); } }
+function staticCellsAdd(b) { STATIC.add(b, b.x, b.z, Math.hypot(b.hw, b.hl)); }   // (into the lookup cells only, not STATIC_LIST: the forest's passing boxes)
+function addStaticBox(b) { STATIC_LIST.push(b); STATIC.add(b, b.x, b.z, Math.hypot(b.hw, b.hl)); }   // (staticBuild's own add, for what is built after it)
 let TREEG = null;   // the scenery's trees (sceneryDebug.trees) in 8 m cells: nothing big goes up through a tree
 function treeCount(x, z, r) { let n = 0; for (const t of sceneryDebug.trees) if (Math.abs(t[0] - x) < r && Math.abs(t[1] - z) < r && (t[0] - x)**2 + (t[1] - z)**2 < r*r) n++; return n; }
 function treeNear(x, z, r) { if (!TREEG) { TREEG = new Map(); for (const t of sceneryDebug.trees) { const k = Math.floor(t[0]/8)*7919 + Math.floor(t[1]/8); let l = TREEG.get(k); if (!l) TREEG.set(k, l = []); l.push(t); } }
@@ -8048,9 +8069,7 @@ function buildBear() { const sp = bearSpot(); if (!sp) return; const B = { hx: s
   X3.reset.push(() => { const p = bearSpot(); if (!p) return; B.hx = h.x = h.home.x = p[0]; B.hz = h.z = h.home.z = p[1]; humanSync(h); }); }   // somewhere else next race
 
 // ── 3. the post van: orange, from street to street; at each stop the postman takes the post to the nearest house and back ──
-let _postTex = null;
-function postTex() { if (_postTex) return _postTex; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
-  g.font = 'bold 96px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffffff'; g.fillText('POSTI', 256, 68); return (_postTex = new THREE.CanvasTexture(c)); }
+function postTex() { return canvasTex('postTex', 512, 128, (g, w, h, c) => { g.font = 'bold 96px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffffff'; g.fillText('POSTI', 256, 68); }); }
 function makePostVan() { const G = new THREE.Group(), orange = lmat(0xe8701a, 0.45), glass = lmat(0x223040, 0.15), black = lmat(0x141414, 0.8), hub = lmat(0xd8d8d8, 0.35), white = lmat(0xf2f2ee, 0.5);
   G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z, rx, sh) => { const me = lmesh(lbox(w, h, d), m, x, y, z, G, sh); if (rx) me.rotation.x = rx; return me; };
   B(1.8, 0.55, 4.4, orange, 0, 0.62, 0); B(1.8, 1.25, 2.9, orange, 0, 1.52, -0.75); B(1.76, 0.9, 0.9, orange, 0, 1.35, 1.1); B(1.78, 0.42, 0.7, glass, 0, 1.52, 1.12);
@@ -8076,7 +8095,7 @@ function postVanAI(V) { return serviceVanAI(V, { vmax: 9,
 function buildPostVan() { const { nodes, adj } = roadGraph(); if (!nodes.length) return;
   let c = null; for (let k = 0; k < 400 && !c; k++) { const i = Math.floor(Math.random()*nodes.length), n = nodes[i], d = distRoute(n.x, n.z); if (d < 30 || d > 160 || Math.abs(n.x) > 520 || Math.abs(n.z) > 520 || !adj[i].length) continue;
     const b = nodes[adj[i][0][0]], yaw = Math.atan2(b.x - n.x, b.z - n.z), o = Math.min(1.4, Math.max(0.8, n.hw - 1.4)), x = n.x + Math.cos(yaw)*o, z = n.z - Math.sin(yaw)*o;
-    if (VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < 12) || LIFE_PLAN.some(P => P.x2 && Math.hypot(P.x - x, P.z - z) < (P.r || 0) + 8)) continue; c = { x, z, yaw }; }
+    if (vehicleWithin(x, z, 12) || planWithin(x, z, 8, true)) continue; c = { x, z, yaw }; }
   if (!c) return; reserve('postvan', [c.x, c.z], 4);
   const V = { mode: 'stop', t: 6, blocks: [], out: false, sent: false, dMin: 60, dMax: 220, dAim: 120 }, G = makePostVan(); lifeGroup.add(G);
   const v = new Vehicle({ kind: 'postvan', x: c.x, z: c.z, yaw: c.yaw, hw: 0.92, hl: 2.3, view: { kind: 'mesh', g: G }, axle: [0.8, 1.45, -1.45], ai: postVanAI(V) }); V.v = v; v.blockT = v.passT = 0; v.passSide = 1; v.sw = 0;
@@ -8148,7 +8167,7 @@ function esPromoBuild(K, W, D) {
     P.dancers.push(new Human({ x, z, yaw: yaw, rig, task: esDanceTask(sd) })); }
   // ── GTA mode only: the big campaign (built now, shown with FREE) — an inflatable arch, a stage with four more dancers, feather flags, a billboard ──
   const X = P.gta = { g: new THREE.Group(), boxes: [], people: [] }; X.g.visible = false; X.g.userData.hide = true; lifeGroup.add(X.g); nearVis(X.g, P.x, P.z);
-  const fits = (a, b, hw, hl, rot) => { const r = rot || 0; for (const [u, v] of [[-hw, -hl], [hw, -hl], [-hw, hl], [hw, hl], [0, 0]]) { const [x, z] = at(a + u*Math.cos(r) + v*Math.sin(r), b - u*Math.sin(r) + v*Math.cos(r)); if (onRoad(x, z, 0.6) || treeNear(x, z, 0.9) || VEHICLES.some(o => Math.hypot(o.x - x, o.z - z) < 2.6)) return false; let hit = false; staticNear(x, z, 1.5, B => { if (!hit && B.kind !== 'lm' && boxPush(B, x, z, 0.6)) hit = true; }); if (hit) return false; } return true; },
+  const fits = (a, b, hw, hl, rot) => { const r = rot || 0; for (const [u, v] of [[-hw, -hl], [hw, -hl], [-hw, hl], [hw, hl], [0, 0]]) { const [x, z] = at(a + u*Math.cos(r) + v*Math.sin(r), b - u*Math.sin(r) + v*Math.cos(r)); if (onRoad(x, z, 0.6) || treeNear(x, z, 0.9) || vehicleWithin(x, z, 2.6)) return false; let hit = false; staticNear(x, z, 1.5, B => { if (!hit && B.kind !== 'lm' && boxPush(B, x, z, 0.6)) hit = true; }); if (hit) return false; } return true; },
     pick = (cands, hw, hl, rot) => cands.find(([a, b]) => fits(a, b, hw, hl, rot));
   const put = (G, a, b, rot) => { const [x, z] = at(a, b); placeAt(G, x, z, yaw + (rot || 0)); X.g.add(G); return [x, z]; }, box = (a, b, hw, hl, rot) => { const [x, z] = at(a, b), B = { x: x + 1e5, z, yaw: yaw + (rot || 0), hw, hl, kind: 'lm', hx: x }; addStaticBox(B); X.boxes.push(B); };
   { const G = new THREE.Group(), R = Math.min(5.2, W*0.35 + 2);   // the arch over the way in: lime and black rings
@@ -8239,7 +8258,7 @@ function olyStageOk(px, pz, F) {   // a spot on the stage: off the roads, clear 
   if (onRoad(px, pz, 1) || inPaved(px, pz) || rockHeightAt(px, pz) > -0.5) return false;   /* (trees only count against a spot) */ const ri = roadInfo(px, pz); if (Math.sqrt(ri.d2) < wAt(ri.idx)/2 + 4) return false;
   const dx = px - F.lx, dz = pz - F.lz, a = Math.cos(F.th)*dx - Math.sin(F.th)*dz, b = Math.sin(F.th)*dx + Math.cos(F.th)*dz; if (Math.abs(a) < F.w/2 + 0.4 && Math.abs(b) < F.d/2 + 0.4) return false;   // (not on the pitch)
   let ok = true; staticNear(px, pz, 2, B => { if (ok && boxPush(B, px, pz, 0.8)) ok = false; }); if (!ok) return false;
-  if (VEHICLES.some(v => Math.hypot(v.x - px, v.z - pz) < 3) || LIFE_PLAN.some(P => Math.hypot(P.x - px, P.z - pz) < (P.r || 0) + 1.5)) return false;
+  if (vehicleWithin(px, pz, 3) || planWithin(px, pz, 1.5)) return false;
   return !HUMANS.some(h => h.task && h.task.kind !== 'spectate' && h.task.kind !== 'fan' && Math.hypot(h.x - px, h.z - pz) < 1.5); }
 function buildOlympics() { const F = FIELD_GAMES[0]; if (!F) return;
   // stages along both touchlines (the sprint along them) and beyond both ends (across). The front is what the route sees:
@@ -8294,8 +8313,8 @@ function placeGrandstand(cx, cz, L, relax) {   // 8–45 m from (cx, cz), off ev
       if (onRoad(px, pz, 1.2) || inPaved(px, pz) || esZoneAt(px, pz) || treeNear(px, pz, relax ? 0.8 : 1.3) || rockHeightAt(px, pz) > -0.5 || LANDMARKS.some(Lm => Lm[0] !== 'manty' && inLandmark(px, pz, Lm, 1.5))) { ok = false; break; }
       const r2 = roadInfo(px, pz); if (Math.sqrt(r2.d2) < wAt(r2.idx)/2 + 3.5) { ok = false; break; }
       staticNear(px, pz, 2, B => { if (ok && boxPush(B, px, pz, 0.7)) ok = false; });
-      if (ok && tires.some(t => Math.abs(t.x - px) < 1.6 && Math.abs(t.z - pz) < 1.6)) ok = false; if (ok && VEHICLES.some(v => Math.hypot(v.x - px, v.z - pz) < 3.2)) ok = false;
-      if (ok && LIFE_PLAN.some(P => Math.hypot(P.x - px, P.z - pz) < (P.r || 0) + 1.5)) ok = false;
+      if (ok && tires.some(t => Math.abs(t.x - px) < 1.6 && Math.abs(t.z - pz) < 1.6)) ok = false; if (ok && vehicleWithin(px, pz, 3.2)) ok = false;
+      if (ok && planWithin(px, pz, 1.5)) ok = false;
       if (ok && HUMANS.some(h => h.task && h.task.kind !== 'spectate' && Math.hypot(h.x - px, h.z - pz) < 1.2)) ok = false;
       if (ok) { const g = H(px, pz); lo = Math.min(lo, g); hi = Math.max(hi, g); } }
     if (!ok || hi - lo > (relax ? 2 : 1.6)) continue; const [mx, mz] = lloc(x, z, yaw, 0, -1.5), sc = -dr - (hi - lo)*5 - r*0.15 - treeCount(mx, mz, L/2 + 3)*3; if (!best || sc > best.sc) best = { x, z, yaw, sc }; if (k > 250 && best) break; }   // (fewest trees round it)
@@ -8317,7 +8336,7 @@ function finishLot(cx, cz, W, D, rMin, rMax, loose) { let best = null;   // an o
   for (let k = 0; k < 900; k++) { const a = Math.random()*6.3, r = rMin + Math.random()*(rMax - rMin), x = cx + Math.sin(a)*r, z = cz + Math.cos(a)*r, ri = roadInfo(x, z), p = trackPoints[ri.idx], dr = Math.sqrt(ri.d2);
     if (dr < wAt(ri.idx)/2 + D/2 + 3 || dr > wAt(ri.idx)/2 + D/2 + (loose ? 30 : 16)) continue; const yaw = Math.atan2(p.x - x, p.y - z); let ok = true, lo = 1e9, hi = -1e9;
     for (let u = -W/2; u <= W/2 + 0.01 && ok; u += 2) for (let v = -D/2; v <= D/2 + 0.01 && ok; v += 2) { const [px, pz] = lloc(x, z, yaw, u, v);
-      if (onRoad(px, pz, 0.8) || treeNear(px, pz, 1.4) || !clearSpot(px, pz, 0.6) || tires.some(t => Math.abs(t.x - px) < 1.8 && Math.abs(t.z - pz) < 1.8) || LIFE_PLAN.some(P => Math.hypot(P.x - px, P.z - pz) < (P.r || 0) + 1)) ok = false;
+      if (onRoad(px, pz, 0.8) || treeNear(px, pz, 1.4) || !clearSpot(px, pz, 0.6) || tires.some(t => Math.abs(t.x - px) < 1.8 && Math.abs(t.z - pz) < 1.8) || planWithin(px, pz, 1)) ok = false;
       else { const g = H(px, pz); lo = Math.min(lo, g); hi = Math.max(hi, g); } }
     if (!ok || hi - lo > (loose ? 2.4 : 1.6)) continue; const sc = -r*0.3 - (hi - lo)*6 - dr*0.2; if (!best || sc > best.sc) best = { x, z, yaw, sc, base: lo }; if (k > 300 && best) break; }
   return best; }
@@ -8622,10 +8641,10 @@ function dragPhys(dt, live) {
   if (DP.p.y < Y(DP.p.x, DP.p.z) - 3) { DP.p.y = Y(DP.p.x, DP.p.z) + 1.5; DP.v.y = 0; }
   // the others: vehicles (a shove with a spin), people, tyre stacks (theirs through car.*)
   dpSync(); const B = playerBox(); B.vx = car.vx; B.vz = car.vz; B.mass = 1;
-  for (const v of VEHICLES) { if (v.gone) continue; const R = v.hl + 4.6; if (Math.abs(v.x - B.x) > R || Math.abs(v.z - B.z) > R) continue; const hh = obbSat(B, v); if (!hh) continue;
+  forVehiclesNear(B.x, B.z, 9.7, v => { if (v.gone) return; const R = v.hl + 4.6; if (Math.abs(v.x - B.x) > R || Math.abs(v.z - B.z) > R) return; const hh = obbSat(B, v); if (!hh) return;
     const vx0 = B.vx, vz0 = B.vz, imp = resolvePair(B, v, hh, 0.25); v.awake = true; v.moved = true; DP.p.x += B.x - car.x; DP.p.z += B.z - car.z; B.x = car.x; B.z = car.z;
     const cpx = (v.x + car.x)/2, cpz = (v.z + car.z)/2; dpImpulse(cpx, DP.p.y, cpz, (B.vx - vx0)*DP.m, 0, (B.vz - vz0)*DP.m); B.vx = DP.v.x; B.vz = DP.v.z;
-    if (imp > 0.8) { const dv = Math.hypot(B.vx - vx0, B.vz - vz0); DP.hit = Math.max(DP.hit, dv); dpHitPart(dpPartAt(v.x - hh.nx*1.5, v.z - hh.nz*1.5), dv*1.6, -hh.nx*dv*0.3, -hh.nz*dv*0.3);   /* (what it takes: the dragster's own change of speed, not the closing speed of the two) */ if (imp > 3) sparkBurst(cpx, 0.6 + Y(cpx, cpz), cpz, -hh.nx, -hh.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } }
+    if (imp > 0.8) { const dv = Math.hypot(B.vx - vx0, B.vz - vz0); DP.hit = Math.max(DP.hit, dv); dpHitPart(dpPartAt(v.x - hh.nx*1.5, v.z - hh.nz*1.5), dv*1.6, -hh.nx*dv*0.3, -hh.nz*dv*0.3);   /* (what it takes: the dragster's own change of speed, not the closing speed of the two) */ if (imp > 3) sparkBurst(cpx, 0.6 + Y(cpx, cpz), cpz, -hh.nx, -hh.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } });
   dpSync(); boxHitsHumans(playerBox(), car.vx, car.vz, true, true); DP.cvx = car.vx; DP.cvz = car.vz;
   // the engine: the slicks' speed through the drive (5:1), the clutch slipping at a launch; a lope at idle
   const wr = (Math.max(0, car.speed) + DP.spin)/0.64*60/(2*Math.PI)*5; DP.rpm += ((thr ? (brk ? 7800 : Math.max(5200, Math.min(8400, wr))) : Math.max(1700, Math.min(8400, wr*0.9))) - DP.rpm)*Math.min(1, dt*(thr ? 9 : 3));
@@ -8938,7 +8957,7 @@ function buildFinishArea() { FINISH_AREA.ctx = null; FINISH_AREA.last = ''; buil
 // ── old tractor tyres: painted white and planted with flowers in front yards (the 80s yard classic), and lying in piles by the
 //    farms' fields where the tractors live ──
 function buildTractorTyres() { const houses = STATIC_LIST.filter(B => B.kind === 'house' && Math.abs(B.x) < 520 && Math.abs(B.z) < 520).sort(() => Math.random() - 0.5), white = lmat(0xf0f0ea, 0.6), black = lmat(0x1c1c1e, 0.9), soil = lmat(0x4a3424, 1);
-  const flowers = [0xe8384a, 0xffd23c, 0xf08ab0, 0xf4f4ee, 0x8a5ad8, 0xff8a3a], ok = (x, z, r) => !onRoad(x, z, 2) && !treeNear(x, z, r + 0.4) && clearSpot(x, z, r) && !VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < 3.5) && !tires.some(t => Math.hypot(t.x - x, t.z - z) < 2.5);
+  const flowers = [0xe8384a, 0xffd23c, 0xf08ab0, 0xf4f4ee, 0x8a5ad8, 0xff8a3a], ok = (x, z, r) => !onRoad(x, z, 2) && !treeNear(x, z, r + 0.4) && clearSpot(x, z, r) && !vehicleWithin(x, z, 3.5) && !tires.some(t => Math.hypot(t.x - x, t.z - z) < 2.5);
   let beds = 0; for (const B of houses) { if (beds >= 12) break; const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), rx = fz, rz = -fx;
     for (const [a, b] of [[B.hw + 3, B.hl*0.4], [-(B.hw + 3), -B.hl*0.3], [B.hw*0.5, B.hl + 3.2], [-B.hw*0.5, -(B.hl + 3.2)]].sort(() => Math.random() - 0.5)) { const x = B.x + rx*a + fx*b, z = B.z + rz*a + fz*b; if (!ok(x, z, 1.2)) continue;
       const G = new THREE.Group(); lmesh(ltractorTyre(0.75, 0.42), white, 0, 0.21, 0, G); lmesh(lcyl(0.5, 0.3, 14), soil, 0, 0.2, 0, G, false);   // lying flat: the axle is up
@@ -9056,8 +9075,8 @@ function ufoHitCar(x, z) {   // a direct hit: thrown aside, bits off, dented —
 function ufoBoom(B) {   // where a bolt comes down: whatever is near gets it
   const x = B.x, z = B.z, gy = Y(x, z), U = B.U; B.live = false; B.m.visible = false; boom(x, gy, z, false);
   const cd = Math.hypot(car.x - x, car.z - z); if (!WRECK.on && gameState === State.RACING) { if (cd < 2.2) ufoHitCar(x, z); else if (cd < 7) { const nx = (car.x - x)/cd, nz = (car.z - z)/cd; car.vx += nx*(7 - cd)*1.6; car.vz += nz*(7 - cd)*1.6; carDamage(-nx, -nz, (7 - cd)*2.2); } }
-  for (const v of VEHICLES) { if (v.gone || v.ufoHit || Math.abs(v.x - x) > 9 || Math.abs(v.z - z) > 9) continue; if (!boxPush(v, x, z, 1.4)) { const dv = Math.hypot(v.x - x, v.z - z); if (dv < 7) { v.vx += (v.x - x)/dv*2; v.vz += (v.z - z)/dv*2; v.awake = true; } continue; }
-    if (v.job || v.kind === 'police') { U.kills++; ufoWreck(v); } else { v.ufoHit = true; v.damage = 99; v.awake = true; v.vx += (Math.random() - 0.5)*5; v.vz += (Math.random() - 0.5)*5; v.w += (Math.random() - 0.5)*3; if (!v.fire) startFire({ vehicle: v }); if (v.fire) v.fire.level = 1; if (v.traffic) v.traffic.mode = 'dead'; } }
+  forVehiclesNear(x, z, 9, v => { if (v.gone || v.ufoHit || Math.abs(v.x - x) > 9 || Math.abs(v.z - z) > 9) return; if (!boxPush(v, x, z, 1.4)) { const dv = Math.hypot(v.x - x, v.z - z); if (dv < 7) { v.vx += (v.x - x)/dv*2; v.vz += (v.z - z)/dv*2; v.awake = true; } return; }
+    if (v.job || v.kind === 'police') { U.kills++; ufoWreck(v); } else { v.ufoHit = true; v.damage = 99; v.awake = true; v.vx += (Math.random() - 0.5)*5; v.vz += (Math.random() - 0.5)*5; v.w += (Math.random() - 0.5)*3; if (!v.fire) startFire({ vehicle: v }); if (v.fire) v.fire.level = 1; if (v.traffic) v.traffic.mode = 'dead'; } });
   forHumansNear(x, z, 12, h => { if (h.down || h.gone || h.inside || h.seat || h.animal) return; const d = Math.hypot(h.x - x, h.z - z), l = d || 1;
     if (d < 3) knock(h, (h.x - x)/l*(9 - d*2), (h.z - z)/l*(9 - d*2), 12); else if (h.task && h.task.kind === 'gawk') h.st.flee = 2 + Math.random()*2; }); }
 const gawkTask = (U, prev) => ({ kind: 'gawk', update(h, dt, t) { const st = h.st || (h.st = { a: Math.random()*6.3, r: 16 + Math.random()*20, flee: 0 });
@@ -9104,7 +9123,7 @@ function buildUfos() { UFOS.length = 0; UFO_GAWK.length = 0; for (const B of UFO
       if (Math.abs(x) > 540 || Math.abs(z) > 540 || distRoute(x, z) < (k < 1400 ? 85 : 70) || rockHeightAt(x, z) > -0.5 || treeNear(x, z, k < 700 ? 10 : 7.5)) continue;
       let nd = 1e9; for (const n of nodes) nd = Math.min(nd, Math.hypot(n.x - x, n.z - z)); if (nd < 16 || nd > 50) continue;   // a street near enough for the ambulance to come (and be shot)
       if (clearSpot(x, z, 6) && ufoRoom(x, z, k < 1400 ? 16 : 13)) sp = [x, z]; }
-    if (!sp && back) for (const q of back || []) { if (treeNear(q.x, q.y, 6) || distRoute(q.x, q.y) < 70) continue; let ok = !VEHICLES.some(v => Math.hypot(v.x - q.x, v.z - q.y) < 9);   // woods all round: down on the dead end of the road itself (no trees there)
+    if (!sp && back) for (const q of back || []) { if (treeNear(q.x, q.y, 6) || distRoute(q.x, q.y) < 70) continue; let ok = !vehicleWithin(q.x, q.y, 9);   // woods all round: down on the dead end of the road itself (no trees there)
       if (ok) ok = ufoRoom(q.x, q.y, 13); if (ok) { sp = [q.x, q.y]; break; } }
     if (!sp) continue; const [x, z] = sp, yaw = Math.random()*6.3, M = makeUfo(); let gL = -1e9, gD = -1e9;   // simply landed there: level on its three legs, nothing ploughed up
     for (let k = 0; k < 3; k++) { const a = k*2.1 - yaw; gL = Math.max(gL, Y(x + Math.cos(a)*3.0, z + Math.sin(a)*3.0)); }
@@ -9133,9 +9152,7 @@ function alienShoot(U, h, P, wide) {   // a small bolt from the gun: better aime
     B = { m: new THREE.Mesh(_boltGeo, _boltMat) }; B.m.renderOrder = 3; scene.add(B.m); UFO_BOLTS.push(B); }
   Object.assign(B, { live: true, x: x0, y: y0, z: z0, vx: (ax - x0)/L*sp, vy: (ay - y0)/L*sp, vz: (az - z0)/L*sp, t: 0, U, small: true }); B.m.scale.setScalar(0.45); B.m.visible = true; B.m.position.set(x0, y0, z0);
   if (audio && (x0 - car.x)**2 + (z0 - car.z)**2 < 150*150) { beep(1900 + Math.random()*400, 0.12, 0.08, 'sawtooth'); beep(950, 0.14, 0.05, 'square'); } }
-function staticRemove(b, notListed) { const r = Math.hypot(b.hw, b.hl); let found = false;   // (from its own cells, as addStaticBox put it; a full sweep only if it has moved since)
-  for (let cx = Math.floor((b.x - r)/SC); cx <= Math.floor((b.x + r)/SC); cx++) for (let cz = Math.floor((b.z - r)/SC); cz <= Math.floor((b.z + r)/SC); cz++) { const l = STATIC.get(cx*73856093 ^ cz*19349663); if (!l) continue; const i = l.indexOf(b); if (i >= 0) { l.splice(i, 1); found = true; } }
-  if (!found) for (const l of STATIC.values()) { const i = l.indexOf(b); if (i >= 0) l.splice(i, 1); }
+function staticRemove(b, notListed) { STATIC.remove(b, b.x, b.z, Math.hypot(b.hw, b.hl));   // (from its own cells, as addStaticBox put it; a full sweep only if it has moved since)
   if (!notListed) { const i = STATIC_LIST.indexOf(b); if (i >= 0) STATIC_LIST.splice(i, 1); } }
 function ufoCapture(U) { if (UFO_CAP.U || U.captured) return; U.captured = true; UFO_CAP.U = U; UFO_CAP.t = 0; UFO_CAP.x = U.x; UFO_CAP.y = U.y; UFO_CAP.z = U.z; staticRemove(U.sb);
   if (!UFO_CAP.beam) { const m = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 3.2, 1, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0x7affb0, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); m.renderOrder = 3; lifeGroup.add(m); UFO_CAP.beam = m; }
@@ -9267,12 +9284,9 @@ function balloonsUpdate(dt) { for (const B of BALLOONS) { B.t += dt; const M = B
 let BALLOON_POP_P = 0.05;   // the chance one bursts as the car passes under it (tests set it to 1)
 
 // ── the Medi-Heli: landed in a field, rotor turning over slowly, the crew doing CPR on someone, a few people watching ──
-let _heliSide = null;
-function heliSideTex() { if (_heliSide) return _heliSide; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
-  g.font = 'italic bold 66px Arial'; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillStyle = '#c4201a'; g.fillText('MEDI-HELI', 118, 56); g.fillStyle = '#1a2a5a'; g.font = 'bold 21px Arial'; g.fillText('LÄÄKÄRIHELIKOPTERI', 122, 104);
+function heliSideTex() { return canvasTex('heliSide', 512, 128, (g, w, h, c) => { g.font = 'italic bold 66px Arial'; g.textBaseline = 'middle'; g.textAlign = 'left'; g.fillStyle = '#c4201a'; g.fillText('MEDI-HELI', 118, 56); g.fillStyle = '#1a2a5a'; g.font = 'bold 21px Arial'; g.fillText('LÄÄKÄRIHELIKOPTERI', 122, 104);
   g.save(); g.translate(58, 64); g.fillStyle = '#1f4fb0'; for (let k = 0; k < 3; k++) { g.rotate(Math.PI/3); g.fillRect(-11, -46, 22, 92); }   // star of life
-  g.fillStyle = '#f4f4f0'; g.fillRect(-3, -30, 6, 60); g.beginPath(); g.arc(0, -30, 5, 0, 6.3); g.fill(); g.restore();
-  return (_heliSide = new THREE.CanvasTexture(c)); }
+  g.fillStyle = '#f4f4f0'; g.fillRect(-3, -30, 6, 60); g.beginPath(); g.arc(0, -30, 5, 0, 6.3); g.fill(); g.restore(); }); }
 // 1980s rescue helicopter (a BO-105-ish twin): white with a red belly and stripes, rounded cabin, big screen, sliding door, twin
 // exhausts, tapered tail boom, fin with end plates, four-blade rotor, skids with turned-up toes. Built round its middle (the Vehicle box).
 function makeMediHeli() { const G = new THREE.Group(), B = new THREE.Group(); B.position.z = 2.3; G.add(B);
@@ -9332,10 +9346,7 @@ function buildMediHeli() { const sp = openSpot(10, 24, 70); if (!sp) return; res
 // ── the police station by the K-shop: an 80s two-storey block, POLIISI on the roof, the blue lamp by the door, a radio mast, a flag;
 //    three patrol cars parked in front (Vehicles like any other: shove one hard and the police come). The building is a house for
 //    the rules (ram it hard enough and it burns). ──
-let _polSign = null;
-function polSignTex() { if (_polSign) return _polSign; const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d');
-  g.fillStyle = '#16389a'; g.fillRect(0, 0, 512, 128); g.strokeStyle = '#f4f4f0'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 116); g.font = 'bold 86px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f4f4f0'; g.fillText('POLIISI', 256, 68);
-  return (_polSign = new THREE.CanvasTexture(c)); }
+function polSignTex() { return canvasTex('polSign', 512, 128, (g, w, h, c) => { g.fillStyle = '#16389a'; g.fillRect(0, 0, 512, 128); g.strokeStyle = '#f4f4f0'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 116); g.font = 'bold 86px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f4f4f0'; g.fillText('POLIISI', 256, 68); }); }
 function makePoliceStation() { const G = new THREE.Group(), wall = lmat(0xc9c2b2, 0.9), band = lmat(0x8a8478, 0.9), glass = lmat(0x1e2a36, 0.15), dark = lmat(0x2b2d33, 0.8), white = lmat(0xf2f2ee, 0.5), steel = lmat(0x9a9aa0, 0.4);
   const B = (w, h, d, m, x, y, z, sh) => lmesh(lbox(w, h, d), m, x, y, z, G, sh);
   B(13.2, 0.9, 8.2, band, 0, 0.0, 0); B(13, 6.2, 8, wall, 0, 3.5, 0); B(13.4, 0.4, 8.4, dark, 0, 6.75, 0); B(13.4, 0.18, 8.4, white, 0, 6.5, 0);   // plinth, walls, flat roof and its fascia
@@ -9402,7 +9413,7 @@ function buildPoliceStation() { const K = LANDMARKS.find(L => L[0] === 'kauppa')
     for (let a = -8.5; a <= 8.5; a += 4.25) for (let b = -8; b <= 12; b += 2.5) { const [x, z] = lloc(cx, cz, yaw, a, b); if (inAnyPlot(x, z) || onRoad(x, z, 0.5) || treeNear(x, z, 1.5) || LANDMARKS.some(L => inLandmark(x, z, L, 1))) return false; } return true; };   // (never on the pitch or another landmark)
   let moveOut = false;
   if (POLICE_SPOT) { const [cx, cz, yaw] = POLICE_SPOT, ri = roadInfo(cx, cz);   // (its trees were kept out; spectators standing there step aside — only roads, plots, houses, cars, plans and the field matter)
-    let fine = !onRoad(cx, cz, 9) && Math.sqrt(ri.d2) >= wAt(ri.idx)/2 + 11.5 && distRoute(cx, cz) >= 14 && !inPaved(cx, cz) && !VEHICLES.some(v => Math.hypot(v.x - cx, v.z - cz) < 10.9) && !LIFE_PLAN.some(P => Math.hypot(P.x - cx, P.z - cz) < 11 + (P.r || 0));
+    let fine = !onRoad(cx, cz, 9) && Math.sqrt(ri.d2) >= wAt(ri.idx)/2 + 11.5 && distRoute(cx, cz) >= 14 && !inPaved(cx, cz) && !vehicleWithin(cx, cz, 10.9) && !planWithin(cx, cz, 11);
     if (fine) staticNear(cx, cz, 11.5, B => { if (fine && boxPush(B, cx, cz, 8.8)) fine = false; });
     for (let a = -8.5; a <= 8.5 && fine; a += 4.25) for (let b = -8; b <= 12 && fine; b += 2.5) { const [x, z] = lloc(cx, cz, yaw, a, b); if (inAnyPlot(x, z) || onRoad(x, z, 0.5) || LANDMARKS.some(L => inLandmark(x, z, L, 1))) fine = false; }
     if (fine) { best = POLICE_SPOT; moveOut = true; } }
@@ -9634,7 +9645,7 @@ function abdReset() { const A = ABD; if (A.h) A.h.abd = false; A.h = null; A.st 
 // ── "peltipoliisi": two speed cameras on posts by the route's straightest stretches, facing the oncoming car. Past one over
 //    80 km/h: a white flash, "📸 PELTIPOLIISI NAPSAHTI! 123 km/h", and the fastest goes on the rap sheet (v) and the radio ──
 const CAMS = [];
-function roadsideOk(x, z, r) { if (onRoad(x, z, 0.6) || tires.some(t => Math.abs(t.x - x) < 1.4 && Math.abs(t.z - z) < 1.4) || treeNear(x, z, 0.8)) return false; let hit = false; staticNear(x, z, r + 2, B => { if (!hit && boxPush(B, x, z, r)) hit = true; }); return !hit; }   // (a verge spot: no road, tyre, trunk or building — spectators just step aside)
+function roadsideOk(x, z, r) { if (onRoad(x, z, 0.6) || tires.some(t => Math.abs(t.x - x) < 1.4 && Math.abs(t.z - z) < 1.4) || treeNear(x, z, 0.8)) return false; let hit = staticHit(x, z, r + 2, r); return !hit; }   // (a verge spot: no road, tyre, trunk or building — spectators just step aside)
 function buildCams() { CAMS.length = 0; const n = trackPoints.length; if (n < 50) return; const cand = [];
   for (let i = 0; i < n; i += 4) { const a = trackPoints[(i - 12 + n) % n], b = trackPoints[i], c = trackPoints[(i + 12) % n], t1 = Math.atan2(b.x - a.x, b.y - a.y), t2 = Math.atan2(c.x - b.x, c.y - b.y); cand.push({ i, bend: Math.abs(angDiff(t2 - t1)) }); }
   for (const f of [0.28, 0.72]) { let best = null; for (const C of cand) { const u = C.i/n; if (Math.abs(u - f) > 0.12) continue;
@@ -9845,7 +9856,7 @@ function worldReset() {
   balesReset();
   if (BASS.on) bassToggle();   // a restart: everyone back on their feet and where they were, responders and fires gone, cars back in place
   for (let i = VEHICLES.length - 1; i >= 0; i--) { const v = VEHICLES[i]; if (v.temp) { vehicleRemove(v); continue; } v.x = v.home.x; v.z = v.home.z; v.yaw = v.home.yaw; v.vx = v.vz = v.w = v.vF = 0; v.awake = false; v.damage = 0; v.fire = null; if (v.charred) charVehicle(v, false);
-    Object.assign(v.ctrl, { thr: 0, brk: 0, steer: 0, hand: !v.ai }); if (v.ai && v.ai.reset) v.ai.reset(); vehicleSync(v); }
+    Object.assign(v.ctrl, { thr: 0, brk: 0, steer: 0, hand: !v.ai }); if (v.ai && v.ai.reset) v.ai.reset(); vehicleSync(v); } VG.dirty = true;
   for (const f of FIRES) { lifeGroup.remove(f.glow); lifeGroup.remove(f.floor); } FIRES.length = 0; STATIC_LIST.forEach(b => { b.fire = null; if (b.soot) { lifeGroup.remove(b.soot); b.soot = null; } });
   for (let i = HUMANS.length - 1; i >= 0; i--) { const h = HUMANS[i]; if (h.temp) { humanRemove(h); continue; } if (h.seat0) { h.seat = h.seat0; h.task = h.task0; }
     h.x = h.home.x; h.z = h.home.z; h.yaw = h.home.yaw; h.vx = h.vz = h.vy = h.hop = h.tilt = h.roll = h.spin = h.sway = 0; h.down = h.hurt = h.gone = false; h.ride = null; h.mad = null; h.pose.up = false; if (h.task && h.task.reset) h.task.reset(h); humanSync(h); }
@@ -10586,17 +10597,17 @@ function trafficAI(V) { const f = (v, dt) => { const C = v.ctrl;
   if (V.mode !== 'drive') return;
   // what drives ahead in our lane: keep the distance, don't go round it (unless it has stood there a long time)
   const sy = Math.sin(v.yaw), cy = Math.cos(v.yaw); let cap = Infinity, fol = null, fd = 1e9;
-  for (const o of VEHICLES) { if (o === v || o.gone || !(o.ai || o.awake)) continue; const dx = o.x - v.x, dz = o.z - v.z; if (Math.abs(dx) > 40 || Math.abs(dz) > 40) continue;
-    const fw = sy*dx + cy*dz, lt = cy*dx - sy*dz; if (fw < 0 || fw > 38 || Math.abs(lt) > 2.0 || Math.abs(angDiff(o.yaw - v.yaw)) > 1.0) continue; if (fw < fd) { fd = fw; fol = o; } }
+  forVehiclesNear(v.x, v.z, 40, o => { if (o === v || o.gone || !(o.ai || o.awake)) return; const dx = o.x - v.x, dz = o.z - v.z; if (Math.abs(dx) > 40 || Math.abs(dz) > 40) return;
+    const fw = sy*dx + cy*dz, lt = cy*dx - sy*dz; if (fw < 0 || fw > 38 || Math.abs(lt) > 2.0 || Math.abs(angDiff(o.yaw - v.yaw)) > 1.0) return; if (fw < fd) { fd = fw; fol = o; } });
   if (fol) { const gap = fd - fol.hl - v.hl, vo = Math.max(0, fol.vF); cap = Math.max(0, Math.min(vo + (gap - 5)*0.7, Math.sqrt(2*4*Math.max(0, gap - 2.5)))); V.folT = cap < 0.5 ? (V.folT || 0) + dt : 0; }
   v.follow = fol && (V.folT || 0) < 12 ? fol : null;
   // oncoming, where it is across OUR path (bends included): keep well right, slow, and crawl past if it's still tight
-  let bias = 0; for (const o of VEHICLES) { if (o === v || o.gone || !(o.ai || o.awake)) continue; const dx = o.x - v.x, dz = o.z - v.z; if (Math.abs(dx) > 40 || Math.abs(dz) > 40) continue;
-    const fw = sy*dx + cy*dz; if (fw < -2 || fw > 36 || Math.abs(o.vF) < 1 || Math.abs(angDiff(o.yaw - v.yaw)) < 2.0) continue;   // (a standing one is just an obstacle: driveAlong goes round it)
+  let bias = 0; forVehiclesNear(v.x, v.z, 40, o => { if (o === v || o.gone || !(o.ai || o.awake)) return; const dx = o.x - v.x, dz = o.z - v.z; if (Math.abs(dx) > 40 || Math.abs(dz) > 40) return;
+    const fw = sy*dx + cy*dz; if (fw < -2 || fw > 36 || Math.abs(o.vF) < 1 || Math.abs(angDiff(o.yaw - v.yaw)) < 2.0) return;   // (a standing one is just an obstacle: driveAlong goes round it)
     const [px0, pz0] = pathAt(v, v.s + Math.max(0, fw)), [px1, pz1] = pathAt(v, v.s + Math.max(0, fw) + 1), py = Math.atan2(px1 - px0, pz1 - pz0), l = (o.x - px0)*Math.cos(py) - (o.z - pz0)*Math.sin(py);
-    const need = v.hw + o.hw + 0.9, clear = -l - (v.sw || 0); if (clear > need + 0.6) continue;   // (it keeps to its own right: l < 0 on our left)
+    const need = v.hw + o.hw + 0.9, clear = -l - (v.sw || 0); if (clear > need + 0.6) return;   // (it keeps to its own right: l < 0 on our left)
     bias = Math.max(bias, Math.min(v.kind === 'bus' ? 0.6 : 0.9, need + 0.6 - clear)); const gap = fw - v.hl - o.hl;
-    cap = Math.min(cap, clear < need ? Math.max(1.5, Math.min(4, (gap - 8)*0.5)) : 6); }   // (tight: both crawl past, keeping right)
+    cap = Math.min(cap, clear < need ? Math.max(1.5, Math.min(4, (gap - 8)*0.5)) : 6); });   // (tight: both crawl past, keeping right)
   v.swBias = bias;
   // junctions ahead: give way to whoever is nearer to it (or already in it)
   let yieldHere = false; for (const J of V.jn) { const dj = J.s - v.s; if (dj < 2 || dj > 26) continue; const me = Math.hypot(J.x - v.x, J.z - v.z);
@@ -10637,7 +10648,7 @@ function freeYardTires(on) { for (let i = tires.length - 1; i >= 0; i--) if (tir
     for (const B of houses) { if (piles >= 30) break; const fx = Math.sin(B.yaw), fz = Math.cos(B.yaw), rx = fz, rz = -fx;
       for (const [sf, sr] of [[0, 1], [0, -1], [-1, 0], [1, 0]].sort(() => Math.random() - 0.5)) {   // a wall of the house: along it, 1.3 m out
         const dist = sf ? B.hl + 1.3 : B.hw + 1.3, ax = sf ? rx : fx, az = sf ? rz : fz, cx = B.x + (sf ? fx*sf : rx*sr)*dist, cz = B.z + (sf ? fz*sf : rz*sr)*dist, n = 2 + Math.floor(Math.random()*4), pts = [];
-        for (let k = 0; k < n; k++) { const o = (k - (n - 1)/2)*1.7, x = cx + ax*o, z = cz + az*o; if (onRoad(x, z, 2.5) || treeNear(x, z, 1.1) || !clearSpot(x, z, 0.9) || VEHICLES.some(v => Math.hypot(v.x - x, v.z - z) < 3)) break; let hit = false; staticNear(x, z, 2, S => { if (!hit && boxPush(S, x, z, 0.85)) hit = true; }); if (hit) break; pts.push([x, z]); }
+        for (let k = 0; k < n; k++) { const o = (k - (n - 1)/2)*1.7, x = cx + ax*o, z = cz + az*o; if (onRoad(x, z, 2.5) || treeNear(x, z, 1.1) || !clearSpot(x, z, 0.9) || vehicleWithin(x, z, 3)) break; let hit = staticHit(x, z, 2, 0.85); if (hit) break; pts.push([x, z]); }
         if (pts.length < 2) continue; piles++;
         for (const [x, z] of pts) { const h = 2 + Math.floor(Math.random()*3), c = Math.random() < 0.7 ? 0 : 1 + Math.floor(Math.random()*2), cols = Array(h).fill(c);
           tires.push({ kind: 'tire', x, z, ox: x, oz: z, vx: 0, vz: 0, hop: 0, r: 0.82, cols, inst: [], yaw: Math.random()*6.3, moving: false, yard: true }); }
