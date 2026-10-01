@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 18.24 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 18.49 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4996,6 +4996,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Jätehuolto: vihreä pyörällinen roskapönttö jokaisen talon eteen ja roska-auto, joka kiertää täydet pöntöt – lastaaja taluttaa pöntön perään, nostaa ja puristin jyskyttää. Ralliauto lennättää pöntön', '21.35'],
   ['1.10.', 'Jalkaisin kuski juoksee oletuksena, Shift pohjassa hiippailee. Viestit pienemmällä ja ylempänä, eivät enää ruudun keskellä. Kone ei käänny itsestään: kartan reunan yli lentävä kone räjähtää – selittämätön vika', '21.23'],
   ['1.10.', 'Kylän ulkopuolinen maailma (loputon metsä, korpikentät, maaseudun tiet, kylät, maatilat ja järvet) pois päältä toistaiseksi – pelaaja kertoi pelin lagaavan. Kone kääntyy taas kylän reunalla takaisin', '20.53'],
   ['1.10.', 'Tarkistuskierros: koko peli vanhaa versiota vastaan 174 testillä; pikkukorjaus: vapaasta ajosta poistuttaessa kotiin palaavat liikenneautot eivät enää ole ihmisille hetken "näkymättömiä"', '19.27'],
@@ -5290,6 +5291,10 @@ const LEHTI = [
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+  { id: 'jate', size: 'page', n: 66, kick: '🗑 JÄTEHUOLTO', title: 'Roska-auto kiertää Ylästöä – pöntöt talojen eteen', lede: 'Jokaisen talon eteen on tuotu vihreä pyörällinen jäteastia. Roska-auto ajaa pöntöltä toiselle, ja lastaaja hyppää takasillalta tyhjentämään ne.',
+    img: ['roskaauto.jpg', 'ponttorivi.jpg', 'ponttolentaa.jpg'], cap: ['Lastaaja nostaa pöntön auton perään. Puristin jyskyttää, ja pönttö palaa paikalleen.', 'Täysistä pöntöistä pilkottaa musta pussi ja kansi on raollaan.', 'Kisavauhdissa kadun reunaa pitkin ajava auto lennättää pöntön pihalle.'],
+    body: ['YLÄSTÖ. Kylässä on nyt jätehuolto. Jokaisen omakotitalon eteen, tontin reunaan kadun puolelle, on tuotu vihreä 240 litran pyörällinen jäteastia. Täydestä pöntöstä näkee mustan pussin kannen alta.', 'Vihreä JÄTEHUOLTO-auto ajaa lähimmälle täydelle pöntölle eikä aja rallireitin kautta. Se pysähtyy niin, että perä on pöntön kohdalla. Lastaaja hyppää takasillalta, taluttaa pöntön auton perään, nostaa sen kippiin ja puristin jyskyttää. Tyhjä pönttö palaa paikalleen, ja mies hyppää takaisin sillalle.', 'Pönttöön kannattaa varoa osumasta. Reunaa pitkin kovaa ajava auto lennättää pöntön metrien päähän, ja roskat leviävät pihalle. Kaatunutta pönttöä lastaaja ei tyhjennä. R-napilla pöntöt nousevat takaisin paikoilleen.', 'Tyhjät pöntöt täyttyvät taas muutamassa minuutissa, joten roska-autolla riittää ajettavaa.'],
+    box: ['JÄTEHUOLTO', 'Pönttö joka talon edessä', 'Täysi: pussi kannen alla', 'Auto kiertää lähimmälle täydelle', 'Osuma: pönttö lentää, roskat leviävät'] },
   { id: 'maaseutu', outer: true, size: 'main', n: 65, kick: '🏡 MAASEUTU', title: 'Kylän takana alkaa maaseutu', lede: 'Metsän takana on nyt järviä, soita, maatiloja ja pieniä kyliä. Soratiet vievät niihin suoraan Ylästöstä, ja tienvarressa kulkee sähkölinja.',
     img: ['kyla.jpg', 'jarvi.jpg'], cap: ['Kylätie, kauppa ja postilaatikot. Kylän nimi lukee sinisessä kyltissä tien päässä.', 'Järven rannalla on sauna ja laituri. Autolla ei kannata ajaa veteen.'],
     body: ['YLÄSTÖ. Kun ajaa Ylästön reunalta ulos, tie ei enää lopu metsään. Sorateitä pitkin pääsee naapurikyliin, maatiloille ja järvien rannoille. Soralla auto kulkee kuin rallitiellä.', 'Kylissä on kymmenkunta taloa tien molemmin puolin, kyläkauppa ja bussikatos. Maatiloilla on päärakennus, navetta, aitta ja sauna, ja pellolla seisoo latoja. Sängellä on pyöröpaaleja.', 'Järviin ajava auto hidastuu ja metrin syvyydessä uppoaa. Suolla pyörät uppoavat sammaleeseen. Lentokoneella vedelle saa laskeutua vain kävelyvauhtia, muuten kone kaatuu.', 'Talot, ladot ja sähkötolpat ovat kovia. Ne syntyvät näkyviin, kun lähestyt, ja katoavat kun poistut, joten kartta jatkuu loputtomiin.'],
@@ -6575,6 +6580,7 @@ const VSPEC = {   // mass (the rally car = 1), engine m/s², brakes m/s², top s
   police:    { mass: 1.4,  accel: 12,  brake: 10,  vmax: 50, wb: 2.65, steer: 0.6,  lat: 13,  yawK: 8, drag: 0.004 },   // (a tuned V8 with the air cut: ~115 km/h through the village)
   icecream:  { mass: 2.0,  accel: 8.0, brake: 7,   vmax: 13, wb: 3.0,  steer: 0.6,  lat: 7.5, yawK: 6 },
   postvan:   { mass: 2.0,  accel: 8.0, brake: 7,   vmax: 13, wb: 3.0,  steer: 0.6,  lat: 7.5, yawK: 6 },
+  garbage:   { mass: 9,    accel: 3.6, brake: 6,   vmax: 11, wb: 4.8,  steer: 0.55, lat: 6.5, yawK: 5 },
   hevi:      { mass: 60,   accel: 9.0, brake: 9,   vmax: 36, wb: 5.4,  steer: 0.6,  lat: 11,  yawK: 6, drag: 0.003 },   // (the gig bus: ~130 km/h flat out, and it weighs a mountain)
 };
 class Vehicle {
@@ -8111,6 +8117,93 @@ function buildPostVan() { const { nodes, adj } = roadGraph(); if (!nodes.length)
   V.man = new Human({ x: c.x, z: c.z, rig, task: postVanManTask(V) }); V.man.inside = true; V.letter = handProp(V.man, lmesh(lbox(0.02, 0.12, 0.2), lmat(0xf4f2ea, 0.7), 0, 0, 0)); V.letter.visible = false;
   X3.postVan = V; X3.reset.push(() => { V.man.inside = true; V.man.st = null; V.out = false; V.letter.visible = false; humanSync(V.man); }); }
 
+// ── the bin lorry: green 240-litre wheelie bins at the front of every house by its street, a bag sticking out of the full ones. The
+//    lorry goes from bin to bin (nearest full one first, not along the rally route); the binman hops off the back step, wheels the bins
+//    round it to the back, up they go, the press thumps, back they go, and he rides on. The rally car sends a bin flying. ──
+const BINS = { list: [], grid: new Grid(8, true), fly: [], lorry: null };
+function makeBin() { const G = new THREE.Group(), col = lmat(0x2f6a3a, 0.6), dk = lmat(0x234f2c, 0.6);
+  lmesh(lbox(0.58, 0.92, 0.7, 0.46), col, 0, 0, 0, G); const lid = new THREE.Group(); lid.position.set(0, 0.96, -0.36); G.add(lid); lmesh(lbox(0.62, 0.05, 0.76), dk, 0, 0, 0.37, lid);
+  const bag = lmesh(lbox(0.34, 0.2, 0.34), lmat(0x141414, 0.5), 0, 1.0, 0.02, G, false);
+  G.traverse(o => { if (o !== G) { o.updateMatrix(); o.matrixAutoUpdate = false; } });   // (the parts never move within the bin: no per-frame matrix check for 1000 of them; the lid is updated by hand)
+  G.rotation.order = 'YXZ'; G.userData.lid = lid; G.userData.bag = bag; return G; }
+function binFull(B, full) { B.full = full; B.g.userData.bag.visible = full; const lid = B.g.userData.lid; lid.rotation.x = full ? -0.32 : 0; lid.updateMatrix(); }
+function binPlace(B) { placeAt(B.g, B.x, B.z, B.yaw); B.g.rotation.x = B.g.rotation.z = 0; }
+function buildBins() { BINS.list.length = 0; BINS.grid.clear(); BINS.fly.length = 0;
+  for (const pl of PLOTS) { const F = pl.F; if (F.street < 0 || Math.abs(F.x) > 520 || Math.abs(F.z) > 520) continue;
+    const u = (pl.bi % 2 ? -1 : 1)*Math.min(F.hu + 1.2, Math.max(1.2, F.u1 - 1.0)), nn = F.n0 - 0.4, x = F.x + F.u[0]*u + F.n[0]*nn, z = F.z + F.u[1]*u + F.n[1]*nn;   // at the front edge, to one side of the house
+    if (onRoad(x, z, 0.35) || staticHit(x, z, 3, 0.45) || vehicleWithin(x, z, 3) || planWithin(x, z, 0.8)) continue;
+    const yaw = Math.atan2(-F.n[0], -F.n[1]), g = makeBin(); lifeGroup.add(g); nearVis(g, x, z);   // (the lid's hinge away from the street)
+    const ni = nearestNode(x, z), B = { x, z, hx: x, hz: z, yaw, g, route: distRoute(x, z), full: true, down: false, ni, refill: 0, vx: 0, vy: 0, vz: 0, y: 0, sp: 0 }; binPlace(B); binFull(B, true); BINS.list.push(B); BINS.grid.add(B, x, z, 0.5); }
+  X3.upd.push(binsUpdate); X3.reset.push(() => { BINS.fly.length = 0; for (const B of BINS.list) { B.down = false; B.held = false; B.x = B.hx; B.z = B.hz; binPlace(B); binFull(B, true); } }); }
+function binsUpdate(dt) { const sp1 = Math.hypot(car.vx, car.vz), sp = Math.max(sp1, BINS.sp0 || 0), cvx = sp1 >= (BINS.sp0 || 0) ? car.vx : BINS.vx0, cvz = sp1 >= (BINS.sp0 || 0) ? car.vz : BINS.vz0; BINS.sp0 = sp1; BINS.vx0 = car.vx; BINS.vz0 = car.vz;   // (last frame's speed too: the bin and a fence behind it in the same frame)
+  if (sp > 2 && gameState === State.RACING && !WALK.on) { const P = playerBox();
+    BINS.grid.near(car.x, car.z, 4, B => { if (B.down || B.held) return; const c = boxPush(P, B.x, B.z, 0.42); if (!c) return;   // knocked flying: the bag goes, the rubbish with it
+      B.down = true; B.vx = cvx*0.9 - c.nx*2; B.vz = cvz*0.9 - c.nz*2; B.vy = 2 + sp*0.12; B.y = 0; B.sp = (Math.random() - 0.5)*10; B.sx = 4 + Math.random()*6; BINS.fly.push(B); B.g.userData.bag.visible = false;
+      const y = Y(B.x, B.z) + 0.9; for (let k = 0; k < 10; k++) lifeFx.emit(B.x, y, B.z, B.vx*0.5 + (Math.random() - 0.5)*3, 1 + Math.random()*2.5, B.vz*0.5 + (Math.random() - 0.5)*3, 1.2 + Math.random(), 0.12, 0.18, 0.9, 0.2, 0.18, 0.14, 0.3, 0.26, 0.2);
+      if (audio) beep(160, 0.15, 0.12, 'square'); }); }
+  for (let i = BINS.fly.length - 1; i >= 0; i--) { const B = BINS.fly[i], g = B.g; B.vy -= 9.8*dt; B.x += B.vx*dt; B.z += B.vz*dt; B.y += B.vy*dt; g.rotation.y += B.sp*dt; g.rotation.x += B.sx*dt;
+    if (B.y <= 0 && B.vy < 0) { B.y = 0; B.vy *= -0.3; B.vx *= 0.6; B.vz *= 0.6; B.sp *= 0.5; B.sx *= 0.5; if (Math.hypot(B.vx, B.vz) < 0.6) { g.rotation.x = Math.PI/2; g.rotation.z = 0; BINS.fly.splice(i, 1); } }   // lands on its side and stays
+    g.position.set(B.x, Y(B.x, B.z) + B.y + 0.35, B.z); }   // (pivot at the base: on its side the body's half depth up)
+  if ((BINS.rt = (BINS.rt || 0) + dt) >= 1) { for (const B of BINS.list) if (!B.full && !B.down && (B.refill -= BINS.rt) <= 0) binFull(B, true); BINS.rt = 0; } }   // (a week later, in game minutes; looked at once a second)
+function makeGarbageTruck() { const G = new THREE.Group(), green = lmat(0x2f6a3a, 0.5), white = lmat(0xf0f0ea, 0.45), glass = lmat(0x223040, 0.15), black = lmat(0x141414, 0.8), hub = lmat(0xc8c8c8, 0.35), steel = lmat(0x8a8e92, 0.4), amber = new THREE.MeshStandardMaterial({ color: 0xffa020, emissive: 0xff8a10, emissiveIntensity: 0.2, roughness: 0.3 });
+  G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z, rx, sh) => { const me = lmesh(lbox(w, h, d), m, x, y, z, G, sh); if (rx) me.rotation.x = rx; return me; };
+  B(2.3, 0.4, 7.6, black, 0, 0.75, -0.1);                                            // chassis
+  B(2.3, 1.5, 1.7, white, 0, 1.75, 2.8); B(2.24, 0.62, 0.06, glass, 0, 2.1, 3.66, -0.12); B(2.32, 0.5, 1.2, glass, 0, 2.1, 2.9); B(2.34, 0.16, 1.74, white, 0, 2.57, 2.8);   // cab
+  B(2.4, 2.3, 4.8, green, 0, 2.15, -0.75); B(2.42, 0.3, 4.82, white, 0, 1.25, -0.75);   // the body, a white band
+  B(2.3, 1.6, 1.3, green, 0, 1.75, -3.75); B(2.0, 0.5, 0.8, steel, 0, 1.05, -4.0);   // the hopper at the back
+  const plate = new THREE.Group(); plate.position.set(0, 2.5, -3.2); G.add(plate); lmesh(lbox(2.0, 0.12, 1.0), steel, 0, 0, -0.5, plate);   // the press: swings down into the hopper
+  B(2.2, 0.08, 0.45, steel, 0, 0.62, -4.55); B(0.06, 1.2, 0.06, steel, -0.9, 1.3, -4.45); B(0.06, 1.2, 0.06, steel, 0.9, 1.3, -4.45);   // the back step, its grab rails
+  const beacon = lmesh(lcyl(0.13, 0.2, 10), amber, 0, 2.75, 3.1, G, false);
+  for (const sx of [-1, 1]) for (const zz of [2.6, -1.6, -2.7]) { const w = lmesh(ltyre(0.5, 0.34), black, sx*1.05, 0.5, zz, G); w.rotation.z = Math.PI/2; const hh = lmesh(lcyl(0.24, 0.35, 10), hub, sx*1.05, 0.5, zz, G, false); hh.rotation.z = Math.PI/2; }
+  for (const sx of [-1, 1]) { const m = new THREE.Mesh(lgeo('jateside', () => new THREE.PlaneGeometry(3.6, 0.6)), new THREE.MeshBasicMaterial({ map: canvasTex('jate', 512, 96, (g) => { g.font = 'bold 64px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f4f4ee'; g.fillText('JÄTEHUOLTO', 256, 52); }), transparent: true, depthWrite: false })); m.position.set(sx*1.21, 2.45, -0.75); m.rotation.y = sx*Math.PI/2; G.add(m); }
+  G.userData.plate = plate; G.userData.beacon = beacon; return G; }
+// the way from here to (tx, tz) by the streets, on the right of the road, the last bit to the side the target is on
+function vanTo(v, V, tx, tz, ni, ahead) { const { nodes } = roadGraph(), si = vanNode(v); if (si < 0) return false; const { prev } = rgDijkstra(si);
+  const P = []; for (let j = ni; j >= 0; j = prev[j]) { P.push({ x: nodes[j].x, z: nodes[j].z, hw: nodes[j].hw }); if (j === si) break; } P.reverse(); if (P.length < 3 || P[0].x !== nodes[si].x) return false;
+  if (ahead) { const a = P[P.length - 2], b = P[P.length - 1], l = Math.hypot(b.x - a.x, b.z - a.z) || 1; P.push({ x: b.x + (b.x - a.x)/l*ahead, z: b.z + (b.z - a.z)/l*ahead, hw: b.hw }); }   // (on past it: a lorry stops with its back by the bin)
+  setPath(v, rightSide(P, tx, tz)); v.blockT = v.passT = v.unstickT = 0; v.passSide = 1; v.sw = 0; v.turn = { dir: 1, legT: 0, n: 0 };
+  const [px, pz] = pathAt(v, Math.min(v.total, 7)); V.mode = Math.abs(angDiff(Math.atan2(px - v.x, pz - v.z) - v.yaw)) > 1.6 ? 'turn' : 'drive'; return true; }
+function nodeRoute(i) { const G = roadGraph(); if (!G.dr) G.dr = new Float32Array(G.nodes.length).fill(-1); if (G.dr[i] < 0) G.dr[i] = distRoute(G.nodes[i].x, G.nodes[i].z); return G.dr[i]; }   // (a street node's distance from the rally route, worked out once)
+const vanNode = (v) => { const [x, z] = lloc(v.x, v.z, v.yaw, 0, v.hl + 3); return nearestNode(x, z); };   // (the street node just in front of it: routes start ahead, not behind)
+function garbageNext(v, V) { const { nodes } = roadGraph(), si = vanNode(v); if (si < 0) return false; const { dist, prev } = rgDijkstra(si); let best = null, bs = Infinity;
+  for (const B of BINS.list) { if (!B.full || B.down || B.ni < 0 || Math.hypot(B.x - v.x, B.z - v.z) < 14) continue; const d = dist[B.ni]; if (!isFinite(d) || d > 600 || B.route < 20) continue;
+    let bad = 0, out = null; for (let j = B.ni; j >= 0 && j !== si; j = prev[j]) { if (nodeRoute(j) < 9) bad++; if (dist[j] >= 9) out = nodes[j]; }
+    const turn = out && Math.abs(angDiff(Math.atan2(out.x - v.x, out.z - v.z) - v.yaw)) > 1.6, sc = d + bad*40 + (turn ? 150 : 0); if (sc < bs) { bs = sc; best = B; } }   // (the nearest full one ahead, not by way of the rally route)
+  if (!best) return false; V.target = best; return vanTo(v, V, best.x, best.z, best.ni, v.hl); }
+const binmanTask = (V) => ({ kind: 'binman', update(h, dt, t) { const v = V.v, S = V.w, P = h.pose;
+  if (h.seat) { h.x = v.x; h.z = v.z; P.armR = -2.7; P.armL = -0.3; P.legs = 0; return; }   // on the back step, a hand on the rail (x, z follow the lorry: 'far' is judged from them)
+  const [rx, rz] = lloc(v.x, v.z, v.yaw, 0, -(v.hl + 0.9)), B = V.job[0];
+  if (S.m === 'go') { if (!B) { S.m = 'board'; return; } if (walkTo(h, B.x, B.z, 2.6, dt)) { if (B.down) { V.job.shift(); return; } S.m = 'wheel'; B.held = true; } return; }
+  if (S.m === 'wheel' || S.m === 'back') { const tx = S.m === 'wheel' ? rx : B.x, tz = S.m === 'wheel' ? rz : B.z, done = walkTo(h, tx, tz, 2.0, dt), [bx, bz] = lloc(h.x, h.z, h.yaw, 0, 0.7);
+    B.g.position.set(bx, Y(bx, bz), bz); B.g.rotation.set(-0.3, h.yaw + Math.PI, 0); P.armL = P.armR = -0.9;   // tilted back on its wheels, pulled along
+    if (done) { if (S.m === 'wheel') { S.m = 'lift'; S.t = 0; } else { B.held = false; binPlace(B); V.job.shift(); S.m = 'go'; } } return; }
+  if (S.m === 'lift') { S.t += dt; h.vx = h.vz = 0; h.yaw = v.yaw + Math.PI; const k = Math.min(1, S.t/0.8)*Math.min(1, Math.max(0, (2.6 - S.t)/0.8)), [bx, bz] = lloc(v.x, v.z, v.yaw, 0, -(v.hl + 0.85 - k*0.35));
+    B.g.position.set(bx, Y(bx, bz) + k*1.25, bz); B.g.rotation.set(-k*2.0, v.yaw, 0);   // (on the lift at the back: up and tipped over the hopper's lip) P.armL = P.armR = -1.2 - k*1.2; const pl = v.view.g.userData.plate; pl.rotation.x = S.t > 1.2 && S.t < 2.4 ? Math.sin((S.t - 1.2)/1.2*Math.PI)*1.1 : 0;   // up, tipped, the press comes down
+    if (S.t > 1.0 && B.full) { binFull(B, false); B.refill = 300 + Math.random()*300; V.emptied = (V.emptied || 0) + 1; if (audio && Math.hypot(car.x - v.x, car.z - v.z) < 60) { beep(90, 0.35, 0.1, 'sawtooth'); setTimeout(() => beep(70, 0.4, 0.08, 'sawtooth'), 300); } }
+    if (S.t > 2.8) S.m = 'back'; return; }
+  if (S.m === 'board') { if (walkTo(h, rx, rz, 2.6, dt)) { h.seat = V.step; S.m = 'ride'; } } },
+  knocked(h) { const S = V.w; if (V.job[0] && V.job[0].held) { const B = V.job[0]; B.held = false; B.x = B.g.position.x; B.z = B.g.position.z; B.down = true; B.g.rotation.set(Math.PI/2, B.g.rotation.y, 0); B.g.position.y = Y(B.x, B.z) + 0.35; } V.job.length = 0; S.m = 'board'; },
+  reset(h) { V.w.m = 'ride'; h.seat = V.step; } });
+function garbageAI(V) { return serviceVanAI(V, { vmax: 8,
+  atStop: (v) => { const h = V.man, S = V.w, bc = v.view.g.userData.beacon; bc.material.emissiveIntensity = 0.2 + Math.max(0, Math.sin(worldT*9))*2.5;
+    if (!V.job.length && S.m === 'ride' && !V.sent) { V.sent = true; V.job = BINS.list.filter(B => B.full && !B.down && Math.hypot(B.x - v.x, B.z - v.z) < 12).sort((a, b) => Math.hypot(a.x - v.x, a.z - v.z) - Math.hypot(b.x - v.x, b.z - v.z)).slice(0, 4);   // the bins here: off he hops
+      if (V.job.length && h && !h.down && !h.gone) { const [sx, sz] = lloc(v.x, v.z, v.yaw, 0.6, -(v.hl + 0.6)); h.seat = null; h.x = sx; h.z = sz; S.m = 'go'; humanSync(h); } else V.job.length = 0; }
+    const away = h && (h.down || h.gone || h.hurt);   // (knocked over: the lorry carries on without him)
+    if ((S.m === 'ride' || away) && V.sent && V.t <= 0) { bc.material.emissiveIntensity = 0.2; if (garbageNext(v, V)) V.sent = false; else V.t = 8; } },
+  arrive: () => { V.t = 2; }, after: () => { V.sent = false; V.job = []; },
+  reset: () => { V.mode = 'stop'; V.t = 3; V.sent = false; V.job = []; V.blocks.length = 0; V.dmg = 0; V.tt = 0; V.wt = 0; } }); }
+function buildGarbageTruck() { if (!BINS.list.length) return; const { nodes, adj } = roadGraph(); let c = null;
+  for (let k = 0; k < 400 && !c; k++) { const i = Math.floor(Math.random()*nodes.length), n = nodes[i], d = distRoute(n.x, n.z); if (d < 40 || d > 200 || Math.abs(n.x) > 500 || Math.abs(n.z) > 500 || adj[i].length !== 2 || n.hw < 2.6) continue;
+    const b = nodes[adj[i][0][0]], yaw = Math.atan2(b.x - n.x, b.z - n.z), o = Math.min(1.4, Math.max(0.8, n.hw - 1.4)), x = n.x + Math.cos(yaw)*o, z = n.z - Math.sin(yaw)*o;
+    if (vehicleWithin(x, z, 14) || planWithin(x, z, 10, true)) continue; c = { x, z, yaw }; }
+  if (!c) return; reserve('garbage', [c.x, c.z], 6);
+  const V = { mode: 'stop', t: 8, blocks: [], job: [], sent: false, w: { m: 'ride', t: 0 }, emptied: 0 }, G = makeGarbageTruck(); lifeGroup.add(G);
+  const v = new Vehicle({ kind: 'garbage', x: c.x, z: c.z, yaw: c.yaw, hw: 1.2, hl: 4.0, view: { kind: 'mesh', g: G }, axle: [1.05, 2.6, -2.2], ai: garbageAI(V) }); V.v = v; v.blockT = v.passT = 0; v.passSide = 1; v.sw = 0;
+  V.step = { v, a: 0.6, b: -(v.hl + 0.35), y: 0.62, show: true, tilt: 0, yaw: Math.PI };   // standing on the back step, facing back
+  const rig = makeAdult(0xe8761a, 0x2a3a2a, lpick(L_HAIR), { sel: { top: 13, longSleeve: 1, longPants: 1 }, acc: 0xe8c02a, shoes: 0x2a2a2a });   // hi-vis orange, work trousers
+  V.man = new Human({ x: c.x, z: c.z, rig, task: binmanTask(V) }); V.man.seat = V.step; v.crew.push(V.man); BINS.lorry = V;
+  X3.reset.push(() => { V.man.seat = V.step; V.w.m = 'ride'; V.job = []; humanSync(V.man); }); }
+
 // ── 4. ES at the K-shop: stop in front of it for 3 s and the shopkeeper brings a can. Forty seconds of bass and double speed —
 //    and hit anything meanwhile and the car goes up in flames ──
 const ES = { on: false, t: 0, got: false, wait: 0, guy: null, zone: null, door: null, DUR: 40, WAIT: 3 };
@@ -9589,7 +9682,7 @@ function nukeReset() { NUKE.armT = -1; if (!NUKE.on) return; NUKE.on = false; NU
 
 function lifeExtras3Build() {
   TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.heli = null; X3.station = null; X3.sauna = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
-  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
+  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildBins(); buildGarbageTruck(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
 }
 // ── the hitchhiker: by the race route a few hundred metres before the K-shop, a cardboard sign "K-KAUPPA" and a thumb out.
 //    Stop by him and he walks to the window and gets in; stop in the K-shop yard and he gets out, thanks you and goes in —
