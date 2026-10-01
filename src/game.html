@@ -4999,6 +4999,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Liikenne väistää hälytysajoneuvoja: sireenin kuullessaan autot ajavat oikeaan reunaan ja pysähtyvät, kunnes ambulanssi, paloauto tai poliisi on mennyt ohi', '22.39'],
   ['1.10.', 'Hinausauto: palaneet ja romuksi ajetut autot hinataan pois – kuski kiinnittää vaijerin, romu vinssataan keula koholla perään ja viedään kylästä. R tuo autot takaisin', '22.33'],
   ['1.10.', 'Uusi kamera: auton takana ja yläviistossa; paikallaan kamera nousee ylös ja kauas, ja laskeutuu tasaisesti takakameraksi 80 km/h:iin mennessä. C = vanha yläkamera. Nopeusmittarit pois alareunasta, auto näkyy alempana', '21.36'],
   ['1.10.', 'Peli käynnistyy noin sekunnin nopeammin (lähimmän reittipisteen haku ja huoltoalueen paikan etsintä nopeammiksi); hiiren rulla / trackpad zoomaa tasaisesti eikä enää hyppien', '21.36'],
@@ -5297,6 +5298,8 @@ const LEHTI = [
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+  { id: 'vaisto', size: 'half', n: 68, kick: '🚨 LIIKENNE', title: 'Ylästössä väistetään hälytysajoneuvoja', img: ['vaisto.jpg'], cap: ['Henkilöauto on ajanut reunaan ja pysähtynyt, kun poliisi tulee takaa vilkut päällä.'],
+    body: ['Kylän autoilijat ovat oppineet tavoille. Kun takaa tai vastaan tulee ambulanssi tai paloauto hälytysajossa tai poliisi takaa-ajossa, auto ajaa tien oikeaan reunaan ja pysähtyy.', 'Matka jatkuu, kun sireeni on mennyt ohi. Vapaassa ajossa tämän näkee hyvin: koko katu väistää, kun poliisi ajaa sinua takaa.'] },
   { id: 'hinaus', size: 'half', n: 67, kick: '🛻 HINAUS', title: 'Hinausauto korjaa romut pois kylän kaduilta', img: ['hinaus.jpg', 'hinaus2.jpg'], cap: ['Palanut auto vinssataan keula koholla hinausauton perään.', 'Romu lähtee kylästä. Seuraavassa kisassa se on taas paikallaan.'],
     body: ['Kun palanut tai romuksi ajettu auto on sammunut ja palokunta lähtenyt, paikalle ajaa keltainen HINAUS-auto. Kuljettaja käy kiinnittämässä vaijerin, ja romu vinssataan auton perään keula koholla.', 'Hinausauto vie romun kylästä pois. Jos tie on tukossa, se peruuttaa ja yrittää uudelleen, ja tarvittaessa betonipossut saavat väistyä. R-napilla kaikki autot ovat taas paikoillaan.'] },
   { id: 'jate', size: 'page', n: 66, kick: '🗑 JÄTEHUOLTO', title: 'Roska-auto kiertää Ylästöä – pöntöt talojen eteen', lede: 'Jokaisen talon eteen on tuotu vihreä pyörällinen jäteastia. Roska-auto ajaa pöntöltä toiselle, ja lastaaja hyppää takasillalta tyhjentämään ne.',
@@ -10762,6 +10765,8 @@ function trafficRoute(v, V, cont) { const { nodes, adj } = roadGraph(); if (!nod
   const [tx, tz] = pathAt(v, Math.min(v.total, 7)); V.mode = !cont && Math.abs(angDiff(Math.atan2(tx - v.x, tz - v.z) - v.yaw)) > 1.6 ? 'turn' : 'drive'; return true; }
 function hoot(v) { const d = Math.hypot(car.x - v.x, car.z - v.z); if (d > 45 || !audio) return; const k = Math.min(0.22, 5/(d + 8)), f = v.kind === 'bus' ? 0.72 : 1;
   beep(392*f, 0.32, k, 'sawtooth'); beep(494*f, 0.32, k*0.8, 'sawtooth'); }
+// who is out with the siren on: the ambulance and the fire engine on the way to a job, the police on a chase
+function sirenOn(o) { return (o.job && o.job.phase === 'drive' && (o.kind === 'ambulance' || o.kind === 'fire')) || (o.kind === 'police' && o.chase); }
 function trafficAI(V) { const f = (v, dt) => { const C = v.ctrl;
   if (v.fire || v.charred) { C.hand = true; C.thr = 0; V.mode = 'dead'; return; }
   if (V.mode === 'dead') return;
@@ -10788,6 +10793,10 @@ function trafficAI(V) { const f = (v, dt) => { const C = v.ctrl;
     bias = Math.max(bias, Math.min(v.kind === 'bus' ? 0.6 : 0.9, need + 0.6 - clear)); const gap = fw - v.hl - o.hl;
     cap = Math.min(cap, clear < need ? Math.max(1.5, Math.min(4, (gap - 8)*0.5)) : 6); });   // (tight: both crawl past, keeping right)
   v.swBias = bias;
+  // a siren behind us or coming towards us: over to the right, slow, stop till it's gone by
+  let siren = false; forVehiclesNear(v.x, v.z, 55, o => { if (siren || o === v || o.gone || !sirenOn(o)) return; const dx = o.x - v.x, dz = o.z - v.z; if (dx*dx + dz*dz > 55*55) return;
+    const fw = sy*dx + cy*dz, da = Math.abs(angDiff(o.yaw - v.yaw)); if ((da < 1.2 && fw < 3 && fw > -50) || (da > 2.0 && fw > -3 && fw < 50)) siren = true; });
+  if (siren) V.sirenT = 2.5; if (V.sirenT > 0) { V.sirenT -= dt; V.pullT = (V.pullT || 0) + dt; v.swBias = 2.4; cap = Math.min(cap, V.pullT < 1.6 ? 3.5 : 0); } else V.pullT = 0;   // (driveAlong keeps the offset inside the road)
   // junctions ahead: give way to whoever is nearer to it (or already in it)
   let yieldHere = false; for (const J of V.jn) { const dj = J.s - v.s; if (dj < 2 || dj > 26) continue; const me = Math.hypot(J.x - v.x, J.z - v.z);
     for (const o of TRAFFIC.list) { if (o === v || o.gone || Math.abs(o.vF) < 0.3 && Math.hypot(J.x - o.x, J.z - o.z) > 7) continue; const od = Math.hypot(J.x - o.x, J.z - o.z); if (od > 20) continue;
