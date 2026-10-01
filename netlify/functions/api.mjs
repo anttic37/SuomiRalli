@@ -29,6 +29,7 @@ const STRUCK = [
   { k: 'anba', t: 86.277, why: 'mutka oikaistu (Antti itse, 26.9.)' },
   { k: 'kurittaja-elli', until: '2026-09-26', why: 'Antti poisti 26.9.' },
   { k: 'huijari-ande', t: 84.834, why: 'neljä mutkaa oikaistu, −149 m (ghost-analyysi 27.9.)' },
+  { k: 'mane2', until: '2026-10-01', why: 'Antti poisti 1.10.' },
 ];
 // restored: struck by mistake, their lap is put back from the struck/ copy (once: the copy is then gone)
 const RESTORE = ['ande'];   // (27.9.: 85.373 was a clean lap — the cheat was Huijari-Ande)
