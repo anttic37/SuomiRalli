@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 07.15 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 08.32 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -761,7 +761,6 @@ function outShed(HM, S, x, z, w, d, th, wallM, roofM, h, o) { o = o || {}; const
   if (o.door !== false) { const big = o.big, [px, pz] = alongZ ? rot(0, d/2 + 0.05) : rot(w/2 + 0.05, 0); add(unitBox, big ? P.trimMat : P.darkMat, px, y0 + 0.1 + (big ? 1.4 : 0.95), pz, th, alongZ ? (big ? 3.2 : 0.85) : 0.1, big ? 2.8 : 1.9, alongZ ? 0.1 : (big ? 3.2 : 0.85));
     if (big) { const [qx, qz] = alongZ ? rot(0, d/2 + 0.08) : rot(w/2 + 0.08, 0); add(unitBox, P.mat ? wallM : wallM, qx, y0 + 0.1 + 1.4, qz, th, alongZ ? 2.9 : 0.1, 2.5, alongZ ? 0.1 : 2.9); } }   // (a barn door: white frame, boards inside)
   if (S) S.push({ x, z, yaw: th, hw: w/2 + 0.1, hl: d/2 + 0.1, kind: 'lm' }); }
-function mergerInto(HM, G) { const it = mergerIntoGen(HM, G); while (!it.next().done); }
 function* mergerIntoGen(HM, G) { HM.fuse(k => /^(trim|door\d*|glass|sokkeli|step)$/.test(k) ? 'n' : 's'); yield;   // (a mesh a step: the merging is the costly part of a village)
   for (const key of Object.keys(HM.groups)) { const g = HM.groups[key], m = new THREE.Mesh(HM.geometryOf(key), g.mat); m.castShadow = !/^(trim|door\d*|glass|step)$/.test(g.key); m.receiveShadow = true; m.userData.key = g.key || key; m.userData.shared = true; G.add(m); yield; } }
 // signs (a canvas texture each: village names, the shop) — kept with the place's group and disposed with it
@@ -930,11 +929,11 @@ let _afTex = null;
 function afTexture() { if (_afTex) return _afTex; const c = document.createElement('canvas'); c.width = 64; c.height = 1024; const g = c.getContext('2d'); g.fillStyle = '#5b5d5f'; g.fillRect(0, 0, 64, 1024);
   for (let i = 0; i < 3000; i++) { g.fillStyle = 'rgba(' + (Math.random() < 0.5 ? '255,255,255' : '0,0,0') + ',0.05)'; g.fillRect(Math.random()*64, Math.random()*1024, 2, 2); }
   g.fillStyle = '#e8e8e2'; for (let y = 40; y < 984; y += 44) g.fillRect(30, y, 4, 22); for (const y of [6, 1000]) for (let x = 6; x < 60; x += 8) g.fillRect(x, y, 4, 18);
-  _afTex = new THREE.CanvasTexture(c); _afTex.anisotropy = 4; return _afTex; }
+  _afTex = new THREE.CanvasTexture(c); _afTex.anisotropy = 4; _afTex.keep = true; return _afTex; }
 function afBuild(A) { const G = new THREE.Group(), y = A.h;
   const strip = new THREE.Mesh(new THREE.PlaneGeometry(AF_W, AF_L), new THREE.MeshStandardMaterial({ map: afTexture(), roughness: 0.95, polygonOffset: true, polygonOffsetFactor: -2 })); strip.rotation.set(-Math.PI/2, 0, A.a); strip.position.set(A.x, y + 0.04, A.z); strip.receiveShadow = true; G.add(strip);
   const loc = (a, b) => [A.x + A.fx*a + A.fz*b, A.z + A.fz*a - A.fx*b];
-  for (let a = -AF_L/2; a <= AF_L/2; a += 60) for (const sd of [-1, 1]) { const [x, z] = loc(a, sd*(AF_W/2 + 2)), m = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.35, 0.6), new THREE.MeshStandardMaterial({ color: 0xf2f2ee })); m.position.set(x, y + 0.17, z); G.add(m); }
+  { const K = kitNew(); for (let a = -AF_L/2; a <= AF_L/2; a += 60) for (const sd of [-1, 1]) { const [x, z] = loc(a, sd*(AF_W/2 + 2)); kitAdd(K, KIT.box, x, y + 0.17, z, 0, 0.6, 0.35, 0.6, 0xf2f2ee); } G.add(kitMesh(K)); }   // (the edge markers: one mesh)
   const [hx, hz] = loc(-AF_L/2 + 70, AF_W/2 + 16), hut = new THREE.Group(); hut.position.set(hx, y, hz); hut.rotation.y = A.a; G.add(hut);   // the hut: a small red-brown wooden shed, a tin roof, a door, one window, a sign
   const wood = new THREE.MeshStandardMaterial({ color: 0x7a3a22, roughness: 0.9 }), B = (w, h, d, m, px, py, pz) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(px, py, pz); o.castShadow = true; o.receiveShadow = true; hut.add(o); return o; };
   B(3.2, 2.3, 2.6, wood, 0, 1.15, 0); const roof = B(3.7, 0.12, 3.2, new THREE.MeshStandardMaterial({ color: 0x55585c, roughness: 0.6, metalness: 0.3 }), 0, 2.45, 0); roof.rotation.x = 0.12;
@@ -955,7 +954,7 @@ function outerSolids(x, z) { const si = Math.floor(x/30), sj = Math.floor(z/30);
 function outerUpdate() { if (!worldLifted) return; const cx = camera.position.x, cz = camera.position.z; outerGround(cx, cz, 2); outerForest(cx, cz, 2);   // (a 2 ms budget each, a frame)
   for (const A of airfieldsNear(cx, cz, 1500)) if (!OUT.afG.has(A.key) && !(OUT.fjob && OUT.fjob.key === 'A' + A.key)) { if (Math.hypot(A.x - cx, A.z - cz) < 700 || !OUT.fjob) OUT.afG.set(A.key, afBuild(A)); }   // (one a frame, not on top of a build unless it's near)
   if (OUT.ctry === undefined || OUT.ctry || Math.hypot(cx - OUT.ccx, cz - OUT.ccz) > 25) { OUT.ccx = cx; OUT.ccz = cz; OUT.ctry = countryUpdate(cx, cz); }   // (the countryside: re-checked every 25 m, or every frame while it is still building)
-  for (const [k, G] of OUT.afG) { const A = OUT.af.get(k); if (Math.hypot(A.x - cx, A.z - cz) > 2000) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); }); OUT.afG.delete(k); } }
+  for (const [k, G] of OUT.afG) { const A = OUT.af.get(k); if (Math.hypot(A.x - cx, A.z - cz) > 2000) { groupDrop(G); OUT.afG.delete(k); } }   // (all of it: materials and the sign's texture too)
   if (PLANE.on) outerSolids(PLANE.p.x, PLANE.p.z); else outerSolids(car.x, car.z); }   // (round whoever is moving: the plane flies far from the parked Pökö)
 function nearestAirfield(x, z) { let best = null, bd = Infinity; for (const A of airfieldsNear(x, z, 6000)) { const d = Math.hypot(A.x - x, A.z - z); if (d < bd) { bd = d; best = A; } } return best && { A: best, d: bd }; }
 function terrainNormal(x, z, out) { const e = 1.0, dx = (H(x+e, z) - H(x-e, z))/(2*e), dz = (H(x, z+e) - H(x, z-e))/(2*e); const l = Math.hypot(dx, 1, dz); out = out || {}; out.x = -dx/l; out.y = 1/l; out.z = -dz/l; return out; }
@@ -2200,7 +2199,6 @@ function buildScenery() { KNOCK.items.length = 0; YARD_SOLID.length = 0; YARDG =
       }
       M.end(); } };
   let flagCount = 0;
-  const flagTex = (() => { const cv = document.createElement('canvas'); cv.width = 180; cv.height = 110; const g = cv.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 180, 110); g.fillStyle = '#003580'; g.fillRect(50, 0, 30, 110); g.fillRect(0, 40, 180, 30); return new THREE.CanvasTexture(cv); })();
   const DRIVE_STRIPS = [];
   PLOTS.forEach(pl => {
     const [x, z, w, d, th] = pl.B, bi = pl.bi, y0 = 0;
@@ -3711,7 +3709,7 @@ const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0, stam: 1
 // Stamina: running (6.2 m/s) empties it in ~6 s, then a slow, puffing walk until it's back over a third (walking or standing fills it).
 // Fear: past 90 m from the car they get nervous (slower, looking back over the shoulder); at 140 m they won't go on — it'll be stolen.
 const WALK_FEAR = 90, WALK_MAX = 140;
-function walkMsg(t, col) { const cpd = document.getElementById('checkpoint-display'); if (!cpd) return; cpd.textContent = t; cpd.style.color = col || '#ffe9a8'; cpd.style.opacity = 1; clearTimeout(walkMsg.tm); walkMsg.tm = setTimeout(() => cpd.style.opacity = 0, 1600); }
+function centerMsg(t, col, ms) { const cpd = document.getElementById('checkpoint-display'); if (!cpd) return; cpd.textContent = t; cpd.style.color = col || '#ffe9a8'; cpd.style.opacity = 1; clearTimeout(centerMsg.tm); centerMsg.tm = setTimeout(() => cpd.style.opacity = 0, ms || 1600); }   // (the one centre-screen message: a new one isn't cut short by an old one's fade)
 const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WALK;   // the arrows move you the way they point on the screen (the camera holds still while you walk), Shift runs, Space punches
   const ix = ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0) - ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0), iz = ((keys['ArrowUp'] || keys['KeyW']) ? 1 : 0) - ((keys['ArrowDown'] || keys['KeyS']) ? 1 : 0), wantRun = keys['ShiftLeft'] || keys['ShiftRight'];
   const A = W.camA, mx = Math.sin(A)*iz - Math.cos(A)*ix, mz = Math.cos(A)*iz + Math.sin(A)*ix,   /* (screen right = (−cos A, sin A): a bigger heading is a left turn) */ ml = Math.hypot(mx, mz), fwd = ml > 0.01 ? 1 : 0;
@@ -3724,35 +3722,28 @@ const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WAL
   const away = (Math.sin(h.yaw)*dx + Math.cos(h.yaw)*dz)/(d || 1); if (away > 0 && sp) sp *= 1 - 0.6*fear;   // (nervous: dragging their feet going further off)
   h.vx = Math.sin(h.yaw)*sp; h.vz = Math.cos(h.yaw)*sp; h.tilt = W.puff ? 0.28 : 0;
   if (W.puff) { h.pose.armL = h.pose.armR = -0.6; if (!fwd) h.tilt = 0.45 + 0.05*Math.sin(t*9); if ((W.pt -= dt) <= 0) { W.pt = 0.55; if (audio) beep(170 + Math.random()*40, 0.2, 0.04, 'triangle'); } }   // hands on knees, panting
-  if (W.puff && !W.saidPuff) { W.saidPuff = true; walkMsg(T('😮‍💨 PUUSKUTTAA…')); } else if (!W.puff) W.saidPuff = false;
-  if (d > WALK_FEAR) { h.sway = 0.25*Math.sin(t*2.2)*fear; if (!W.saidFear) { W.saidFear = true; walkMsg(T('😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!'), '#ffb080'); } } else { W.saidFear = false; h.sway = 0; }
-  if (d > WALK_MAX) { h.x = car.x + dx/d*WALK_MAX; h.z = car.z + dz/d*WALK_MAX; if ((W.ft -= dt) <= 0) { W.ft = 3; walkMsg(T('😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!'), '#ff8a6a'); } } },
+  if (W.puff && !W.saidPuff) { W.saidPuff = true; centerMsg(T('😮‍💨 PUUSKUTTAA…')); } else if (!W.puff) W.saidPuff = false;
+  if (d > WALK_FEAR) { h.sway = 0.25*Math.sin(t*2.2)*fear; if (!W.saidFear) { W.saidFear = true; centerMsg(T('😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!'), '#ffb080'); } } else { W.saidFear = false; h.sway = 0; }
+  if (d > WALK_MAX) { h.x = car.x + dx/d*WALK_MAX; h.z = car.z + dz/d*WALK_MAX; if ((W.ft -= dt) <= 0) { W.ft = 3; centerMsg(T('😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!'), '#ff8a6a'); } } },
   reset() {} });
 function walkPunch(h) {   // a swing at whoever stands in front: they run off, and someone calls the police
   WALK.punchT = 0.3; const fx = Math.sin(h.yaw), fz = Math.cos(h.yaw); let best = null, bd = 1.9;
   forHumansNear(h.x, h.z, 2, o => { if (o === h || o.gone || o.down || o.seat || o.inside || o.ride) return; const dx = o.x - h.x, dz = o.z - h.z, d = Math.hypot(dx, dz); if (d < bd && (dx*fx + dz*fz)/(d || 1) > 0.25) { bd = d; best = o; } });
   if (audio) beep(best ? 140 : 300, best ? 0.12 : 0.06, best ? 0.25 : 0.05, best ? 'square' : 'triangle'); if (!best) return;
   const dx = best.x - h.x, dz = best.z - h.z, l = Math.hypot(dx, dz) || 1; best.dodge = { t: 3.5 + Math.random()*1.5, x: dx/l*5, z: dz/l*5 };   // (off at a run, away from you)
-  walkMsg(T('👊 PAM!'), '#ffd23a');
+  centerMsg(T('👊 PAM!'), '#ffd23a');
   if (!best.animal && worldT - (WALK.copT || -99) > 12) { WALK.copT = worldT; policeSpawn(1); policeMsg(T('🚨 JOKU SOITTI POLIISIT!'), true); } }
 function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on || POLICE.hold > 0 || Math.hypot(car.vx, car.vz) > 3) return false;
   const [x, z] = lloc(car.x, car.z, car.angle, 1.35, 0.3);   // the driver's door: local +x is the car's left
   const h = WALK.h = new Human({ x, z, yaw: car.angle + Math.PI/2, rig: makeAdult(0xf2f2ee, 0xf2f2ee, 0x5a3a1e, { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), task: playerWalkTask(), temp: true });
   h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.camA = camAngle.current; WALK.spPrev = true; WALK.punchT = 0; WALK.downT = 0; WALK.stam = 1; WALK.puff = false; WALK.ft = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
-  const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ'); cpd.style.color = '#ffe9a8'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 1800); return true; }
+  centerMsg(T('JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ'), '#ffe9a8', 1800); return true; }
 function walkIn(force) { if (!WALK.on) return false; const h = WALK.h; if (!force && (h.down || Math.hypot(h.x - car.x, h.z - car.z) > 3.8)) return false;
   if (!h.gone) humanRemove(h); WALK.on = false; WALK.h = null; return true; }
 function walkBar() { let b = WALK.bar; if (!b) { b = WALK.bar = document.createElement('div'); b.style.cssText = 'position:fixed;left:50%;bottom:118px;width:160px;height:9px;margin-left:-80px;border:1px solid rgba(255,255,255,0.55);border-radius:5px;background:rgba(0,0,0,0.45);z-index:20;display:none;overflow:hidden'; b.innerHTML = '<i style="display:block;height:100%;width:100%;background:#7ad86a"></i>'; document.body.appendChild(b); }
   b.style.display = WALK.on ? 'block' : 'none'; if (WALK.on) { const i = b.firstChild; i.style.width = (WALK.stam*100).toFixed(0) + '%'; i.style.background = WALK.puff ? '#e86a3a' : WALK.stam < 0.3 ? '#e8c03a' : '#7ad86a'; } }
 function walkUpdate(dt) { walkBar(); if (!WALK.on) return; const h = WALK.h; if (h.gone) { WALK.on = false; WALK.h = null; return; }
   if (h.down && !h.ride && h.hop <= 0 && Math.hypot(h.vx, h.vz) < 0.4) { if ((WALK.downT += dt) > 2.5) { h.down = h.hurt = false; h.tilt = h.roll = h.spin = 0; h.vx = h.vz = 0; WALK.downT = 0; } } else WALK.downT = 0; }   // up on their feet again
-function walkCamera(dt) { const h = WALK.h, gy = Y(h.x, h.z) + h.hop; WALK.cy += angDiff(h.yaw - WALK.cy)*Math.min(1, dt*2.5); const cx = Math.sin(WALK.cy), cz = Math.cos(WALK.cy);
-  camTarget.set(h.x - cx*6.5, gy + 3.4, h.z - cz*6.5); camTarget.y = Math.max(camTarget.y, Y(camTarget.x, camTarget.z) + 1.3);
-  camPos.lerp(camTarget, 1 - Math.pow(0.02, dt)); camPos.y = Math.max(camPos.y, Y(camPos.x, camPos.z) + 1.0);
-  camLookAt.lerp(_camV.set(h.x + cx*4, gy + 1.3, h.z + cz*4), 1 - Math.pow(0.005, dt)); camera.position.copy(camPos); camera.lookAt(camLookAt);
-  camera.fov += (58 - camera.fov)*Math.min(2*dt, 1); camera.updateProjectionMatrix();
-  const texel = 200/4096, ax = Math.round(h.x/texel)*texel, az = Math.round(h.z/texel)*texel;
-  if (Math.hypot(ax - lightAnchor.x, az - lightAnchor.z) > 24) { lightAnchor.x = ax; lightAnchor.z = az; const ay = Y(ax, az); dirLight.position.set(ax + SUN.x, SUN.y + ay, az + SUN.z); dirLight.target.position.set(ax, ay, az); dirLight.target.updateMatrixWorld(); } }
 function updateCar(dt, live = true) {
   const held = POLICE.hold > 0 || WRECK.on || WALK.on; if (held) live = false;   // pulled over: the police have it
   if (PLANE.on) { planePhys(dt, live); return; }   // the plane: its own flight physics (PLANE)
@@ -4992,6 +4983,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Koodin siivous: kuollut koodi pois (vanha kävelykamera, käyttämättömät animaatio- ja lippuapurit, rengasvallien vanhat ihmisproput), auton törmäyslaatikko yhdellä yhteisellä funktiolla, ruudun keskiviestit yhdellä apurilla (uusi viesti ei enää sammu vanhan ajastimeen), korpikenttien muistivuoto korjattu', '11.32'],
   ['1.10.', 'Ulkomaailma ilman nykäyksiä: kylät, tiet, maa ja metsä rakennetaan taustalla muutama millisekunti kerrallaan; kameran takana olevaa metsää ei piirretä, ja vain lähipuut heittävät varjoa; pitkän matkan välimuistit karsitaan', '10.15'],
   ['1.10.', 'Maaseudun talot ovat nyt samoja kuin Ylästössä: rintamamiestalot, matalat 60–70-luvun talot ja kasaritalot lautaverhouksineen, tiilikattoineen ja verhoineen; navetat, aitat, saunat ja ladot samoista laudoista ja tiilistä', '08.30'],
   ['1.10.', '🏡 Maaseutu kylän takana: soratiet Ylästön reunalta naapurikyliin (talot, kyläkauppa, bussikatos, nimikyltit), maatiloille (navetta, aitta, sauna, pelto latoineen ja paaleineen) ja järville (sauna, laituri, vene); suot pitkospuineen; sähkölinjat teiden varsilla. Järvessä auto uppoaa ja kone kaatuu, suolla pyörät uppoavat', '05.40'],
@@ -6098,7 +6090,6 @@ function bodyFill(cam) {
     for (const a of ['bposeA', 'bposeB', 'bposeC', 'bcol', 'bcol2']) { const A = im.geometry.attributes[a]; A.updateRange.count = n[k]*4; A.needsUpdate = true; } }); }
 function makeAdult(shirt, pants, hair, o) { return bodyRig(false, lookCivil(false, shirt, pants, hair, o)); }
 function makeKid(shirt, o) { return bodyRig(true, lookCivil(true, shirt, lpick(LOOK_KIDPANTS), lpick(L_HAIR), o)); }
-function walkAnim(rig, ph, amp) { const s = Math.sin(ph)*amp; rig.legL.rotation.x = s; rig.legR.rotation.x = -s; rig.armL.rotation.x = -s*0.8; rig.armR.rotation.x = s*0.8; }
 function placeAt(g, x, z, yaw, dy) { g.position.set(x, Y(x, z) + (dy || 0), z); if (yaw !== undefined) g.rotation.y = yaw; }
 let _flagMat = null;
 function flagMaterial() { if (_flagMat) return _flagMat;
@@ -6756,7 +6747,7 @@ function balesReset() { BALES.forEach((b, i) => { if (b.x === b.ox && b.z === b.
 // the bale as a capsule: two circles on its axis
 function balePts(b) { const ax = Math.sin(b.yaw)*0.4, az = Math.cos(b.yaw)*0.4; return [[b.x + ax, b.z + az], [b.x - ax, b.z - az]]; }
 function baleHitByCar(b) {
-  for (const [px, pz] of balePts(b)) { const hit = carBoxPush(px, pz, BALE.R*0.95); if (!hit) continue;
+  for (const [px, pz] of balePts(b)) { const hit = boxPush(playerBox(), px, pz, BALE.R*0.95); if (!hit) continue;
     const nx = hit.nx, nz = hit.nz; b.x += nx*hit.ov*0.7; b.z += nz*hit.ov*0.7; car.x -= nx*hit.ov*0.3; car.z -= nz*hit.ov*0.3;
     const rel = (b.vx - car.vx)*nx + (b.vz - car.vz)*nz;
     if (rel < 0) { const imp = -rel*1.25;   // car ≈ 1000 kg, bale ≈ 400 kg (some of it lost in the straw)
@@ -8949,7 +8940,7 @@ function paulinKaali(P) { if (!_paulTex) { const c = document.createElement('can
 const CABBAGE = [], TRACTOR_MAD = Object.assign({}, VSPEC.tractor, { accel: 5.5, vmax: 15 });   // (the farmer floors it)
 function cabbageUpdate(dt) { if (gameState !== State.RACING || Math.hypot(car.vx, car.vz) < 2) return;
   for (const C of CABBAGE) { const P = C.P, dx = car.x - P.x, dz = car.z - P.z, a = dx*P.ux + dz*P.uz, b = dx*P.uz - dz*P.ux; if (Math.abs(a) > P.L/2 + 2.5 || Math.abs(b) > P.W/2 + 2.5) continue;
-    let flat = false; for (let i = 0; i < C.pts.length; i++) { if (C.flat.has(i)) continue; const [x, z] = C.pts[i]; if (Math.abs(x - car.x) > 2.3 || Math.abs(z - car.z) > 2.3 || !carBoxPush(x, z, 0.2)) continue;
+    let flat = false; for (let i = 0; i < C.pts.length; i++) { if (C.flat.has(i)) continue; const [x, z] = C.pts[i]; if (Math.abs(x - car.x) > 2.3 || Math.abs(z - car.z) > 2.3 || !boxPush(playerBox(), x, z, 0.2)) continue;
       C.flat.add(i); C.im.getMatrixAt(i, _vm); _vm.decompose(_vp, _vq, _vs); _vs.set(_vs.x*1.45, _vs.y*0.2, _vs.z*1.45); _vp.y -= 0.09; _vm.compose(_vp, _vq, _vs); C.im.setMatrixAt(i, _vm); _vs.set(1, 1, 1); flat = true;
       if (Math.random() < 0.5) lifeFx.emit(x, Y(x, z) + 0.2, z, (Math.random() - 0.5)*2, 1.5 + Math.random(), (Math.random() - 0.5)*2, 0.8, 0.18, 0.3, 0.9, 0.45, 0.7, 0.3, 0.45, 0.7, 0.3); }   // bits of leaf
     if (flat) C.im.instanceMatrix.needsUpdate = true;
@@ -9214,7 +9205,7 @@ function balloonsUpdate(dt) { for (const B of BALLOONS) { B.t += dt; const M = B
     M.G.rotation.x = 0.15*Math.sin(B.ft*5); M.G.rotation.z = 0.15*Math.cos(B.ft*4);
     if (B.y <= Y(B.x, B.z)) balloonLand(B); }
   else { M.G.rotation.x = M.G.rotation.z = 0;   // on the ground: the basket is a hay bale (the same weights and knocks), sliding instead of rolling
-    if (Math.abs(B.x - car.x) < 4.5 && Math.abs(B.z - car.z) < 4.5) { const hit = carBoxPush(B.x, B.z, 0.9); if (hit) { const nx = hit.nx, nz = hit.nz; B.x += nx*hit.ov*0.7; B.z += nz*hit.ov*0.7; car.x -= nx*hit.ov*0.3; car.z -= nz*hit.ov*0.3;
+    if (Math.abs(B.x - car.x) < 4.5 && Math.abs(B.z - car.z) < 4.5) { const hit = boxPush(playerBox(), B.x, B.z, 0.9); if (hit) { const nx = hit.nx, nz = hit.nz; B.x += nx*hit.ov*0.7; B.z += nz*hit.ov*0.7; car.x -= nx*hit.ov*0.3; car.z -= nz*hit.ov*0.3;
       const rel = (B.vx - car.vx)*nx + (B.vz - car.vz)*nz;
       if (rel < 0) { const imp = -rel*1.25; B.vx += nx*imp*0.72; B.vz += nz*imp*0.72; car.vx -= nx*imp*0.28; car.vz -= nz*imp*0.28; B.w += ((Math.random() - 0.5)*2)*imp*0.35; carDamage(nx, nz, -rel*0.7);
         const now = performance.now(); if (audio && now - lastThud > 110) { lastThud = now; beep(75 + Math.random()*20, 0.14, Math.min(0.32, -rel*0.03), 'triangle'); } }
@@ -9949,33 +9940,22 @@ function repairCar() {
 }
 // the car as what it is — a box (3.8 × 1.7 m) — against a prop's circle; people count as slim (0.3 m), not their spacing radius
 const CAR_HL = 1.9, CAR_HW = 0.84;
-function carBoxPush(x, z, r) { if (DRAG.on) return boxPush(playerBox(), x, z, r);
-  const fx = Math.sin(car.angle), fz = Math.cos(car.angle), rx = fz, rz = -fx, dx = x - car.x, dz = z - car.z, lf = dx*fx + dz*fz, lr = dx*rx + dz*rz;
-  if (Math.abs(lf) > CAR_HL + r || Math.abs(lr) > CAR_HW + r) return null;
-  const cf = Math.max(-CAR_HL, Math.min(CAR_HL, lf)), cr = Math.max(-CAR_HW, Math.min(CAR_HW, lr)), ef = lf - cf, er = lr - cr, d = Math.hypot(ef, er);
-  if (d >= r) return null;
-  if (d > 1e-6) return { nx: (rx*er + fx*ef)/d, nz: (rz*er + fz*ef)/d, ov: r - d };
-  const pf = CAR_HL - Math.abs(lf), pr = CAR_HW - Math.abs(lr);                                           // centre inside: out by the shallow side
-  if (pr < pf) { const sg = Math.sign(lr) || 1; return { nx: rx*sg, nz: rz*sg, ov: pr + r }; } const sg = Math.sign(lf) || 1; return { nx: fx*sg, nz: fz*sg, ov: pf + r };
-}
 function propHitByCar(t) {
-  const person = t.kind === 'person', pig = t.kind === 'pig';
-  const hit = carBoxPush(t.x, t.z, person ? 0.3 : t.r); if (!hit) return;
+  const pig = t.kind === 'pig';   // (tyre stacks and concrete pigs: the spectators placed with them become Humans when the world is built)
+  const hit = boxPush(playerBox(), t.x, t.z, t.r); if (!hit) return;
   const nx = hit.nx, nz = hit.nz; if (pig) { car.x -= nx*hit.ov*0.5; car.z -= nz*hit.ov*0.5; t.x += nx*hit.ov*0.5; t.z += nz*hit.ov*0.5; } else { t.x += nx*hit.ov; t.z += nz*hit.ov; }   // (a pig: twice a tyre stack's weight — it shoves, but it costs)
   const rel = (t.vx - car.vx)*nx + (t.vz - car.vz)*nz;
   if (rel < 0) {
-    const kick = person ? 2.4 : pig ? 1.05 : 1.15;                     // heavier tire stacks: they don't fly as far (a pig gets going too — no pushing it along for ever — but its friction stops it in half the distance)…
+    const kick = pig ? 1.05 : 1.15;                     // heavier tire stacks: they don't fly as far (a pig gets going too — no pushing it along for ever — but its friction stops it in half the distance)…
     t.vx -= nx*rel*kick; t.vz -= nz*rel*kick;
     if (pig) { const fx = Math.sin(car.angle), fz = Math.cos(car.angle), sd = (fx*(t.z - car.z) - fz*(t.x - car.x)) >= 0 ? 1 : -1; t.vx += -fz*sd*(-rel)*0.6; t.vz += fx*sd*(-rel)*0.6; }   // (a pig slews off to the side it was hit on: it doesn't stay in front to be pushed along)
-    const back = person ? 0.02 : pig ? (rel < -3 ? 0.75 : 0.2) : 0.16; car.vx += nx*rel*back; car.vz += nz*rel*back;   // …and the car pays for hitting them (a pig: twice what a stack costs)
-    if (person) { if (Math.hypot(car.vx, car.vz) > 3) { t.vy = Math.min(9, -rel*0.45 + 2); t.down = true; t.spin = (Math.random()-0.5)*8; propInjured(t); } else { t.vx *= 0.3; t.vz *= 0.3; } }
-    else carDamage(nx, nz, pig ? -rel*1.15 : -rel);
+    const back = pig ? (rel < -3 ? 0.75 : 0.2) : 0.16; car.vx += nx*rel*back; car.vz += nz*rel*back;   // …and the car pays for hitting them (a pig: twice what a stack costs)
+    carDamage(nx, nz, pig ? -rel*1.15 : -rel);
     const now = performance.now();
-    if (audio && now - lastThud > 110) { lastThud = now; beep(person ? 240 + Math.random()*120 : 65 + Math.random()*35, person ? 0.14 : 0.09, Math.min(0.3, -rel*0.025), person ? 'square' : 'triangle'); }
+    if (audio && now - lastThud > 110) { lastThud = now; beep(65 + Math.random()*35, 0.09, Math.min(0.3, -rel*0.025), 'triangle'); }
   }
   setMoving(t);
 }
-function propInjured(t) { t.hurt = true; }   // (people are Humans now: see knock())
 function propPair(a, b) {
   const dx = b.x-a.x, dz = b.z-a.z, d2 = dx*dx+dz*dz, R = a.r+b.r;
   if (d2 >= R*R || d2 < 1e-9) return;
@@ -9985,10 +9965,6 @@ function propPair(a, b) {
   if (rel < 0) {
     const imp = rel * 0.85;
     a.vx += nx*imp*0.5; a.vz += nz*imp*0.5; b.vx -= nx*imp*0.5; b.vz -= nz*imp*0.5;
-    // only something flying knocks a person over (a tyre, or somebody the car launched) — not a runner tripping over the fallen
-    const flying = (o) => o.kind !== 'person' ? Math.hypot(o.vx, o.vz) > 2.5 : (o.down && (o.hop > 0.25 || Math.hypot(o.vx, o.vz) > 3.5));
-    if (b.kind === 'person' && !b.down && Math.abs(imp) > 1.5 && flying(a)) { b.down = true; b.vy = Math.max(b.vy, 2.5); b.spin = (Math.random()-0.5)*6; propInjured(b); }
-    if (a.kind === 'person' && !a.down && Math.abs(imp) > 1.5 && flying(b)) { a.down = true; a.vy = Math.max(a.vy, 2.5); a.spin = (Math.random()-0.5)*6; propInjured(a); }
   }
   setMoving(a); setMoving(b);
 }
@@ -10002,12 +9978,10 @@ function updateTires(dt) {
   for (const t of movingProps) propHitByCar(t);
   // integrate moving props
   for (const t of movingProps) {
-    const person = t.kind === 'person';
-    const fr = person ? 2.2 : t.kind === 'pig' ? 6 : 3;   // (a pig slides half as far as a stack)
+    const fr = t.kind === 'pig' ? 6 : 3;   // (a pig slides half as far as a stack)
     t.vx *= Math.max(1 - fr*dt, 0); t.vz *= Math.max(1 - fr*dt, 0);
     if (Math.abs(t.vx) < 0.01 && Math.abs(t.vz) < 0.01) { t.vx = 0; t.vz = 0; }
     t.x += t.vx*dt; t.z += t.vz*dt;
-    if (person && (t.hop > 0 || t.vy > 0)) { t.vy -= 22*dt; t.hop += t.vy*dt; if (t.hop <= 0) { t.hop = 0; t.vy = 0; } }
   }
   // a flying tyre bowls people over — the same knock as a car, a van or a flying body
   for (const t of movingProps) { if (t.kind !== 'tire') continue; const sp = Math.hypot(t.vx, t.vz); if (sp < 1) continue;
@@ -10024,11 +9998,9 @@ function updateTires(dt) {
   // sync + retire props that came to rest
   for (let i = movingProps.length-1; i >= 0; i--) {
     const t = movingProps[i];
-    const person = t.kind === 'person';
-    if (person && t.down) { t.yaw += t.spin * dt; if (!(t.hop > 0)) t.spin *= Math.exp(-dt*7); t.tilt += ((-Math.PI/2 + 0.15) - t.tilt) * Math.min(8*dt, 1); if (t.vx === 0 && t.vz === 0) t.spin *= 0.9; }
-    else if (!person) t.yaw += (t.vx + t.vz) * (t.kind === 'pig' ? 0.05 : 0.4) * dt;
+    t.yaw += (t.vx + t.vz) * (t.kind === 'pig' ? 0.05 : 0.4) * dt;
     syncProp(t);
-    const settled = t.vx === 0 && t.vz === 0 && !(t.hop > 0) && (!person || !t.down || Math.abs(t.tilt - (-Math.PI/2 + 0.15)) < 0.01);
+    const settled = t.vx === 0 && t.vz === 0;
     if (settled) { t.moving = false; movingProps.splice(i, 1); staticDirty = true; }
   }
 }
@@ -10430,8 +10402,8 @@ addEventListener('keydown', e => {
   else if (e.code==='KeyF' && !e.repeat) { if (WALK.on) { if (dragNear(WALK.h) && !WALK.h.down) { dragSwap(!DRAG.on); walkIn(true); } else walkIn(); } else walkOut(); }   // out of the car / back in — or into the other one parked here (the dragster, the Pökö)
   if (e.code==='Digit1' || e.code==='Numpad1') radioVol(-1);   // radio quieter / louder
   if (e.code==='Digit2' || e.code==='Numpad2') radioVol(1);
-  if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = T(camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'); cpd.style.color='#ffe9a8'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0, 900); }
-  if (e.code==='KeyG' && !e.repeat) { ghostEnabled = !ghostEnabled; const cpd=document.getElementById('checkpoint-display'); cpd.textContent = T(ghost ? (ghostEnabled ? 'HAAMU PÄÄLLÄ' : 'HAAMU POIS') : 'EI HAAMUA VIELÄ'); cpd.style.color='#bfe2ff'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0,900); }   // restart any time: back to the grid, countdown again
+  if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; centerMsg(T(camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'), '#ffe9a8', 900); }
+  if (e.code==='KeyG' && !e.repeat) { ghostEnabled = !ghostEnabled; centerMsg(T(ghost ? (ghostEnabled ? 'HAAMU PÄÄLLÄ' : 'HAAMU POIS') : 'EI HAAMUA VIELÄ'), '#bfe2ff', 900); }   // restart any time: back to the grid, countdown again
 });
 addEventListener('keyup', e => keys[e.code]=false);
 
@@ -10660,7 +10632,7 @@ function freeEnter() {
   if (FREE.on) return; FREE.on = true; lapStarted = false;
   trackMeshGroup.children.forEach(m => { const k = m.userData.key; if ((k === 'curb' || k === 'checkpoint' || k === 'grid' || m === finishMesh || m.userData.routePatch) && m.visible) { m.visible = false; FREE.hidden.push(m); } if (k === 'freeFillet') m.visible = true; });   // (the route's own tarmac out, the network's rounded junction corners in)
   tires.forEach(t => { if ((t.kind !== 'tire' && t.kind !== 'pig') || t.off) return; t.off = true; t.freeOff = true; if (t.moving) { t.moving = false; movingProps = movingProps.filter(o => o !== t); } syncProp(t); }); staticDirty = true;
-  const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('VAPAA AJO – KOKO KYLÄ ON SINUN'); cpd.style.color = '#ffd23c'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2600);
+  centerMsg(T('VAPAA AJO – KOKO KYLÄ ON SINUN'), '#ffd23c', 2600);
   beep(523, 0.1, 0.25, 'square'); setTimeout(() => beep(784, 0.2, 0.25, 'square'), 120); trafficStart(); freeYardTires(true); freeKshop(true); }
 function freeExit() {
   if (!FREE.on) return; FREE.on = false; trafficStop(); freeYardTires(false); freeKshop(false); FREE.hidden.forEach(m => { m.visible = true; }); FREE.hidden.length = 0; trackMeshGroup.children.forEach(m => { if (m.userData.key === 'freeFillet') m.visible = false; });
@@ -10679,7 +10651,7 @@ function cutUpdate() {
   if (!CUT.on && d > w + 3) { CUT.on = true; CUT.drv = CUT.gain = CUT.far = 0; }
   if (CUT.on) { CUT.far = Math.max(CUT.far, d - w); CUT.drv += Math.hypot(car.x - CUT.px, car.z - CUT.pz); let g = cutArc(p) - cutArc(CUT.pp); const L = cutArc(n); if (g < -L/2) g += L; if (g > L/2) g -= L; CUT.gain += g;
     if (d < w + 1 || gameState !== State.RACING) { if (CUT.gain - CUT.drv > 12 && CUT.far > 8 && !CUT.bad) { CUT.bad = true; CUT.at = [Math.round(car.x), Math.round(car.z)];
-        const cpd = document.getElementById('checkpoint-display'); cpd.textContent = T('OIKAISU – KIERROS EI KELPAA'); cpd.style.color = '#ff4444'; cpd.style.opacity = 1; setTimeout(() => cpd.style.opacity = 0, 2200); beep(180, 0.3, 0.3, 'sawtooth'); }
+        centerMsg(T('OIKAISU – KIERROS EI KELPAA'), '#ff4444', 2200); beep(180, 0.3, 0.3, 'sawtooth'); }
       CUT.on = false; } }
   CUT.px = car.x; CUT.pz = car.z; CUT.pp = p; }
 function updateCheckpoints(fdt) {
@@ -10696,7 +10668,7 @@ function updateCheckpoints(fdt) {
       lapStarted = true; raceTime = -f*fdt;                                  // updateHUD adds this frame's dt → exactly the time since crossing
       prevFinishS = s; prevCpS = null;
       beep(990, 0.1, 0.25, 'square');
-      const cpd=document.getElementById('checkpoint-display'); cpd.textContent=T('AIKA KÄY'); cpd.style.color='#ffffff'; cpd.style.opacity=1; setTimeout(()=>cpd.style.opacity=0,700);
+      centerMsg(T('AIKA KÄY'), '#ffffff', 700);
     } else prevStartS = s;
     return;
   }
@@ -10717,10 +10689,7 @@ function updateCheckpoints(fdt) {
       beep(880, 0.07, 0.22);
       if(checkpointMeshes[ci]){checkpointMeshes[ci].material.emissive.setHex(0x33cc33);
         setTimeout(()=>{if(checkpointMeshes[ci]){checkpointMeshes[ci].material.emissive.setHex(0x000000);}},300);}
-      const cpd=document.getElementById('checkpoint-display');
-      if(checkpointsPassed===totalCheckpoints){cpd.textContent=T('FINAL — FIND FINISH');cpd.style.color='#ff4444';}
-      else{cpd.textContent=T('CHECKPOINT {0}', checkpointsPassed);cpd.style.color='#44ff44';}
-      cpd.style.opacity=1;setTimeout(()=>cpd.style.opacity=0,800);
+      const fin = checkpointsPassed===totalCheckpoints; centerMsg(fin ? T('FINAL — FIND FINISH') : T('CHECKPOINT {0}', checkpointsPassed), fin ? '#ff4444' : '#44ff44', 800);
     } else {
       prevCpS=s;
     }
