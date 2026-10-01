@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 12.42 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 16.59 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4992,6 +4992,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Tarkistuskierros: koko peli vanhaa versiota vastaan 174 testillä; pikkukorjaus: vapaasta ajosta poistuttaessa kotiin palaavat liikenneautot eivät enää ole ihmisille hetken "näkymättömiä"', '19.27'],
   ['1.10.', 'Lähihaku yhdellä ruudukolla: ihmiset, talot ja tolpat sekä nyt myös ajoneuvot (liikenne ~10 % kevyempää); sijoittelun kysymykset (onko auto/varattu paikka/talo lähellä) yhteisinä apureina; maalatut tekstit yhdestä välimuistista; katujen nimet kerran per nimi ja puolella resoluutiolla – näyttömuistia ~35 Mt vähemmän, ero ei näy', '15.42'],
   ['1.10.', 'Muiden kulkuneuvojen ohjaus yhteisistä osista: poliisi, traktori, hevibussi, jäätelö- ja postiauto käyttävät samaa tienseurantaa, jumista peruutusta ja takaa-ajoa; mopot, postinkantajan pyörä ja lasten pyörät saman kuskikomponentin; Pökö ja dragsteri kysyvät alustan samasta paikasta (dragsteri tuntee nyt maaseudun soratiet). Poliisit odottavat kiinnioton jälkeen, että konstaapeli on autossa, eivätkä enää puske pysäytettyä autoa (ennen ne saattoivat rysäyttää sitä ja syttyä)', '14.13'],
   ['1.10.', 'Pelaajan ajoneuvot yhteen paikkaan: Pökö, dragsteri ja lentokone ovat nyt saman rajapinnan takana (fysiikka, kamera, ääni, törmäyslaatikko, sisään ja ulos, R), ohjaimet luetaan yhdestä kohdasta – uuden ajoneuvon lisääminen on yksi merkintä', '12.56'],
@@ -6551,7 +6552,7 @@ const fireTask = (v, i) => ({ kind: 'firefighter', update(h, dt, t) {
 // engines: engine and brakes, a steered bicycle for the yaw, tyres that grip up to a limit (a shove makes it slide and spin,
 // then the tyres catch it again), parked = wheels locked. A driver only works the pedals and the wheel:
 //   v.ctrl = { thr −1…1 (minus = reverse), brk 0…1, steer −1…1 (plus = right), hand (parked) }
-const VEHICLES = [], VDIRTY = new Set(), VGRID = new Grid(12), VG = { n: -1, dirty: true };
+const VEHICLES = [], VDIRTY = new Set(), VGRID = new Grid(12), VG = { n: -1, dirty: true, hl: 0 };   // (hl: the longest vehicle's half-length, for search radii)
 // vehicles near a point: the grid is put together again once per physics step (and when one is added, removed or put back home);
 // within the step they move under a metre, so 2 m slack. Callers still check the exact distance themselves.
 function forVehiclesNear(x, z, r, fn) { if (VG.dirty || VG.n !== VEHICLES.length) { VGRID.reset(); for (const v of VEHICLES) if (!v.gone) VGRID.put(v, v.x, v.z); VG.n = VEHICLES.length; VG.dirty = false; }
@@ -6574,7 +6575,7 @@ class Vehicle {
     const S = VSPEC[o.kind] || VSPEC.car;
     Object.assign(this, { kind: o.kind, spec: S, x: o.x, z: o.z, yaw: o.yaw, hw: o.hw, hl: o.hl, mass: o.mass === undefined ? S.mass : o.mass, vx: 0, vz: 0, w: 0, vF: 0, ai: o.ai || null, crew: [],
       ctrl: { thr: 0, brk: 0, steer: 0, hand: !o.ai }, damage: 0, fire: null, awake: false, moved: false, view: o.view, axle: o.axle || [0.7, 1.25, -1.25], temp: !!o.temp, gy: 0, onRoadY: !!o.onRoadY, smokeT: 0 });
-    this.I = this.mass*(this.hw*this.hw + this.hl*this.hl)/3; this.home = { x: o.x, z: o.z, yaw: o.yaw }; VEHICLES.push(this); vehicleSync(this);
+    this.I = this.mass*(this.hw*this.hw + this.hl*this.hl)/3; this.home = { x: o.x, z: o.z, yaw: o.yaw }; VEHICLES.push(this); if (this.hl > VG.hl) VG.hl = this.hl; vehicleSync(this);
   }
 }
 function vehicleSync(v) {
@@ -6610,14 +6611,14 @@ function collideCarWorld() {
   staticNear(P.x, P.z, 4, B => { const h = obbSat(P, B); if (!h) return; P.x -= h.nx*h.depth; P.z -= h.nz*h.depth; const into = P.vx*h.nx + P.vz*h.nz;
     if (into > 0) { P.vx -= h.nx*into*1.3; P.vz -= h.nz*into*1.3; carDamage(h.nx, h.nz, into); if (into > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + into*0.8), 4);
       if (B.kind === 'house' && into >= 8.5 && !B.fire) { startFire({ house: B }); if (B.fire) { rapCount('f'); policeIncident('fire'); } } } });
-  forVehiclesNear(P.x, P.z, 5.1 + CAR_HL + 0.6, v => { if (v.gone) return; const R = v.hl + CAR_HL + 0.6; if (Math.abs(v.x - P.x) > R || Math.abs(v.z - P.z) > R) return;
+  forVehiclesNear(P.x, P.z, VG.hl + CAR_HL + 0.6, v => { if (v.gone) return; const R = v.hl + CAR_HL + 0.6; if (Math.abs(v.x - P.x) > R || Math.abs(v.z - P.z) > R) return;
     const h = obbSat(P, v); if (!h) return; const imp = resolvePair(P, v, h, 0.25); v.awake = true; v.moved = true;
     if (imp > 0.8) { carDamage(h.nx, h.nz, imp); if (imp > 3) sparkBurst(P.x + h.nx*1.2, 0.5 + Y(P.x, P.z), P.z + h.nz*1.2, -h.nx, -h.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } });
   car.x = P.x; car.z = P.z; car.vx = P.vx; car.vz = P.vz;
   boxHitsHumans(playerBox(), car.vx, car.vz, true);
 }
 function vehicleVsWorld(v) {   // a vehicle that moves: other vehicles (each moving pair once), houses, tyre stacks, people
-  forVehiclesNear(v.x, v.z, v.hl + 5.6, o => { if (o === v || o.gone) return; if ((o.ai || o.awake) && o._i < v._i) return;
+  forVehiclesNear(v.x, v.z, v.hl + VG.hl + 0.5, o => { if (o === v || o.gone) return; if ((o.ai || o.awake) && o._i < v._i) return;
     const R = o.hl + v.hl + 0.5; if (Math.abs(o.x - v.x) > R || Math.abs(o.z - v.z) > R) return;
     const h = obbSat(v, o); if (!h) return; const imp = resolvePair(v, o, h, 0.2); if (imp > 0.2) { o.awake = true; o.moved = true; } if (imp > 5) { vehicleHit(o, imp*0.7); vehicleHit(v, imp*0.7); } });
   staticNear(v.x, v.z, v.hl + 1, B => { if (v.kind === 'hevi' && B.hw < 1.6 && B.hl < 1.6) return; const h = obbSat(v, B); if (!h) return;   /* (the gig bus goes straight through poles and signs) */ v.x -= h.nx*h.depth; v.z -= h.nz*h.depth; const into = v.vx*h.nx + v.vz*h.nz; if (into > 0) { v.vx -= h.nx*into*1.2; v.vz -= h.nz*into*1.2; v.w *= 0.5; if (into > 5) vehicleHit(v, into); } });
@@ -8641,7 +8642,7 @@ function dragPhys(dt, live) {
   if (DP.p.y < Y(DP.p.x, DP.p.z) - 3) { DP.p.y = Y(DP.p.x, DP.p.z) + 1.5; DP.v.y = 0; }
   // the others: vehicles (a shove with a spin), people, tyre stacks (theirs through car.*)
   dpSync(); const B = playerBox(); B.vx = car.vx; B.vz = car.vz; B.mass = 1;
-  forVehiclesNear(B.x, B.z, 9.7, v => { if (v.gone) return; const R = v.hl + 4.6; if (Math.abs(v.x - B.x) > R || Math.abs(v.z - B.z) > R) return; const hh = obbSat(B, v); if (!hh) return;
+  forVehiclesNear(B.x, B.z, VG.hl + 4.6, v => { if (v.gone) return; const R = v.hl + 4.6; if (Math.abs(v.x - B.x) > R || Math.abs(v.z - B.z) > R) return; const hh = obbSat(B, v); if (!hh) return;
     const vx0 = B.vx, vz0 = B.vz, imp = resolvePair(B, v, hh, 0.25); v.awake = true; v.moved = true; DP.p.x += B.x - car.x; DP.p.z += B.z - car.z; B.x = car.x; B.z = car.z;
     const cpx = (v.x + car.x)/2, cpz = (v.z + car.z)/2; dpImpulse(cpx, DP.p.y, cpz, (B.vx - vx0)*DP.m, 0, (B.vz - vz0)*DP.m); B.vx = DP.v.x; B.vz = DP.v.z;
     if (imp > 0.8) { const dv = Math.hypot(B.vx - vx0, B.vz - vz0); DP.hit = Math.max(DP.hit, dv); dpHitPart(dpPartAt(v.x - hh.nx*1.5, v.z - hh.nz*1.5), dv*1.6, -hh.nx*dv*0.3, -hh.nz*dv*0.3);   /* (what it takes: the dragster's own change of speed, not the closing speed of the two) */ if (imp > 3) sparkBurst(cpx, 0.6 + Y(cpx, cpz), cpz, -hh.nx, -hh.nz, Math.min(18, 4 + imp*0.8), 4); const f0 = v.fire; vehicleHit(v, imp); if (!f0 && v.fire) { rapCount('f'); policeIncident('fire'); } else if (v.kind === 'policeP' && imp > 3) policeIncident('crash'); } });
@@ -10637,7 +10638,7 @@ function trafficStart() { trafficStop(); if (!VEHICLES.length) return;
     if (!trafficRoute(v, V)) continue; v.ai = trafficAI(V); v.traffic = V; v.awake = true; v.ctrl.hand = false; TRAFFIC.list.push(v); } }
 function trafficStop() { for (const v of TRAFFIC.list) { if (v.gone) continue; v.ai = null; v.traffic = null; v.follow = null; v.vCap = undefined; v.path = null;
     v.x = v.home.x; v.z = v.home.z; v.yaw = v.home.yaw; v.vx = v.vz = v.w = v.vF = 0; v.awake = false; Object.assign(v.ctrl, { thr: 0, brk: 0, steer: 0, hand: true }); vehicleSync(v); }
-  TRAFFIC.list.length = 0; }
+  TRAFFIC.list.length = 0; VG.dirty = true; }
 // ── FREE (GTA) mode: taken by driving up the right lane at the start. The race dressing goes (kerbs, tyre walls, gates, start/finish,
 //    checkpoints, grid), no clock, no laps: every street of the village to drive. R: a new start, Esc: the start screen (both put the track back). ──
 const FREE = { on: false, hidden: [] };
