@@ -853,7 +853,7 @@ function countryUpdate(cx, cz) { OUT.fG = OUT.fG || new Map(); OUT.rG = OUT.rG |
       OUT.fjob = { key: 'P' + k, it: (function* () { roadExits(); yield; roadEdge(i, j, 'E'); yield; roadEdge(i, j, 'N'); yield; roadCellEnsure(i, j); })(), done: () => {} }; built = true; } }
   if (FEAT.size > 20000 || RD.edges.size > 6000 || OUT.af.size > 20000) countryPrune();
   if (built) OUT.sx = 1e9;   // (new solids: outerSolids re-does its list)
-  const px = PLANE.on ? PLANE.p.x : car.x, pz = PLANE.on ? PLANE.p.z : car.z; let at = null;   // (arriving: the place's name on the screen, once a visit)
+  const PP = PLAYER.pos(), px = PP.x, pz = PP.z; let at = null;   // (arriving: the place's name on the screen, once a visit)
   for (const F of featsNear(px, pz, 300)) { if (F.kind === 'village') { const [a, b] = featLoc(F, px, pz); if (Math.abs(a) < F.L + 20 && Math.abs(b) < 60) at = F; } else if (F.kind === 'lake' && featQ(F, px, pz) < 1.1) at = F; }
   if (at && OUT.at !== at.key && gameState !== State.MENU) pizzaMsg(at.kind === 'village' ? '🏡 ' + at.name.toUpperCase() : '🌊 ' + at.name, true); OUT.at = at ? at.key : null;
   return built; }
@@ -955,7 +955,7 @@ function outerUpdate() { if (!worldLifted) return; const cx = camera.position.x,
   for (const A of airfieldsNear(cx, cz, 1500)) if (!OUT.afG.has(A.key) && !(OUT.fjob && OUT.fjob.key === 'A' + A.key)) { if (Math.hypot(A.x - cx, A.z - cz) < 700 || !OUT.fjob) OUT.afG.set(A.key, afBuild(A)); }   // (one a frame, not on top of a build unless it's near)
   if (OUT.ctry === undefined || OUT.ctry || Math.hypot(cx - OUT.ccx, cz - OUT.ccz) > 25) { OUT.ccx = cx; OUT.ccz = cz; OUT.ctry = countryUpdate(cx, cz); }   // (the countryside: re-checked every 25 m, or every frame while it is still building)
   for (const [k, G] of OUT.afG) { const A = OUT.af.get(k); if (Math.hypot(A.x - cx, A.z - cz) > 2000) { groupDrop(G); OUT.afG.delete(k); } }   // (all of it: materials and the sign's texture too)
-  if (PLANE.on) outerSolids(PLANE.p.x, PLANE.p.z); else outerSolids(car.x, car.z); }   // (round whoever is moving: the plane flies far from the parked Pökö)
+  { const P = PLAYER.pos(); outerSolids(P.x, P.z); } }   // (round whoever is moving: the plane flies far from the parked Pökö)
 function nearestAirfield(x, z) { let best = null, bd = Infinity; for (const A of airfieldsNear(x, z, 6000)) { const d = Math.hypot(A.x - x, A.z - z); if (d < bd) { bd = d; best = A; } } return best && { A: best, d: bd }; }
 function terrainNormal(x, z, out) { const e = 1.0, dx = (H(x+e, z) - H(x-e, z))/(2*e), dz = (H(x, z+e) - H(x, z-e))/(2*e); const l = Math.hypot(dx, 1, dz); out = out || {}; out.x = -dx/l; out.y = 1/l; out.z = -dz/l; return out; }
 // raw (unsmoothed) ground before roads: the imported model, or placeholder hills named after the places
@@ -3708,16 +3708,18 @@ const car = { x:0, z:0, angle:0, vx:0, vz:0, steerSm:0, steerAngle:0, pivot:-1.3
 // ── on foot: F by the car (nearly stopped) gets the driver out — a Human like everyone else (the same body, bumps, knocks; knocked
 //    down they lie a moment and get up again, no ambulance for them). Arrows/WASD walk, space or shift runs, F by the car gets back in.
 //    The car waits with the handbrake on; the camera follows the driver; they stay within 200 m of the car (the village lives round it). ──
+// the controls, read in one place (the keyboard; the phone page presses the same keys)
+const INPUT = { thr: () => !!(keys['ArrowUp'] || keys['KeyW']), brk: () => !!(keys['ArrowDown'] || keys['KeyS']), steer: () => ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0) - ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0), hand: () => !!keys['Space'] };
 const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0, stam: 1, puff: false, pt: 0, ft: 0, saidPuff: false, saidFear: false, bar: null };
 // Stamina: running (6.2 m/s) empties it in ~6 s, then a slow, puffing walk until it's back over a third (walking or standing fills it).
 // Fear: past 90 m from the car they get nervous (slower, looking back over the shoulder); at 140 m they won't go on — it'll be stolen.
 const WALK_FEAR = 90, WALK_MAX = 140;
 function centerMsg(t, col, ms) { const cpd = document.getElementById('checkpoint-display'); if (!cpd) return; cpd.textContent = t; cpd.style.color = col || '#ffe9a8'; cpd.style.opacity = 1; clearTimeout(centerMsg.tm); centerMsg.tm = setTimeout(() => cpd.style.opacity = 0, ms || 1600); }   // (the one centre-screen message: a new one isn't cut short by an old one's fade)
 const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WALK;   // the arrows move you the way they point on the screen (the camera holds still while you walk), Shift runs, Space punches
-  const ix = ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0) - ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0), iz = ((keys['ArrowUp'] || keys['KeyW']) ? 1 : 0) - ((keys['ArrowDown'] || keys['KeyS']) ? 1 : 0), wantRun = keys['ShiftLeft'] || keys['ShiftRight'];
+  const ix = -INPUT.steer(), iz = (INPUT.thr() ? 1 : 0) - (INPUT.brk() ? 1 : 0), wantRun = keys['ShiftLeft'] || keys['ShiftRight'];
   const A = W.camA, mx = Math.sin(A)*iz - Math.cos(A)*ix, mz = Math.cos(A)*iz + Math.sin(A)*ix,   /* (screen right = (−cos A, sin A): a bigger heading is a left turn) */ ml = Math.hypot(mx, mz), fwd = ml > 0.01 ? 1 : 0;
   if (fwd) h.yaw += angDiff(Math.atan2(mx, mz) - h.yaw)*Math.min(1, dt*12);   // (turns to where it goes, quickly)
-  if (keys['Space'] && !W.spPrev && !h.down && !h.ride) walkPunch(h); W.spPrev = !!keys['Space']; if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; }
+  if (INPUT.hand() && !W.spPrev && !h.down && !h.ride) walkPunch(h); W.spPrev = INPUT.hand(); if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; }
   if (W.stam < 0.02) W.puff = true; else if (W.stam > 0.35) W.puff = false;
   const run = wantRun && fwd > 0 && !W.puff, dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz), fear = Math.max(0, Math.min(1, (d - WALK_FEAR)/(WALK_MAX - WALK_FEAR)));
   W.stam = Math.max(0, Math.min(1, W.stam + (run ? -dt/6 : dt*(fwd ? 0.07 : 0.14))));
@@ -3749,12 +3751,11 @@ function walkUpdate(dt) { walkBar(); if (!WALK.on) return; const h = WALK.h; if 
   if (h.down && !h.ride && h.hop <= 0 && Math.hypot(h.vx, h.vz) < 0.4) { if ((WALK.downT += dt) > 2.5) { h.down = h.hurt = false; h.tilt = h.roll = h.spin = 0; h.vx = h.vz = 0; WALK.downT = 0; } } else WALK.downT = 0; }   // up on their feet again
 function updateCar(dt, live = true) {
   const held = POLICE.hold > 0 || WRECK.on || WALK.on; if (held) live = false;   // pulled over: the police have it
-  if (PLANE.on) { planePhys(dt, live); return; }   // the plane: its own flight physics (PLANE)
-  if (DRAG.on) { dragPhys(dt, live); return; }   // the dragster: its own physics (below, DP)
-  const throttle = live && (keys['ArrowUp'] || keys['KeyW']) ? 1 : 0;
-  const brake = live && (keys['ArrowDown'] || keys['KeyS']) ? 1 : 0;   /* (not while held: the brake at a standstill is reverse) */
-  const steerInput = live ? (((keys['ArrowLeft']||keys['KeyA'])?1:0) - ((keys['ArrowRight']||keys['KeyD'])?1:0)) : 0;
-  const handbrake = held || (live && keys['Space']) ? 1 : 0;
+  if (PLAYER.R.phys) { PLAYER.R.phys(dt, live); return; }   // (the dragster, the plane: their own physics — RIDES)
+  const throttle = live && INPUT.thr() ? 1 : 0;
+  const brake = live && INPUT.brk() ? 1 : 0;   /* (not while held: the brake at a standstill is reverse) */
+  const steerInput = live ? INPUT.steer() : 0;
+  const handbrake = held || (live && INPUT.hand()) ? 1 : 0;
   car.throttle = throttle;
   
   // basis
@@ -4850,7 +4851,7 @@ function updateCarBody(dt) {
   const k = Math.min(1, dt*7); carBody.roll += (tRoll - carBody.roll)*k; carBody.pitch += (tPitch - carBody.pitch)*k;
   bodyGroup.rotation.z = carBody.roll; bodyGroup.rotation.x = carBody.pitch; bodyGroup.position.y = Math.abs(carBody.roll)*0.25;
   // brake lights
-  const braking = gameState === State.RACING && ((keys['ArrowDown'] || keys['KeyS']) && car.speed > 1 || keys['Space']);
+  const braking = gameState === State.RACING && (INPUT.brk() && car.speed > 1 || INPUT.hand());
   tlMat_.emissiveIntensity += ((braking ? 2.6 : 0.5) - tlMat_.emissiveIntensity)*Math.min(1, dt*18);
   // dirt
   const spd = Math.hypot(car.vx, car.vz);
@@ -4986,6 +4987,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Pelaajan ajoneuvot yhteen paikkaan: Pökö, dragsteri ja lentokone ovat nyt saman rajapinnan takana (fysiikka, kamera, ääni, törmäyslaatikko, sisään ja ulos, R), ohjaimet luetaan yhdestä kohdasta – uuden ajoneuvon lisääminen on yksi merkintä', '12.56'],
   ['1.10.', 'Koodin siivous: kuollut koodi pois (vanha kävelykamera, käyttämättömät animaatio- ja lippuapurit, rengasvallien vanhat ihmisproput), auton törmäyslaatikko yhdellä yhteisellä funktiolla, ruudun keskiviestit yhdellä apurilla (uusi viesti ei enää sammu vanhan ajastimeen), korpikenttien muistivuoto korjattu', '11.32'],
   ['1.10.', 'Ulkomaailma ilman nykäyksiä: kylät, tiet, maa ja metsä rakennetaan taustalla muutama millisekunti kerrallaan; kameran takana olevaa metsää ei piirretä, ja vain lähipuut heittävät varjoa; pitkän matkan välimuistit karsitaan', '10.15'],
   ['1.10.', 'Maaseudun talot ovat nyt samoja kuin Ylästössä: rintamamiestalot, matalat 60–70-luvun talot ja kasaritalot lautaverhouksineen, tiilikattoineen ja verhoineen; navetat, aitat, saunat ja ladot samoista laudoista ja tiilistä', '08.30'],
@@ -6321,8 +6323,7 @@ function boxHitsHumans(B, bvx, bvz, isPlayer, noRide) {
       h.vx = bvx*0.8 + fz*sd; h.vz = bvz*0.8 - fx*sd; h.vy = Math.max(h.vy, 1.2); }
     else { h.vx -= hit.nx*rel; h.vz -= hit.nz*rel; } });
 }
-function playerBox() { if (DRAG.on) return { x: car.x + Math.sin(car.angle)*0.2, z: car.z + Math.cos(car.angle)*0.2, yaw: car.angle, hw: 1.05, hl: 3.85 };   // (the dragster: 7.7 × 2.1 m)
-  return { x: car.x, z: car.z, yaw: car.angle, hw: CAR_HW, hl: CAR_HL }; }
+function playerBox() { return PLAYER.box(); }   // (what you drive, as a box: RIDES)
 function carTopAt(b) {   // height of the rally car's top b metres ahead of its centre (the body profile: bonnet, screen, roof, hatch)
   return b > 1.66 ? 0.66 : b > 0.7 ? 0.86 - (b - 0.7)*0.167 : b > 0.04 ? 1.29 - (b - 0.04)*0.65 : b > -1.1 ? 1.33 : b > -1.6 ? 1.33 - (-1.1 - b)*0.86 : 0.4; }
 function rideStep(h, dt) {   // folded onto the bonnet: carried until the car brakes, turns hard or a moment has passed — then off, at the car's speed
@@ -7965,7 +7966,7 @@ function boom(x, y, z, big) {   // an explosion: a ball of flame, sparks, black 
 const WRECK = { on: false, rv: null, driver: null };
 function wreckCar(how) { if (WRECK.on || gameState !== State.RACING) return; WRECK.on = true; esEnd();
   const fx = Math.sin(car.angle), fz = Math.cos(car.angle), gy = Y(car.x, car.z);
-  const RV = WRECK.rv = { kind: 'rally', x: car.x, z: car.z, yaw: car.angle, hw: DRAG.on ? 1 : CAR_HW, hl: DRAG.on ? 3.6 : CAR_HL, gy, view: { kind: 'mesh', g: carGroup }, fire: null, charred: false, crew: [], vx: 0, vz: 0 };
+  const RV = WRECK.rv = { kind: 'rally', x: car.x, z: car.z, yaw: car.angle, hw: PLAYER.wreckBox()[0], hl: PLAYER.wreckBox()[1], gy, view: { kind: 'mesh', g: carGroup }, fire: null, charred: false, crew: [], vx: 0, vz: 0 };
   if (how === 'boom') { boom(car.x, gy, car.z, true); for (let r = 0; r < 2; r++) for (const [nx, nz] of [[fx, fz], [-fx, -fz], [fz, -fx], [-fz, fx]]) { for (const p of carParts) p.cool = 0; carDamage(nx, nz, 30); } }
   startFire({ vehicle: RV }); if (RV.fire) RV.fire.level = how === 'boom' ? 1 : 0.6;
   const [dx, dz] = lloc(car.x, car.z, car.angle, 1.4, 0.2), h = new Human({ x: dx, z: dz, yaw: car.angle, rig: makeAdult(0xf2f2ee, 0xf2f2ee, lpick(L_HAIR), { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), temp: true }); h.ao = aoAlloc(); WRECK.driver = h;
@@ -8409,7 +8410,7 @@ function dragSwap(toDrag) { if (!DRAG.home || DRAG.on === toDrag) return;
 function dragNear(h) { if (!DRAG.home || !h) return false; const P = DRAG.on ? DRAG.poko : DRAG.park; return !!P && Math.hypot(h.x - P.x, h.z - P.z) < 4.2; }   // (by the parked one: the dragster, or the Pökö while you have the dragster)
 function dragUpdate(dt) { if (!DRAG.on) return; const v = Math.hypot(car.vx, car.vz), P = DRAG.carMesh.userData.parts;
   for (const S of DP.wh) { const w = P.wheels[S.W.id]; w.spin.rotation.x += (car.speed + (S.W.front ? 0 : DP.spin))*dt/S.W.r; if (S.W.front) w.g.rotation.y = DP.steer; }   // (the slicks spin up faster than the ground goes by at a launch)
-  { const rear = DP.wh.filter(S => !S.W.front && S.on && !DP.lost[S.W.id]).length === 2, sp = Math.hypot(car.vx, car.vz), brk = (keys['ArrowDown'] || keys['KeyS']) && car.speed > 4, hand = keys['Space'] && sp > 3;
+  { const rear = DP.wh.filter(S => !S.W.front && S.on && !DP.lost[S.W.id]).length === 2, sp = Math.hypot(car.vx, car.vz), brk = INPUT.brk() && car.speed > 4, hand = INPUT.hand() && sp > 3;
     if (rear && !WALK.on && (DP.spin > 1.5 || DP.slip > 0.2 || brk || hand || (!car.onTrack && sp > 3.5))) spawnMarks(DRAG_REAR_MARKS, 0.27); else endMarks(); }   // (black lines off a launch, a slide, a stop; ruts on grass)
   if (DP.spin > 2.5 && Math.random() < dt*40) for (const S of DP.wh) if (!S.W.front && S.on) { const [x, z] = lloc(car.x, car.z, car.angle, S.W.x, S.W.z - 0.5); lifeFx.emit(x, Y(x, z) + 0.3, z, (Math.random() - 0.5)*1.5 - car.vx*0.2, 0.8 + Math.random(), (Math.random() - 0.5)*1.5 - car.vz*0.2, 1.2 + Math.random(), 0.5, 1.8, 0.4, 0.86, 0.86, 0.88, 0.92, 0.92, 0.93); }   // tyre smoke
   // the zoomies: eight pipes blowing flame — tall and yellow under load, a lick at idle, a gout off the throttle (the pops)
@@ -8592,7 +8593,7 @@ function dragPhys(dt, live) {
   if (!DP.ok) dragInit(car.x, car.z, car.angle);
   // whatever else moved the car since the last step (a tyre stack's shove, a person, the walker's parking) moves the body too
   const ex = car.x - DP.cx, ez = car.z - DP.cz; if (ex*ex + ez*ez > 25) { dragInit(car.x, car.z, car.angle); } else { DP.p.x += ex; DP.p.z += ez; DP.v.x += car.vx - DP.cvx; DP.v.z += car.vz - DP.cvz; }
-  const thr = live && (keys['ArrowUp'] || keys['KeyW']) ? 1 : 0, brk = live && (keys['ArrowDown'] || keys['KeyS']) ? 1 : 0, st = live ? (((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0) - ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0)) : 0, hand = !live || keys['Space'];
+  const thr = live && INPUT.thr() ? 1 : 0, brk = live && INPUT.brk() ? 1 : 0, st = live ? INPUT.steer() : 0, hand = !live || INPUT.hand();
   car.throttle = thr; car.steerSm = st; DP.thr = thr; DP.pp.copy(DP.p); DP.pq.copy(DP.q); DP.scrape *= Math.exp(-dt*6); DP.hit = 0;
   const n = DP.v.lengthSq() > 40*40 ? 4 : 2; for (let i = 0; i < n; i++) dpStep(dt/n, thr, brk, st, hand);
   if (!isFinite(DP.p.x + DP.p.y + DP.p.z + DP.q.w + DP.w.x + DP.v.x)) dragInit(DRAG.park.x, DRAG.park.z, DRAG.park.angle);   // (never: but a NaN would lose the car for good)
@@ -8795,6 +8796,32 @@ function planeEnter(fresh) { if (!PLANE.home || DRAG.on) return; if (fresh) plan
 function planeExit() { if (!PLANE.on || PLANE.air || PLANE.v.length() > 2) return false; PLANE.on = false; PLANE.thr = 0; const P = PLANE.poko;
   car.x = RI.x = P.x; car.z = RI.z = P.z; car.angle = RI.a = P.angle; car.vx = car.vz = car.speed = 0; carGroup.visible = true; if (PLANE.pokoMesh) PLANE.pokoMesh.visible = false; planeSolid(); return true; }
 function planeReset() { if (PLANE.on) { PLANE.on = false; carGroup.visible = true; } if (PLANE.pokoMesh) PLANE.pokoMesh.visible = false; PLANE.used = false; if (PLANE.home) planeInit(PLANE.home); }
+// ════════ THE PLAYER (1.10., code review: "jos joku liikkuu, ettei sitä ole tehty eri tavalla kuin toinen"): ONE place says what you're in —
+// PLAYER.ride: 'poko' (the rally car), 'drag', 'plane' — and every ride answers the same questions: its physics, its camera, its engine sound,
+// its box against people and props, where it is, how you get in (near / board), out, reset and back after R. DRAG.on and PLANE.on are views
+// of PLAYER.ride (the older code reads them on). On foot (WALK) is a layer over a ride: you step out of one and leave it parked.
+// A new ride = one entry in RIDES (and its name in RIDE_BOARD if you can walk up to it and get in).
+const RIDES = {
+  poko: { box: () => ({ x: car.x, z: car.z, yaw: car.angle, hw: CAR_HW, hl: CAR_HL }), wreck: () => [CAR_HW, CAR_HL] },   // (its physics, camera and sound are the defaults: updateCar, updateCamera, the engine synth)
+  drag: { phys: (dt, live) => dragPhys(dt, live), camAngle: (dt) => dragCamAngle(dt), camSpeedCap: 45, ownSynth: true,
+    box: () => ({ x: car.x + Math.sin(car.angle)*0.2, z: car.z + Math.cos(car.angle)*0.2, yaw: car.angle, hw: 1.05, hl: 3.85 }), wreck: () => [1, 3.6],   // (7.7 × 2.1 m)
+    near: (h) => dragNear(h), board: () => { dragSwap(!DRAG.on); walkIn(true); }, reset: () => dragReset(), respawn: () => { if (DRAG.home) { dragSwap(true); DRAG.used = true; } } },
+  plane: { phys: (dt, live) => planePhys(dt, live), camera: (dt) => planeCamera(dt), engineSound: () => ({ rpm: PLANE.rpm, throttle: PLANE.thr > 0.2, gear: 1 }), pos: () => PLANE.p,
+    near: (h) => planeNear(h), board: () => { walkIn(true); planeEnter(); }, exitHere: () => planeExit(), reset: () => planeReset(), respawn: () => { if (PLANE.home) { planeEnter(true); PLANE.used = true; } } },
+};
+const RIDE_BOARD = ['plane', 'drag'], RIDE_RESET = ['plane', 'drag'];   // (walking up to one: the plane first; reset in this order)
+const PLAYER = { ride: 'poko', get R() { return RIDES[this.ride]; },
+  pos() { return this.R.pos ? this.R.pos() : car; },   // (x, z of what you drive — the parked one while you walk)
+  box() { return (this.R.box || RIDES.poko.box)(); },
+  wreckBox() { return (this.R.wreck || RIDES.poko.wreck)(); },
+  use() { const R = this.R;   // F: out of the plane straight into the Pökö; on foot, into whatever you stand by (else back into your own); in a car, out on foot
+    if (R.exitHere) { R.exitHere(); return; }
+    if (!WALK.on) { walkOut(); return; }
+    if (!WALK.h.down) for (const k of RIDE_BOARD) { const Q = RIDES[k]; if (Q.near && Q.near(WALK.h)) { Q.board(); return; } }
+    walkIn(); },
+  reset() { const was = gameState === State.RACING ? this.ride : 'poko'; for (const k of RIDE_RESET) RIDES[k].reset(); return was; },   // (startRace: R in a ride brings a fresh one)
+  respawn(was) { const R = RIDES[was]; if (R && R.respawn) R.respawn(); } };
+for (const [O, id] of [[DRAG, 'drag'], [PLANE, 'plane']]) Object.defineProperty(O, 'on', { configurable: true, enumerable: true, get: () => PLAYER.ride === id, set: (v) => { if (v) PLAYER.ride = id; else if (PLAYER.ride === id) PLAYER.ride = 'poko'; } });
 function planePhys(dt, live) { const P = PLANE; if (P.crashed) { car.vx = car.vz = car.speed = 0; return; }
   const k = (c) => live && !!keys[c], gnd = !P.air, V0 = P.v.length(); if (!k('ArrowUp')) P.upFree = true; if (gnd) P.upFree = false;
   const thrIn = k('KeyW') || (gnd && k('ArrowUp')) ? 1 : k('KeyS') ? -1 : 0; P.thr = Math.max(0, Math.min(1, P.thr + thrIn*0.8*dt));   // (↑ on the ground: the throttle, as in the car)
@@ -10361,14 +10388,15 @@ function updateAudio(dt) {
   const racing = gameState === State.RACING;
   const kmh = Math.abs(car.speed) * 3.6;
   // engine: same rpm and gear as the tachometer; idles on the grid and after the finish, silent in the menu
-  engineSynth.update({ rpm: PLANE.on ? PLANE.rpm : engine.rpmDisp, throttle: PLANE.on ? PLANE.thr > 0.2 : !!engine.throttle, gear: PLANE.on ? 1 : engine.gear, on: gameState !== State.MENU && !DRAG.on, volume: racing ? 1 : 0.8 }, t, Math.min(0.1, Math.max(0.001, dt || 1/60)));
+  const es = PLAYER.R.engineSound ? PLAYER.R.engineSound() : { rpm: engine.rpmDisp, throttle: !!engine.throttle, gear: engine.gear };   // (the ride's engine on the shared synth; the dragster has its own)
+  engineSynth.update({ rpm: es.rpm, throttle: es.throttle, gear: es.gear, on: gameState !== State.MENU && !PLAYER.R.ownSynth, volume: racing ? 1 : 0.8 }, t, Math.min(0.1, Math.max(0.001, dt || 1/60)));
   audio.dragSynth.update({ rpm: DP.rpm, thr: racing && DRAG.on && !WALK.on && !WRECK.on ? DP.thr : 0, on: DRAG.on && gameState !== State.MENU && !WRECK.on, scrape: DP.scrape, volume: WALK.on ? 0.5 : 1 }, t, Math.min(0.1, Math.max(0.001, dt || 1/60)));
   
   // Screech when drifting on tarmac — volume scales with slip depth
   const screech = (racing && car.drifting && car.onTrack && Math.abs(car.speed) > 6)
     ? 0.02 + Math.min(car.maxSlip, 0.5) * 0.11 : 0;
   const fdt = Math.min(0.1, Math.max(0.001, dt || 1/60));
-  tyreSynth.update({ active: racing && !PLANE.air, slide: car.drifting || (keys['Space'] && Math.abs(car.speed) > 4), slip: Math.max(car.maxSlip || 0, keys['Space'] ? 0.45 : 0), speed: Math.abs(car.speed), surface: car.onTrack ? (car.surface || 'asphalt') : 'grass', sinceGravel: car.lastGravelT ? (performance.now() - car.lastGravelT)/1000 : 99 }, t, fdt);
+  tyreSynth.update({ active: racing && !PLANE.air, slide: car.drifting || (INPUT.hand() && Math.abs(car.speed) > 4), slip: Math.max(car.maxSlip || 0, INPUT.hand() ? 0.45 : 0), speed: Math.abs(car.speed), surface: car.onTrack ? (car.surface || 'asphalt') : 'grass', sinceGravel: car.lastGravelT ? (performance.now() - car.lastGravelT)/1000 : 99 }, t, fdt);
   
   prevThrottle = car.throttle;   // overrun pops now come from the engine synth
   
@@ -10400,9 +10428,7 @@ addEventListener('keydown', e => {
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
   if (e.code==='KeyE' && !e.repeat) { initAudio(); radioNext(); }   // (in the menu too: the radio there)
   if (e.code==='KeyB' && !e.repeat && gameState !== State.MENU) { initAudio(); bassToggle(); }
-  if (e.code==='KeyF' && !e.repeat && PLANE.on) planeExit();   // (out of the plane: back in the Pökö)
-  else if (e.code==='KeyF' && !e.repeat && WALK.on && planeNear(WALK.h) && !WALK.h.down) { walkIn(true); planeEnter(); }
-  else if (e.code==='KeyF' && !e.repeat) { if (WALK.on) { if (dragNear(WALK.h) && !WALK.h.down) { dragSwap(!DRAG.on); walkIn(true); } else walkIn(); } else walkOut(); }   // out of the car / back in — or into the other one parked here (the dragster, the Pökö)
+  if (e.code==='KeyF' && !e.repeat) PLAYER.use();   // (in and out of rides, on foot: PLAYER)
   if (e.code==='Digit1' || e.code==='Numpad1') radioVol(-1);   // radio quieter / louder
   if (e.code==='Digit2' || e.code==='Numpad2') radioVol(1);
   if (e.code==='KeyC' && !e.repeat) { camLow = !camLow; centerMsg(T(camLow ? 'MATALA KAMERA' : 'YLÄKAMERA'), '#ffe9a8', 900); }
@@ -10416,10 +10442,9 @@ function startRace(newTrack) {
   FLOW.on = false; FLOW.mopo = true; for (const v of VEHICLES) v.dodge = null;
   if (audio && audio.ctx.state === 'suspended') audio.ctx.resume();
   if (newTrack) generateTrack();
-  const wasDrag = DRAG.on && gameState === State.RACING, wasPlane = PLANE.on && gameState === State.RACING;   // (R in the dragster, whole or in bits: straight into a fresh one at its lay-by — Antti, 30.9.)
   resetCar();
   checkpoints.forEach(cp=>cp.passed=false);
-  walkIn(true); planeReset(); dragReset(); knockReset(); rbClear(); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;
+  walkIn(true); const wasRide = PLAYER.reset(); knockReset(); rbClear(); freeExit(); START_SPLIT.prev = null; START_SPLIT.done = false;   // (R in the dragster or the plane, whole or in bits: straight into a fresh one — Antti, 30.9.)
   checkpointsPassed=0; raceTime=0; prevFinishS=null; prevCpS=null; onlineStart();
   gameState = State.RACING; raceTime = 0;   // (no 3-2-1-GO: the clock starts at the line anyway — Antti, 29.9.)
   countdownT = 0; radioStart(); countdownLast = -1; document.getElementById('countdown').style.opacity = 0;
@@ -10433,8 +10458,7 @@ function startRace(newTrack) {
   lapStarted = false; prevStartS = null; ghostStartRun();
   repairCar(); smokeFx.clear(); flameFx.clear(); sparkFx.clear(); smokeGear = 1; carBody.dirt = 0; carBody.vx = carBody.vz = 0;
   pickTimeOfDay();
-  if (wasDrag && DRAG.home) { dragSwap(true); DRAG.used = true; }
-  if (wasPlane && PLANE.home) { planeEnter(true); PLANE.used = true; }   // (R in the plane: a fresh one on its grass)   // (the Pökö waits on the grid)
+  PLAYER.respawn(wasRide);   // (the Pökö waits on the grid)
 }
 
 function updateCountdown(dt) {
@@ -10730,16 +10754,15 @@ addEventListener('wheel', e => {
 let camAdj = 0, _clTopFrac = 1, _clT = 0; const _camV = new THREE.Vector3();
 const _camWalker = { x: 0, z: 0, angle: 0, vx: 0, vz: 0 };
 function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind the car, no speed lead — Antti asked it back (the later lead + auto look-ahead went too top-down)
-  if (PLANE.on) { planeCamera(dt); return; }   // (the plane: a chase camera along its nose)
+  if (PLAYER.R.camera) { PLAYER.R.camera(dt); return; }   // (a ride with a camera of its own: the plane's chase camera along its nose)
   const C = WALK.on && WALK.h ? Object.assign(_camWalker, { x: WALK.h.x, z: WALK.h.z, angle: WALK.camA, vx: WALK.h.vx || 0, vz: WALK.h.vz || 0 }) : car;   // (on foot: the same camera, high up, on the walker — Antti, 29.9.)
-  const speed=Math.min(DRAG.on ? 45 : Infinity, Math.sqrt(C.vx*C.vx+C.vz*C.vz));   // (the dragster at 400 km/h: the camera as at 160)
+  const speed=Math.min(C === car && PLAYER.R.camSpeedCap || Infinity, Math.sqrt(C.vx*C.vx+C.vz*C.vz));   // (the dragster at 400 km/h: the camera as at 160)
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
   camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two views
   const h=((43+speed*0.5)*(1-camLowK) + (4.2+speed*0.04)*camLowK)*camZoom;
-  const dragCam = DRAG.on && C === car;
-  let angleDiff=(dragCam ? dragCamAngle(dt) : C.angle)-camAngle.current;
-  while(angleDiff>Math.PI)angleDiff-=Math.PI*2; while(angleDiff<-Math.PI)angleDiff+=Math.PI*2;
-  camAngle.current+= dragCam ? Math.max(-1.1*dt, Math.min(1.1*dt, angleDiff*1.2*dt)) : angleDiff*1.2*dt;   // (the dragster: never faster than ~60°/s round)
+  const rideCam = C === car && PLAYER.R.camAngle;   // (a ride may steer the camera's heading itself: the dragster's calm one)
+  const angleDiff = angDiff((rideCam ? rideCam(dt) : C.angle) - camAngle.current);
+  camAngle.current+= rideCam ? Math.max(-1.1*dt, Math.min(1.1*dt, angleDiff*1.2*dt)) : angleDiff*1.2*dt;   // (the dragster: never faster than ~60°/s round)
   const cfx=Math.sin(camAngle.current),cfz=Math.cos(camAngle.current);
   const camDist=((21+speed*0.1)*(1-camLowK) + (10.5+speed*0.1)*camLowK)*camZoom;
   camTarget.set(C.x-cfx*camDist, Y(C.x,C.z)+h, C.z-cfz*camDist);
@@ -10751,8 +10774,7 @@ function updateCamera(dt) {   // Mane's-record camera (27.9, f1c9ed8): behind th
   let lookAng = camAngle.current;
   if (speed > 6) {
     const vAng = Math.atan2(C.vx, C.vz);
-    let dAng = vAng - C.angle;
-    while (dAng > Math.PI) dAng -= Math.PI*2; while (dAng < -Math.PI) dAng += Math.PI*2;
+    const dAng = angDiff(vAng - C.angle);
     lookAng = camAngle.current + Math.max(-0.5, Math.min(0.5, dAng)) * 0.55;
   }
   const lfx = Math.sin(lookAng), lfz = Math.cos(lookAng);
@@ -10826,7 +10848,7 @@ const elTimer=document.getElementById('timer'), elCpC=document.getElementById('c
 const GEAR_TOP = [44, 74, 102, 130, 162];   // km/h at the 6300 rpm shift point
 const RPM_IDLE = 850, RPM_SHIFT = 6300, RPM_MAX = 7000;
 const engine = { gear: 1, rpm: RPM_IDLE, rpmDisp: RPM_IDLE, kmhDisp: 0, trip: 0 };
-const throttleKey = () => !!(keys['ArrowUp'] || keys['KeyW']);
+const throttleKey = INPUT.thr;
 function updateEngine(dt) {
   const kmh = Math.abs(car.speed)*3.6;
   engine.throttle = gameState === State.RACING ? !!car.throttle : throttleKey();   // blip it on the grid too
