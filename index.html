@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 23.45 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 01.40 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -625,15 +625,22 @@ function inBase(x, z, m) { const g = HG, X1 = g.x0 + (g.n - 1)*g.step; return x 
 // the ground out there: one 2 km sheet round the camera on the height grid's own 20 m lattice (so its edge lies on the village's), rebuilt every 100 m
 function outerGround(cx0, cz0) { const S = 20, N = 111, g = HG, cx = g.x0 + Math.round((cx0 - g.x0)/S)*S, cz = g.z0 + Math.round((cz0 - g.z0)/S)*S;
   if (OUT.mesh && Math.abs(cx - OUT.cx) < 160 && Math.abs(cz - OUT.cz) < 160) return; OUT.cx = cx; OUT.cz = cz;
-  const pos = new Float32Array(N*N*3), col = new Float32Array(N*N*3), idx = [], half = (N - 1)/2*S, X1 = g.x0 + (g.n - 1)*g.step;
-  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const x = cx - half + i*S, z = cz - half + j*S, k = (j*N + i)*3, inside = x > g.x0 + 0.1 && x < X1 - 0.1 && z > g.z0 + 0.1 && z < X1 - 0.1;
-    let af = 0; if (!inside) for (const A of airfieldsNear(x, z, AF_L/2 + 200)) af = Math.max(af, afMask(A, x, z));
-    pos[k] = x; pos[k + 1] = inside ? H(x, z) - 4 : H(x, z); pos[k + 2] = z;   // (under the village's own ground where they overlap)
-    const n = 0.5 + 0.5*vnoise(x/90, z/90), tn = terrainNormal(x, z, {}), lit = Math.max(0.6, Math.min(1.4, 1 + ((tn.x*HS_L[0] + tn.y*HS_L[1] + tn.z*HS_L[2])/HS_L[1] - 1)*1.9)), l = (0.8 + 0.2*n)*lit;   // (lit like the village's ground: NW banks light, hollows dark)
+  // (1.10., Ande's worry: was ~23 ms a rebuild — 5 H() a vertex for its normal, new buffers each time. Now each lattice point's height and
+  // colour is cached (a move of 160 m reuses ~85 %), the normal comes from the neighbours on the lattice, the buffers are rewritten in place)
+  const half = (N - 1)/2*S, X1 = g.x0 + (g.n - 1)*g.step, C = OUT.gc || (OUT.gc = new Map()); if (C.size > 120000) C.clear();
+  const M = N + 2, hh = OUT.gh || (OUT.gh = new Float32Array(M*M)), pt = (x, z) => { const key = x*1e6 + z; let v = C.get(key); if (v === undefined) { let af = 0; if (!inBase(x, z, -0.1)) for (const A of airfieldsNear(x, z, AF_L/2 + 200)) af = Math.max(af, afMask(A, x, z)); v = [H(x, z), af, 0.5 + 0.5*vnoise(x/90, z/90)]; C.set(key, v); } return v; }, VA = OUT.gv || (OUT.gv = new Array(M*M));
+  for (let j = 0; j < M; j++) for (let i = 0; i < M; i++) { const v = pt(cx - half + (i - 1)*S, cz - half + (j - 1)*S); VA[j*M + i] = v; hh[j*M + i] = v[0]; }
+  if (!OUT.mesh) { const geo = new THREE.BufferGeometry(), idx = new Uint32Array((N - 1)*(N - 1)*6); let q = 0;
+    for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) { const a = j*N + i, b = a + 1, c = a + N, d = c + 1; idx[q++] = a; idx[q++] = c; idx[q++] = b; idx[q++] = b; idx[q++] = c; idx[q++] = d; }
+    for (const k of ['position', 'normal', 'color']) geo.setAttribute(k, new THREE.BufferAttribute(new Float32Array(N*N*3), 3)); geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e5);
+    OUT.mesh = new THREE.Mesh(geo, addGroundDetail(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), 0.7)); OUT.mesh.receiveShadow = true; OUT.mesh.renderOrder = -3; OUT.mesh.frustumCulled = false; scene.add(OUT.mesh); }
+  const geo = OUT.mesh.geometry, pos = geo.attributes.position.array, nor = geo.attributes.normal.array, col = geo.attributes.color.array;
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const x = cx - half + i*S, z = cz - half + j*S, k = (j*N + i)*3, m = (j + 1)*M + i + 1, inside = x > g.x0 + 0.1 && x < X1 - 0.1 && z > g.z0 + 0.1 && z < X1 - 0.1;
+    const dx = (hh[m + 1] - hh[m - 1])/(2*S), dz = (hh[m + M] - hh[m - M])/(2*S), nl = Math.hypot(dx, 1, dz), tx = -dx/nl, ty = 1/nl, tz = -dz/nl;
+    pos[k] = x; pos[k + 1] = inside ? hh[m] - 4 : hh[m]; pos[k + 2] = z; nor[k] = tx; nor[k + 1] = ty; nor[k + 2] = tz;   // (under the village's own ground where they overlap)
+    const af = VA[m][1], n = VA[m][2], lit = Math.max(0.6, Math.min(1.4, 1 + ((tx*HS_L[0] + ty*HS_L[1] + tz*HS_L[2])/HS_L[1] - 1)*1.9)), l = (0.8 + 0.2*n)*lit;   // (lit like the village's ground: NW banks light, hollows dark)
     col[k] = (0.36 + 0.07*af)*l; col[k + 1] = (0.54 + 0.06*af)*l; col[k + 2] = (0.27 + 0.03*af)*l; }   // (the strip's clearing: mown, a shade lighter)
-  for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) { const a = j*N + i, b = a + 1, c = a + N, d = c + 1; idx.push(a, c, b, b, c, d); }
-  if (!OUT.mesh) { OUT.mesh = new THREE.Mesh(new THREE.BufferGeometry(), addGroundDetail(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), 0.7)); OUT.mesh.receiveShadow = true; OUT.mesh.renderOrder = -3; OUT.mesh.frustumCulled = false; scene.add(OUT.mesh); }
-  const geo = OUT.mesh.geometry; geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.setIndex(idx); geo.computeVertexNormals(); geo.computeBoundingSphere(); }
+  for (const k of ['position', 'normal', 'color']) geo.attributes[k].needsUpdate = true; }
 // the sparse forest: pines on 60 m tiles (a hash per tile: 0–5 trees), 950 m round the camera, one instanced draw for trunks, one for crowns
 function outerTreesAt(i, j, fn) { const cx = i*60 + 30, cz = j*60 + 30, W = WORLD_EDGE, e = Math.hypot(Math.max(0, -W - cx, cx - W), Math.max(0, -W - cz, cz - W));   // (from where the village's own forest stops: WORLD_EDGE)   // (thick forest by the village, thinning out over 250 m to the sparse one)
   const d = Math.max(0, 1 - e/160), n = Math.min(60, Math.floor(hsh(i, j, 21)*6) + Math.floor(d*d*48*(0.75 + 0.5*hsh(i, j, 22)))); for (let k = 0; k < n; k++) { const x = i*60 + hsh(i, j, 30 + k)*60, z = j*60 + hsh(i, j, 40 + k)*60; if (Math.abs(x) < WORLD_EDGE + 1 && Math.abs(z) < WORLD_EDGE + 1) continue; if (outerExitNear(x, z)) continue;
@@ -681,7 +688,7 @@ function outerSolids(x, z) { const si = Math.floor(x/30), sj = Math.floor(z/30);
 function outerUpdate() { if (!worldLifted) return; const cx = camera.position.x, cz = camera.position.z; outerGround(cx, cz); outerForest(cx, cz);
   for (const A of airfieldsNear(cx, cz, 1500)) if (!OUT.afG.has(A.key)) OUT.afG.set(A.key, afBuild(A));
   for (const [k, G] of OUT.afG) { const A = OUT.af.get(k); if (Math.hypot(A.x - cx, A.z - cz) > 2000) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); }); OUT.afG.delete(k); } }
-  outerSolids(car.x, car.z); }
+  if (PLANE.on) outerSolids(PLANE.p.x, PLANE.p.z); else outerSolids(car.x, car.z); }   // (round whoever is moving: the plane flies far from the parked Pökö)
 function nearestAirfield(x, z) { let best = null, bd = Infinity; for (const A of airfieldsNear(x, z, 6000)) { const d = Math.hypot(A.x - x, A.z - z); if (d < bd) { bd = d; best = A; } } return best && { A: best, d: bd }; }
 function terrainNormal(x, z, out) { const e = 1.0, dx = (H(x+e, z) - H(x-e, z))/(2*e), dz = (H(x, z+e) - H(x, z-e))/(2*e); const l = Math.hypot(dx, 1, dz); out = out || {}; out.x = -dx/l; out.y = 1/l; out.z = -dz/l; return out; }
 // raw (unsmoothed) ground before roads: the imported model, or placeholder hills named after the places
@@ -4701,6 +4708,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Lentokone osuu nyt korven puihin ja korpikentän koppiin (esteet seurasivat parkkeerattua Pököä eivätkä konetta); loputtoman maan uudelleenrakennus ~8× nopeampi, ei nykäisyä lentäessä', '04.40'],
   ['30.9.', '✈🎈 Lentokone törmää kuumailmapalloon oikealla fysiikalla: kova osuma kupuun repäisee pallon (kone menettää vauhtia, pallo sinkoaa ja laskeutuu), hiljainen tönäisy vain heilauttaa, ja koriin osuminen pudottaa koneen – kori heiluu heilurina', '02.13'],
   ['30.9.', 'Korjauksia: radio ei kaadu, jos soittolista puuttuu; metsän esteiden poisto loputtomassa maailmassa nopeammaksi', '02.13'],
   ['30.9.', '🌲 Kartta jatkuu loputtomiin: kylän metsä harvenee kumpuilevaksi kankaaksi, ja korvessa on silloin tällöin korpikenttä (800 m kiitorata, koppi, tuulipussi) – lentäessä näytöllä lähimmän kentän suunta ja matka', '00.17'],
