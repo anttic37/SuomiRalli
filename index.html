@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 02.40 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 05.30 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -630,7 +630,6 @@ function inBase(x, z, m) { const g = HG, X1 = g.x0 + (g.n - 1)*g.step; return x 
 const FC = 1100, FEAT = new Map(), RD = { edges: new Map(), buckets: new Map(), done: new Set(), exits: false }, RBK = 100;
 const VIL_NAMES = ['Kuusela', 'Hirvelä', 'Korpela', 'Rajala', 'Niemelä', 'Koivula', 'Haapala', 'Mäkelä', 'Ahola', 'Peltola', 'Suolahti', 'Kaitajärvi'];
 const LAKE_NAMES = ['Ahvenlampi', 'Kotajärvi', 'Särkijärvi', 'Hauklampi', 'Mustalampi', 'Kivijärvi', 'Lahnajärvi', 'Myllylampi'];
-const H_WALL = [0xd8c27a, 0x8a2e22, 0xe8e4d8, 0x9fb8c8, 0x8aa070, 0xc8a070, 0x7a3a28], H_ROOF = [0x5a5e62, 0x9a4632, 0x4a5a4a, 0x6a6e72, 0x7a3a2e];
 const smooth01 = (t) => { t = Math.max(0, Math.min(1, t)); return t*t*(3 - 2*t); };
 function featCell(i, j) { const key = i + ',' + j; let F = FEAT.get(key); if (F !== undefined) return F; F = null;
   const x = i*FC + 200 + hsh(i, j, 101)*(FC - 400), z = j*FC + 200 + hsh(i, j, 102)*(FC - 400), r = hsh(i, j, 103);
@@ -724,10 +723,6 @@ function featBlocksTree(x, z) { for (const F of featsNear(x, z, 300)) { if (F.ki
   return roadDist(x, z) < 7.5; }
 // ── the kit: boxes, gable roofs, cylinders, cones merged into one vertex-coloured mesh a place (one draw, shadows)
 const KIT = { box: new THREE.BoxGeometry(1, 1, 1).toNonIndexed(), cyl: new THREE.CylinderGeometry(0.5, 0.5, 1, 8).toNonIndexed(), cone: new THREE.ConeGeometry(0.5, 1, 7).toNonIndexed(), mat: null, m: new THREE.Matrix4(), q: new THREE.Quaternion(), e: new THREE.Euler(), p: new THREE.Vector3(), s: new THREE.Vector3(), n3: new THREE.Matrix3(), c: new THREE.Color(), v: new THREE.Vector3() };
-KIT.gab = (P) => { P = P.slice(); for (let i = 0; i < P.length; i += 9) for (let k = 0; k < 3; k++) [P[i + 3 + k], P[i + 6 + k]] = [P[i + 6 + k], P[i + 3 + k]];   // (listed clockwise: turned round so they face out)
-  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.computeVertexNormals(); return g; };
-KIT.roof = KIT.gab([-0.5, 0, 0.5, -0.5, 0, -0.5, 0, 1, -0.5,  -0.5, 0, 0.5, 0, 1, -0.5, 0, 1, 0.5,  0.5, 0, -0.5, 0.5, 0, 0.5, 0, 1, 0.5,  0.5, 0, -0.5, 0, 1, 0.5, 0, 1, -0.5]);   // (the two slopes: the ridge along z, eaves at y 0, x ±0.5)
-KIT.gable = KIT.gab([-0.5, 0, -0.5, 0.5, 0, -0.5, 0, 1, -0.5,  0.5, 0, 0.5, -0.5, 0, 0.5, 0, 1, 0.5]);   // (the two gable ends, in the wall's colour)
 function kitNew() { return { p: [], n: [], c: [] }; }
 function kitAdd(K, geo, x, y, z, yaw, sx, sy, sz, col, pitch, roll) { KIT.m.compose(KIT.p.set(x, y, z), KIT.q.setFromEuler(KIT.e.set(pitch || 0, yaw || 0, roll || 0, 'YXZ')), KIT.s.set(sx, sy, sz)); KIT.n3.getNormalMatrix(KIT.m); KIT.c.setHex(col);
   const P = geo.attributes.position.array, N = geo.attributes.normal.array; for (let i = 0; i < P.length; i += 3) { KIT.v.set(P[i], P[i + 1], P[i + 2]).applyMatrix4(KIT.m); K.p.push(KIT.v.x, KIT.v.y, KIT.v.z); KIT.v.set(N[i], N[i + 1], N[i + 2]).applyMatrix3(KIT.n3).normalize(); K.n.push(KIT.v.x, KIT.v.y, KIT.v.z); K.c.push(KIT.c.r, KIT.c.g, KIT.c.b); } }
@@ -736,19 +731,22 @@ function kitMesh(K) { const g = new THREE.BufferGeometry(); g.setAttribute('posi
 // a local frame on the ground: (a, b) along/across `yaw` from (x, z)
 function kitFrame(x, z, yaw) { const fx = Math.sin(yaw), fz = Math.cos(yaw); return (a, b) => [x + fx*a + fz*b, z + fz*a - fx*b]; }
 function groundMin(x, z, hw, hl, yaw) { const at = kitFrame(x, z, yaw); let lo = Infinity; for (const [a, b] of [[-hl, -hw], [hl, -hw], [-hl, hw], [hl, hw], [0, 0]]) { const [px, pz] = at(a, b); lo = Math.min(lo, H(px, pz)); } return lo; }
-// a house: w across (the gable end), l along the ridge; walls h; a stone plinth down to the lowest ground; windows, a door, white corners, a chimney
-function kitHouse(K, S, x, z, yaw, w, l, h, wall, roof, o) { o = o || {}; const y0 = groundMin(x, z, w/2 + 0.3, l/2 + 0.3, yaw), at = kitFrame(x, z, yaw), fy = y0 + (o.plinth === 0 ? 0 : 0.45), trim = o.trim === undefined ? 0xeeeae0 : o.trim;
-  if (o.plinth !== 0) kitAdd(K, KIT.box, x, y0 - 0.7, z, yaw, w + 0.2, 2.3, l + 0.2, 0x7a7a76);
-  kitAdd(K, KIT.box, x, fy + h/2, z, yaw, w, h, l, wall);
-  const rh = o.roofH || w*0.36; kitAdd(K, KIT.roof, x, fy + h, z, yaw, w + 0.9, rh*(w + 0.9)/w, l + 0.8, roof); kitAdd(K, KIT.gable, x, fy + h, z, yaw, w, rh, l, wall);
-  if (trim !== null) for (const [a, b] of [[-l/2, -w/2], [l/2, -w/2], [-l/2, w/2], [l/2, w/2]]) { const [px, pz] = at(a, b); kitAdd(K, KIT.box, px, fy + h/2, pz, yaw, 0.22, h, 0.22, trim); }
-  if (o.windows !== false) { const nw = Math.max(1, Math.floor(l/3)), fr = trim === null ? 0xd8d0c0 : trim, rows = h > 4.5 ? [1.75, h - 1.35] : [h*0.55];
-    for (const sd of [-1, 1]) for (let k = 0; k < nw; k++) { const a = -l/2 + (k + 0.5)*l/nw, [px, pz] = at(a, sd*(w/2 + 0.03)), [qx, qz] = at(a, sd*(w/2 + 0.08));
-      rows.forEach((ry, r) => { if (r === 0 && sd > 0 && k === Math.floor(nw/2) && o.door !== false) return; kitAdd(K, KIT.box, px, fy + ry, pz, yaw, 0.12, 1.2, 1.0, fr); kitAdd(K, KIT.box, qx, fy + ry, qz, yaw, 0.06, 0.95, 0.75, 0x24303c); }); } }
-  if (o.door !== false) { const [px, pz] = at(0, w/2 + 0.06); kitAdd(K, KIT.box, px, fy + 1.0, pz, yaw, 0.1, 2.0, 1.0, o.doorCol || 0x5a3a24); const [sx2, sz2] = at(0, w/2 + 0.9); kitAdd(K, KIT.box, sx2, fy - 0.1, sz2, yaw, 1.4, 0.5, 1.6, 0x8a8a84); }
-  if (o.chimney !== false) { const [px, pz] = at(l*0.22, -w*0.12); kitAdd(K, KIT.box, px, fy + h + rh*0.75, pz, yaw, 0.6, rh*0.9 + 0.6, 0.6, 0x8a4a3a); }
-  if (S) S.push({ x, z, yaw, hw: w/2 + 0.2, hl: l/2 + 0.2, kind: 'lm' });   // (the static box: hw across, hl along the ridge)
-  return fy; }
+// the countryside's buildings are Ylästö's own: houseBuild (the village's eras, boards, tiles, windows with curtains, porches) into a Merger a place;
+// outbuildings (cowshed, granary, saunas, barns) from the same boards and tiles. On uneven ground the house stands on its highest corner and
+// its brick plinth reaches down to the lowest (as the village's are lifted).
+function groundMax(x, z, hw, hl, yaw) { const at = kitFrame(x, z, yaw); let hi = -Infinity; for (const [a, b] of [[-hl, -hw], [hl, -hw], [-hl, hw], [hl, hw], [0, 0]]) { const [px, pz] = at(a, b); hi = Math.max(hi, H(px, pz)); } return hi; }
+function outerHouse(HM, S, x, z, w, d, th, bi, sx, sz) { const P = houseMats(), lo = groundMin(x, z, w/2 + 0.2, d/2 + 0.2, th), y0 = groundMax(x, z, w/2 + 0.2, d/2 + 0.2, th); let k = 0;
+  if (y0 - lo > 0.05) HM.add(unitBox, 'sokkeli', P.sokkeliMat, x, (lo - 0.3 + y0 + 0.2)/2, z, th, w + 0.1, y0 + 0.5 - lo, d + 0.1);
+  houseBuild(HM, x, z, w, d, th, bi, { y0, rnd: () => hsh(bi, k++, 777), street: [sx - x, sz - z], chim: false }); if (S) S.push({ x, z, yaw: th, hw: w/2 + 0.1, hl: d/2 + 0.1, kind: 'lm' }); }
+function outShed(HM, S, x, z, w, d, th, wallM, roofM, h, o) { o = o || {}; const P = houseMats(), y0 = groundMin(x, z, w/2, d/2, th), add = (g, m, ...a) => HM.add(g, 'o' + m.id, m, ...a), rot = (lx, lz) => [x + Math.cos(th)*lx + Math.sin(th)*lz, z - Math.sin(th)*lx + Math.cos(th)*lz];
+  add(unitBox, P.sokkeliMat, x, y0 - 0.35, z, th, w + 0.1, 0.9, d + 0.1); add(unitBox, wallM, x, y0 + 0.1 + h/2, z, th, w, h, d);
+  const alongZ = d >= w, rw = alongZ ? w : d, rd = alongZ ? d : w, rh = o.rh || rw*0.42; add(gableGeo, roofM, x, y0 + 0.1 + h, z, th + (alongZ ? 0 : Math.PI/2), rw + 0.7, rh, rd + 0.5);
+  const lw = alongZ ? d : w, sw = alongZ ? w : d, wall = (t, n, y, along, hgt, m) => { const [px, pz] = alongZ ? rot(n, t) : rot(t, n); add(unitBox, m, px, y, pz, th, alongZ ? 0.12 : along, hgt, alongZ ? along : 0.12); };
+  for (let i = 0; i < (o.win || 0); i++) { const t = ((i + 0.5)/o.win - 0.5)*lw*0.8; for (const sd of [-1, 1]) { wall(t, sd*(sw/2 + 0.04), y0 + 0.1 + h*0.6, 0.8, 0.6, P.trimMat); wall(t, sd*(sw/2 + 0.07), y0 + 0.1 + h*0.6, 0.62, 0.44, houseGlass); } }
+  if (o.door !== false) { const big = o.big, [px, pz] = alongZ ? rot(0, d/2 + 0.05) : rot(w/2 + 0.05, 0); add(unitBox, big ? P.trimMat : P.darkMat, px, y0 + 0.1 + (big ? 1.4 : 0.95), pz, th, alongZ ? (big ? 3.2 : 0.85) : 0.1, big ? 2.8 : 1.9, alongZ ? 0.1 : (big ? 3.2 : 0.85));
+    if (big) { const [qx, qz] = alongZ ? rot(0, d/2 + 0.08) : rot(w/2 + 0.08, 0); add(unitBox, P.mat ? wallM : wallM, qx, y0 + 0.1 + 1.4, qz, th, alongZ ? 2.9 : 0.1, 2.5, alongZ ? 0.1 : 2.9); } }   // (a barn door: white frame, boards inside)
+  if (S) S.push({ x, z, yaw: th, hw: w/2 + 0.1, hl: d/2 + 0.1, kind: 'lm' }); }
+function mergerInto(HM, G) { HM.fuse(k => /^(trim|door\d*|glass|sokkeli|step)$/.test(k) ? 'n' : 's'); const list = []; HM.build(list); for (const m of list) { scene.remove(m); m.userData.shared = true; if (/^(trim|door\d*|glass|step)$/.test(m.userData.key)) m.castShadow = false; G.add(m); } }
 // signs (a canvas texture each: village names, the shop) — kept with the place's group and disposed with it
 function featSign(G, text, x, y, z, yaw, w, h, bg, fg) { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d'); g.fillStyle = bg; g.fillRect(0, 0, 256, 64); g.strokeStyle = fg; g.lineWidth = 4; g.strokeRect(4, 4, 248, 56);
   g.fillStyle = fg; g.font = '900 ' + (text.length > 11 ? 30 : 36) + 'px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 128, 34);
@@ -767,26 +765,26 @@ function fieldMesh(F) { const f = F.field, [cx, cz] = featAt(F, f.a, f.b), R = M
   const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setIndex(idx); geo.computeVertexNormals();
   const t = fieldTex(F.crop), m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: t, roughness: 0.95, transparent: false, alphaTest: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2 })); t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; m.receiveShadow = true; return m; }
 // each kind of place
-function featBuild(F) { const G = new THREE.Group(), K = kitNew(), S = [], at = (a, b) => featAt(F, a, b), h = F.h, yaw = F.yaw;
-  if (F.kind === 'farm') { const wall = H_WALL[Math.floor(h(1)*H_WALL.length)], roof = H_ROOF[Math.floor(h(2)*H_ROOF.length)];
-    { const [x, z] = at(-8, 0); kitHouse(K, S, x, z, yaw + Math.PI/2, 8.5, 12, h(3) < 0.5 ? 3.0 : 5.4, wall, roof); }   // the farmhouse
-    { const [x, z] = at(-34, 10); kitHouse(K, S, x, z, yaw, 11, 24, 4.4, 0x8a2e22, 0x5a5e62, { windows: true, door: false, chimney: false }); const [hx, hz] = at(-34 + 13, 10); kitAdd(K, KIT.box, hx, H(hx, hz) + 0.8, hz, yaw, 6, 1.6, 2, 0xb8b0a0); }   // the cowshed and its manure slab
-    { const [x, z] = at(6, -26); kitHouse(K, S, x, z, yaw, 4.2, 5.5, 2.5, 0x6a3a24, 0x55585c, { trim: null, chimney: true, windows: false }); }   // the sauna
-    { const [x, z] = at(-16, -24); kitHouse(K, S, x, z, yaw + 0.05, 4.5, 6, 2.6, 0x8a2e22, 0x4a4e52, { windows: false }); }   // the granary (aitta)
-    const f = F.field; for (let k = 0; k < 2; k++) { const a = f.a + (h(10 + k) - 0.5)*f.hl*1.4, b = (k ? -1 : 1)*f.hw*0.55, [x, z] = at(a, b); kitHouse(K, S, x, z, yaw + (h(12 + k) - 0.5)*0.3, 6.5, 9, 3.4, 0x6e665a, 0x6a4e3a, { plinth: 0, trim: null, windows: false, chimney: false, doorCol: 0x4e463a, roofH: 2.4 }); }   // barns (lato) on the field
+function featBuild(F) { const G = new THREE.Group(), K = kitNew(), HM = new Merger(0), S = [], at = (a, b) => featAt(F, a, b), h = F.h, yaw = F.yaw;
+  if (F.kind === 'farm') {
+    const P = houseMats(), [hx0, hz0] = at(10, 0); { const [x, z] = at(-8, 0), r = h(3); outerHouse(HM, S, x, z, r < 0.4 ? 7.0 : 8.2, r < 0.4 ? 7.2 : 12, yaw + Math.PI/2, 3 + Math.floor(h(4)*900), hx0, hz0); }   // the farmhouse
+    { const [x, z] = at(-34, 10); outShed(HM, S, x, z, 11, 24, yaw, P.eraWall.rinta[3], P.eraRoof.rinta[0], 4.2, { win: 6, big: true }); }   // the cowshed (navetta): punamulta boards, a row of small windows, the barn door at the end
+    { const [x, z] = at(6, -26); outShed(HM, S, x, z, 4.2, 5.5, yaw, barnMats()[2], P.eraRoof.matala[0], 2.4, { win: 1 }); const [cx, cz] = at(6 + 1.2, -26 + 0.8); kitAdd(K, KIT.box, cx, H(cx, cz) + 3.6, cz, yaw, 0.5, 1.6, 0.5, 0x6a6a66); }   // the sauna (and its chimney)
+    { const [x, z] = at(-16, -24); outShed(HM, S, x, z, 4.5, 6, yaw + 0.05, P.eraWall.rinta[3], P.eraRoof.rinta[1], 2.6); }   // the granary (aitta)
+    const f = F.field; for (let k = 0; k < 2; k++) { const a = f.a + (h(10 + k) - 0.5)*f.hl*1.4, b = (k ? -1 : 1)*f.hw*0.55, [x, z] = at(a, b); outShed(HM, S, x, z, 6.5, 9, yaw + (h(12 + k) - 0.5)*0.3, barnMats()[k], P.eraRoof.rinta[3], 3.4, { big: true, rh: 2.4 }); }   // barns (lato) on the field: grey boards
     if (F.crop === 0) for (let k = 0; k < 8; k++) { const [x, z] = at(f.a + (h(20 + k) - 0.5)*f.hl*1.6, (h(30 + k) - 0.5)*f.hw*1.6); kitAdd(K, KIT.cyl, x, H(x, z) + 0.6, z, h(40 + k)*3, 1.25, 1.2, 1.25, 0xf2f2ee, Math.PI/2); }   // wrapped bales
     { const [x, z] = at(-8, 14); kitAdd(K, KIT.box, x, H(x, z) + 1.2, z, yaw, 0.12, 2.4, 0.12, 0x6a6a6a); kitAdd(K, KIT.box, x, H(x, z) + 2.5, z, yaw, 0.5, 0.35, 0.3, 0xe8e2d0); }   // the yard light
     G.add(fieldMesh(F)); }
   if (F.kind === 'village') { let n = 0;
     for (let k = 0; k < 13; k++) { const sd = k % 2 ? 1 : -1, a = -F.L + 18 + k*(2*F.L - 36)/12 + (h(50 + k) - 0.5)*6; if (h(60 + k) < 0.12) continue; const b = sd*(13 + h(70 + k)*5), [x, z] = at(a, b);
-      if (k === 6) { kitHouse(K, S, x, z, yaw + (sd > 0 ? Math.PI : 0), 10, 16, 3.6, 0xe8e2c8, 0x6a6e72, { chimney: false }); const [sx, sz] = at(a, sd*(b*sd - 5.9)); featSign(G, 'KYLÄKAUPPA', sx, H(x, z) + 4.2, sz, yaw + (sd > 0 ? -Math.PI/2 : Math.PI/2), 5, 1.25, '#1a4a9a', '#f4f0e0'); continue; }   // the shop
-      kitHouse(K, S, x, z, yaw + (sd > 0 ? Math.PI : 0), 7.5 + h(80 + k)*2, 9 + h(90 + k)*4, h(100 + k) < 0.4 ? 5.2 : 3.0, H_WALL[Math.floor(h(110 + k)*H_WALL.length)], H_ROOF[Math.floor(h(120 + k)*H_ROOF.length)]); n++;
+      const [sx0, sz0] = at(a, 0); if (k === 6) { outerHouse(HM, S, x, z, 10, 17, yaw, 2 + 3*Math.floor(h(55)*300)*4 + 1, sx0, sz0); const [sx, sz] = at(a, sd*(b*sd - 5.9)); featSign(G, 'KYLÄKAUPPA', sx, H(x, z) + 4.2, sz, yaw + (sd > 0 ? -Math.PI/2 : Math.PI/2), 5, 1.25, '#1a4a9a', '#f4f0e0'); continue; }   // the shop
+      { const e = h(100 + k), [ww, dd] = e < 0.35 ? [6.6 + h(80 + k)*0.5, 6.8 + h(90 + k)*0.4] : e < 0.7 ? [7.6 + h(80 + k)*0.8, 10 + h(90 + k)*1.5] : [7 + h(80 + k)*0.6, 12 + h(90 + k)*2]; outerHouse(HM, S, x, z, ww, dd, yaw, Math.floor(h(110 + k)*100000), sx0, sz0); } n++;   // (rintamamiestalo, kasari or a long matala, by size)
       const [mx, mz] = at(a + 3, sd*6.5); kitAdd(K, KIT.box, mx, H(mx, mz) + 0.55, mz, yaw, 0.08, 1.1, 0.08, 0x5a4a3a); kitAdd(K, KIT.box, mx, H(mx, mz) + 1.15, mz, yaw, 0.3, 0.25, 0.45, 0x2a5a9a); }   // a mailbox
     { const [x, z] = at(8, 9); const y = H(x, z); for (const [u, v, w, hh, d] of [[0, -0.9, 3.4, 0.08, 0.1], [-1.6, 0, 0.1, 2.3, 1.8], [1.6, 0, 0.1, 2.3, 1.8]]) { const [px, pz] = at(8 + u, 9 + v); kitAdd(K, KIT.box, px, y + hh/2 + 0.02, pz, yaw, d, hh, w, 0x6a5040); } const [rx, rz] = at(8, 9); kitAdd(K, KIT.box, rx, y + 2.4, rz, yaw, 2.2, 0.12, 3.8, 0x3a3a3c); }   // the bus shelter
     for (const s of [-1, 1]) { const [x, z] = at(s*(F.L + 14), 5.5), y = H(x, z); kitAdd(K, KIT.box, x, y + 1.0, z, yaw, 0.1, 2.0, 0.1, 0x8a8a8a); featSign(G, F.name.toUpperCase(), x, y + 2.3, z, yaw + (s > 0 ? 0 : Math.PI), 3.2, 0.8, '#1a4a9a', '#ffffff'); }   // the name signs at both ends
     F.nHouses = n; }
   if (F.kind === 'lake') { const ap = F.yaw + 1.2; let r = F.R*0.93*featWob(F, ap); const [sx, sz] = [F.x + Math.sin(ap)*r, F.z + Math.cos(ap)*r];
-    { const d = 9, [x, z] = [F.x + Math.sin(ap)*(r + d), F.z + Math.cos(ap)*(r + d)]; kitHouse(K, S, x, z, ap, 4.2, 5, 2.4, 0x5a3a24, 0x55585c, { trim: null, windows: false, chimney: true }); }   // the lakeside sauna
+    { const d = 9, [x, z] = [F.x + Math.sin(ap)*(r + d), F.z + Math.cos(ap)*(r + d)]; const P = houseMats(); outShed(HM, S, x, z, 4.2, 5, ap, barnMats()[2], P.eraRoof.matala[0], 2.3, { win: 1 }); }   // the lakeside sauna
     for (let k = 0; k < 7; k++) { const t = 2 - k*2.1, x = sx + Math.sin(ap)*t, z = sz + Math.cos(ap)*t; kitAdd(K, KIT.box, x, F.level + 0.45, z, ap, 1.4, 0.12, 2.0, 0x9a8a6a); if (k % 2) for (const s of [-0.6, 0.6]) { const px = x + Math.cos(ap)*s, pz = z - Math.sin(ap)*s; kitAdd(K, KIT.box, px, F.level - 0.4, pz, ap, 0.15, 1.8, 0.15, 0x5a4a3a); } }   // the jetty
     { const b = ap - 0.09, rr = F.R*0.96*featWob(F, b), x = F.x + Math.sin(b)*rr, z = F.z + Math.cos(b)*rr; kitAdd(K, KIT.box, x, Math.max(F.level, H(x, z)) + 0.25, z, b + 0.3, 1.2, 0.45, 4.2, 0x4a8a5a); }   // a rowing boat, upside down on the shore
     for (let k = 0; k < 6; k++) { const b = F.yaw + h(130 + k)*6.28, rr = F.R*0.9*featWob(F, b), x = F.x + Math.sin(b)*rr, z = F.z + Math.cos(b)*rr; for (let m = 0; m < 9; m++) { const u = (h(140 + k*9 + m) - 0.5)*7, v = (h(200 + k*9 + m) - 0.5)*4; kitAdd(K, KIT.box, x + u, F.level + 0.5, z + v, h(250 + m)*3, 0.08, 1.6 + h(260 + m), 0.08, 0x7a8a3a); } }   // reeds
@@ -797,7 +795,7 @@ function featBuild(F) { const G = new THREE.Group(), K = kitNew(), S = [], at = 
       kitAdd(K, KIT.cyl, x, y + t/2, z, 0, 0.12, t, 0.12, dead ? 0x8a8478 : 0x4a3a2a); if (!dead) kitAdd(K, KIT.cone, x, y + t*0.75, z, 0, 1.1 + t*0.15, t*0.7, 1.1 + t*0.15, 0x3a5a32); }
     for (let k = -14; k <= 14; k++) { const [x, z] = at(k*2.1, 0), y = H(x, z); for (const s of [-0.18, 0.18]) { const [px, pz] = at(k*2.1, s); kitAdd(K, KIT.box, px, y + 0.12, pz, yaw, 0.26, 0.1, 2.0, 0x8a7a5a); } }   // duckboards
     for (let k = 0; k < 7; k++) { const b = h(350 + k)*6.28, rr = F.R*0.6*h(360 + k), x = F.x + Math.sin(b)*rr, z = F.z + Math.cos(b)*rr; kitAdd(K, KIT.cyl, x, H(x, z) + 0.06, z, 0, 3 + h(370 + k)*4, 0.04, 2 + h(380 + k)*3, 0x2a3a3a); } }   // pools
-  if (K.p.length) G.add(kitMesh(K)); F.solid = S; scene.add(G); return G; }
+  if (K.p.length) G.add(kitMesh(K)); if (Object.keys(HM.groups).length) mergerInto(HM, G); F.solid = S; scene.add(G); return G; }
 // a road's things: the gravel ribbon, and on some the power line (poles every ~50 m, three sagging wires)
 let _gravTex = null;
 function roadBuild(E) { const G = new THREE.Group(), P = E.pts, pos = [], col = [], idx = [], L = [0];
@@ -817,7 +815,7 @@ function roadBuild(E) { const G = new THREE.Group(), P = E.pts, pos = [], col = 
       for (const v of t) kitAdd(K, KIT.cyl, v.x, v.y - 0.1, v.z, 0, 0.1, 0.2, 0.1, 0xe8e8e0); }
     if (K.p.length) G.add(kitMesh(K)); if (wires.length) { const wg = new THREE.BufferGeometry(); wg.setAttribute('position', new THREE.Float32BufferAttribute(wires, 3)); G.add(new THREE.LineSegments(wg, new THREE.LineBasicMaterial({ color: 0x1a1a1a }))); } }
   E.solid = S; scene.add(G); return G; }
-function groupDrop(G) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material !== KIT.mat) { if (o.material.map && !FIELD_TEX.includes(o.material.map)) o.material.map.dispose(); o.material.dispose(); } }); }
+function groupDrop(G) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material !== KIT.mat && !o.userData.shared) { if (o.material.map && !FIELD_TEX.includes(o.material.map)) o.material.map.dispose(); o.material.dispose(); } }); }
 // streaming: a place within 1.3 km of the camera is built, dropped past 1.7 km; roads likewise by their bounding box; at most one build a frame
 function countryUpdate(cx, cz) { OUT.fG = OUT.fG || new Map(); OUT.rG = OUT.rG || new Map(); let built = false;
   for (const F of featsNear(cx, cz, 1300)) if (!OUT.fG.has(F.key) && Math.hypot(F.x - cx, F.z - cz) < 1300 + (F.R || 0)) { if (built) break; OUT.fG.set(F.key, featBuild(F)); built = true; }
@@ -1868,6 +1866,117 @@ const unitTrunk = new THREE.CylinderGeometry(1, 1, 1, 5, 1, true);   // tree tru
 const unitCyl = new THREE.CylinderGeometry(1, 1, 1, 6);
 
 const YARD_SOLID = []; let YARDG = null;   // yard things people bump into: [x, z, r] circles (woodpiles, posts, swings, bushes, flower beds, flagpoles, garden trees)
+// ── a house of Ylästö's own kind (1.10.: the village and the countryside both build theirs with it). Eras from the footprint: rinta = rintamamiestalo
+// (small, squarish, 1½ floors, steep roof, a porch), matala = 1960–70s (long, low, brick or dark boards), kasari = 1980s (light boards, wide eaves).
+// M: a Merger; o: { y0 ground, rnd (the village: Math.random — the same draws as ever), street: [dx, dz] towards the street (the door's side),
+// room(x, z) → > 0 if a porch fits there, chim: some chimneys smoke }
+function houseMats() { if (houseMats.P) return houseMats.P; const mat = (c, r = 0.85, extra = {}) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: r, flatShading: true }, extra));
+  const curtainMats = [0xd98a3a, 0xf2e6c8, 0x9a3a2a, 0x6a8a4a, 0xe8c85a, 0xc9a0b8].map(c => mat(c, 0.9)), stepMat = mat(0xa8a49c, 0.95);
+  const tileRoof = (m) => { m.onBeforeCompile = (sh) => {
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvWp = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp;')
+        .replace('#include <color_fragment>', '#include <color_fragment>\nfloat rowF = fract(vWp.y*5.0); float rim = smoothstep(0.0, 0.18, rowF); diffuseColor.rgb *= mix(0.72, 1.0, rim) * (0.96 + 0.04*sin(vWp.x*7.0 + vWp.z*7.0));'); };
+    m.customProgramCacheKey = () => 'tiles'; return m; };
+  const eraWall = {
+    rinta:  [0xe8c85a,0xb9d39a,0xf1f0e8,0x9e3325,0xa6c3dc,0xe6c1b5,0xd9a64a,0xf3e3a1].map(c=>surfaceDetail(mat(c,0.92), 'hboards', 1.0)),   // ochre, mint, white, punamulta, sky blue, pink… — horizontal weatherboards
+    matala: [0x9a4a35,0x5a3f2a,0xe6e2da,0x6f879a,0x5f7a55,0xc79a52,0x8a5a3c].map((c, i)=>surfaceDetail(mat(c,0.9), i === 0 || i === 2 ? 'brick' : 'vboards', 0.9)),   // 60s–70s: brick or dark vertical boards
+    kasari: [0xc9a277,0xf0d27a,0xbcd2e2,0xf4efe3,0xb24a36,0xcfe0bf,0xe9dfc8].map(c=>surfaceDetail(mat(c,0.9), 'vboards', 0.8)),   // 80s: vertical cladding
+  };
+  const eraRoof = {
+    rinta:  [0x4b4f57,0x8b3a2e,0x3e4a5c,0x5b3a2e].map(c=>tileRoof(mat(c,0.85))),
+    matala: [0x2f3136,0x3a3a3a,0x4a3b30].map(c=>tileRoof(mat(c,0.8))),
+    kasari: [0xb8452c,0x8b3a2e,0x6b4a35,0x4b4f57].map(c=>tileRoof(mat(c,0.8))),
+  };
+  const doorMats = [0x5a3a22, 0x8a2a1e, 0x2f4a36, 0x6b4a2c, 0x33405a, 0x9a7a4a].map((c, k) => { const m = mat(c, 0.7); m.userData.k = k; return m; });
+  const sokkeliMat = surfaceDetail(mat(0x6f6f6a, 0.95), 'brick', 0.35), trimMat = mat(0xf7f7f2, 0.8), flatRoofMat = surfaceDetail(mat(0x2b2d33, 0.8), 'grit', 0.9);
+  const darkMat = mat(0x2b2d33, 0.7);
+  return houseMats.P = { mat, curtainMats, stepMat, tileRoof, eraWall, eraRoof, doorMats, sokkeliMat, trimMat, flatRoofMat, darkMat }; }
+function barnMats() { const P = houseMats(); return P.barn || (P.barn = [0x8a8272, 0x6e665a, 0x9e3325].map(c => surfaceDetail(P.mat(c, 0.95), 'vboards', 1.0))); }   // (made only when the countryside needs them: the village's random draws stay as they were)
+function houseBuild(M, x, z, w, d, th, bi, o) { const { curtainMats, stepMat, eraWall, eraRoof, doorMats, sokkeliMat, trimMat, flatRoofMat, darkMat } = houseMats();
+    const longW = Math.max(w,d), shortW = Math.min(w,d), alongX = w > d, aspect = longW/shortW, y0 = o.y0;
+    const rot = (lx, lz) => [x + Math.cos(th)*lx + Math.sin(th)*lz, z - Math.sin(th)*lx + Math.cos(th)*lz];
+    const [rdx, rdz] = o.street || [0, 1], doorSide = (alongX ? (Math.sin(th)*rdx + Math.cos(th)*rdz) : (Math.cos(th)*rdx - Math.sin(th)*rdz)) >= 0 ? 1 : -1;
+    const era = (longW <= 7.2 && aspect <= 1.5) || (longW <= 8.5 && aspect <= 1.7 && bi % 5 < 2) ? 'rinta' : (aspect >= 1.55 && longW >= 6.5 && (bi % 3 !== 0)) ? 'matala' : 'kasari';
+    const flat = era === 'matala' && (bi % 4 === 0);
+    const h = era === 'rinta' ? 3.4 : era === 'matala' ? 2.6 : 2.9;
+    const wi = bi % 6, ri = (bi*7+3) % eraRoof[era].length;
+    // foundation
+    M.add(unitBox, 'sokkeli', sokkeliMat, x, y0+0.18, z, th, w+0.1, 0.36, d+0.1);
+    // walls
+    M.add(unitBox, 'wall_'+era+wi, eraWall[era][wi], x, y0+0.3+h/2, z, th, w, h, d);
+    // roof
+    const ridgeAlongZ = d >= w;
+    const rw = ridgeAlongZ ? w : d, rd = ridgeAlongZ ? d : w;
+    let rh;
+    if (flat) {
+      M.add(unitBox, 'roofflat', flatRoofMat, x, y0+0.3+h+0.12, z, th, w+0.9, 0.24, d+0.9);
+      rh = 0.3;
+    } else {
+      rh = era === 'rinta' ? rw*0.62 : era === 'matala' ? rw*0.2 : rw*0.36;
+      const over = era === 'kasari' ? 1.0 : 0.7;
+      M.add(gableGeo, 'roof_'+era+ri, eraRoof[era][ri], x, y0+0.3+h, z, th + (ridgeAlongZ ? 0 : Math.PI/2), rw+over, rh, rd+over*0.8);
+      // chimney on the ridge (centred for rinta, off-centre otherwise)
+      const cu = era === 'rinta' ? 0 : (o.rnd()-0.5)*rd*0.5;
+      const [cwx, cwz] = ridgeAlongZ ? rot(0, cu) : rot(cu, 0);
+      M.add(unitBox, 'chimney', darkMat, cwx, y0+0.3+h+rh*0.8, cwz, th, 0.5, rh*0.9+0.4, 0.5);
+      if (o.chim && bi % 5 === 0) CHIMNEYS.push([cwx, y0+0.3+h+rh*0.8 + (rh*0.9+0.4)/2, cwz, x, z, w/2, d/2, th]);   // some are burning something
+    }
+    let porchSide = 0;
+    // rintamamiestalo: knee-wall dormer look — small attic window on each gable + porch on one gable
+    if (era === 'rinta') {
+      for (const s of [-1, 1]) {
+        const [gx, gz] = ridgeAlongZ ? rot(0, s*(rd/2+0.06)) : rot(s*(rd/2+0.06), 0);
+        M.add(unitBox, 'glass', houseGlass, gx, y0+0.3+h+rh*0.35, gz, th + (ridgeAlongZ ? 0 : Math.PI/2), 0.6, 0.6, 0.1);
+      }
+      const pAt = (sg) => ridgeAlongZ ? rot(0, sg*(rd/2+0.8)) : rot(sg*(rd/2+0.8), 0), pOut = (sg) => ridgeAlongZ ? rot(0, sg*(rd/2+1.8)) : rot(sg*(rd/2+1.8), 0);
+      const room = (sg) => { const [ox, oz] = pOut(sg); return o.room ? o.room(ox, oz) : 1; };
+      let ps = (bi % 2) ? 1 : -1; if (room(ps) < 0 && room(-ps) > room(ps)) ps = -ps;   // porch on the gable away from the road
+      if (room(ps) >= 0) {
+      porchSide = ps;
+      const [px, pz] = pAt(ps);
+      const pyaw = th + (ridgeAlongZ ? 0 : Math.PI/2);
+      M.add(unitBox, 'wall_'+era+wi, eraWall[era][wi], px, y0+0.3+1.15, pz, pyaw, 1.9, 2.3, 1.5);
+      M.add(gableGeo, 'roof_'+era+ri, eraRoof[era][ri], px, y0+0.3+2.3, pz, pyaw + Math.PI/2, 1.9, 0.5, 2.1);
+      M.add(unitBox, 'door', darkMat, px, y0+0.3+1.0, pz + 0, pyaw, 0.8, 1.8, 1.62);
+      }
+    }
+    // windows: rinta small, matala wide, kasari medium; the front door on the long side that faces the street
+    const winW = era === 'rinta' ? 0.8 : era === 'matala' ? 1.7 : 1.2, winH = era === 'rinta' ? 0.9 : 1.1;
+    const nWin = Math.max(1, Math.min(4, Math.floor(longW / (winW + 1.2))));
+    const wy = y0 + 0.3 + (era === 'rinta' ? 1.5 : h*0.55);
+    // a box on a wall: t = along the wall, n = out of it (local frame), size along × height × thickness
+    const onWall = (key, m, t, n, nAlongZ, y, along, hgt, thick) => { const [px, pz] = nAlongZ ? rot(t, n) : rot(n, t); M.add(unitBox, key, m, px, y, pz, th, nAlongZ ? along : thick, hgt, nAlongZ ? thick : along); };
+    const ci = bi % curtainMats.length, wall = eraWall[era][wi], boards = !(era === 'matala' && (wi === 0 || wi === 2));
+    const windowAt = (t, n, nAlongZ, ww, wh, yy) => {   // white frame, glass, a cross of glazing bars and two curtains drawn to the sides
+      onWall('trim', trimMat, t, n, nAlongZ, yy, ww + 0.16, wh + 0.16, 0.08);
+      onWall('glass', houseGlass, t, n, nAlongZ, yy, ww, wh, 0.12);
+      onWall('trim', trimMat, t, n, nAlongZ, yy, 0.07, wh, 0.15);
+      onWall('trim', trimMat, t, n, nAlongZ, yy + wh*0.22, ww, 0.06, 0.15);
+      onWall('curtain'+ci, curtainMats[ci], t, n, nAlongZ, yy + wh*0.4, ww*0.94, wh*0.14, 0.13);
+      for (const e of [-1, 1]) onWall('curtain'+ci, curtainMats[ci], t + e*ww*0.4, n, nAlongZ, yy - wh*0.05, ww*0.13, wh*0.86, 0.13);
+      if (wh > 0.8) onWall('trim', trimMat, t, n + Math.sign(n)*0.08, nAlongZ, yy - wh/2 - 0.1, ww + 0.3, 0.07, 0.2); };   // sill
+    const doorMat = doorMats[(bi*5 + 1) % doorMats.length];
+    for (const side of [-1, 1]) {
+      for (let k = 0; k < nWin; k++) {
+        const u = ((k+0.5)/nWin - 0.5) * longW * 0.82, n = side*(shortW/2+0.05);
+        const isDoor = side === doorSide && k === nWin-1 && era !== 'rinta';
+        if (!isDoor) { windowAt(u, n, alongX, winW, winH, wy); continue; }
+        onWall('trim', trimMat, u, n, alongX, y0+0.3+1.0, 1.0, 2.0, 0.08);
+        onWall('door'+doorMat.userData.k, doorMat, u, n, alongX, y0+0.3+0.95, 0.86, 1.9, 0.12);
+        onWall('glass', houseGlass, u, n + side*0.01, alongX, y0+0.3+1.45, 0.22, 0.6, 0.12);   // narrow door window
+        onWall('step', stepMat, u, side*(shortW/2+0.45), alongX, y0+0.12, 1.3, 0.24, 0.7);
+        onWall('roofflat', flatRoofMat, u, side*(shortW/2+0.5), alongX, y0+0.3+2.2, 1.6, 0.1, 1.0);   // small canopy over the door
+      }
+    }
+    // gable ends get windows too (not behind the rintamamiestalo porch)
+    const nG = shortW >= 6.5 ? 2 : 1, gW = Math.min(winW, 1.2);
+    for (const gs of [-1, 1]) {
+      if (era === 'rinta' && gs === porchSide) continue;
+      for (let k = 0; k < nG; k++) windowAt(((k+0.5)/nG - 0.5)*shortW*0.7, gs*(longW/2+0.05), !alongX, gW, winH, wy);
+    }
+    // corner boards on board-clad walls
+    if (boards) for (const [cxs, czs] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) { const [qx, qz] = rot(cxs*(w/2 + 0.02), czs*(d/2 + 0.02)); M.add(unitBox, 'trim', trimMat, qx, y0+0.3+h/2, qz, th, 0.16, h, 0.16); }
+}
 function buildScenery() { KNOCK.items.length = 0; YARD_SOLID.length = 0; YARDG = null; sceneryDebug.drives = []; LIFE_PLAN.length = 0; LIFE_GUESTS.length = 0;
   CHIMNEYS.length = 0;
   const M = new Merger(160);
@@ -1904,24 +2013,7 @@ function buildScenery() { KNOCK.items.length = 0; YARD_SOLID.length = 0; YARDG =
   // rinta = rintamamiestalo (1940–50s): small, squarish, 1½ floors, steep roof, porch
   // matala = 1960–70s: long and low, shallow roof or flat, brick/dark wood, big windows
   // kasari = 1980s: one floor, medium gable, light brick or wood, wide eaves
-  const curtainMats = [0xd98a3a, 0xf2e6c8, 0x9a3a2a, 0x6a8a4a, 0xe8c85a, 0xc9a0b8].map(c => mat(c, 0.9)), stepMat = mat(0xa8a49c, 0.95);
-  const tileRoof = (m) => { m.onBeforeCompile = (sh) => {
-      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvWp = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp;')
-        .replace('#include <color_fragment>', '#include <color_fragment>\nfloat rowF = fract(vWp.y*5.0); float rim = smoothstep(0.0, 0.18, rowF); diffuseColor.rgb *= mix(0.72, 1.0, rim) * (0.96 + 0.04*sin(vWp.x*7.0 + vWp.z*7.0));'); };
-    m.customProgramCacheKey = () => 'tiles'; return m; };
-  const eraWall = {
-    rinta:  [0xe8c85a,0xb9d39a,0xf1f0e8,0x9e3325,0xa6c3dc,0xe6c1b5,0xd9a64a,0xf3e3a1].map(c=>surfaceDetail(mat(c,0.92), 'hboards', 1.0)),   // ochre, mint, white, punamulta, sky blue, pink… — horizontal weatherboards
-    matala: [0x9a4a35,0x5a3f2a,0xe6e2da,0x6f879a,0x5f7a55,0xc79a52,0x8a5a3c].map((c, i)=>surfaceDetail(mat(c,0.9), i === 0 || i === 2 ? 'brick' : 'vboards', 0.9)),   // 60s–70s: brick or dark vertical boards
-    kasari: [0xc9a277,0xf0d27a,0xbcd2e2,0xf4efe3,0xb24a36,0xcfe0bf,0xe9dfc8].map(c=>surfaceDetail(mat(c,0.9), 'vboards', 0.8)),   // 80s: vertical cladding
-  };
-  const eraRoof = {
-    rinta:  [0x4b4f57,0x8b3a2e,0x3e4a5c,0x5b3a2e].map(c=>tileRoof(mat(c,0.85))),
-    matala: [0x2f3136,0x3a3a3a,0x4a3b30].map(c=>tileRoof(mat(c,0.8))),
-    kasari: [0xb8452c,0x8b3a2e,0x6b4a35,0x4b4f57].map(c=>tileRoof(mat(c,0.8))),
-  };
-  const doorMats = [0x5a3a22, 0x8a2a1e, 0x2f4a36, 0x6b4a2c, 0x33405a, 0x9a7a4a].map((c, k) => { const m = mat(c, 0.7); m.userData.k = k; return m; });
-  const sokkeliMat = surfaceDetail(mat(0x6f6f6a, 0.95), 'brick', 0.35), trimMat = mat(0xf7f7f2, 0.8), flatRoofMat = surfaceDetail(mat(0x2b2d33, 0.8), 'grit', 0.9);
+  const { curtainMats, stepMat, tileRoof, eraWall, eraRoof, doorMats, sokkeliMat, trimMat, flatRoofMat } = houseMats();   // (shared with the countryside: houseBuild)
   BUILDINGS.forEach(([x,z,w,d,th], bi)=>{
     if (BUILDINGS[bi].length > 5) return;
     if (Math.min(w,d) < 2.0) return;   // sub-2 m blobs are OSM noise, not buildings
@@ -1935,89 +2027,9 @@ function buildScenery() { KNOCK.items.length = 0; YARD_SOLID.length = 0; YARDG =
       M.add(unitBox, 'roofflat', flatRoofMat, x, y0+h+0.08, z, th, w+0.3, 0.16, d+0.3);
       placed.push({x,z,r:Math.max(w,d)*0.62}); return;
     }
-    const era = (longW <= 7.2 && aspect <= 1.5) || (longW <= 8.5 && aspect <= 1.7 && bi % 5 < 2) ? 'rinta' : (aspect >= 1.55 && longW >= 6.5 && (bi % 3 !== 0)) ? 'matala' : 'kasari';
-    const flat = era === 'matala' && (bi % 4 === 0);
-    const h = era === 'rinta' ? 3.4 : era === 'matala' ? 2.6 : 2.9;
-    const wi = bi % 6, ri = (bi*7+3) % eraRoof[era].length;
-    // foundation
-    M.add(unitBox, 'sokkeli', sokkeliMat, x, y0+0.18, z, th, w+0.1, 0.36, d+0.1);
-    // walls
-    M.add(unitBox, 'wall_'+era+wi, eraWall[era][wi], x, y0+0.3+h/2, z, th, w, h, d);
-    // roof
-    const ridgeAlongZ = d >= w;
-    const rw = ridgeAlongZ ? w : d, rd = ridgeAlongZ ? d : w;
-    let rh;
-    if (flat) {
-      M.add(unitBox, 'roofflat', flatRoofMat, x, y0+0.3+h+0.12, z, th, w+0.9, 0.24, d+0.9);
-      rh = 0.3;
-    } else {
-      rh = era === 'rinta' ? rw*0.62 : era === 'matala' ? rw*0.2 : rw*0.36;
-      const over = era === 'kasari' ? 1.0 : 0.7;
-      M.add(gableGeo, 'roof_'+era+ri, eraRoof[era][ri], x, y0+0.3+h, z, th + (ridgeAlongZ ? 0 : Math.PI/2), rw+over, rh, rd+over*0.8);
-      // chimney on the ridge (centred for rinta, off-centre otherwise)
-      const cu = era === 'rinta' ? 0 : (Math.random()-0.5)*rd*0.5;
-      const [cwx, cwz] = ridgeAlongZ ? rot(0, cu) : rot(cu, 0);
-      M.add(unitBox, 'chimney', darkMat, cwx, y0+0.3+h+rh*0.8, cwz, th, 0.5, rh*0.9+0.4, 0.5);
-      if (bi % 5 === 0) CHIMNEYS.push([cwx, y0+0.3+h+rh*0.8 + (rh*0.9+0.4)/2, cwz, x, z, w/2, d/2, th]);   // some are burning something
-    }
-    let porchSide = 0;
-    // rintamamiestalo: knee-wall dormer look — small attic window on each gable + porch on one gable
-    if (era === 'rinta') {
-      for (const s of [-1, 1]) {
-        const [gx, gz] = ridgeAlongZ ? rot(0, s*(rd/2+0.06)) : rot(s*(rd/2+0.06), 0);
-        M.add(unitBox, 'glass', houseGlass, gx, y0+0.3+h+rh*0.35, gz, th + (ridgeAlongZ ? 0 : Math.PI/2), 0.6, 0.6, 0.1);
-      }
-      const pAt = (sg) => ridgeAlongZ ? rot(0, sg*(rd/2+0.8)) : rot(sg*(rd/2+0.8), 0), pOut = (sg) => ridgeAlongZ ? rot(0, sg*(rd/2+1.8)) : rot(sg*(rd/2+1.8), 0);
-      const room = (sg) => { const [ox, oz] = pOut(sg), r = roadPen(ox, oz, 1.2); return r ? -r.pen : 1; };
-      let ps = (bi % 2) ? 1 : -1; if (room(ps) < 0 && room(-ps) > room(ps)) ps = -ps;   // porch on the gable away from the road
-      if (room(ps) >= 0) {
-      porchSide = ps;
-      const [px, pz] = pAt(ps);
-      const pyaw = th + (ridgeAlongZ ? 0 : Math.PI/2);
-      M.add(unitBox, 'wall_'+era+wi, eraWall[era][wi], px, y0+0.3+1.15, pz, pyaw, 1.9, 2.3, 1.5);
-      M.add(gableGeo, 'roof_'+era+ri, eraRoof[era][ri], px, y0+0.3+2.3, pz, pyaw + Math.PI/2, 1.9, 0.5, 2.1);
-      M.add(unitBox, 'door', darkMat, px, y0+0.3+1.0, pz + 0, pyaw, 0.8, 1.8, 1.62);
-      }
-    }
-    // windows: rinta small, matala wide, kasari medium; the front door on the long side that faces the street
-    const winW = era === 'rinta' ? 0.8 : era === 'matala' ? 1.7 : 1.2, winH = era === 'rinta' ? 0.9 : 1.1;
-    const nWin = Math.max(1, Math.min(4, Math.floor(longW / (winW + 1.2))));
-    const wy = y0 + 0.3 + (era === 'rinta' ? 1.5 : h*0.55);
-    // a box on a wall: t = along the wall, n = out of it (local frame), size along × height × thickness
-    const onWall = (key, m, t, n, nAlongZ, y, along, hgt, thick) => { const [px, pz] = nAlongZ ? rot(t, n) : rot(n, t); M.add(unitBox, key, m, px, y, pz, th, nAlongZ ? along : thick, hgt, nAlongZ ? thick : along); };
-    const ci = bi % curtainMats.length, wall = eraWall[era][wi], boards = !(era === 'matala' && (wi === 0 || wi === 2));
-    const windowAt = (t, n, nAlongZ, ww, wh, yy) => {   // white frame, glass, a cross of glazing bars and two curtains drawn to the sides
-      onWall('trim', trimMat, t, n, nAlongZ, yy, ww + 0.16, wh + 0.16, 0.08);
-      onWall('glass', houseGlass, t, n, nAlongZ, yy, ww, wh, 0.12);
-      onWall('trim', trimMat, t, n, nAlongZ, yy, 0.07, wh, 0.15);
-      onWall('trim', trimMat, t, n, nAlongZ, yy + wh*0.22, ww, 0.06, 0.15);
-      onWall('curtain'+ci, curtainMats[ci], t, n, nAlongZ, yy + wh*0.4, ww*0.94, wh*0.14, 0.13);
-      for (const e of [-1, 1]) onWall('curtain'+ci, curtainMats[ci], t + e*ww*0.4, n, nAlongZ, yy - wh*0.05, ww*0.13, wh*0.86, 0.13);
-      if (wh > 0.8) onWall('trim', trimMat, t, n + Math.sign(n)*0.08, nAlongZ, yy - wh/2 - 0.1, ww + 0.3, 0.07, 0.2); };   // sill
     // which long side faces the street (nearest side-road sample)
     let rd2 = 1e9, rdx = 0, rdz = 0; for (const q of sideRoadPts) { const dx = q.x - x, dz = q.y - z, dd = dx*dx + dz*dz; if (dd < rd2) { rd2 = dd; rdx = dx; rdz = dz; } }
-    const doorSide = (alongX ? (Math.sin(th)*rdx + Math.cos(th)*rdz) : (Math.cos(th)*rdx - Math.sin(th)*rdz)) >= 0 ? 1 : -1;
-    const doorMat = doorMats[(bi*5 + 1) % doorMats.length];
-    for (const side of [-1, 1]) {
-      for (let k = 0; k < nWin; k++) {
-        const u = ((k+0.5)/nWin - 0.5) * longW * 0.82, n = side*(shortW/2+0.05);
-        const isDoor = side === doorSide && k === nWin-1 && era !== 'rinta';
-        if (!isDoor) { windowAt(u, n, alongX, winW, winH, wy); continue; }
-        onWall('trim', trimMat, u, n, alongX, y0+0.3+1.0, 1.0, 2.0, 0.08);
-        onWall('door'+doorMat.userData.k, doorMat, u, n, alongX, y0+0.3+0.95, 0.86, 1.9, 0.12);
-        onWall('glass', houseGlass, u, n + side*0.01, alongX, y0+0.3+1.45, 0.22, 0.6, 0.12);   // narrow door window
-        onWall('step', stepMat, u, side*(shortW/2+0.45), alongX, y0+0.12, 1.3, 0.24, 0.7);
-        onWall('roofflat', flatRoofMat, u, side*(shortW/2+0.5), alongX, y0+0.3+2.2, 1.6, 0.1, 1.0);   // small canopy over the door
-      }
-    }
-    // gable ends get windows too (not behind the rintamamiestalo porch)
-    const nG = shortW >= 6.5 ? 2 : 1, gW = Math.min(winW, 1.2);
-    for (const gs of [-1, 1]) {
-      if (era === 'rinta' && gs === porchSide) continue;
-      for (let k = 0; k < nG; k++) windowAt(((k+0.5)/nG - 0.5)*shortW*0.7, gs*(longW/2+0.05), !alongX, gW, winH, wy);
-    }
-    // corner boards on board-clad walls
-    if (boards) for (const [cxs, czs] of [[-1, -1], [-1, 1], [1, -1], [1, 1]]) { const [qx, qz] = rot(cxs*(w/2 + 0.02), czs*(d/2 + 0.02)); M.add(unitBox, 'trim', trimMat, qx, y0+0.3+h/2, qz, th, 0.16, h, 0.16); }
+    houseBuild(M, x, z, w, d, th, bi, { y0, rnd: Math.random, street: [rdx, rdz], room: (ox, oz) => { const r = roadPen(ox, oz, 1.2); return r ? -r.pen : 1; }, chim: true });
     placed.push({x,z,r:Math.max(w,d)*0.62});
   });
   M.end();
@@ -4920,6 +4932,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Maaseudun talot ovat nyt samoja kuin Ylästössä: rintamamiestalot, matalat 60–70-luvun talot ja kasaritalot lautaverhouksineen, tiilikattoineen ja verhoineen; navetat, aitat, saunat ja ladot samoista laudoista ja tiilistä', '08.30'],
   ['1.10.', '🏡 Maaseutu kylän takana: soratiet Ylästön reunalta naapurikyliin (talot, kyläkauppa, bussikatos, nimikyltit), maatiloille (navetta, aitta, sauna, pelto latoineen ja paaleineen) ja järville (sauna, laituri, vene); suot pitkospuineen; sähkölinjat teiden varsilla. Järvessä auto uppoaa ja kone kaatuu, suolla pyörät uppoavat', '05.40'],
   ['1.10.', 'Lentokone osuu nyt korven puihin ja korpikentän koppiin (esteet seurasivat parkkeerattua Pököä eivätkä konetta); loputtoman maan uudelleenrakennus ~8× nopeampi, ei nykäisyä lentäessä', '04.40'],
   ['30.9.', '✈🎈 Lentokone törmää kuumailmapalloon oikealla fysiikalla: kova osuma kupuun repäisee pallon (kone menettää vauhtia, pallo sinkoaa ja laskeutuu), hiljainen tönäisy vain heilauttaa, ja koriin osuminen pudottaa koneen – kori heiluu heilurina', '02.13'],
