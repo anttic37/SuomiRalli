@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 19.01 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 19.33 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -4996,6 +4996,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Hinausauto: palaneet ja romuksi ajetut autot hinataan pois – kuski kiinnittää vaijerin, romu vinssataan keula koholla perään ja viedään kylästä. R tuo autot takaisin', '22.33'],
   ['1.10.', 'Uusi kamera: auton takana ja yläviistossa; paikallaan kamera nousee ylös ja kauas, ja laskeutuu tasaisesti takakameraksi 80 km/h:iin mennessä. C = vanha yläkamera. Nopeusmittarit pois alareunasta, auto näkyy alempana', '21.36'],
   ['1.10.', 'Peli käynnistyy noin sekunnin nopeammin (lähimmän reittipisteen haku ja huoltoalueen paikan etsintä nopeammiksi); hiiren rulla / trackpad zoomaa tasaisesti eikä enää hyppien', '21.36'],
   ['1.10.', 'Jätehuolto: vihreä pyörällinen roskapönttö jokaisen talon eteen ja roska-auto, joka kiertää täydet pöntöt – lastaaja taluttaa pöntön perään, nostaa ja puristin jyskyttää. Ralliauto lennättää pöntön', '21.35'],
@@ -5293,6 +5294,8 @@ const LEHTI = [
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+  { id: 'hinaus', size: 'half', n: 67, kick: '🛻 HINAUS', title: 'Hinausauto korjaa romut pois kylän kaduilta', img: ['hinaus.jpg', 'hinaus2.jpg'], cap: ['Palanut auto vinssataan keula koholla hinausauton perään.', 'Romu lähtee kylästä. Seuraavassa kisassa se on taas paikallaan.'],
+    body: ['Kun palanut tai romuksi ajettu auto on sammunut ja palokunta lähtenyt, paikalle ajaa keltainen HINAUS-auto. Kuljettaja käy kiinnittämässä vaijerin, ja romu vinssataan auton perään keula koholla.', 'Hinausauto vie romun kylästä pois. Jos tie on tukossa, se peruuttaa ja yrittää uudelleen, ja tarvittaessa betonipossut saavat väistyä. R-napilla kaikki autot ovat taas paikoillaan.'] },
   { id: 'jate', size: 'page', n: 66, kick: '🗑 JÄTEHUOLTO', title: 'Roska-auto kiertää Ylästöä – pöntöt talojen eteen', lede: 'Jokaisen talon eteen on tuotu vihreä pyörällinen jäteastia. Roska-auto ajaa pöntöltä toiselle, ja lastaaja hyppää takasillalta tyhjentämään ne.',
     img: ['roskaauto.jpg', 'ponttorivi.jpg', 'ponttolentaa.jpg'], cap: ['Lastaaja nostaa pöntön auton perään. Puristin jyskyttää, ja pönttö palaa paikalleen.', 'Täysistä pöntöistä pilkottaa musta pussi ja kansi on raollaan.', 'Kisavauhdissa kadun reunaa pitkin ajava auto lennättää pöntön pihalle.'],
     body: ['YLÄSTÖ. Kylässä on nyt jätehuolto. Jokaisen omakotitalon eteen, tontin reunaan kadun puolelle, on tuotu vihreä 240 litran pyörällinen jäteastia. Täydestä pöntöstä näkee mustan pussin kannen alta.', 'Vihreä JÄTEHUOLTO-auto ajaa lähimmälle täydelle pöntölle eikä aja rallireitin kautta. Se pysähtyy niin, että perä on pöntön kohdalla. Lastaaja hyppää takasillalta, taluttaa pöntön auton perään, nostaa sen kippiin ja puristin jyskyttää. Tyhjä pönttö palaa paikalleen, ja mies hyppää takaisin sillalle.', 'Pönttöön kannattaa varoa osumasta. Reunaa pitkin kovaa ajava auto lennättää pöntön metrien päähän, ja roskat leviävät pihalle. Kaatunutta pönttöä lastaaja ei tyhjennä. R-napilla pöntöt nousevat takaisin paikoilleen.', 'Tyhjät pöntöt täyttyvät taas muutamassa minuutissa, joten roska-autolla riittää ajettavaa.'],
@@ -6221,12 +6224,13 @@ function makeStretcher() { const S = new THREE.Group(), steel = lmat(0xb0b0b0, 0
   lmesh(lgeo('head', () => new THREE.SphereGeometry(0.135, 10, 8)), lmat(0xe8b795, 0.8), 0, 0.17, 0.66, S);
   for (const sx of [-1, 1]) { lmesh(lbox(0.03, 0.03, 2.25), steel, sx*0.3, 0.02, 0, S); for (const e of [-0.7, 0.7]) { lmesh(lbox(0.03, 0.34, 0.03), steel, sx*0.24, -0.2, e, S); const w = lmesh(lcyl(0.05, 0.03, 8), lmat(0x151515, 0.7), sx*0.24, -0.38, e, S); w.rotation.z = Math.PI/2; } }
   S.visible = false; return S; }
-function ambPath(x, z) {
+function ambPath(x, z, offRoute) {   // (offRoute: a way in that keeps off the rally route — its tyre walls narrow the corners)
   const { nodes } = roadGraph(); if (!nodes.length) return null;
   let ti = -1, td = 1e9; for (let i = 0; i < nodes.length; i++) { const d = Math.hypot(nodes[i].x - x, nodes[i].z - z); if (d < td) { td = d; ti = i; } } if (td > 70) return null;
   const { dist, prev } = rgDijkstra(ti); let si = -1, best = -1;
   for (let i = 0; i < nodes.length; i++) { const d = dist[i]; if (!isFinite(d) || d > 280) continue; const n = nodes[i], cam = Math.hypot(n.x - car.x, n.z - car.z);
-    const score = (d >= 150 ? 1000 - Math.abs(d - 210) : d) + (cam > 90 ? 60 : 0); if (score > best) { best = score; si = i; } }
+    let score = (d >= 150 ? 1000 - Math.abs(d - 210) : d) + (cam > 90 ? 60 : 0); if (offRoute && d >= 150) for (let j = i; j >= 0 && j !== ti; j = prev[j]) if (nodeRoute(j) < 9) score -= 30;
+    if (score > best) { best = score; si = i; } }
   if (si < 0 || dist[si] < 50) return null;
   const P = []; for (let i = si; i >= 0; i = prev[i]) { P.push({ x: nodes[i].x, z: nodes[i].z, hw: nodes[i].hw }); if (i === ti) break; }
   const out = rightSide(P, x, z); out.raw = P; return out;
@@ -6590,6 +6594,7 @@ const VSPEC = {   // mass (the rally car = 1), engine m/s², brakes m/s², top s
   police:    { mass: 1.4,  accel: 12,  brake: 10,  vmax: 50, wb: 2.65, steer: 0.6,  lat: 13,  yawK: 8, drag: 0.004 },   // (a tuned V8 with the air cut: ~115 km/h through the village)
   icecream:  { mass: 2.0,  accel: 8.0, brake: 7,   vmax: 13, wb: 3.0,  steer: 0.6,  lat: 7.5, yawK: 6 },
   postvan:   { mass: 2.0,  accel: 8.0, brake: 7,   vmax: 13, wb: 3.0,  steer: 0.6,  lat: 7.5, yawK: 6 },
+  tow:       { mass: 4.5,  accel: 5.0, brake: 7,   vmax: 14, wb: 4.0,  steer: 0.55, lat: 7.0, yawK: 5 },
   garbage:   { mass: 9,    accel: 3.6, brake: 6,   vmax: 11, wb: 4.8,  steer: 0.55, lat: 6.5, yawK: 5 },
   hevi:      { mass: 60,   accel: 9.0, brake: 9,   vmax: 36, wb: 5.4,  steer: 0.6,  lat: 11,  yawK: 6, drag: 0.003 },   // (the gig bus: ~130 km/h flat out, and it weighs a mountain)
 };
@@ -6602,7 +6607,7 @@ class Vehicle {
   }
 }
 function vehicleSync(v) {
-  const f = wheelFit(v.x, v.z, v.yaw, v.axle[0], v.axle[1], v.axle[2], _wf); v.gy = f.y + (v.onRoadY ? (onRoad(v.x, v.z, 0) ? ROAD_Y : 0.05) : 0);
+  const f = wheelFit(v.x, v.z, v.yaw, v.axle[0], v.axle[1], v.axle[2], _wf); v.gy = f.y + (v.onRoadY ? (onRoad(v.x, v.z, 0) ? ROAD_Y : 0.05) : 0) + (v.towLift || 0); if (v.towTilt) f.pitch += v.towTilt;   // (on the tow truck's hook: nose up)
   if (v.view.kind === 'mesh') { const g = v.view.g; g.position.set(v.x, v.gy, v.z); g.rotation.order = 'YXZ'; g.rotation.set(f.pitch, v.yaw, f.roll); }
   else { _we.set(f.pitch, v.yaw, f.roll); _vq.setFromEuler(_we); _vp.set(v.x, v.gy, v.z); _vm.compose(_vp, _vq, _vs); for (const P of v.view.c.inst || []) { P.im.setMatrixAt(P.k, _vm); P.im.instanceMatrix.needsUpdate = true; VDIRTY.add(P.im); } }
 }
@@ -6641,14 +6646,14 @@ function collideCarWorld() {
   boxHitsHumans(playerBox(), car.vx, car.vz, true);
 }
 function vehicleVsWorld(v) {   // a vehicle that moves: other vehicles (each moving pair once), houses, tyre stacks, people
-  forVehiclesNear(v.x, v.z, v.hl + VG.hl + 0.5, o => { if (o === v || o.gone) return; if ((o.ai || o.awake) && o._i < v._i) return;
+  forVehiclesNear(v.x, v.z, v.hl + VG.hl + 0.5, o => { if (o === v || o.gone || o.towed === v || v.towed === o) return; if ((o.ai || o.awake) && o._i < v._i) return;
     const R = o.hl + v.hl + 0.5; if (Math.abs(o.x - v.x) > R || Math.abs(o.z - v.z) > R) return;
     const h = obbSat(v, o); if (!h) return; const imp = resolvePair(v, o, h, 0.2); if (imp > 0.2) { o.awake = true; o.moved = true; } if (imp > 5) { vehicleHit(o, imp*0.7); vehicleHit(v, imp*0.7); } });
   staticNear(v.x, v.z, v.hl + 1, B => { if (v.kind === 'hevi' && B.hw < 1.6 && B.hl < 1.6) return; const h = obbSat(v, B); if (!h) return;   /* (the gig bus goes straight through poles and signs) */ v.x -= h.nx*h.depth; v.z -= h.nz*h.depth; const into = v.vx*h.nx + v.vz*h.nz; if (into > 0) { v.vx -= h.nx*into*1.2; v.vz -= h.nz*into*1.2; v.w *= 0.5; if (into > 5) vehicleHit(v, into); } });
   if (ROCK_HILLS.length && rockNear(v.x, v.z, v.hl + 2)) { const fx = Math.sin(v.yaw), fz = Math.cos(v.yaw);   // the granite: nose, middle, tail
     for (const s of [v.hl*0.95, 0, -v.hl*0.95]) { const o = rockOut(v.x + fx*s, v.z + fz*s, 0.5); if (!o) continue; v.x -= o.nx*o.depth; v.z -= o.nz*o.depth; const into = v.vx*o.nx + v.vz*o.nz; if (into > 0) { v.vx -= o.nx*into*1.2; v.vz -= o.nz*into*1.2; v.w *= 0.5; if (into > 5) vehicleHit(v, into); } } }
   const sp = Math.hypot(v.vx, v.vz); if (sp > 1) { const fx = Math.sin(v.yaw), fz = Math.cos(v.yaw);
-    for (const s of [-v.hl*0.6, 0, v.hl*0.6]) forStaticNear(v.x + fx*s, v.z + fz*s, t => { if ((t.kind !== 'tire' && t.kind !== 'pig') || t.off) return; const hit = boxPush(v, t.x, t.z, t.r); if (!hit) return; if (t.kind === 'pig' && v.kind !== 'hevi') { v.x -= hit.nx*hit.ov; v.z -= hit.nz*hit.ov; const into = -(v.vx*hit.nx + v.vz*hit.nz); if (into > 0) { v.vx += hit.nx*into*1.2; v.vz += hit.nz*into*1.2; } return; }   /* (a pig doesn't give) */
+    for (const s of [-v.hl*0.6, 0, v.hl*0.6]) forStaticNear(v.x + fx*s, v.z + fz*s, t => { if ((t.kind !== 'tire' && t.kind !== 'pig') || t.off) return; const hit = boxPush(v, t.x, t.z, t.r); if (!hit) return; if (t.kind === 'pig' && v.kind !== 'hevi' && !v.pigPush) { v.x -= hit.nx*hit.ov; v.z -= hit.nz*hit.ov; const into = -(v.vx*hit.nx + v.vz*hit.nz); if (into > 0) { v.vx += hit.nx*into*1.2; v.vz += hit.nz*into*1.2; } return; }   /* (a pig doesn't give) */
       t.x += hit.nx*hit.ov; t.z += hit.nz*hit.ov; t.vx = v.vx*1.1 + hit.nx*1.5; t.vz = v.vz*1.1 + hit.nz*1.5; setMoving(t); }); }
   boxHitsHumans(v, v.vx, v.vz, false);
 }
@@ -6743,7 +6748,7 @@ function driveAlong(v, dt, vmax) {
   const latOf = (x, z, s) => { const [px0, pz0] = pathAt(v, s), [px1, pz1] = pathAt(v, s + 1), py = Math.atan2(px1 - px0, pz1 - pz0); return [(x - px0)*Math.cos(py) - (z - pz0)*Math.sin(py), py]; };
   const [latNow] = latOf(v.x, v.z, v.s); let lo = -3.2, hi = 3.2, close = false;
   const reach = 18 + v.hl + Math.max(0, v.vF - 8)*2.2;   // (faster: it looks further ahead — a swerve at 13 m/s takes ~20 m)
-  forVehiclesNear(v.x, v.z, reach + 8, o => { if (o === v || o.gone || o === v.follow) return; const dx = o.x - v.x, dz = o.z - v.z; if (Math.abs(dx) > reach + 8 || Math.abs(dz) > reach + 8) return;
+  forVehiclesNear(v.x, v.z, reach + 8, o => { if (o === v || o.gone || o === v.follow || o.towed === v) return; const dx = o.x - v.x, dz = o.z - v.z; if (Math.abs(dx) > reach + 8 || Math.abs(dz) > reach + 8) return;
     const f = sy*dx + cy*dz; if (f < -v.hl - o.hl || f > reach) return; const [l, py] = latOf(o.x, o.z, v.s + Math.max(0, f)), dyaw = o.yaw - py, ext = o.hw*Math.abs(Math.cos(dyaw)) + o.hl*Math.abs(Math.sin(dyaw)), need = v.hw + ext + 0.4;
     if (Math.abs(l - v.sw) >= need && Math.abs(l - latNow) >= need) return; if (l > 0) hi = Math.min(hi, l - need); else lo = Math.max(lo, l + need); if (f < reach - 4) close = true; });
   if (v.ghostT > 0) { v.ghostT -= dt; lo = -3.2; hi = 3.2; }                                      // stuck too long: push through
@@ -6759,7 +6764,7 @@ function driveAlong(v, dt, vmax) {
 // turning round in the street: forward on full lock, back on the other lock, until it faces the way out. true when done.
 function clearAt(v, d) { const fx = Math.sin(v.yaw), fz = Math.cos(v.yaw), rx = fz, rz = -fx;
   for (const l of [-v.hw, 0, v.hw]) { const x = v.x + fx*d + rx*l, z = v.z + fz*d + rz*l; if (!onRoad(x, z, 2.5)) return false; let hit = staticHit(x, z, 1, 0.4); if (hit) return false;
-    if (VEHICLES.some(o => o !== v && !o.gone && boxPush(o, x, z, 0.4))) return false; }
+    if (VEHICLES.some(o => o !== v && !o.gone && o.towed !== v && boxPush(o, x, z, 0.4))) return false; }
   return true; }
 function turnAround(v, dt) {
   const T = v.turn, [tx, tz] = pathAt(v, Math.min(v.total, 8)), err = angDiff(Math.atan2(tx - v.x, tz - v.z) - v.yaw), C = v.ctrl; C.hand = false; C.brk = 0;
@@ -8213,6 +8218,63 @@ function buildGarbageTruck() { if (!BINS.list.length) return; const { nodes, adj
   const rig = makeAdult(0xe8761a, 0x2a3a2a, lpick(L_HAIR), { sel: { top: 13, longSleeve: 1, longPants: 1 }, acc: 0xe8c02a, shoes: 0x2a2a2a });   // hi-vis orange, work trousers
   V.man = new Human({ x: c.x, z: c.z, rig, task: binmanTask(V) }); V.man.seat = V.step; v.crew.push(V.man); BINS.lorry = V;
   X3.reset.push(() => { V.man.seat = V.step; V.w.m = 'ride'; V.job = []; humanSync(V.man); }); }
+
+// ── the tow truck: a burnt-out or smashed car, once it has stopped burning and the fire engine has gone, gets the yellow HINAUS truck.
+//    The driver walks over and hooks it, it is winched up behind (nose up) and taken out of the village; R brings every car back. ──
+const TOW = { v: null, seen: new Map(), t: 0, done: 0 };
+const TOW_SKIP = new Set(['tow', 'heli', 'hevi', 'bus', 'fire', 'garbage', 'tractor']);
+function makeTowTruck() { const G = new THREE.Group(), yel = lmat(0xe8b818, 0.45), glass = lmat(0x223040, 0.15), black = lmat(0x141414, 0.8), hub = lmat(0xc8c8c8, 0.35), steel = lmat(0x5a5e62, 0.45);
+  G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z, rx, sh) => { const me = lmesh(lbox(w, h, d), m, x, y, z, G, sh); if (rx) me.rotation.x = rx; return me; };
+  B(1.95, 0.35, 5.8, black, 0, 0.62, -0.2); B(1.95, 1.3, 1.9, yel, 0, 1.45, 1.75); B(1.9, 0.55, 0.06, glass, 0, 1.75, 2.72, -0.15); B(1.97, 0.45, 1.2, glass, 0, 1.78, 1.8);   // chassis, cab, windscreen, side glass
+  B(1.95, 0.5, 0.9, yel, 0, 0.95, 3.0); B(1.9, 0.12, 0.14, black, 0, 0.62, 3.47);   // bonnet, bumper
+  B(1.95, 0.5, 3.2, yel, 0, 1.05, -1.25); for (const sx of [-1, 1]) { const a = B(0.12, 2.2, 0.12, steel, sx*0.55, 2.0, -1.9); a.rotation.x = -0.45; }   // the bed, the A-frame
+  const boom = B(0.16, 0.16, 1.8, steel, 0, 2.55, -2.75); boom.rotation.x = 0.35; B(0.5, 0.18, 0.3, steel, 0, 1.0, -2.95);   // the boom over the back, the lift bar
+  const bm = [0, 1].map(() => new THREE.MeshStandardMaterial({ color: 0xffa020, emissive: 0xff8a10, emissiveIntensity: 0.2, roughness: 0.3 })); [-0.55, 0.55].forEach((x, i) => lmesh(lcyl(0.12, 0.18, 10), bm[i], x, 2.2, 1.85, G, false));
+  for (const sx of [-1, 1]) for (const zz of [2.0, -1.4, -2.3]) { const w = lmesh(ltyre(0.42, 0.3), black, sx*0.92, 0.42, zz, G); w.rotation.z = Math.PI/2; const hh = lmesh(lcyl(0.2, 0.31, 10), hub, sx*0.92, 0.42, zz, G, false); hh.rotation.z = Math.PI/2; }
+  for (const sx of [-1, 1]) { const m = new THREE.Mesh(lgeo('towside', () => new THREE.PlaneGeometry(1.6, 0.42)), new THREE.MeshBasicMaterial({ map: canvasTex('hinaus', 512, 128, (g) => { g.font = 'bold 92px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#141414'; g.fillText('HINAUS', 256, 68); }), transparent: true, depthWrite: false })); m.position.set(sx*0.985, 1.55, 1.7); m.rotation.y = sx*Math.PI/2; G.add(m); }
+  const cable = lmesh(lbox(0.03, 0.03, 1), lmat(0x202020, 0.5), 0, 0, 0, null, false); cable.visible = false;
+  G.userData.bm = bm; G.userData.cable = cable; return G; }
+function towable(w) { return !w.gone && !w.towed && !w.nuked && !TOW_SKIP.has(w.kind) && w.hl <= 3.2 && (w.charred || w.damage >= 70) && !(w.fire && !w.fire.out) && Math.hypot(w.vx, w.vz) < 0.3 && (!w.ai || w.charred); }
+function towUpdate(dt) { if (NUKE.on) return; if ((TOW.t += dt) < 2) return; const step = TOW.t; TOW.t = 0; if (TOW.v && !TOW.v.gone) return; TOW.v = null;
+  for (const w of VEHICLES) { if (!towable(w)) { TOW.seen.delete(w); continue; } const s = (TOW.seen.get(w) || 0) + step; TOW.seen.set(w, s); if (s < 15) continue;   // (a while after it's out)
+    if (VEHICLES.some(o => o.job && o.job.phase !== 'leave' && Math.hypot(o.x - w.x, o.z - w.z) < 35)) continue;   // the fire engine is still there
+    if (spawnTow(w)) { TOW.seen.delete(w); return; } TOW.seen.set(w, -60); } }   // (no way there by the streets: try again in a minute)
+function spawnTow(w) { const path = ambPath(w.x, w.z, true); if (!path || path.length < 3) return false;
+  const G = makeTowTruck(); lifeGroup.add(G); lifeGroup.add(G.userData.cable);
+  const v = new Vehicle({ kind: 'tow', x: path[0][0], z: path[0][1], yaw: Math.atan2(path[1][0] - path[0][0], path[1][1] - path[0][1]), hw: 0.98, hl: 3.0, view: { kind: 'mesh', g: G }, axle: [0.92, 2.0, -1.85], temp: true, ai: towAI });
+  setPath(v, path); v.rawPath = path.raw; v.blockT = v.passT = 0; v.passSide = 1; v.sw = 0; v.flash = 0; v.ctrl.hand = false; v.job = { phase: 'drive', t: 0, w, k: 0, stall: 0, back: 0, wx: v.x, wz: v.z, wt: 0 };
+  const rig = makeAdult(0x2a4a8a, 0x2a4a8a, lpick(L_HAIR), { sel: { top: 13, longSleeve: 1, longPants: 1 }, acc: 0xe8b818, shoes: 0x1c1c20 });   // blue overalls
+  const h = new Human({ x: v.x, z: v.z, yaw: v.yaw, rig, task: towManTask(v), temp: true }); h.inside = true; h.ao = aoAlloc(); v.crew.push(h); TOW.v = v; return true; }
+const towManTask = (v) => ({ kind: 'towman', update(h, dt, t) { const J = v.job, w = J.w;
+  if (J.phase === 'hook') { const [tx, tz] = lloc(w.x, w.z, w.yaw, 0, w.hl + 0.7); if (walkTo(h, tx, tz, 1.8, dt)) { h.yaw = w.yaw + Math.PI; h.tilt = 0.55; h.pose.armL = h.pose.armR = -1.3; if ((J.k += dt) > 2.2) { h.tilt = 0; J.phase = 'winch'; J.t = 0; } } return; }
+  if (J.phase === 'winch') { const [tx, tz] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), -(v.hl - 1.0)); if (walkTo(h, tx, tz, 1.8, dt)) { h.yaw = v.yaw + Math.PI/2; h.pose.armR = -1.4 + Math.sin(t*3)*0.1; } return; }
+  if (J.phase === 'in') { const [tx, tz] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 1.7); if (walkTo(h, tx, tz, 1.8, dt)) { h.inside = true; humanSync(h); J.phase = 'shut'; J.t = 0; } } } });
+function towAI(v, dt) { const J = v.job, w = J.w, G = v.view.g, cable = G.userData.cable; J.t += dt; v.flash += dt;
+  G.userData.bm.forEach((m, i) => { m.emissiveIntensity = 0.2 + Math.pow(Math.max(0, Math.sin(v.flash*9 + i*Math.PI)), 3)*3; });
+  const carry = () => { const [x, z] = lloc(v.x, v.z, v.yaw, 0, -(v.hl + w.hl - 0.4)); w.x = x; w.z = z; w.yaw = v.yaw; w.vx = w.vz = w.w = 0; vehicleSync(w); };
+  if (J.phase === 'drive' || J.phase === 'leave') { if (J.phase === 'leave' && w.towed === v) carry();
+    if (J.phase === 'leave' && v.turn) { if (turnAround(v, dt)) v.turn = null; else return; }
+    if (J.back > 0) { J.back -= dt; v.ctrl.hand = false; v.ctrl.brk = 0; v.ctrl.thr = -0.7; v.ctrl.steer = J.bs; return; }   // backing off whatever it's pinned against
+    if ((J.wt = (J.wt || 0) + dt) > 5) { const moved = Math.hypot(v.x - (J.wx || 0), v.z - (J.wz || 0)); J.wt = 0; J.wx = v.x; J.wz = v.z;   // a watchdog on real progress (a bus and a tyre stack at a corner hold it while the wheels still turn)
+      if (moved < 1.5) { if (++J.stall >= 4) { if (J.phase === 'drive' && Math.hypot(w.x - v.x, w.z - v.z) < 90) { cutPath(v); J.stall = 0; } else { if (J.phase === 'drive') TOW.seen.set(w, -120); else if (w.towed === v) { w.towed = null; if (w.temp) vehicleRemove(w); else { w.towedAway = true; w.nuked = true; w.x += 1e5; vehicleSync(w); } TOW.done++; } vehicleRemove(v); lifeGroup.remove(cable); return; } }
+        else { J.back = 1.5; J.bs = -(v.ctrl.steer || 0.7); if (J.stall >= 2) v.pigPush = true; return; } } else J.stall = 0; }   // (stuck twice: it shoves the concrete pigs aside)
+    const arrived = driveAlong(v, dt, J.phase === 'leave' ? 9 : 12);
+    if ((v.stuckT > 3 || (J.t > 60 && Math.abs(v.vF) < 1)) && J.phase === 'drive' && v.total - v.s < 45) cutPath(v); else if (v.stuckT > 8) { v.ghostT = 6; v.stuckT = 0; }
+    if (J.phase === 'drive' && (arrived || w.gone)) { if (w.gone) { J.phase = 'shut'; J.t = 0; } else { J.phase = 'park'; J.t = 0; } }
+    else if (J.phase === 'leave' && (v.total - v.s < 3 || J.t > 75)) { if (w.towed === v) { w.towed = null; if (w.temp) vehicleRemove(w); else { w.towedAway = true; w.nuked = true; w.x += 1e5; vehicleSync(w); } TOW.done++; } vehicleRemove(v); lifeGroup.remove(cable); }
+    return; }
+  v.ctrl.hand = true; v.ctrl.thr = 0; const h = v.crew[0], away = !h || h.down || h.gone;
+  if (J.phase === 'park') { if (J.t > 1) { if (away) { J.phase = 'shut'; J.t = 0; return; } h.inside = false; const [x, z] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 1.7); h.x = x; h.z = z; h.yaw = v.yaw + Math.PI; humanSync(h); J.phase = 'hook'; J.k = 0; } return; }
+  if (J.phase === 'hook') { if (away || w.gone) { J.phase = 'shut'; J.t = 0; } return; }
+  if (J.phase === 'winch') { if (!w.towed) { w.towed = v; w.ai = null; w.awake = false; J.x0 = w.x; J.z0 = w.z; J.y0 = w.yaw; }   // off its wheels and up behind
+    const u = Math.min(1, J.t/5), s = u*u*(3 - 2*u), [tx, tz] = lloc(v.x, v.z, v.yaw, 0, -(v.hl + w.hl - 0.4));
+    w.x = J.x0 + (tx - J.x0)*s; w.z = J.z0 + (tz - J.z0)*s; w.yaw = J.y0 + angDiff(v.yaw - J.y0)*s; w.towTilt = -0.16*s; w.towLift = 0.45*s; vehicleSync(w);
+    const [ax, az] = lloc(v.x, v.z, v.yaw, 0, -(v.hl + 0.1)), [bx, bz] = lloc(w.x, w.z, w.yaw, 0, w.hl); hoseSeg(cable, ax, v.gy + 2.5, az, bx, w.gy + 0.6, bz); cable.visible = u < 1;
+    if (u >= 1 && J.t > 5.5) { cable.visible = false; J.phase = 'in'; J.t = 0; } return; }
+  if (J.phase === 'in') { if (away || J.t > 25) { if (h) h.inside = true; J.phase = 'shut'; J.t = 0; } return; }
+  if (J.phase === 'shut' && J.t > 1) { const ex = exitRoute(v); if (ex) setPath(v, ex); else { setPath(v, backRoute(v)); v.turn = { dir: 1, legT: 0, n: 0 }; } J.phase = 'leave'; J.t = 0; v.stuckT = v.slowT = 0; } }
+function buildTow() { TOW.v = null; TOW.seen.clear(); TOW.t = 0; X3.upd.push(towUpdate);
+  X3.reset.push(() => { TOW.v = null; TOW.seen.clear(); for (const w of VEHICLES) if (w.towed || w.towedAway) { w.towed = null; w.towedAway = false; w.nuked = false; w.towTilt = w.towLift = 0; } }); }
 
 // ── 4. ES at the K-shop: stop in front of it for 3 s and the shopkeeper brings a can. Forty seconds of bass and double speed —
 //    and hit anything meanwhile and the car goes up in flames ──
@@ -9694,7 +9756,7 @@ function nukeReset() { NUKE.armT = -1; if (!NUKE.on) return; NUKE.on = false; NU
 
 function lifeExtras3Build() {
   TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.heli = null; X3.station = null; X3.sauna = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
-  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildBins(); buildGarbageTruck(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
+  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildBins(); buildGarbageTruck(); buildTow(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
 }
 // ── the hitchhiker: by the race route a few hundred metres before the K-shop, a cardboard sign "K-KAUPPA" and a thumb out.
 //    Stop by him and he walks to the window and gets in; stop in the K-shop yard and he gets out, thanks you and goes in —
