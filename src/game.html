@@ -149,6 +149,10 @@
   #top10 .t10-pos { width: 2.4em; text-align: right; color: #8a8a86; } #top10 .t10-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } #top10 .t10-time { color: #fff; }
   #top10 .t10-empty { font-size: clamp(10px, 1.4vw, 13px); color: #8a8a86; text-align: center; margin-top: clamp(10px, 2vh, 18px); letter-spacing: 0.04em; }
   #top10 .t10-err { color: #ff6a5a; }
+  #omenat { margin-top: clamp(12px, 2.6vh, 26px); width: min(600px, 88vw); font-size: clamp(11px, 1.45vw, 16px); color: #f0f0ec; font-variant-numeric: tabular-nums; }   /* the apple thieves: the rap sheet's 'o' */
+  #omenat:empty { display: none; } #omenat .om-head { font-size: clamp(9px, 1.3vw, 13px); letter-spacing: 0.4em; color: #c86a5a; text-align: center; margin-bottom: clamp(6px, 1.2vh, 12px); text-transform: uppercase; }
+  #omenat .om-row { display: flex; gap: 0.9em; padding: 0.12em 6px; line-height: 1.28; } #omenat .om-pos { width: 2.4em; text-align: right; color: #8a8a86; } #omenat .om-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #omenat .om-n { color: #ff7a6a; } #omenat .om-row.me .om-name { color: #44e24a; font-weight: 700; } #omenat .om-empty { font-size: clamp(10px, 1.4vw, 13px); color: #8a8a86; text-align: center; letter-spacing: 0.04em; }
   /* fetching the results: a loud line with a spinner and ghost rows that shimmer, so nobody thinks the list is empty */
   #top10 .t10-loading { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: clamp(11px, 1.6vw, 15px); font-weight: 800; letter-spacing: 0.28em; text-transform: uppercase; color: #ff2a2a; margin: 4px 0 12px; }
   #top10 .t10-loading.small { font-size: clamp(9px, 1.2vw, 12px); font-weight: 400; color: #c8c8c4; margin: clamp(10px, 2vh, 18px) 0 0; letter-spacing: 0.2em; }
@@ -363,6 +367,7 @@
     <div class="restart-hint" data-t>enter — uusi lähtö</div>
   </div>
   <div id="top10"><div class="t10-head">Ennätyslista · kaikki kuskit</div><div class="t10-loading"><span class="spin"></span>haetaan aikoja…</div><div class="t10-bar"></div><div class="t10-skel"></div><div class="t10-skel" style="width:88%"></div><div class="t10-skel" style="width:94%"></div></div>
+  <div id="omenat"></div>
   <div id="changelog"></div>
   <div class="deco bottom"><svg width="80" height="20" viewBox="0 0 80 20" aria-hidden="true"><path d="M8 20L17 0h8L16 20zM30 20L39 0h8L38 20zM52 20L61 0h8L60 20z" fill="#e0141e"/></svg></div>
   <div id="lehti-mini"></div>
@@ -435,8 +440,10 @@ const I18N = {
   '🛸 UFO KAAPATTU! SE ON NYT SINUN': ['🛸 UFO HIJACKED! IT’S YOURS NOW', '🛸 UFO KAPRET! DEN ER DIN NÅ'],
   '😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!': ['😰 THE CAR’S ALL ALONE – SOMEONE COULD TAKE IT!', '😰 BILEN STÅR ALENE – NOEN KAN TA DEN!'],
   '😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!': ['😱 TOO SCARED TO GO FURTHER – THEY’LL STEAL THE CAR!', '😱 TØR IKKE GÅ LENGRE – BILEN BLIR STJÅLET!'],
-  '😮‍💨 PUUSKUTTAA…': ['😮‍💨 OUT OF BREATH…', '😮‍💨 ANDPUSTEN…'],
-  '💥 SELITTÄMÄTÖN VIKA – R = uusi kone': ['💥 UNEXPLAINED FAILURE – R = new plane', '💥 OFÖRKLARLIGT FEL – R = nytt plan'],
+  '💥 SELITTÄMÄTÖN VIKA – R = uusi kone': ['💥 UNEXPLAINED FAILURE – R = new plane', '💥 UFORKLARLIG FEIL – R = nytt fly'],
+  '🍎 OMENA! ({0} mukana)': ['🍎 AN APPLE! ({0} on you)', '🍎 ET EPLE! ({0} på deg)'], '👴 ISÄNTÄ HUOMASI! AUTOLLE JA 200 M PÄÄHÄN!': ['👴 THE OWNER SAW YOU! TO THE CAR, 200 M AWAY!', '👴 EIEREN SÅ DEG! TIL BILEN, 200 M UNNA!'],
+  '👴 KIINNI JÄIT! OMENAT TAKAISIN': ['👴 CAUGHT! THE APPLES GO BACK', '👴 TATT! EPLENE TILBAKE'], '🍎 KARKUUN! +{0} OMENAA (yht. {1})': ['🍎 GOT AWAY! +{0} APPLES ({1} in all)', '🍎 SLAPP UNNA! +{0} EPLER ({1} i alt)'],
+  'Omenavarkaat · kaikki kuskit': ['Apple thieves · all drivers', 'Epletyver · alle sjåfører'], 'ei vielä omenavarkaita — kävele (F) pihan omenapuulle': ['no apple thieves yet — walk (F) to a yard apple tree', 'ingen epletyver ennå — gå (F) til et epletre i en hage'],
   '🔥 ENNÄTYSVAUHTI': ['🔥 RECORD PACE', '🔥 REKORDFART'],
   'JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ': ['ON FOOT · F = BACK IN THE CAR · SPACE = PUNCH', 'TIL FOTS · F = TILBAKE I BILEN · MELLOMROM = SLÅ'], '👊 PAM!': ['👊 POW!', '👊 PANG!'], '🚨 JOKU SOITTI POLIISIT!': ['🚨 SOMEONE CALLED THE POLICE!', '🚨 NOEN RINGTE POLITIET!'],
   '☢️ YDINSOTA ALKOI!': ['☢️ NUCLEAR WAR HAS BEGUN!', '☢️ ATOMKRIGEN HAR BEGYNT!'],
@@ -2118,7 +2125,7 @@ function buildScenery() { KNOCK.items.length = 0; YARD_SOLID.length = 0; YARDG =
   const segs = []; sideRoads.forEach((R, ri) => { for (let i = 1; i < R.pts.length; i++) segs.push([R.pts[i-1], R.pts[i], R.w*0.5, ri]); });
   const nearestSeg = (x, z) => { let best = null; for (const [a0, b0, hw, ri] of segs) { const vx = b0.x-a0.x, vz = b0.y-a0.y, L2 = vx*vx+vz*vz || 1; let t = ((x-a0.x)*vx + (z-a0.y)*vz)/L2; t = Math.max(0, Math.min(1, t));
     const qx = a0.x + vx*t, qz = a0.y + vz*t, dd = Math.hypot(qx-x, qz-z); if (!best || dd < best.d) best = { d: dd, x: qx, z: qz, hw, ri, tx: vx/Math.sqrt(L2), tz: vz/Math.sqrt(L2) }; } return best; };
-  PLOTS.length = 0; YARD_CARS.length = 0;
+  PLOTS.length = 0; YARD_CARS.length = 0; APPLE_TREES.length = 0;
   // 1) a frame per house: u along the street, n from the street towards the house (from the house's own walls)
   const frames = RES.map(({ B, i: bi }) => {
     const [x, z, w, d, th] = B, c = Math.cos(th), s = Math.sin(th), ns = nearestSeg(x, z);
@@ -2294,7 +2301,7 @@ function buildScenery() { KNOCK.items.length = 0; YARD_SOLID.length = 0; YARDG =
     const nT = 1 + (bi % 3);
     for (let k = 0; k < nT; k++) { const sp = freeSpot(1.4); if (!sp) continue; const [tx, tz] = sp; YARD_SOLID.push([tx, tz, 0.14]);
       if ((bi + k) % 3 === 0) { const hT = 3.0 + Math.random()*1.5, r = 1.0 + Math.random()*0.5; M.begin(tx, tz, r*0.5, r*0.5, 0); M.add(unitCyl, 'btrunk', birchTrunk, tx, hT/2, tz, 0, 0.11, hT, 0.11); M.add(CROWN_BIRCH[(bi+k) % 2], 'gbcrown', birchLeafV, tx, hT+r*0.5, tz, Math.random()*6.3, r, r*1.1, r); M.end(); }
-      else { const hT = 0.9 + Math.random()*0.4, r = 1.3 + Math.random()*0.6; M.begin(tx, tz, r*0.6, r*0.6, 0); M.add(unitCyl, 'atrunk', appleTrunk, tx, hT/2, tz, 0, 0.14, hT, 0.14); M.add(CROWN_VILLAGE[(bi+k) % 3], 'acrown', appleLeafV, tx, hT+r*0.5, tz, Math.random()*6.3, r*1.15, r*0.72, r*1.15); M.end(); }
+      else { const hT = 0.9 + Math.random()*0.4, r = 1.3 + Math.random()*0.6; M.begin(tx, tz, r*0.6, r*0.6, 0); M.add(unitCyl, 'atrunk', appleTrunk, tx, hT/2, tz, 0, 0.14, hT, 0.14); M.add(CROWN_VILLAGE[(bi+k) % 3], 'acrown', appleLeafV, tx, hT+r*0.5, tz, Math.random()*6.3, r*1.15, r*0.72, r*1.15); M.end(); APPLE_TREES.push({ x: tx, z: tz, cy: hT + r*0.5, r, pl }); }
       placed.push({ x: tx, z: tz, r: 1.2 }); }
     spots.forEach(([px, pz, r]) => placed.push({ x: px, z: pz, r: r + 0.3 }));
   });
@@ -2690,6 +2697,7 @@ function buildYardCars() {
 
 function inAnyPlot(x, z) { const l = PLOT_GRID.get(Math.floor(x/20)*73856093 ^ Math.floor(z/20)*19349663); if (!l) return false;
   for (const pl of l) { let c = false; const P = pl.P; for (let a = 0, b = P.length-1; a < P.length; b = a++) { if (((P[a][1] > z) !== (P[b][1] > z)) && (x < (P[b][0]-P[a][0])*(z-P[a][1])/(P[b][1]-P[a][1]) + P[a][0])) c = !c; } if (c) return true; } return false; }
+const APPLE_TREES = [];   // the yard apple trees (scenery): { x, z, cy (crown centre over the ground), r, pl } — the apples on them: APPLES
 const PLOTS = [];   // filled by the scenery: { bi, B, P: [[x,z,label]...], fenced, style, shade }
 const ROCK_HILLS = [];   // filled by the scenery: { lx, lz, th, w, d, heightAt(a,b) } in the hill's own frame
 function rockHeightAt(x, z) { let best = -9; for (const R of ROCK_HILLS) { const dx = x - R.lx, dz = z - R.lz, a = Math.cos(R.th)*dx - Math.sin(R.th)*dz, b = Math.sin(R.th)*dx + Math.cos(R.th)*dz;
@@ -3724,8 +3732,8 @@ const car = { x:0, z:0, angle:0, vx:0, vz:0, steerSm:0, steerAngle:0, pivot:-1.3
 //    The car waits with the handbrake on; the camera follows the driver; they stay within 200 m of the car (the village lives round it). ──
 // the controls, read in one place (the keyboard; the phone page presses the same keys)
 const INPUT = { thr: () => !!(keys['ArrowUp'] || keys['KeyW']), brk: () => !!(keys['ArrowDown'] || keys['KeyS']), steer: () => ((keys['ArrowLeft'] || keys['KeyA']) ? 1 : 0) - ((keys['ArrowRight'] || keys['KeyD']) ? 1 : 0), hand: () => !!keys['Space'] };
-const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0, stam: 1, puff: false, pt: 0, ft: 0, saidPuff: false, saidFear: false, bar: null };
-// Stamina: running (6.2 m/s) empties it in ~6 s, then a slow, puffing walk until it's back over a third (walking or standing fills it).
+const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0, ft: 0, saidFear: false };
+// (1.10., Antti: the stamina meter out — 'ei mitään hyötyä': no stamina at all, runs as long as you like)
 // Fear: past 90 m from the car they get nervous (slower, looking back over the shoulder); at 140 m they won't go on — it'll be stolen.
 const WALK_FEAR = 90, WALK_MAX = 140;
 function centerMsg(t, col, ms) { const cpd = document.getElementById('checkpoint-display'); if (!cpd) return; cpd.textContent = t; cpd.style.color = col || '#ffe9a8'; cpd.style.opacity = 1; clearTimeout(centerMsg.tm); centerMsg.tm = setTimeout(() => cpd.style.opacity = 0, ms || 1600); }   // (the one centre-screen message: a new one isn't cut short by an old one's fade)
@@ -3733,15 +3741,11 @@ const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WAL
   const ix = -INPUT.steer(), iz = (INPUT.thr() ? 1 : 0) - (INPUT.brk() ? 1 : 0), sneak = keys['ShiftLeft'] || keys['ShiftRight'], wantRun = !sneak;
   const A = W.camA, mx = Math.sin(A)*iz - Math.cos(A)*ix, mz = Math.cos(A)*iz + Math.sin(A)*ix,   /* (screen right = (−cos A, sin A): a bigger heading is a left turn) */ ml = Math.hypot(mx, mz), fwd = ml > 0.01 ? 1 : 0;
   if (fwd) h.yaw += angDiff(Math.atan2(mx, mz) - h.yaw)*Math.min(1, dt*12);   // (turns to where it goes, quickly)
-  if (INPUT.hand() && !W.spPrev && !h.down && !h.ride) walkPunch(h); W.spPrev = INPUT.hand(); if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; }
-  if (W.stam < 0.02) W.puff = true; else if (W.stam > 0.35) W.puff = false;
-  const run = wantRun && fwd > 0 && !W.puff, dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz), fear = Math.max(0, Math.min(1, (d - WALK_FEAR)/(WALK_MAX - WALK_FEAR)));
-  W.stam = Math.max(0, Math.min(1, W.stam + (run ? -dt/40 : dt*(fwd ? 0.1 : 0.14))));   // (runs by default: forty seconds flat out before the puffing)
-  let sp = fwd ? (run ? 6.8 : W.puff ? 1.6 : sneak ? 1.5 : 3.6) : 0;   // (Shift: creeping, bent a little)
+  if (INPUT.hand() && !W.spPrev && !h.down && !h.ride) walkPunch(h); W.spPrev = INPUT.hand(); if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; } if (W.reachT > 0) { W.reachT -= dt; h.pose.armL = h.pose.armR = -2.7; }   // (an apple picked: both hands up in the tree)
+  const run = wantRun && fwd > 0, dx = h.x - car.x, dz = h.z - car.z, d = Math.hypot(dx, dz), fear = Math.max(0, Math.min(1, (d - WALK_FEAR)/(WALK_MAX - WALK_FEAR)));
+  let sp = fwd ? (run ? 6.8 : sneak ? 1.5 : 3.6) : 0;   // (Shift: creeping, bent a little)
   const away = (Math.sin(h.yaw)*dx + Math.cos(h.yaw)*dz)/(d || 1); if (away > 0 && sp) sp *= 1 - 0.6*fear;   // (nervous: dragging their feet going further off)
-  h.vx = Math.sin(h.yaw)*sp; h.vz = Math.cos(h.yaw)*sp; h.tilt = W.puff ? 0.28 : sneak && fwd ? 0.18 : 0;
-  if (W.puff) { h.pose.armL = h.pose.armR = -0.6; if (!fwd) h.tilt = 0.45 + 0.05*Math.sin(t*9); if ((W.pt -= dt) <= 0) { W.pt = 0.55; if (audio) beep(170 + Math.random()*40, 0.2, 0.04, 'triangle'); } }   // hands on knees, panting
-  if (W.puff && !W.saidPuff) { W.saidPuff = true; centerMsg(T('😮‍💨 PUUSKUTTAA…')); } else if (!W.puff) W.saidPuff = false;
+  h.vx = Math.sin(h.yaw)*sp; h.vz = Math.cos(h.yaw)*sp; h.tilt = sneak && fwd ? 0.18 : 0;
   if (d > WALK_FEAR) { h.sway = 0.25*Math.sin(t*2.2)*fear; if (!W.saidFear) { W.saidFear = true; centerMsg(T('😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!'), '#ffb080'); } } else { W.saidFear = false; h.sway = 0; }
   if (d > WALK_MAX) { h.x = car.x + dx/d*WALK_MAX; h.z = car.z + dz/d*WALK_MAX; if ((W.ft -= dt) <= 0) { W.ft = 3; centerMsg(T('😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!'), '#ff8a6a'); } } },
   reset() {} });
@@ -3755,13 +3759,11 @@ function walkPunch(h) {   // a swing at whoever stands in front: they run off, a
 function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on || POLICE.hold > 0 || Math.hypot(car.vx, car.vz) > 3) return false;
   const [x, z] = lloc(car.x, car.z, car.angle, 1.35, 0.3);   // the driver's door: local +x is the car's left
   const h = WALK.h = new Human({ x, z, yaw: car.angle + Math.PI/2, rig: makeAdult(0xf2f2ee, 0xf2f2ee, 0x5a3a1e, { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), task: playerWalkTask(), temp: true });
-  h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.camA = camAngle.current; WALK.spPrev = true; WALK.punchT = 0; WALK.downT = 0; WALK.stam = 1; WALK.puff = false; WALK.ft = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
+  h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.camA = camAngle.current; WALK.spPrev = true; WALK.punchT = 0; WALK.downT = 0; WALK.ft = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
   centerMsg(T('JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ'), '#ffe9a8', 1800); return true; }
 function walkIn(force) { if (!WALK.on) return false; const h = WALK.h; if (!force && (h.down || Math.hypot(h.x - car.x, h.z - car.z) > 3.8)) return false;
   if (!h.gone) humanRemove(h); WALK.on = false; WALK.h = null; return true; }
-function walkBar() { let b = WALK.bar; if (!b) { b = WALK.bar = document.createElement('div'); b.style.cssText = 'position:fixed;left:50%;bottom:118px;width:160px;height:9px;margin-left:-80px;border:1px solid rgba(255,255,255,0.55);border-radius:5px;background:rgba(0,0,0,0.45);z-index:20;display:none;overflow:hidden'; b.innerHTML = '<i style="display:block;height:100%;width:100%;background:#7ad86a"></i>'; document.body.appendChild(b); }
-  b.style.display = WALK.on ? 'block' : 'none'; if (WALK.on) { const i = b.firstChild; i.style.width = (WALK.stam*100).toFixed(0) + '%'; i.style.background = WALK.puff ? '#e86a3a' : WALK.stam < 0.3 ? '#e8c03a' : '#7ad86a'; } }
-function walkUpdate(dt) { walkBar(); if (!WALK.on) return; const h = WALK.h; if (h.gone) { WALK.on = false; WALK.h = null; return; }
+function walkUpdate(dt) { if (!WALK.on) return; const h = WALK.h; if (h.gone) { WALK.on = false; WALK.h = null; return; }
   if (h.down && !h.ride && h.hop <= 0 && Math.hypot(h.vx, h.vz) < 0.4) { if ((WALK.downT += dt) > 2.5) { h.down = h.hurt = false; h.tilt = h.roll = h.spin = 0; h.vx = h.vz = 0; WALK.downT = 0; } } else WALK.downT = 0; }   // up on their feet again
 function updateCar(dt, live = true) {
   const held = POLICE.hold > 0 || WRECK.on || WALK.on; if (held) live = false;   // pulled over: the police have it
@@ -4963,20 +4965,20 @@ function oppPick(others, myT, mine) {
   if (!pick.length && mine) pick = [mine];       // (alone on the board: your own best, under your name)
   return pick.sort((a, b) => b.t - a.t); }       // nearest first
 // ── the police's rap sheet: fires the driver set, people and animals they ran over → /api/rap (as deltas), and the list back for the paper's "Poliisi tiedottaa" ──
-const RAP = { f: 0, p: 0, a: 0, h: 0, t: 0, v: 0, vSent: 0, sent: { f: 0, p: 0, a: 0, h: 0, t: 0 }, life: { f: 0, p: 0, a: 0, h: 0, t: 0 }, list: null, at: -1e9, busy: false };   // (h: rides given to hitchhikers — the good deeds; t: trees felled)
-try { const l = JSON.parse(localStorage.getItem('ylasto1988-rekisteri') || 'null'); if (l) for (const k of ['f', 'p', 'a', 'h', 't']) RAP.life[k] = Math.max(0, l[k] | 0); } catch (e) {}
-function rapCount(k) { if (gameState === State.MENU) return;   // (the race, GTA, after the finish line: all of it counts)
-  RAP[k]++; RAP.life[k]++; try { localStorage.setItem('ylasto1988-rekisteri', JSON.stringify(RAP.life)); } catch (e) {} }
+const RAP = { f: 0, p: 0, a: 0, h: 0, t: 0, o: 0, v: 0, vSent: 0, sent: { f: 0, p: 0, a: 0, h: 0, t: 0, o: 0 }, life: { f: 0, p: 0, a: 0, h: 0, t: 0, o: 0 }, list: null, at: -1e9, busy: false };   // (h: rides given to hitchhikers — the good deeds; t: trees felled; o: apples got away with)
+try { const l = JSON.parse(localStorage.getItem('ylasto1988-rekisteri') || 'null'); if (l) for (const k of ['f', 'p', 'a', 'h', 't', 'o']) RAP.life[k] = Math.max(0, l[k] | 0); } catch (e) {}
+function rapCount(k, n = 1) { if (gameState === State.MENU) return;   // (the race, GTA, after the finish line: all of it counts)
+  RAP[k] += n; RAP.life[k] += n; try { localStorage.setItem('ylasto1988-rekisteri', JSON.stringify(RAP.life)); } catch (e) {} }
 function rapSend(beacon) {   // → a promise that settles when the server has it (so the paper's list, fetched after, includes it)
-  if (!ONLINE.api || !ONLINE.id) return Promise.resolve(); const d = { f: RAP.f - RAP.sent.f, p: RAP.p - RAP.sent.p, a: RAP.a - RAP.sent.a, h: RAP.h - RAP.sent.h, t: RAP.t - RAP.sent.t, v: RAP.v > RAP.vSent ? RAP.v : 0 }, name = ONLINE.name || '';
-  if (!d.f && !d.p && !d.a && !d.h && !d.t && !d.v && (!name || name === RAP.sentName || !(RAP.life.f + RAP.life.p + RAP.life.a + RAP.life.h + RAP.life.t))) return Promise.resolve();   // (nothing new — or only a name given since: then the name goes, to put it on the old rows)
-  const body = JSON.stringify({ id: ONLINE.id, name, ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a, h: RAP.h, t: RAP.t }; RAP.vSent = Math.max(RAP.vSent, RAP.v); RAP.sentName = name; RAP.at = -1e9;
+  if (!ONLINE.api || !ONLINE.id) return Promise.resolve(); const d = { f: RAP.f - RAP.sent.f, p: RAP.p - RAP.sent.p, a: RAP.a - RAP.sent.a, h: RAP.h - RAP.sent.h, t: RAP.t - RAP.sent.t, o: RAP.o - RAP.sent.o, v: RAP.v > RAP.vSent ? RAP.v : 0 }, name = ONLINE.name || '';
+  if (!d.f && !d.p && !d.a && !d.h && !d.t && !d.o && !d.v && (!name || name === RAP.sentName || !(RAP.life.f + RAP.life.p + RAP.life.a + RAP.life.h + RAP.life.t + RAP.life.o))) return Promise.resolve();   // (nothing new — or only a name given since: then the name goes, to put it on the old rows)
+  const body = JSON.stringify({ id: ONLINE.id, name, ...d }); RAP.sent = { f: RAP.f, p: RAP.p, a: RAP.a, h: RAP.h, t: RAP.t, o: RAP.o }; RAP.vSent = Math.max(RAP.vSent, RAP.v); RAP.sentName = name; RAP.at = -1e9;
   try { if (beacon && navigator.sendBeacon) { navigator.sendBeacon(ONLINE.api + '/rap', body); return Promise.resolve(); } return fetch(ONLINE.api + '/rap', { method: 'POST', body, keepalive: true }).catch(() => {}); } catch (e) { return Promise.resolve(); } }
 function rapFetch() { if (!ONLINE.api || RAP.busy || performance.now() - RAP.at < 60000) return; RAP.busy = true;
-  fetch(ONLINE.api + '/rap', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { RAP.busy = false; if (!j || !Array.isArray(j.fires)) return; RAP.list = j; RAP.at = performance.now(); posterRefresh(); mailFetch(); lhRapFill(document.getElementById('lehti-mini')); if (PAPER.open) lhRapFill(document.querySelector('#paper .pv-stage')); }).catch(() => { RAP.busy = false; }); }
+  fetch(ONLINE.api + '/rap', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { RAP.busy = false; if (!j || !Array.isArray(j.fires)) return; RAP.list = j; RAP.at = performance.now(); omenaRender(); posterRefresh(); mailFetch(); lhRapFill(document.getElementById('lehti-mini')); if (PAPER.open) lhRapFill(document.querySelector('#paper .pv-stage')); }).catch(() => { RAP.busy = false; }); }
 setInterval(() => rapSend(false), 30000); addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') rapSend(true); });
 async function onlineRefresh() {   // the leaderboard → the top 10 on the menu, then the three rivals and their ghosts
-  if (!ONLINE.api || ONLINE.busy) return; ONLINE.busy = true; renderTop10(); onlineStats();   // ("haen ajajia…" while it loads)
+  if (!ONLINE.api || ONLINE.busy) return; ONLINE.busy = true; renderTop10(); onlineStats(); rapFetch();   // ("haen ajajia…" while it loads)
   try { const sig = trackSignature(); try { localStorage.setItem('yl-top-sig', sig); } catch (e) {}
     let d = null; if (TOP_PREFETCH && TOP_PREFETCH.sig === sig && !TOP_PREFETCH.used) { TOP_PREFETCH.used = true; d = await TOP_PREFETCH.p.catch(() => null); }
     if (!d) d = await apiGet('/top?sig=' + encodeURIComponent(sig)); ONLINE.ok = true; ONLINE.list = d.list || []; renderTop10();
@@ -4999,6 +5001,8 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Omenavarkaus: pihojen omenapuissa on omenoita, jotka saa jalkaisin poimittua. Isäntä juoksee perään ja jalkaisin saa kiinni. Autolla 200 m päähän pääsee karkuun, ja omenat kirjataan päävalikon omenavarkaiden listaan', '00.00'],
+  ['2.10.', 'Jalkaisin ei enää väsy: kuntomittari ja puuskutus pois', '00.00'],
   ['1.10.', 'Kävelykamera korjattu: autosta ulos hypätessä kamera ei enää loikkaa, vaan liukuu sekunnissa ukon taakse (ja takaisin autoon)', '23.30'],
   ['1.10.', 'Lehden ennätyslistakuva uusittu: nykyinen nettilista, Mane2 poistettu', '23.23'],
   ['1.10.', 'Lehteen iso juttu: simukuski Mantti Anttila kertoo, miten uusi takakamera, puomi ja zoomi toimivat', '22.52'],
@@ -5260,7 +5264,7 @@ const LEHTI = [
     body: ['Valo tulee eri suunnasta, varjot pitenevät ja taivas vaihtaa väriä. Illalla ikkunat hehkuvat ja saunan piipussa näkyy kiukaan loimu.'] },
   { id: 'jalan', size: 'page', n: 12, kick: '🚶 JALKAISIN', title: 'F – ja kuski nousee autosta', lede: 'Pysähdy, paina F, ja kävele – nuolet vievät sinne minne osoittavat. Välilyönti lyö, ja lyöty juoksee karkuun. Joku soittaa aina poliisit.',
     img: ['jalan.jpg'], cap: ['Kuski jaloittelee kylän raitilla. Auto odottaa käsijarru päällä.'],
-    body: ['Jalkaisin kuski on ihan tavallinen kyläläinen: hän törmäilee aitoihin ja kaatuu, jos joku ajaa päälle. Hän nousee kyllä itse.', 'Kuski juoksee itsestään, mutta pitkä juoksu väsyttää. Shift pohjassa hän hiippailee hiljaa. Yli 90 metrin päässä autosta kuski alkaa pelätä, että joku vie sen. 140 metrin jälkeen ei uskalla kauemmas.', 'Kyläläisiä ei kannata lyödä: poliisi tulee paikalle, ja lyöty pakenee paikalta niin kovaa kuin pääsee.'],
+    body: ['Jalkaisin kuski on ihan tavallinen kyläläinen: hän törmäilee aitoihin ja kaatuu, jos joku ajaa päälle. Hän nousee kyllä itse.', 'Kuski juoksee itsestään eikä väsy. Shift pohjassa hän hiippailee hiljaa. Yli 90 metrin päässä autosta kuski alkaa pelätä, että joku vie sen. 140 metrin jälkeen ei uskalla kauemmas.', 'Kyläläisiä ei kannata lyödä: poliisi tulee paikalle, ja lyöty pakenee paikalta niin kovaa kuin pääsee.'],
     box: ['NÄPPÄIMET', 'F = ulos / takaisin autoon', 'Nuolet = juoksu · Shift = hiippailu', 'Välilyönti = lyö (poliisi tulee)'] },
   { id: 'es', size: 'page', n: 13, kick: '⚡ ES', title: 'ES-juoma: tuplanopeus 40 sekunniksi', lede: 'K-kaupan edessä on ES-piste. Pysähdy, myyjä tuo tölkin – ja auto kulkee kaksi kertaa niin kovaa.',
     img: ['es.jpg'], cap: ['ES-kyltti K-kaupan edessä. Tanssijat houkuttelevat pysähtymään.'],
@@ -5302,6 +5306,10 @@ const LEHTI = [
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+  { id: 'omenat', size: 'page', n: 71, kick: '🍎 OMENAVARKAAT', title: 'Omenavarkaat liikkeellä – isännät juoksevat perässä', lede: 'Ylästön pihojen omenapuut ovat täynnä punaisia omenoita, ja rallikuskit ovat huomanneet sen. Isännät eivät ole ilahtuneita.',
+    img: ['omenavaras.jpg', 'omenapuu.jpg'], cap: ['Varas juoksee kohti autoa, ja talon isäntä on jo kintereillä nyrkki pystyssä.', 'Pihan omenapuu. Muutamassa minuutissa sen oksat voivat olla tyhjät.'],
+    body: ['YLÄSTÖ. Kun kuski nousee autosta (F) ja kävelee pihan omenapuun alle, omenoita tarttuu käteen yksi kerrallaan. Talon isäntä huomaa sen heti ja ryntää ulos ovesta.', 'Isäntä juoksee kovempaa kuin kuski. Jalkaisin karkuun ei pääse: kun isäntä saa kiinni, kaikki taskussa olevat omenat menevät takaisin, ja kuski saa saarnan päälle.', 'Ainoa keino on hypätä autoon ja ajaa vähintään 200 metrin päähän isännästä. Silloin isäntä luovuttaa, ja omenat ovat sinun. Paikallaan seisovan auton ovesta isäntä kiskoo kuskin vielä kiinni.', 'Karkuun viedyt omenat kirjataan nettiin. Päävalikossa on nyt omenavarkaiden lista: eniten omenoita vieneet kuskit, kaikkien pelien yhteissummat. R-napilla puut kasvattavat omenansa takaisin.'],
+    box: ['OMENAVARKAUS', 'F = ulos autosta', 'Kävele omenapuun alle', 'Isäntä juoksee perään', 'Autolla 200 m päähän = omenat sinun', 'Lista päävalikossa'] },
   { id: 'mantti', size: 'page', n: 70, kick: '🎥 KAMERAUUDISTUS', title: 'Mantti Anttila: ”Puomi 26 metriä, elevaatio 0,68 radiaania. Siinä se.”', lede: 'Kylän uusi takakamera on iRacing-veteraanin käsialaa. Tavoitimme hänet ruohonleikkuun lomasta ja ymmärsimme noin puolet.',
     img: ['mantti.jpg'], cap: ['Mantti Anttila rengasmuurin luona: ”80 km/h:ssa en edes näe tätä muuria. Siinä koko pointti.”'],
     body: ['YLÄSTÖ. Mantti Anttila on ajanut simulaattorilla tuhansia kierroksia, ja sen huomaa. Kun toimittaja kysyy, miksi kamera piti uusia, hän vastaa ennen kuin kysymys on lopussa: ”Vanha kamera roikkui 43 metrissä. Siitä näki kyllä katot, mutta ei apeksia. Simussa sellaisesta saisi protestin.”', 'Anttilan ratkaisu on hänen sanoillaan ”puomi”: kamera roikkuu 26 metriä auton takana, 0,68 radiaanin kulmassa, ja puomi pitenee 0,2 metriä jokaista metriä sekunnissa kohden. ”Pituussuunnassa ei mitään viivettä. Vain yaw suodatetaan. Auto on joka vauhdilla samassa kohdassa ruutua. Se on immersiota”, hän selittää ja näyttää kädellä jotain, mikä voi olla puomi tai haukka.', 'Kun talo tai mäen harja tulee auton ja kameran väliin, puomi vetää itsensä sisään nopeudella kymmenen ja palaa ulos nopeudella puolitoista. ”Seitsemän näytettä viivaa pitkin ja slab-testi talon laatikkoa vastaan.” Kameran hän nostaa mäestä ”nopeasti ylös, hitaasti alas”. Kuulemma myös elämänohje.', 'Rullan zoomi kulkee eksponenttikäyrällä 0,7–2,5-kertaiseksi. ”Deltamode yksi kerrotaan kolmellakymmenelläkolmella. Lukijat ymmärtävät.” Nopeusmittarit Anttila otti alareunasta kokonaan pois. ”Oikea kuski kuulee vauhdin.” Samalla yli 220 metrin päässä olevat heinät ja yli 320 metrin päässä olevat pihojen autot jätetään piirtämättä. ”Ei niitä kukaan katso.” Tienhaku käy renkaina lähimmästä solusta ulospäin, ja peli käynnistyy sekuntia nopeammin.'],
@@ -5506,12 +5514,12 @@ function lhRapFill(root) { if (!root) return; lhMailFill(root); const L = RAP.li
   else { set('w', 'EI KETÄÄN'); set('wd', 'Kylä on rauhallinen. Toistaiseksi.'); } }
 function lhKeys(where, keysPage, lyhPage, pno) { const K = [['Enter', 'lähtö'], ['↑', 'kaasu'], ['↓', 'jarru / peruutus'], ['← →', 'ohjaus'], ['välilyönti', 'käsijarru'], ['R', 'uusi lähtö'], ['Esc', 'alkuruutu'], ['C', 'kamera'], ['G', 'haamu päälle / pois'], ['E', 'radio: seuraava kanava'], ['1 · 2', 'radio hiljemmalle / lujemmalle'], ['B', 'bassoboost'], ['P', 'tauko'], ['F', 'ulos autosta / jalkaisin'], ['L', 'kieli (alkuruudussa)']];
   const idx = LEHTI.slice().sort((a, b) => where[a.id] - where[b.id] || b.n - a.n).map(s => '<a data-go="' + where[s.id] + '">' + lhEsc(s.title) + ' <i>' + where[s.id] + '</i></a>').join('');
-  return lhPg(lhFolio('OHJEET · SISÄLLYS', pno) + lhLabel('OHJEET') + '<h2 class="mid">Näin ajat</h2><div class="lh-lede">Pökö 205 ajetaan näppäimistöllä. Peli on tehty tietokoneelle – kännykällä voi lukea lehteä.</div>' +
+  return lhPg(lhFolio('OHJEET · SISÄLLYS', pno) + lhLabel('OHJEET') + '<h2 class="mid">Näin ajat</h2><div class="lh-lede">Pökö 205 ajetaan tietokoneen näppäimistöllä – kännykällä voi lukea lehteä.</div>' +
     '<div class="lh-keys">' + K.map(([k, t]) => '<div><kbd>' + lhEsc(k) + '</kbd><span>' + lhEsc(t) + '</span></div>').join('') + '</div>' +
     '<div class="lh-boxes"><div class="lh-box"><b>GTA-TILA</b>Aja lähdössä oikeaa kaistaa pois radalta – koko kylä on vapaa. R palauttaa kisaan.</div>' +
     '<div class="lh-box"><b>KERRO KAVERILLE</b>suomiralli.netlify.app – QR-koodi on alkuruudussa.</div>' +
     '<div class="lh-box"><b>LEHTI PDF:NÄ</b>Koko lehti tulostettavana: ⬇ PDF lehden yläkulmassa.</div></div>' +
-    '<div class="lh-index" style="font-size:' + Math.min(13, Math.max(9.5, 13 - (LEHTI.length + 5 - 40)*0.25)).toFixed(2) + 'px"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + where.__pol + '">Poliisi tiedottaa <i>' + where.__pol + '</i></a><a data-go="' + where.__ads + '">Pienet ilmoitukset <i>' + where.__ads + '</i></a><a data-go="' + where.__mail + '">Lukijoiden kirjeet <i>' + where.__mail + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame'); }
+    '<div class="lh-index" style="font-size:' + Math.min(13, Math.max(9, 13 - (LEHTI.length + 5 - 40)*0.27)).toFixed(2) + 'px"><b>TÄSSÄ NUMEROSSA</b>' + idx + '<a data-go="' + where.__pol + '">Poliisi tiedottaa <i>' + where.__pol + '</i></a><a data-go="' + where.__ads + '">Pienet ilmoitukset <i>' + where.__ads + '</i></a><a data-go="' + where.__mail + '">Lukijoiden kirjeet <i>' + where.__mail + '</i></a><a data-go="' + keysPage + '">Näin ajat <i>' + keysPage + '</i></a><a data-go="' + lyhPage + '">Lyhyesti: kaikki muutokset <i>' + lyhPage + '</i></a></div>', 'lh-frame'); }
 function lhLyhyesti(pno) {   // the change list, filled page by page for real: items go into fixed-height columns until a fourth column would open
   const host = document.createElement('div'); host.className = 'lh-measure'; document.body.appendChild(host); const out = [];
   const items = CHANGES.map(([d, t, hm]) => { const e = lhEsc(t), k = e.indexOf(': '); return '<p><b class="d">' + lhEsc(d) + (hm ? ' ' + hm : '') + '</b> ' + (k > 0 && k <= 70 ? '<b>' + e.slice(0, k + 1) + '</b>' + lhHy(e.slice(k + 1)) : lhHy(e)) + '</p>'; });
@@ -5630,6 +5638,10 @@ function renderTop10() { scoreboardDraw(); const el = document.getElementById('t
   if (ONLINE.busy) { el.insertAdjacentHTML('beforeend', loading(true)); return; }   // (a refresh after a lap: the old list stays up meanwhile)
   const rivals = ONLINE.opp.map(o => o.name + ' ' + formatTime(o.t).replace(/^00:/, '')).join(' · '), d = document.createElement('div'); d.className = 't10-empty';
   d.textContent = rivals ? T('haamuina radalla: {0}', rivals) : T('ei haamuja vielä'); el.appendChild(d); }
+function omenaRender() { const el = document.getElementById('omenat'); if (!el) return; const L = RAP.list && RAP.list.apples; if (!Array.isArray(L)) { el.innerHTML = ''; return; }
+  const me = (ONLINE.name || '').trim(); el.innerHTML = '<div class="om-head">🍎 ' + T('Omenavarkaat · kaikki kuskit') + '</div>' + (L.length ? '' : '<div class="om-empty">' + T('ei vielä omenavarkaita — kävele (F) pihan omenapuulle') + '</div>');
+  L.forEach((r, i) => { const d = document.createElement('div'); d.className = 'om-row' + (me && r.name === me ? ' me' : ''); d.innerHTML = '<span class="om-pos"></span><span class="om-name"></span><span class="om-n"></span>';
+    d.children[0].textContent = (i + 1) + '.'; d.children[1].textContent = r.name || T('nimetön'); d.children[2].textContent = r.n + ' 🍎'; el.appendChild(d); }); }
 function samplePose(S, st, t) {   // a ghost's pose at t: linear between samples (angle along the short way); st.cursor walks forward
   const n = S.length/4; if (st.cursor >= n - 1 || S[st.cursor*4] > t*1000) st.cursor = 0;
   while (st.cursor < n - 2 && S[(st.cursor + 1)*4] <= t*1000) st.cursor++;
@@ -8189,6 +8201,53 @@ function buildBins() { BINS.list.length = 0; BINS.grid.clear(); BINS.fly.length 
     const yaw = Math.atan2(-F.n[0], -F.n[1]), g = makeBin(); lifeGroup.add(g); nearVis(g, x, z);   // (the lid's hinge away from the street)
     const ni = nearestNode(x, z), B = { x, z, hx: x, hz: z, yaw, g, route: distRoute(x, z), full: true, down: false, ni, refill: 0, vx: 0, vy: 0, vz: 0, y: 0, sp: 0 }; binPlace(B); binFull(B, true); BINS.list.push(B); BINS.grid.add(B, x, z, 0.5); }
   X3.upd.push(binsUpdate); X3.reset.push(() => { BINS.fly.length = 0; for (const B of BINS.list) { B.down = false; B.held = false; B.x = B.hx; B.z = B.hz; binPlace(B); binFull(B, true); } }); }
+// ── apple thieving (1.10., Antti): the yard apple trees bear apples; walk (F) up to one and you pick them, one a moment. The owner
+//    sees it and runs out of the house after you — faster than you on foot. Caught: the apples go back. Into the car and 200 m off
+//    from them: away, and the apples are yours → the rap sheet's 'o' → the menu's apple-thief list. R: the trees bear again. ──
+const APPLES = { im: null, list: [], bag: 0, chase: [], t: 0, near: null, ESC: 200 };
+function buildApples() { if (APPLES.im) { scene.remove(APPLES.im); APPLES.im.geometry.dispose(); } APPLES.list.length = 0; APPLES.chase.length = 0; APPLES.bag = 0;
+  const pos = []; for (const T0 of APPLE_TREES) { if (!T0.pl || !T0.pl.B) continue; const n = 4 + Math.floor(Math.random()*3), A = { x: T0.x, z: T0.z, pl: T0.pl, i0: pos.length, n, left: n, owner: null }, gy = Y(T0.x, T0.z);
+    for (let k = 0; k < n; k++) { const a = k*6.2832/n + Math.random()*0.6, e = -0.45 + Math.random()*0.6, ce = Math.cos(e);   // (round the crown, mostly low on it: reachable)
+      pos.push([T0.x + Math.sin(a)*ce*T0.r*1.3, gy + T0.cy + Math.sin(e)*T0.r*0.8, T0.z + Math.cos(a)*ce*T0.r*1.3]); }   // (just outside the crown's lumps)
+    APPLES.list.push(A); }
+  if (!pos.length) return; const im = APPLES.im = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.13, 1), new THREE.MeshStandardMaterial({ color: 0xd0201a, roughness: 0.45 }), pos.length);
+  APPLES.pos = pos; im.castShadow = false; im.receiveShadow = false; im.frustumCulled = false; applesGrow(); scene.add(im);
+  X3.upd.push(applesUpdate); X3.reset.push(applesReset); }
+const _apM = new THREE.Matrix4(), _apZ = new THREE.Matrix4().makeScale(0, 0, 0);
+function applesGrow() { const im = APPLES.im; if (!im) return; APPLES.pos.forEach((p, i) => { _apM.makeTranslation(p[0], p[1], p[2]); im.setMatrixAt(i, _apM); }); im.instanceMatrix.needsUpdate = true; for (const A of APPLES.list) A.left = A.n; }
+function applesReset() { applesGrow(); for (const C of APPLES.chase) if (!C.h.gone) humanRemove(C.h); APPLES.chase.length = 0; APPLES.bag = 0; for (const A of APPLES.list) A.owner = null; }
+function applePick(A, h) { const i = A.i0 + A.n - A.left; A.left--; APPLES.im.setMatrixAt(i, _apZ); APPLES.im.instanceMatrix.needsUpdate = true; APPLES.bag++; WALK.reachT = 0.3;
+  if (audio) beep(700 + Math.random()*80, 0.05, 0.05, 'sine'); centerMsg(T('🍎 OMENA! ({0} mukana)', APPLES.bag), '#ff8a7a', 1200);
+  if (!A.owner) appleOwner(A); else if (A.owner.m === 'scold' || A.owner.m === 'home') { A.owner.m = 'lag'; A.owner.t = 0; pizzaMsg(T('👴 ISÄNTÄ HUOMASI! AUTOLLE JA 200 M PÄÄHÄN!'), true); } }   // (at it again under their nose)
+function appleOwner(A) {   // out of the house, on the tree's side
+  const [bx, bz, w, d] = A.pl.B; let a = Math.atan2(A.x - bx, A.z - bz), x = bx, z = bz; const R0 = Math.max(w, d)/2 + 1.0;
+  for (let k = 0; k < 12; k++) { const aa = a + (k % 2 ? 1 : -1)*Math.ceil(k/2)*0.35; x = bx + Math.sin(aa)*R0; z = bz + Math.cos(aa)*R0; if (clearSpot(x, z, 0.4)) break; }
+  const h = new Human({ x, z, yaw: a, rig: makeAdult(lpick([0x8a2a2a, 0x2f5a3a, 0x3a5a8a, 0xe8e0c8]), lpick(L_PANTS), lpick([0xc8c0b0, 0x8a8a86, 0x5a3a1e]), { sel: { longPants: 1 } }), task: appleOwnerTask(), temp: true });
+  const C = { h, A, hx: x, hz: z, m: 'lag', t: 0 }; h.mApple = C; A.owner = C; APPLES.chase.push(C);
+  pizzaMsg(T('👴 ISÄNTÄ HUOMASI! AUTOLLE JA 200 M PÄÄHÄN!'), true); if (audio) { beep(220, 0.25, 0.06, 'sawtooth'); setTimeout(() => beep(180, 0.3, 0.06, 'sawtooth'), 260); } }
+const appleOwnerTask = () => ({ kind: 'appleowner', update(h, dt, t) { const C = h.mApple; C.t += dt; h.tilt = 0;
+  if (C.m === 'home') { h.pose.armR = -0.2; if (walkTo(h, C.hx, C.hz, 1.6, dt) || C.t > 60) humanRemove(h); return; }
+  const P = WALK.on && WALK.h ? WALK.h : car, dx = P.x - h.x, dz = P.z - h.z, d = Math.hypot(dx, dz);
+  if (C.m === 'scold') { h.vx = h.vz = 0; h.yaw = Math.atan2(dx, dz); h.pose.armR = -2.2 + Math.sin(t*18)*0.25; if (C.t > 2.2) { C.m = 'home'; C.t = 0; } return; }   // the finger wagged
+  h.pose.armR = -2.75 + Math.sin(t*15)*0.4; h.pose.armRz = 0.25;   // a fist shaken
+  if (C.m === 'lag') { h.vx = h.vz = 0; h.yaw = Math.atan2(dx, dz); if (C.t > 1.0) { C.m = 'run'; C.t = 0; } return; }
+  walkTo(h, P.x, P.z, 7.3, dt);   // (a touch faster than you run: on foot they get you)
+  if (WALK.on ? d < 0.95 && !WALK.h.down : d < 2.9 && Math.hypot(car.vx, car.vz) < 2.5) appleCaught(C); },
+  knocked(h) { const C = h.mApple; if (C && C.m !== 'home') { C.m = 'home'; C.t = 0; } },
+  reset(h) {} });
+function appleCaught(C) { for (const o of APPLES.chase) if (o.m !== 'home') { o.m = o === C ? 'scold' : 'home'; o.t = 0; } APPLES.bag = 0;
+  pizzaMsg(T('👴 KIINNI JÄIT! OMENAT TAKAISIN'), true); if (audio) beep(140, 0.3, 0.08, 'square'); }
+function applesUpdate(dt) { if (!APPLES.im) return;
+  for (const C of APPLES.chase) { if (C.m === 'home' || C.m === 'scold') continue; const h = C.h;
+    if (h.gone || h.down) { C.m = 'home'; C.t = 0; continue; }
+    if (!WALK.on && Math.hypot(car.x - h.x, car.z - h.z) > APPLES.ESC) { C.m = 'home'; C.t = 0; } else if (C.t > 120 && C.m === 'run') { C.m = 'home'; C.t = 0; } }   // (out of reach in the car: they give up)
+  for (let i = APPLES.chase.length - 1; i >= 0; i--) { const C = APPLES.chase[i]; if (C.h.gone) { if (C.A.owner === C) C.A.owner = null; APPLES.chase.splice(i, 1); } }
+  if (APPLES.bag > 0 && !APPLES.chase.some(C => C.m === 'run' || C.m === 'lag') && !WALK.on) { const n = APPLES.bag; APPLES.bag = 0; rapCount('o', n);   // away with them
+    pizzaMsg(T('🍎 KARKUUN! +{0} OMENAA (yht. {1})', n, RAP.life.o), true); rapSend(false); }
+  if (!WALK.on || gameState !== State.RACING) return; const h = WALK.h; if (!h || h.down) return;
+  if ((APPLES.t -= dt) > 0) return; APPLES.t = 0.45; let best = null, bd = 2.1;
+  for (const A of APPLES.list) { if (!A.left) continue; const dd = Math.abs(A.x - h.x) + Math.abs(A.z - h.z); if (dd > 3) continue; const e = Math.hypot(A.x - h.x, A.z - h.z); if (e < bd) { bd = e; best = A; } }
+  if (best) applePick(best, h); else APPLES.t = 0.1; }
 function binsUpdate(dt) { const sp1 = Math.hypot(car.vx, car.vz), sp = Math.max(sp1, BINS.sp0 || 0), cvx = sp1 >= (BINS.sp0 || 0) ? car.vx : BINS.vx0, cvz = sp1 >= (BINS.sp0 || 0) ? car.vz : BINS.vz0; BINS.sp0 = sp1; BINS.vx0 = car.vx; BINS.vz0 = car.vz;   // (last frame's speed too: the bin and a fence behind it in the same frame)
   if (sp > 2 && gameState === State.RACING && !WALK.on) { const P = playerBox();
     BINS.grid.near(car.x, car.z, 4, B => { if (B.down || B.held) return; const c = boxPush(P, B.x, B.z, 0.42); if (!c) return;   // knocked flying: the bag goes, the rubbish with it
@@ -9795,7 +9854,7 @@ function nukeReset() { NUKE.armT = -1; if (!NUKE.on) return; NUKE.on = false; NU
 
 function lifeExtras3Build() {
   TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.heli = null; X3.station = null; X3.sauna = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
-  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildBins(); buildGarbageTruck(); buildTow(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
+  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildBins(); buildApples(); buildGarbageTruck(); buildTow(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
 }
 // ── the hitchhiker: by the race route a few hundred metres before the K-shop, a cardboard sign "K-KAUPPA" and a thumb out.
 //    Stop by him and he walks to the window and gets in; stop in the K-shop yard and he gets out, thanks you and goes in —

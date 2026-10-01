@@ -91,7 +91,7 @@ const STATS_SEED = { starts: 700, drivers: 45 };
 async function statsGet(store) { return (await store.get('stats.json', { type: 'json' })) || { ...STATS_SEED, since: new Date().toISOString().slice(0, 10), seeded: true }; }
 
 // the rap sheet: one file (rap.json) of every browser's totals, by browser id; the name is the one they save laps with (or none: "Tuntematon kuski")
-const RAP_MAX = { f: 40, p: 150, a: 40, h: 10, t: 300 }, RAP_ROWS = 3000;
+const RAP_MAX = { f: 40, p: 150, a: 40, h: 10, t: 300, o: 120 }, RAP_ROWS = 3000;
 async function rapGet(store) { return (await store.get('rap.json', { type: 'json' })) || { rows: {} }; }
 function rapTop(R, k, n = 7) { return Object.values(R.rows).filter(r => (r[k] || 0) > 0).sort((a, b) => b[k] - a[k]).slice(0, n).map(r => ({ name: r.name || '', n: r[k] })); }
 
@@ -127,15 +127,15 @@ export async function handle(req, store) {
       await store.setJSON('stats.json', st); return json({ starts: st.starts, drivers: st.drivers });
     }
     if (req.method === 'GET' && route === 'rap') { const R = await rapGet(store), rows = Object.values(R.rows);
-      return json({ fires: rapTop(R, 'f'), people: rapTop(R, 'p'), animals: rapTop(R, 'a', 3), kind: rapTop(R, 'h', 5), speed: rapTop(R, 'v', 5), lumber: rapTop(R, 't', 3), drivers: rows.length, total: { f: rows.reduce((s, r) => s + r.f, 0), p: rows.reduce((s, r) => s + r.p, 0), a: rows.reduce((s, r) => s + r.a, 0), h: rows.reduce((s, r) => s + (r.h || 0), 0), t: rows.reduce((s, r) => s + (r.t || 0), 0) } }); }
+      return json({ fires: rapTop(R, 'f'), people: rapTop(R, 'p'), animals: rapTop(R, 'a', 3), kind: rapTop(R, 'h', 5), speed: rapTop(R, 'v', 5), lumber: rapTop(R, 't', 3), apples: rapTop(R, 'o', 10), drivers: rows.length, total: { f: rows.reduce((s, r) => s + r.f, 0), p: rows.reduce((s, r) => s + r.p, 0), a: rows.reduce((s, r) => s + r.a, 0), h: rows.reduce((s, r) => s + (r.h || 0), 0), t: rows.reduce((s, r) => s + (r.t || 0), 0), o: rows.reduce((s, r) => s + (r.o || 0), 0) } }); }
     if (req.method === 'POST' && route === 'rap') {
       let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: 'bad json' }, 400); }
       const id = String(b && b.id || ''); if (!/^[a-z0-9]{8,32}$/.test(id)) return json({ error: 'id' }, 400);
-      const d = {}; for (const k of ['f', 'p', 'a', 'h', 't']) { const v = b[k] === undefined ? 0 : b[k]; if (!Number.isInteger(v) || v < 0) return json({ error: k }, 400); d[k] = Math.min(v, RAP_MAX[k]); }
+      const d = {}; for (const k of ['f', 'p', 'a', 'h', 't', 'o']) { const v = b[k] === undefined ? 0 : b[k]; if (!Number.isInteger(v) || v < 0) return json({ error: k }, 400); d[k] = Math.min(v, RAP_MAX[k]); }
       const v = Number.isInteger(b.v) && b.v > 0 ? Math.min(300, b.v) : 0, name = cleanName(b.name), R = await rapGet(store);
-      if (!d.f && !d.p && !d.a && !d.h && !d.t && !(v > ((R.rows[id] || {}).v || 0)) && (!R.rows[id] || !name || badName(name) || R.rows[id].name === name)) return json({ ok: true });   // (nothing new — unless it names an existing row)
+      if (!d.f && !d.p && !d.a && !d.h && !d.t && !d.o && !(v > ((R.rows[id] || {}).v || 0)) && (!R.rows[id] || !name || badName(name) || R.rows[id].name === name)) return json({ ok: true });   // (nothing new — unless it names an existing row)
       const r = R.rows[id] || (R.rows[id] = { name: '', f: 0, p: 0, a: 0, h: 0 });
-      if (name && !badName(name)) r.name = name; r.f += d.f; r.p += d.p; r.a += d.a; r.h = (r.h || 0) + d.h; r.t = (r.t || 0) + d.t; if (v > (r.v || 0)) r.v = v; r.d = new Date().toISOString().slice(0, 10);
+      if (name && !badName(name)) r.name = name; r.f += d.f; r.p += d.p; r.a += d.a; r.h = (r.h || 0) + d.h; r.t = (r.t || 0) + d.t; r.o = (r.o || 0) + d.o; if (v > (r.v || 0)) r.v = v; r.d = new Date().toISOString().slice(0, 10);
       const ids = Object.keys(R.rows); if (ids.length > RAP_ROWS) { ids.sort((x, y) => (R.rows[x].f + R.rows[x].p) - (R.rows[y].f + R.rows[y].p)); for (const x of ids.slice(0, ids.length - RAP_ROWS)) delete R.rows[x]; }   // (the mildest go first)
       await store.setJSON('rap.json', R); return json({ ok: true }); }
     if (req.method === 'GET' && route === 'posti') { if (!(await keyOk(url.searchParams.get('key')))) return json({ error: 'key' }, 403);
