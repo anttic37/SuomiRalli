@@ -4999,6 +4999,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Lehdenjakaja: poika ajaa pyörällä katuaan ja työntää Ylästön Sanomat jokaiseen postilaatikkoon. Kumoon ajettuna lehdet lentävät pihoille', '22.47'],
   ['1.10.', 'Liikenne väistää hälytysajoneuvoja: sireenin kuullessaan autot ajavat oikeaan reunaan ja pysähtyvät, kunnes ambulanssi, paloauto tai poliisi on mennyt ohi', '22.39'],
   ['1.10.', 'Hinausauto: palaneet ja romuksi ajetut autot hinataan pois – kuski kiinnittää vaijerin, romu vinssataan keula koholla perään ja viedään kylästä. R tuo autot takaisin', '22.33'],
   ['1.10.', 'Uusi kamera: auton takana ja yläviistossa; paikallaan kamera nousee ylös ja kauas, ja laskeutuu tasaisesti takakameraksi 80 km/h:iin mennessä. C = vanha yläkamera. Nopeusmittarit pois alareunasta, auto näkyy alempana', '21.36'],
@@ -5298,6 +5299,8 @@ const LEHTI = [
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+  { id: 'lehdenjakaja', size: 'half', n: 69, kick: '🚲 JAKELU', title: 'Ylästön Sanomat tulee nyt pyörällä', img: ['lehdenjakaja.jpg'], cap: ['Lehdenjakaja pysähtyy postilaatikolle ja työntää lehden sisään pyörän selästä.'],
+    body: ['Kylän omalla lehdellä on oma jakaja. Pyöräilevä poika ajaa katuaan päästä päähän, pysähtyy jokaisen postilaatikon kohdalle ja työntää tuoreen Ylästön Sanomien luukusta sisään. Kadun päässä hän kääntyy ja aloittaa alusta.', 'Jos jakajan ajaa kumoon, koko laukullinen lehtiä lentää pitkin pihoja. Toimitus pyytää ajamaan varovasti: lehti on se, jota juuri luet.'] },
   { id: 'vaisto', size: 'half', n: 68, kick: '🚨 LIIKENNE', title: 'Ylästössä väistetään hälytysajoneuvoja', img: ['vaisto.jpg'], cap: ['Henkilöauto on ajanut reunaan ja pysähtynyt, kun poliisi tulee takaa vilkut päällä.'],
     body: ['Kylän autoilijat ovat oppineet tavoille. Kun takaa tai vastaan tulee ambulanssi tai paloauto hälytysajossa tai poliisi takaa-ajossa, auto ajaa tien oikeaan reunaan ja pysähtyy.', 'Matka jatkuu, kun sireeni on mennyt ohi. Vapaassa ajossa tämän näkee hyvin: koko katu väistää, kun poliisi ajaa sinua takaa.'] },
   { id: 'hinaus', size: 'half', n: 67, kick: '🛻 HINAUS', title: 'Hinausauto korjaa romut pois kylän kaduilta', img: ['hinaus.jpg', 'hinaus2.jpg'], cap: ['Palanut auto vinssataan keula koholla hinausauton perään.', 'Romu lähtee kylästä. Seuraavassa kisassa se on taas paikallaan.'],
@@ -7733,19 +7736,42 @@ const postTask = (Pm) => { const S = Pm.s; return { kind: 'post', onRoad: () => 
   knocked(h) { TWO.down(Pm.bike, S.bx, S.bz, S.yaw, Math.random() < 0.5 ? 1 : -1); Pm.letter.visible = false;
     flyLetters(h.x, Y(h.x, h.z) + 1.0, h.z, h.vx, h.vz, 14); },
   reset(h) { Object.assign(S, { s: S.s0, dir: 1, v: 0, phi: -1, mode: 'ride', last: null, yaw: S.yaw0, bx: S.bx0, bz: S.bz0 }); } }; };
-function buildPostman(st) { const L = polyLine(chaikin(st.P, 2)), stops = [], mboxes = new THREE.Group(); reserve('post', [st.mid.x, st.mid.z], 3);
-  for (let s = 6; s < L.total - 6; s += 3) { if (stops.length && s - stops[stops.length - 1].s < 22) continue; const [x, z, py] = L.at(s);
+// letterboxes along a street stretch: at the edge in front of each house that faces it, gap m apart at least → { stops: [{ s, mx, mz, stx, stz, side }], mboxes }
+function mailStops(L, st, gap) { const stops = [], mboxes = new THREE.Group();
+  for (let s = 6; s < L.total - 6; s += 3) { if (stops.length && s - stops[stops.length - 1].s < gap) continue; const [x, z, py] = L.at(s);
     let side = 0; staticNear(x, z, 22, B => { if (side || B.kind !== 'house') return; const l = (B.x - x)*Math.cos(py) - (B.z - z)*Math.sin(py), f = (B.x - x)*Math.sin(py) + (B.z - z)*Math.cos(py); if (Math.abs(l) > st.w/2 + 5 && Math.abs(f) < 7) side = Math.sign(l); });
     if (!side) continue; const [mx, mz] = lloc(x, z, py, side*(st.w/2 + 0.55), 0), [stx, stz] = lloc(x, z, py, side*(st.w/2 - 0.05), 0);
     let hit = staticHit(mx, mz, 2, 0.4); if (hit || vehicleWithin(mx, mz, 3)) continue;
-    stops.push({ s, mx, mz, stx, stz }); const b = new THREE.Group(); lmesh(lbox(0.08, 1.05, 0.08, 0.525), lmat(0x6a5a44, 0.8), 0, 0, 0, b); lmesh(lbox(0.34, 0.28, 0.26), lmat(lpick([0x2f6a3a, 0x8a2a2a, 0x3a4a6a, 0x6a6a6a, 0xd8b030]), 0.5), 0, 1.18, 0, b);
+    stops.push({ s, mx, mz, stx, stz, side }); const b = new THREE.Group(); lmesh(lbox(0.08, 1.05, 0.08, 0.525), lmat(0x6a5a44, 0.8), 0, 0, 0, b); lmesh(lbox(0.34, 0.28, 0.26), lmat(lpick([0x2f6a3a, 0x8a2a2a, 0x3a4a6a, 0x6a6a6a, 0xd8b030]), 0.5), 0, 1.18, 0, b);
     lmesh(lbox(0.2, 0.02, 0.02), lmat(0xf0f0f0, 0.4), 0, 1.24, side*-0.14, b, false); b.position.set(mx, Y(mx, mz), mz); b.rotation.y = py; mboxes.add(b); }
+  return { stops, mboxes }; }
+function buildPostman(st) { const L = polyLine(chaikin(st.P, 2)); reserve('post', [st.mid.x, st.mid.z], 3); const { stops, mboxes } = mailStops(L, st, 22);
   if (stops.length < 2) return false; lifeGroup.add(mboxes); nearVis(mboxes, st.mid.x, st.mid.z);
   const bike = makeBike(lmat(0x1c2c5a, 0.4), 1.2), orange = lmat(0xe8761a, 0.6); for (const s of [-1, 1]) lmesh(lbox(0.1, 0.26, 0.34), orange, s*0.14, 0.5, -0.42, bike); lmesh(lbox(0.3, 0.18, 0.24), orange, 0, 0.66, 0.6, bike);
   lifeGroup.add(bike); const [x0, z0, py0] = L.at(0), o = Math.min(1.3, Math.max(0.7, st.w/2 - 1.2)), [bx0, bz0] = [x0 + o*Math.cos(py0), z0 - o*Math.sin(py0)];
   const Pm = { L, stops, bike, s: { s0: 0, s: 0, dir: 1, v: 0, o, phi: -1, mode: 'ride', last: null, ph: 0, yaw0: py0, yaw: py0, bx0, bz0, bx: bx0, bz: bz0 } }; placeAt(bike, bx0, bz0, py0);
   const navy = 0x1c2c5a, rig = makeAdult(navy, navy, lpick(L_HAIR), { sel: { hat: 5, top: 13, longSleeve: 1, longPants: 1 }, acc: navy, shoes: 0x6a4020 });   // cap, the post bag
   const h = new Human({ x: bx0, z: bz0, yaw: py0, rig, task: postTask(Pm) }); Pm.letter = handProp(h, lmesh(lbox(0.02, 0.12, 0.2), lmat(0xf4f2ea, 0.7), 0, 0, 0)); Pm.letter.visible = false; return true; }
+
+// ── the paper boy: a lad on a bike along his street with a bag of Ylästön Sanomat; at each letterbox he stops astride the bike, pushes
+//    a paper in and rides on; a U-turn at each end. Knocked off, the papers go everywhere. ──
+const paperTask = (Pb) => { const S = Pb.s; return { kind: 'paper', onRoad: () => true, update(h, dt, t, near) { const g = Pb.bike, L = Pb.L;
+  if (S.mode === 'drop') { h.vx = h.vz = 0; S.v = 0; TWO.ride(h, g, TWO.kidbike, S.bx, S.bz, S.yaw, 0.08*S.side, near, S.ph); h.pose.armR = -1.45; h.pose.armRz = -0.5*S.side;   // leaning to the box, the paper in
+    if ((S.t -= dt) < 0.45) Pb.paper.visible = false; if (S.t <= 0) { S.mode = 'ride'; Pb.n++; } return; }
+  let vT = 3.6, nx = null; if (S.phi < 0) { for (const q of Pb.stops) { const d = (q.s - S.s)*S.dir; if (d > -0.05 && q !== S.last && (!nx || d < (nx.s - S.s)*S.dir)) nx = q; }
+    if (nx) { const d = Math.max(0, (nx.s - S.s)*S.dir); vT = Math.min(vT, 0.3 + Math.sqrt(2*1.8*d)); if (d < 0.3) { S.mode = 'drop'; S.t = 1.1; S.last = nx; S.side = nx.side*S.dir; S.v = 0; Pb.paper.visible = true; } }
+    else { const rem = S.dir > 0 ? L.total - S.s : S.s; vT = Math.min(vT, 1.8 + Math.sqrt(2*2*rem)); } } else vT = 1.8;
+  if (carAhead(h.x, h.z, S.yaw, 9)) vT = 0; S.v += Math.max(-5*dt, Math.min(1.6*dt, vT - S.v));
+  const [x, z, yaw] = laneStep(S, L, dt); S.yaw += angDiff(yaw - S.yaw)*Math.min(1, dt*8); S.bx = x; S.bz = z; S.ph += dt*S.v*2.6; if (S.phi >= 0) S.last = null;   // (back the other way: the boxes again — tomorrow's paper)
+  TWO.ride(h, g, TWO.kidbike, x, z, S.yaw, S.phi >= 0 ? 0.2 : 0, near, S.ph); },
+  knocked(h) { TWO.down(Pb.bike, S.bx, S.bz, S.yaw, Math.random() < 0.5 ? 1 : -1); Pb.paper.visible = false; flyLetters(h.x, Y(h.x, h.z) + 0.9, h.z, h.vx, h.vz, 10); },
+  reset(h) { Object.assign(S, { s: S.s0, dir: 1, v: 0, phi: -1, mode: 'ride', last: null, yaw: S.yaw0, bx: S.bx0, bz: S.bz0 }); h.roll = 0; } }; };
+function buildPaperBoy(st) { const L = polyLine(chaikin(st.P, 2)); reserve('paper', [st.mid.x, st.mid.z], 3); const { stops, mboxes } = mailStops(L, st, 16); if (stops.length < 2) return false; lifeGroup.add(mboxes); nearVis(mboxes, st.mid.x, st.mid.z);
+  const bike = makeBike(lmat(lpick([0xc8201a, 0x2a7a3a, 0x1a1a1a]), 0.4)), bag = lmesh(lbox(0.16, 0.3, 0.36), lmat(0xd8c8a0, 0.8), 0.22, 0.75, -0.25, bike); lmesh(lbox(0.05, 0.12, 0.3), lmat(0xf2f0e6, 0.7), 0.22, 0.95, -0.25, bike, false);   // the paper bag on the carrier, papers sticking out
+  lifeGroup.add(bike); const [x0, z0, py0] = L.at(0), o = Math.min(1.3, Math.max(0.7, st.w/2 - 1.2)), bx0 = x0 + o*Math.cos(py0), bz0 = z0 - o*Math.sin(py0);
+  const Pb = { L, stops, bike, n: 0, s: { s0: 0, s: 0, dir: 1, v: 0, o, phi: -1, mode: 'ride', last: null, ph: 0, side: 1, t: 0, yaw0: py0, yaw: py0, bx0, bz0, bx: bx0, bz: bz0 } }; placeAt(bike, bx0, bz0, py0);
+  const h = new Human({ x: bx0, z: bz0, yaw: py0, kid: true, rig: makeKid(lpick([0xe8c02a, 0x2f7bd6, 0xd83b2c, 0x3aa64c])), task: paperTask(Pb) }); h.mPb = Pb;
+  Pb.paper = handProp(h, lmesh(lbox(0.03, 0.2, 0.28), lmat(0xf2f0e6, 0.7), 0, 0, 0)); Pb.paper.visible = false; X2.paperBoy = Pb; return true; }
 
 // ── the ice-cream van: from one street to the next (away from the route if it can), stops, plays its tune; the kids come running
 //    out of the yards and queue at the hatch, go off licking their cones. It drives like every other van (driveAlong). ──
@@ -9936,6 +9962,7 @@ function lifeExtras2Build() {
   const take = (gap) => { const s = streets.find(s => !used.some(u => Math.hypot(u.mid.x - s.mid.x, u.mid.z - s.mid.z) < gap)); if (s) used.push(s); return s; };
   for (let k = 0; k < 2; k++) { const s = take(150); if (s) buildMopeds(s); }
   for (let k = 0; k < 4; k++) { const s = take(90); if (s && buildPostman(s)) break; }
+  X2.paperBoy = null; for (let k = 0; k < 4; k++) { const s = take(90); if (s && buildPaperBoy(s)) break; }
   buildHorses(2); buildCarpets(3); buildLaundry(3); buildMidsummer(); for (let k = 0; k < 4; k++) buildYardDog(); buildBadminton(2); buildRing(); buildRing(); buildRing();
 }
 function extras2Update(dt) { for (const f of X2.upd) f(dt, worldT); flyingUpdate(dt); }
