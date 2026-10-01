@@ -124,6 +124,7 @@
       <div class="feat"><img src="lehti/puu.jpg" alt="" loading="lazy"><div><b>🌲 26 000 puuta</b><span>Ja jokaisen voi kaataa. Aidat myös.</span></div></div>
       <div class="feat"><img src="lehti/ufo_a.jpg" alt="" loading="lazy"><div><b>👽 Ufot</b><span>Kylän laidalle on laskeutunut kaksi lautasta.</span></div></div>
       <div class="feat"><img src="lehti/mummo.jpg" alt="" loading="lazy"><div><b>👵 Kylän elämä</b><span>Mummo suojatiellä, saunojat, makkarakärry, pihakoirat.</span></div></div>
+      <div class="feat"><img src="lehti/omenavaras.jpg" alt="" loading="lazy"><div><b>🍎 Omenavarkaat</b><span>Pihojen omenapuut ovat täynnä. Isäntä juoksee perään – autolla 200 m päähän ja omenat ovat sinun.</span></div></div>
       <div class="feat"><img src="lehti/poliisi_a.jpg" alt="" loading="lazy"><div><b>🚨 Rikosrekisteri</b><span>Poliisi pitää kirjaa – pahimmat pääsevät lehteen.</span></div></div>
       <div class="feat wide"><img src="lehti/nuke_a.jpg" alt="" loading="lazy"><div><b>☢️ …ja jos radiossa kuuluu koelähetys 11</b><span>Siitä ei puhuta.</span></div></div>
     </div>
@@ -162,6 +163,8 @@
     <p class="lede" id="livelede">Kuskit ympäri Suomea ajavat parhaillaan.</p>
     <div class="nums"><div class="num"><b id="n-starts">–</b><span>kisaa ajettu</span></div><div class="num"><b id="n-fires">–</b><span>taloa palanut</span></div><div class="num"><b id="n-trees">–</b><span>puuta kaadettu</span></div></div>
     <ol class="top" id="top"></ol>
+    <p class="lede" id="omlede" style="margin-top:22px;display:none">🍎 Omenavarkaat – eniten omenoita pihoilta vieneet:</p>
+    <ol class="top" id="omenat"></ol>
   </section>
 
   <footer><b>YLÄSTÖ 1988 · Suomiralli</b><br>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et – vielä.<br>Avaa koneella: suomiralli.netlify.app</footer>
@@ -196,7 +199,8 @@ fetch('lehti/lehti.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : nul
 // live from the village: races, fires, trees, the fastest five
 const fmt = (n) => (n || 0).toLocaleString('fi-FI'), clock = (t) => { const m = Math.floor(t/60), s = t - m*60; return m + '.' + s.toFixed(3).padStart(6, '0').replace('.', ':'); };
 fetch('api/stats').then(r => r.ok ? r.json() : null).then(j => { if (!j) return; $('n-starts').textContent = fmt(j.starts); if (j.drivers) $('livelede').textContent = fmt(j.drivers) + ' kuskia on ajanut Ylästössä. Tässä kylän nopeimmat:'; }).catch(() => {});
-fetch('api/rap').then(r => r.ok ? r.json() : null).then(j => { if (!j || !j.total) return; $('n-fires').textContent = fmt(j.total.f); $('n-trees').textContent = fmt(j.total.t); }).catch(() => {});
+fetch('api/rap').then(r => r.ok ? r.json() : null).then(j => { if (!j || !j.total) return; $('n-fires').textContent = fmt(j.total.f); $('n-trees').textContent = fmt(j.total.t);
+  const A = (j.apples || []).slice(0, 5); if (A.length) { $('omlede').style.display = ''; $('omenat').innerHTML = A.map(r => '<li><span>' + String(r.name || 'nimetön').replace(/[&<>]/g, '') + '</span><b>' + fmt(r.n) + ' 🍎</b></li>').join(''); } }).catch(() => {});   // (the apple thieves: the rap sheet's 'o')
 fetch('mobiili.json', { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).then(m => m && m.sig ? fetch('api/top?sig=' + encodeURIComponent(m.sig)) : null).then(r => r && r.ok ? r.json() : null).then(j => {
   const L = (j && j.list || []).slice(0, 5); if (!L.length) return; $('top').innerHTML = L.map(r => '<li><span>' + String(r.name || '?').replace(/[&<>]/g, '') + '</span><b>' + clock(r.t) + '</b></li>').join(''); }).catch(() => {});
 </script>

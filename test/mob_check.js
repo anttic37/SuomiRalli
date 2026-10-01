@@ -1,11 +1,11 @@
 const { chromium, devices } = require('playwright-core');
 (async () => { const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--autoplay-policy=no-user-gesture-required'] });
-  await fetch('http://localhost:8799/api/rap', { method: 'POST', body: JSON.stringify({ id: 'abcdefgh1234', name: 'Testi-Timo', f: 7, t: 42 }) });
+  await fetch('http://localhost:8799/api/rap', { method: 'POST', body: JSON.stringify({ id: 'abcdefgh1234', name: 'Testi-Timo', f: 7, t: 42, o: 17 }) });
   const out = {};
   const m = await b.newContext({ ...devices['Pixel 5'] }); const p = await m.newPage(); const errs = []; p.on('pageerror', e => errs.push(String(e))); p.on('console', x => { if (x.type() === 'error') errs.push(x.text()); });
   await p.goto('http://localhost:8799/', { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(2500); out.mobileUrl = p.url();
   await p.screenshot({ path: 'mob_top.png' }); await p.screenshot({ path: 'mob_full.png', fullPage: true });
-  out.heads = await p.$$eval('#heads li', l => l.map(e => e.textContent)); out.nums = await p.$$eval('.num b', l => l.map(e => e.textContent));
+  out.heads = await p.$$eval('#heads li', l => l.map(e => e.textContent)); out.nums = await p.$$eval('.num b', l => l.map(e => e.textContent)); out.apples = await p.$$eval('#omenat li', l => l.map(e => e.textContent));
   await p.click('#play'); await p.waitForTimeout(1500); out.radio = await p.evaluate(() => ({ on: R.on, src: R.el.src.split('/').pop(), t: R.el.currentTime, n: R.list.length, disp: document.getElementById('st').textContent + ' | ' + document.getElementById('ti').textContent }));
   await p.click('#next'); await p.waitForTimeout(800); out.radio2 = await p.evaluate(() => document.getElementById('ti').textContent);
   await p.locator('#radio').scrollIntoViewIfNeeded(); await p.screenshot({ path: 'mob_radio.png' });
