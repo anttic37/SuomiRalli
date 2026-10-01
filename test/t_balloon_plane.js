@@ -7,7 +7,7 @@ const snap = () => ({ mode: B.mode, torn: !!B.torn, kmh: Math.round(P.v.length()
 setup(B.y + PB_ENV[2], 40, 40); const v0 = P.v.length(); let shotDone = false; out.before = snap();
 for (let i = 0; i < 180; i++) { step(1); if (B.torn && !shotDone) { shotDone = true; out.atTear = { ...snap(), momentumRatio: +((v0 - P.v.length())*650/(B.cv.length()*3500)).toFixed(2) }; const d = new THREE.Vector3(0, 0, 1).applyQuaternion(P.q); camera.position.set(P.p.x - d.x*18 + 12, P.p.y + 5, P.p.z - d.z*18 - 8); camera.lookAt(B.x, B.y + 9, B.z); camera.fov = 60; camera.updateProjectionMatrix(); RR(scene, camera); await __save('s3_bp_tear.png', renderer.domElement.toDataURL('image/png')); } }
 out.A = { ...snap(), dvPlane: +(v0 - P.v.length()).toFixed(2) };
-step(60*8); out.A.later = { mode: B.mode, planeCrashed: P.crashed };
+P.p.y = Math.max(P.p.y, H(P.p.x, P.p.z) + 120); step(60*8); out.A.later = { mode: B.mode, planeCrashed: P.crashed };
 // B: a slow nudge (4 m/s) against the other balloon's envelope
 const B2 = BALLOONS[1]; { const ang = 0.2; planeInit({ x: B2.x - Math.sin(ang)*7.2, z: B2.z - Math.cos(ang)*7.2, angle: ang }); P.p.y = B2.y + PB_ENV[2]; P.v.set(Math.sin(ang)*4, 0, Math.cos(ang)*4); P.air = true; P.airT = 1; P.thr = 0; }
 const b0 = B2.cv.length(); for (let i = 0; i < 60; i++) step(1); out.B = { torn: !!B2.torn, mode: B2.mode, cvGain: +(B2.cv.length() - b0).toFixed(3), kmh: Math.round(P.v.length()*3.6), crashed: P.crashed, sw: +Math.hypot(B2.sw.xw, B2.sw.zw).toFixed(3) };

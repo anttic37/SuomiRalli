@@ -1,7 +1,7 @@
 // the endless world's cost and solidity: rebuild times of the streamed ground/forest/solids, the static grid's size and query cost,
 // and the plane meets the outer forest and a korpikenttä's hut (the solids follow the plane, not the parked Pökö)
 startRace(false); step(20); const out = {}, P = PLANE, ms = (f, k) => { const t0 = performance.now(); for (let i = 0; i < k; i++) f(i); return +((performance.now() - t0)/k).toFixed(2); };
-out.groundCold = ms(i => outerGround(3000 + i*2000, 500), 3); out.ground = ms(i => outerGround(9000 + i*170, 500), 8); out.forest = ms(i => { OUT.tx = 1e9; outerForest(3000 + i*200, 500); }, 5); out.trees = OUT.trees.count + OUT.far.count;
+out.groundCold = ms(i => outerGround(3000 + i*2000, 500), 3); out.ground = ms(i => outerGround(9000 + i*170, 500), 8); out.forest = ms(i => { forestClear(); outerForest(3000 + i*200, 500); }, 5); out.trees = forestCount().all; out.forestStep = ms(i => outerForest(3000 + 800 + i*40, 500), 10);
 out.solids = ms(i => outerSolids(3000 + i*40, 500), 10); out.solidN = OUT.sb.length; out.staticList = STATIC_LIST.length; let cells = 0; STATIC.forEach(() => cells++); out.cells = cells;
 out.query = +(ms(i => { let c = 0; staticNear(-200 + (i % 400), -200 + (i % 300), 3, () => c++); }, 20000)*1000).toFixed(2) + ' µs';
 // plane taxiing at 15 m/s into Hukanaho's hut

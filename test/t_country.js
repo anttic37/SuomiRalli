@@ -17,7 +17,7 @@ for (const [k, v] of Object.entries(kinds)) { const F = v.F; settle(F.x, F.z); c
   if (k === 'village') { const [x, z] = featAt(F, F.L + 14, 5.5); await look('ct_sign', x, H(x, z) + 2, z, x + F.fx*12 + F.fz*4, H(x, z) + 3, z + F.fz*12 - F.fx*4); }
   if (k === 'village' || k === 'farm') { const [x, z] = featAt(F, k === 'farm' ? -8 : 20, k === 'farm' ? 14 : 0); await look('ct_' + k + '_near', x, H(x, z) + 2, z, x - F.fz*28 + F.fx*20, H(x, z) + 9, z + F.fx*28 + F.fz*20); } }
 // the forest rebuild with the places and roads in it
-{ const V = kinds.village.F; settle(V.x, V.z); const t0 = performance.now(); OUT.tx = 1e9; outerForest(V.x, V.z); out.tForest = +(performance.now() - t0).toFixed(1); out.trees = OUT.crowns.count + OUT.far.count; }
+{ const V = kinds.village.F; settle(V.x, V.z); const t0 = performance.now(); forestClear(); outerForest(V.x, V.z); out.tForest = +(performance.now() - t0).toFixed(1); out.trees = forestCount().all; }
 // a car on the village street, full throttle along it for 6 s: gravel grip, stays on the road; then a hard left into the yard (a house stops it)
 { const V = kinds.village.F, [x, z] = featAt(V, -V.L + 5, 0); settle(x, z); car.x = RI.x = x; car.z = RI.z = z; car.angle = RI.a = V.yaw; car.vx = car.vz = 0; car.speed = 0; step(3); keys.ArrowUp = true; let onRd = 0, f = 0;
   step(360, () => { camera.position.set(car.x, H(car.x, car.z) + 30, car.z); const [a] = featLoc(V, car.x, car.z); if (a > V.L - 5) return false; f++; if (car.outer && car.outer.road) onRd++; }); keys.ArrowUp = false; out.street = { kmh: Math.round(Math.hypot(car.vx, car.vz)*3.6), surface: car.surface, onRoad: +(onRd/f).toFixed(2), sb: OUT.sb.length }; }

@@ -342,7 +342,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 05.30 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 07.15 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -616,18 +616,24 @@ function airfieldCell(i, j) { const key = i + ',' + j; let A = OUT.af.get(key); 
   OUT.af.set(key, A); return A; }
 function airfieldsNear(x, z, R) { const out = [], i0 = Math.floor((x - R)/AF_CELL), i1 = Math.floor((x + R)/AF_CELL), j0 = Math.floor((z - R)/AF_CELL), j1 = Math.floor((z + R)/AF_CELL);
   for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) { const A = airfieldCell(i, j); if (A && Math.hypot(A.x - x, A.z - z) < R) out.push(A); } return out; }
+// (1.10. optimising) cell lookups for the hot paths — every tree, lattice point and wheel asks: the list for a block of cells is made once and
+// shared (callers only read it; it isn't filtered by distance, they test that themselves); wide asks (> 3 cells) still build a fresh list
+function cellsCached(C, CELL, get, x, z, R) { const i0 = Math.floor((x - R)/CELL), i1 = Math.floor((x + R)/CELL), j0 = Math.floor((z - R)/CELL), j1 = Math.floor((z + R)/CELL), di = i1 - i0, dj = j1 - j0;
+  const key = di <= 2 && dj <= 2 ? ((i0 + 50000)*100001 + (j0 + 50000))*9 + di*3 + dj : null; if (key !== null) { const l = C.get(key); if (l) return l; }
+  const out = []; for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) { const A = get(i, j); if (A) out.push(A); } if (key !== null) { if (C.size > 6000) C.clear(); C.set(key, out); } return out; }
+const _afC = new Map(), afCells = (x, z, R) => cellsCached(_afC, AF_CELL, airfieldCell, x, z, R);
 function afMask(A, x, z) { const dx = x - A.x, dz = z - A.z, a = dx*A.fx + dz*A.fz, b = dx*A.fz - dz*A.fx, ea = Math.max(0, Math.abs(a) - (AF_L/2 + 50)), eb = Math.max(0, Math.abs(b) - (AF_W/2 + 45)), e = Math.hypot(ea, eb);
   if (e >= 70) return 0; const t = e/70; return 1 - t*t*(3 - 2*t); }
 function hOuter(x, z) { const g = HG, X1 = g.x0 + (g.n - 1)*g.step, Z1 = g.z0 + (g.n - 1)*g.step, cx = Math.max(g.x0, Math.min(X1, x)), cz = Math.max(g.z0, Math.min(Z1, z));
   const he = H(cx, cz), d = Math.hypot(x - cx, z - cz), t = Math.min(1, d/260), s = t*t*(3 - 2*t); let h = he + (outerBase(x, z) - he)*s;
-  for (const A of airfieldsNear(x, z, AF_L/2 + 200)) { const m = afMask(A, x, z); if (m > 0) h += (A.h - h)*m; } return h; }
+  for (const A of afCells(x, z, AF_L/2 + 200)) { const m = afMask(A, x, z); if (m > 0) h += (A.h - h)*m; } return h; }
 function inBase(x, z, m) { const g = HG, X1 = g.x0 + (g.n - 1)*g.step; return x > g.x0 - (m || 0) && x < X1 + (m || 0) && z > g.z0 - (m || 0) && z < X1 + (m || 0); }
 // ── THE COUNTRYSIDE (1.10., Antti: "lisätään kaikki"): lakes with a sauna and a jetty, bogs with duckboards, farms with their field,
 // cowshed and barns, small villages with a shop and name signs, gravel roads joining them (and the village's own exits), power lines
 // along the roads. Like the airstrips everything is a hash of its 1.1 km cell — nothing is stored, it is the same every time. The ground
 // shapes itself (lake bowls, bog hollows, flat yards) in hOuterRaw; outside the village H() is the drawn 20 m lattice itself (what you
 // see is what you drive on). Props are built near the camera, one merged vertex-coloured mesh a place, dropped when far (fog: 900 m).
-const FC = 1100, FEAT = new Map(), RD = { edges: new Map(), buckets: new Map(), done: new Set(), exits: false }, RBK = 100;
+const FC = 1100, FEAT = new Map(), RD = { edges: new Map(), buckets: new Map(), done: new Set(), cell: new Map(), exits: false }, RBK = 100;
 const VIL_NAMES = ['Kuusela', 'Hirvelä', 'Korpela', 'Rajala', 'Niemelä', 'Koivula', 'Haapala', 'Mäkelä', 'Ahola', 'Peltola', 'Suolahti', 'Kaitajärvi'];
 const LAKE_NAMES = ['Ahvenlampi', 'Kotajärvi', 'Särkijärvi', 'Hauklampi', 'Mustalampi', 'Kivijärvi', 'Lahnajärvi', 'Myllylampi'];
 const smooth01 = (t) => { t = Math.max(0, Math.min(1, t)); return t*t*(3 - 2*t); };
@@ -648,8 +654,7 @@ function featWob(F, a) { return 1 + 0.28*vnoise(Math.sin(a)*1.6 + F.s, Math.cos(
 function featQ(F, x, z) { const dx = x - F.x, dz = z - F.z, d = Math.hypot(dx, dz); return d/(F.R*featWob(F, Math.atan2(dx, dz))); }
 function featLoc(F, x, z) { const dx = x - F.x, dz = z - F.z; return [dx*F.fx + dz*F.fz, dx*F.fz - dz*F.fx]; }   // (along the yaw, across it)
 function featAt(F, a, b) { return [F.x + F.fx*a + F.fz*b, F.z + F.fz*a - F.fx*b]; }
-function featsNear(x, z, R) { const out = [], i0 = Math.floor((x - R)/FC), i1 = Math.floor((x + R)/FC), j0 = Math.floor((z - R)/FC), j1 = Math.floor((z + R)/FC);
-  for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) { const F = featCell(i, j); if (F && Math.abs(F.x - x) < R + 450 && Math.abs(F.z - z) < R + 450) out.push(F); } return out; }
+const _fnC = new Map(), featsNear = (x, z, R) => cellsCached(_fnC, FC, featCell, x, z, R);   // (every place in the cells round (x, z); read-only)
 function waterAt(x, z) { if (inBase(x, z, 0)) return -Infinity; for (const F of featsNear(x, z, 300)) if (F.kind === 'lake' && featQ(F, x, z) < 1) return F.level; return -Infinity; }
 // the ground's shape round a place (applied to hOuter's hills)
 function featGround(F, x, z, h) {
@@ -665,11 +670,13 @@ function featGround(F, x, z, h) {
   return h; }
 function hOuterRaw(x, z) { let h = hOuter(x, z); for (const F of featsNear(x, z, 420)) h = featGround(F, x, z, h); return h; }
 // the lattice: each 20 m point's [height, airstrip mask, noise, tint r, g, b, tint weight] — cached; the ground mesh and H() both read it
-function latPt(x, z) { const C = OUT.gc || (OUT.gc = new Map()), key = x*1e6 + z; let v = C.get(key); if (v !== undefined) return v; if (C.size > 150000) C.clear();
+function latPt(x, z) { const C = OUT.gc || (OUT.gc = new Map()), key = x*1e6 + z; let v = C.get(key); if (v !== undefined) return v;
+  if (OUT.gc0) { v = OUT.gc0.get(key); if (v !== undefined) { C.set(key, v); return v; } }   // (the older generation: what's still in use moves up)
+  if (C.size > 90000) { OUT.gc0 = C; OUT.gc = new Map(); return latPt(x, z); }   // (no wholesale clear: the last 90k points stay one lookup away)
   if (inBase(x, z, -0.1)) v = [H(x, z), 0, 0.5 + 0.5*vnoise(x/90, z/90), 0, 0, 0, 0];
-  else { let af = 0; for (const A of airfieldsNear(x, z, AF_L/2 + 200)) af = Math.max(af, afMask(A, x, z)); v = [hOuterRaw(x, z), af, 0.5 + 0.5*vnoise(x/90, z/90), 0, 0, 0, 0];
+  else { let af = 0; for (const A of afCells(x, z, AF_L/2 + 200)) af = Math.max(af, afMask(A, x, z)); v = [hOuterRaw(x, z), af, 0.5 + 0.5*vnoise(x/90, z/90), 0, 0, 0, 0];
     for (const F of featsNear(x, z, 420)) featTint(F, x, z, v); }
-  C.set(key, v); return v; }
+  OUT.gc.set(key, v); return v; }
 function featTint(F, x, z, v) { const put = (r, g, b, w) => { if (w > v[6]) { v[3] = r; v[4] = g; v[5] = b; v[6] = w; } };
   if (F.kind === 'lake') { const q = featQ(F, x, z); if (q < 1.12) put(q < 0.9 ? 0.4 : 0.66, q < 0.9 ? 0.42 : 0.6, q < 0.9 ? 0.3 : 0.42, smooth01((1.12 - q)/0.1)); }   // (sand at the shore, mud under the water)
   else if (F.kind === 'bog') { const q = featQ(F, x, z), n = vnoise(x/30 + 5, z/30); if (q < 1.25) put(0.55 + 0.12*n, 0.52 + 0.08*n, 0.3, smooth01((1.25 - q)/0.35)*0.95); }
@@ -682,21 +689,22 @@ function hLat(x, z) { const g = HG, fx = (x - g.x0)/LAT, fz = (z - g.z0)/LAT, ix
 // ── the gravel roads: hub to hub between neighbouring cells (a village's street ends, a farm's yard, beside a lake), and out of the village
 function hubOf(i, j) { const F = featCell(i, j); if (F) return F; return { hub: { x: i*FC + FC/2 + (hsh(i, j, 120) - 0.5)*500, z: j*FC + FC/2 + (hsh(i, j, 121) - 0.5)*500 }, none: true }; }
 function hubToward(F, x, z) { if (F.kind === 'village') { const [e0, e1] = F.ends; return Math.hypot(e0.x - x, e0.z - z) < Math.hypot(e1.x - x, e1.z - z) ? e0 : e1; } return F.hub; }
-function roadOk(x, z, base) { if (!base && inBase(x, z, 60)) return false; for (const A of airfieldsNear(x, z, AF_L/2 + 200)) if (afMask(A, x, z) > 0.02) return false;
+function roadOk(x, z, base) { if (!base && inBase(x, z, 60)) return false; for (const A of afCells(x, z, AF_L/2 + 200)) if (afMask(A, x, z) > 0.02) return false;
   for (const F of featsNear(x, z, 300)) { if (F.kind === 'lake' && featQ(F, x, z) < 1.2) return false; const [a, b] = featLoc(F, x, z); if (F.kind === 'farm' && ((Math.abs(a - 100) < 86 && Math.abs(b) < 58) || (a > -52 && a < 4 && Math.abs(b) < 34))) return false; if (F.kind === 'village' && Math.abs(a) < F.L - 4 && Math.abs(b) < 50) return false; } return true; }
 function roadPath(P0, P1, seed, base) { const L = Math.hypot(P1.x - P0.x, P1.z - P0.z); if (L < 30) return null; const n = Math.ceil(L/10), nx = (P1.z - P0.z)/L, nz = -(P1.x - P0.x)/L, W = Math.min(70, L*0.09), pts = [];
   for (let k = 0; k <= n; k++) { const t = k/n, w = W*Math.sin(Math.PI*t)*vnoise(t*L/240 + seed, seed*0.7), x = P0.x + (P1.x - P0.x)*t + nx*w, z = P0.z + (P1.z - P0.z)*t + nz*w; if (k > 2 && k < n - 2 && !roadOk(x, z, base)) return null; pts.push({ x, z }); }
   return pts; }
-function roadAdd(key, pts, power) { const E = { key, pts, power, x0: Infinity, z0: Infinity, x1: -Infinity, z1: -Infinity }; RD.edges.set(key, E); if (!pts) return E;
+function roadAdd(key, pts, power, ci, cj) { const E = { key, pts, power, ci, cj, x0: Infinity, z0: Infinity, x1: -Infinity, z1: -Infinity }; RD.edges.set(key, E); if (!pts) return E;
   for (let k = 0; k < pts.length - 1; k++) { const a = pts[k], b = pts[k + 1], s = { ax: a.x, az: a.z, bx: b.x, bz: b.z };
     E.x0 = Math.min(E.x0, a.x); E.z0 = Math.min(E.z0, a.z); E.x1 = Math.max(E.x1, a.x); E.z1 = Math.max(E.z1, a.z);
     for (let i = Math.floor((Math.min(a.x, b.x) - 9)/RBK); i <= Math.floor((Math.max(a.x, b.x) + 9)/RBK); i++) for (let j = Math.floor((Math.min(a.z, b.z) - 9)/RBK); j <= Math.floor((Math.max(a.z, b.z) + 9)/RBK); j++) {
       const bk = i*100003 + j; let l = RD.buckets.get(bk); if (!l) RD.buckets.set(bk, l = []); l.push(s); } }
-  return E; }
+  const ck = ci*100003 + cj; let c = RD.cell.get(ck); if (!c) RD.cell.set(ck, c = { keys: [], x0: Infinity, z0: Infinity, x1: -Infinity, z1: -Infinity }); c.keys.push(key);   // (the cell that owns it: built and dropped with it)
+  c.x0 = Math.min(c.x0, E.x0); c.z0 = Math.min(c.z0, E.z0); c.x1 = Math.max(c.x1, E.x1); c.z1 = Math.max(c.z1, E.z1); return E; }
 function roadEdge(i, j, dir) { const key = dir + i + ',' + j; if (RD.edges.has(key)) return RD.edges.get(key);
   const A = hubOf(i, j), B = dir === 'E' ? hubOf(i + 1, j) : hubOf(i, j + 1), live = (k) => !k.none && (k.kind === 'farm' || k.kind === 'village');
   const p = live(A) || live(B) ? 0.85 : 0.45; if (hsh(i, j, dir === 'E' ? 130 : 131) >= p) return roadAdd(key, null);
-  const PA = hubToward(A, B.hub.x, B.hub.z), PB = hubToward(B, PA.x, PA.z); return roadAdd(key, roadPath(PA, PB, hsh(i, j, dir === 'E' ? 132 : 133)*50, false), hsh(i, j, dir === 'E' ? 134 : 135) < 0.5); }
+  const PA = hubToward(A, B.hub.x, B.hub.z), PB = hubToward(B, PA.x, PA.z); return roadAdd(key, roadPath(PA, PB, hsh(i, j, dir === 'E' ? 132 : 133)*50, false), hsh(i, j, dir === 'E' ? 134 : 135) < 0.5, i, j); }
 function roadExits() { if (RD.exits) return; RD.exits = true; outerExitNear(0, 0);   // (OUT.exits: where the village's roads run out of it)
   const seen = []; OUT.exits.forEach((E, k) => { if (seen.some(q => Math.hypot(q.x - E.x, q.z - E.z) < 80)) return; seen.push(E);
     let dx = E.dx, dz = E.dz; const ox = Math.abs(E.x) >= Math.abs(E.z) ? Math.sign(E.x) : 0, oz = ox ? 0 : Math.sign(E.z); if (dx*ox + dz*oz < 0.6) { dx = ox; dz = oz; }   // (a road running along the edge: out along the edge's normal)
@@ -704,10 +712,11 @@ function roadExits() { if (RD.exits) return; RD.exits = true; outerExitNear(0, 0
     const M = { x: E.x + dx*run, z: E.z + dz*run }; let best = null, bd = Infinity;
     for (let i = Math.floor(M.x/FC) - 2; i <= Math.floor(M.x/FC) + 2; i++) for (let j = Math.floor(M.z/FC) - 2; j <= Math.floor(M.z/FC) + 2; j++) { const H0 = hubOf(i, j), P = hubToward(H0, M.x, M.z), d = Math.hypot(P.x - M.x, P.z - M.z) + (H0.none ? 300 : 0); if (d < bd && roadPath(M, P, 3 + k, false)) { bd = d; best = P; } }
     const lane = []; for (let t = 0; t <= run; t += 10) lane.push({ x: E.x + dx*t, z: E.z + dz*t }); const rest = best ? roadPath(M, best, 3 + k, false) : null;
-    roadAdd('X' + k, rest ? lane.concat(rest.slice(1)) : lane, true); }); }
+    roadAdd('X' + k, rest ? lane.concat(rest.slice(1)) : lane, true, Math.floor(E.x/FC), Math.floor(E.z/FC)); }); }
 function roadsEnsure(x, z) { const ci = Math.floor(x/FC), cj = Math.floor(z/FC), key = ci*100003 + cj; if (RD.done.has(key)) return; RD.done.add(key); roadExits();
-  for (let i = ci - 2; i <= ci + 1; i++) for (let j = cj - 2; j <= cj + 1; j++) { roadEdge(i, j, 'E'); roadEdge(i, j, 'N'); const F = featCell(i, j);
-    if (F && F.kind === 'village' && !RD.edges.has('V' + F.key)) { const pts = []; for (let a = -F.L; a <= F.L; a += 10) { const [x, z] = featAt(F, a, 0); pts.push({ x, z }); } roadAdd('V' + F.key, pts, true); } } }   // (the village street, its power line along it)
+  for (let i = ci - 2; i <= ci + 1; i++) for (let j = cj - 2; j <= cj + 1; j++) roadCellEnsure(i, j); }
+function roadCellEnsure(i, j) { roadExits(); roadEdge(i, j, 'E'); roadEdge(i, j, 'N'); const F = featCell(i, j);
+  if (F && F.kind === 'village' && !RD.edges.has('V' + F.key)) { const pts = []; for (let a = -F.L; a <= F.L; a += 10) { const [x, z] = featAt(F, a, 0); pts.push({ x, z }); } roadAdd('V' + F.key, pts, true, i, j); } }   // (the village street, its power line along it)
 function roadDist(x, z) { roadsEnsure(x, z); const l = RD.buckets.get(Math.floor(x/RBK)*100003 + Math.floor(z/RBK)); if (!l) return Infinity; let best = Infinity;
   for (const s of l) { const dx = s.bx - s.ax, dz = s.bz - s.az, L2 = dx*dx + dz*dz || 1, t = Math.max(0, Math.min(1, ((x - s.ax)*dx + (z - s.az)*dz)/L2)), d = Math.hypot(x - s.ax - dx*t, z - s.az - dz*t); if (d < best) best = d; } return best; }
 // what's under a wheel out there: { road, bog, water: depth }
@@ -717,6 +726,12 @@ function outerSurface(x, z) { const o = { road: false, bog: 0, water: 0 }; if (i
 function outerSplash(OS, spd, drown) { const y = Y(car.x, car.z), wl = OS.water > 0 ? y + OS.water : y, n = Math.min(4, spd*0.25);
   for (let i = 0; i < n; i++) if (Math.random() < 0.5) { const a = Math.random()*6.3, w = OS.water > 0; lifeFx.emit(car.x + Math.sin(a)*1.2, wl + 0.1, car.z + Math.cos(a)*1.2, Math.sin(a)*1.5 + car.vx*0.2, 1.5 + Math.random()*2.5, Math.cos(a)*1.5 + car.vz*0.2, 0.6 + Math.random()*0.4, 0.5, 1.4, 0.6, w ? 0.85 : 0.35, w ? 0.92 : 0.28, w ? 0.98 : 0.18, w ? 0.8 : 0.3, w ? 0.88 : 0.25, w ? 0.95 : 0.16); }
   if (drown && !car.drownMsg) { car.drownMsg = true; pizzaMsg(T('🌊 AUTO UPPOSI JÄRVEEN – R = takaisin'), true); } if (!drown && OS.water < 0.3) car.drownMsg = false; }
+// a long journey leaves the caches behind it: past a size they're pruned to what's built (everything else is a hash, made again when needed)
+function countryPrune() { const fj = OUT.fjob && OUT.fjob.key; for (const k of FEAT.keys()) if (!(OUT.fG && OUT.fG.has(k)) && k !== fj) FEAT.delete(k); _fnC.clear();
+  for (const k of OUT.af.keys()) if (!OUT.afG.has(k)) OUT.af.delete(k); _afC.clear();
+  const keep = new Set(); for (const k of RD.edges.keys()) if (k[0] === 'X') keep.add(k); if (OUT.rG) for (const k of OUT.rG.keys()) { const c = RD.cell.get(k); if (c) for (const e of c.keys) keep.add(e); }
+  const old = RD.edges; RD.edges = new Map(); RD.buckets = new Map(); RD.cell = new Map(); RD.done = new Set(); RD.pre = new Set(); for (const k of keep) { const E = old.get(k); roadAdd(k, E.pts, E.power, E.ci, E.cj); }
+  if (OUT.rG) for (const [k, G] of OUT.rG) if (G) G.userData.box = RD.cell.get(k) || null; }
 // trees keep off the places and the roads
 function featBlocksTree(x, z) { for (const F of featsNear(x, z, 300)) { if (F.kind === 'lake') { if (featQ(F, x, z) < 1.3) return true; continue; } if (F.kind === 'bog') { if (featQ(F, x, z) < 0.85) return true; continue; }
     const [a, b] = featLoc(F, x, z); if (F.kind === 'farm' && (Math.hypot(a + 8, b) < 58 || (Math.abs(a - 100) < 92 && Math.abs(b) < 64))) return true; if (F.kind === 'village' && Math.abs(a) < F.L + 25 && Math.abs(b) < 48) return true; }
@@ -746,11 +761,14 @@ function outShed(HM, S, x, z, w, d, th, wallM, roofM, h, o) { o = o || {}; const
   if (o.door !== false) { const big = o.big, [px, pz] = alongZ ? rot(0, d/2 + 0.05) : rot(w/2 + 0.05, 0); add(unitBox, big ? P.trimMat : P.darkMat, px, y0 + 0.1 + (big ? 1.4 : 0.95), pz, th, alongZ ? (big ? 3.2 : 0.85) : 0.1, big ? 2.8 : 1.9, alongZ ? 0.1 : (big ? 3.2 : 0.85));
     if (big) { const [qx, qz] = alongZ ? rot(0, d/2 + 0.08) : rot(w/2 + 0.08, 0); add(unitBox, P.mat ? wallM : wallM, qx, y0 + 0.1 + 1.4, qz, th, alongZ ? 2.9 : 0.1, 2.5, alongZ ? 0.1 : 2.9); } }   // (a barn door: white frame, boards inside)
   if (S) S.push({ x, z, yaw: th, hw: w/2 + 0.1, hl: d/2 + 0.1, kind: 'lm' }); }
-function mergerInto(HM, G) { HM.fuse(k => /^(trim|door\d*|glass|sokkeli|step)$/.test(k) ? 'n' : 's'); const list = []; HM.build(list); for (const m of list) { scene.remove(m); m.userData.shared = true; if (/^(trim|door\d*|glass|step)$/.test(m.userData.key)) m.castShadow = false; G.add(m); } }
+function mergerInto(HM, G) { const it = mergerIntoGen(HM, G); while (!it.next().done); }
+function* mergerIntoGen(HM, G) { HM.fuse(k => /^(trim|door\d*|glass|sokkeli|step)$/.test(k) ? 'n' : 's'); yield;   // (a mesh a step: the merging is the costly part of a village)
+  for (const key of Object.keys(HM.groups)) { const g = HM.groups[key], m = new THREE.Mesh(HM.geometryOf(key), g.mat); m.castShadow = !/^(trim|door\d*|glass|step)$/.test(g.key); m.receiveShadow = true; m.userData.key = g.key || key; m.userData.shared = true; G.add(m); yield; } }
 // signs (a canvas texture each: village names, the shop) — kept with the place's group and disposed with it
-function featSign(G, text, x, y, z, yaw, w, h, bg, fg) { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d'); g.fillStyle = bg; g.fillRect(0, 0, 256, 64); g.strokeStyle = fg; g.lineWidth = 4; g.strokeRect(4, 4, 248, 56);
+const SIGN_TEX = new Map();   // (a sign's texture made once per text: the names come round again)
+function featSign(G, text, x, y, z, yaw, w, h, bg, fg) { const sk = text + bg + fg; let tex = SIGN_TEX.get(sk); if (!tex) { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d'); g.fillStyle = bg; g.fillRect(0, 0, 256, 64); g.strokeStyle = fg; g.lineWidth = 4; g.strokeRect(4, 4, 248, 56);
   g.fillStyle = fg; g.font = '900 ' + (text.length > 11 ? 30 : 36) + 'px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 128, 34);
-  const tex = new THREE.CanvasTexture(c), m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, side: THREE.DoubleSide })); m.position.set(x, y, z); m.rotation.y = yaw; G.add(m); return m; }
+  tex = new THREE.CanvasTexture(c); tex.keep = true; SIGN_TEX.set(sk, tex); } const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, side: THREE.DoubleSide })); m.position.set(x, y, z); m.rotation.y = yaw; G.add(m); return m; }
 // a field: a sheet on the ground lattice's own points (so it lies exactly on the drawn ground), the furrows a texture, alpha outside the field
 const FIELD_TEX = [];
 function fieldTex(crop) { if (FIELD_TEX[crop]) return FIELD_TEX[crop]; const c = document.createElement('canvas'); c.width = 64; c.height = 256; const g = c.getContext('2d');
@@ -765,18 +783,19 @@ function fieldMesh(F) { const f = F.field, [cx, cz] = featAt(F, f.a, f.b), R = M
   const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setIndex(idx); geo.computeVertexNormals();
   const t = fieldTex(F.crop), m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: t, roughness: 0.95, transparent: false, alphaTest: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2 })); t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; m.receiveShadow = true; return m; }
 // each kind of place
-function featBuild(F) { const G = new THREE.Group(), K = kitNew(), HM = new Merger(0), S = [], at = (a, b) => featAt(F, a, b), h = F.h, yaw = F.yaw;
+function featBuild(F) { const it = featBuildGen(F); let r; while (!(r = it.next()).done); return r.value; }   // (at once: tests)
+function* featBuildGen(F) { const G = new THREE.Group(), K = kitNew(), HM = new Merger(0), S = [], at = (a, b) => featAt(F, a, b), h = F.h, yaw = F.yaw;
   if (F.kind === 'farm') {
-    const P = houseMats(), [hx0, hz0] = at(10, 0); { const [x, z] = at(-8, 0), r = h(3); outerHouse(HM, S, x, z, r < 0.4 ? 7.0 : 8.2, r < 0.4 ? 7.2 : 12, yaw + Math.PI/2, 3 + Math.floor(h(4)*900), hx0, hz0); }   // the farmhouse
-    { const [x, z] = at(-34, 10); outShed(HM, S, x, z, 11, 24, yaw, P.eraWall.rinta[3], P.eraRoof.rinta[0], 4.2, { win: 6, big: true }); }   // the cowshed (navetta): punamulta boards, a row of small windows, the barn door at the end
-    { const [x, z] = at(6, -26); outShed(HM, S, x, z, 4.2, 5.5, yaw, barnMats()[2], P.eraRoof.matala[0], 2.4, { win: 1 }); const [cx, cz] = at(6 + 1.2, -26 + 0.8); kitAdd(K, KIT.box, cx, H(cx, cz) + 3.6, cz, yaw, 0.5, 1.6, 0.5, 0x6a6a66); }   // the sauna (and its chimney)
-    { const [x, z] = at(-16, -24); outShed(HM, S, x, z, 4.5, 6, yaw + 0.05, P.eraWall.rinta[3], P.eraRoof.rinta[1], 2.6); }   // the granary (aitta)
-    const f = F.field; for (let k = 0; k < 2; k++) { const a = f.a + (h(10 + k) - 0.5)*f.hl*1.4, b = (k ? -1 : 1)*f.hw*0.55, [x, z] = at(a, b); outShed(HM, S, x, z, 6.5, 9, yaw + (h(12 + k) - 0.5)*0.3, barnMats()[k], P.eraRoof.rinta[3], 3.4, { big: true, rh: 2.4 }); }   // barns (lato) on the field: grey boards
+    const P = houseMats(), [hx0, hz0] = at(10, 0); { const [x, z] = at(-8, 0), r = h(3); outerHouse(HM, S, x, z, r < 0.4 ? 7.0 : 8.2, r < 0.4 ? 7.2 : 12, yaw + Math.PI/2, 3 + Math.floor(h(4)*900), hx0, hz0); yield; }   // the farmhouse
+    { const [x, z] = at(-34, 10); outShed(HM, S, x, z, 11, 24, yaw, P.eraWall.rinta[3], P.eraRoof.rinta[0], 4.2, { win: 6, big: true }); yield; }   // the cowshed (navetta): punamulta boards, a row of small windows, the barn door at the end
+    { const [x, z] = at(6, -26); outShed(HM, S, x, z, 4.2, 5.5, yaw, barnMats()[2], P.eraRoof.matala[0], 2.4, { win: 1 }); const [cx, cz] = at(6 + 1.2, -26 + 0.8); kitAdd(K, KIT.box, cx, H(cx, cz) + 3.6, cz, yaw, 0.5, 1.6, 0.5, 0x6a6a66); yield; }   // the sauna (and its chimney)
+    { const [x, z] = at(-16, -24); outShed(HM, S, x, z, 4.5, 6, yaw + 0.05, P.eraWall.rinta[3], P.eraRoof.rinta[1], 2.6); yield; }   // the granary (aitta)
+    const f = F.field; for (let k = 0; k < 2; k++) { const a = f.a + (h(10 + k) - 0.5)*f.hl*1.4, b = (k ? -1 : 1)*f.hw*0.55, [x, z] = at(a, b); outShed(HM, S, x, z, 6.5, 9, yaw + (h(12 + k) - 0.5)*0.3, barnMats()[k], P.eraRoof.rinta[3], 3.4, { big: true, rh: 2.4 }); yield; }   // barns (lato) on the field: grey boards
     if (F.crop === 0) for (let k = 0; k < 8; k++) { const [x, z] = at(f.a + (h(20 + k) - 0.5)*f.hl*1.6, (h(30 + k) - 0.5)*f.hw*1.6); kitAdd(K, KIT.cyl, x, H(x, z) + 0.6, z, h(40 + k)*3, 1.25, 1.2, 1.25, 0xf2f2ee, Math.PI/2); }   // wrapped bales
     { const [x, z] = at(-8, 14); kitAdd(K, KIT.box, x, H(x, z) + 1.2, z, yaw, 0.12, 2.4, 0.12, 0x6a6a6a); kitAdd(K, KIT.box, x, H(x, z) + 2.5, z, yaw, 0.5, 0.35, 0.3, 0xe8e2d0); }   // the yard light
-    G.add(fieldMesh(F)); }
+    yield; G.add(fieldMesh(F)); }
   if (F.kind === 'village') { let n = 0;
-    for (let k = 0; k < 13; k++) { const sd = k % 2 ? 1 : -1, a = -F.L + 18 + k*(2*F.L - 36)/12 + (h(50 + k) - 0.5)*6; if (h(60 + k) < 0.12) continue; const b = sd*(13 + h(70 + k)*5), [x, z] = at(a, b);
+    for (let k = 0; k < 13; k++) { if (k) yield; const sd = k % 2 ? 1 : -1, a = -F.L + 18 + k*(2*F.L - 36)/12 + (h(50 + k) - 0.5)*6; if (h(60 + k) < 0.12) continue; const b = sd*(13 + h(70 + k)*5), [x, z] = at(a, b);
       const [sx0, sz0] = at(a, 0); if (k === 6) { outerHouse(HM, S, x, z, 10, 17, yaw, 2 + 3*Math.floor(h(55)*300)*4 + 1, sx0, sz0); const [sx, sz] = at(a, sd*(b*sd - 5.9)); featSign(G, 'KYLÄKAUPPA', sx, H(x, z) + 4.2, sz, yaw + (sd > 0 ? -Math.PI/2 : Math.PI/2), 5, 1.25, '#1a4a9a', '#f4f0e0'); continue; }   // the shop
       { const e = h(100 + k), [ww, dd] = e < 0.35 ? [6.6 + h(80 + k)*0.5, 6.8 + h(90 + k)*0.4] : e < 0.7 ? [7.6 + h(80 + k)*0.8, 10 + h(90 + k)*1.5] : [7 + h(80 + k)*0.6, 12 + h(90 + k)*2]; outerHouse(HM, S, x, z, ww, dd, yaw, Math.floor(h(110 + k)*100000), sx0, sz0); } n++;   // (rintamamiestalo, kasari or a long matala, by size)
       const [mx, mz] = at(a + 3, sd*6.5); kitAdd(K, KIT.box, mx, H(mx, mz) + 0.55, mz, yaw, 0.08, 1.1, 0.08, 0x5a4a3a); kitAdd(K, KIT.box, mx, H(mx, mz) + 1.15, mz, yaw, 0.3, 0.25, 0.45, 0x2a5a9a); }   // a mailbox
@@ -795,76 +814,117 @@ function featBuild(F) { const G = new THREE.Group(), K = kitNew(), HM = new Merg
       kitAdd(K, KIT.cyl, x, y + t/2, z, 0, 0.12, t, 0.12, dead ? 0x8a8478 : 0x4a3a2a); if (!dead) kitAdd(K, KIT.cone, x, y + t*0.75, z, 0, 1.1 + t*0.15, t*0.7, 1.1 + t*0.15, 0x3a5a32); }
     for (let k = -14; k <= 14; k++) { const [x, z] = at(k*2.1, 0), y = H(x, z); for (const s of [-0.18, 0.18]) { const [px, pz] = at(k*2.1, s); kitAdd(K, KIT.box, px, y + 0.12, pz, yaw, 0.26, 0.1, 2.0, 0x8a7a5a); } }   // duckboards
     for (let k = 0; k < 7; k++) { const b = h(350 + k)*6.28, rr = F.R*0.6*h(360 + k), x = F.x + Math.sin(b)*rr, z = F.z + Math.cos(b)*rr; kitAdd(K, KIT.cyl, x, H(x, z) + 0.06, z, 0, 3 + h(370 + k)*4, 0.04, 2 + h(380 + k)*3, 0x2a3a3a); } }   // pools
-  if (K.p.length) G.add(kitMesh(K)); if (Object.keys(HM.groups).length) mergerInto(HM, G); F.solid = S; scene.add(G); return G; }
+  yield; if (K.p.length) G.add(kitMesh(K)); yield; if (Object.keys(HM.groups).length) yield* mergerIntoGen(HM, G); F.solid = S; scene.add(G); return G; }
 // a road's things: the gravel ribbon, and on some the power line (poles every ~50 m, three sagging wires)
-let _gravTex = null;
-function roadBuild(E) { const G = new THREE.Group(), P = E.pts, pos = [], col = [], idx = [], L = [0];
+const ROADM = { rib: null, wire: null };
+function* roadGeom(E, R) { const P = E.pts, pos = R.pos, col = R.col, idx = R.idx, base = pos.length/3, L = [0];
   for (let k = 1; k < P.length; k++) L.push(L[k - 1] + Math.hypot(P[k].x - P[k - 1].x, P[k].z - P[k - 1].z));
   const tot = L[L.length - 1], n = Math.ceil(tot/3), pt = (s) => { let k = 1; while (k < P.length - 1 && L[k] < s) k++; const t = (s - L[k - 1])/((L[k] - L[k - 1]) || 1); return { x: P[k - 1].x + (P[k].x - P[k - 1].x)*t, z: P[k - 1].z + (P[k].z - P[k - 1].z)*t }; };
   const across = [-2.9, -1.4, 0, 1.4, 2.9], C = new THREE.Color(); let prev = pt(0);
-  for (let k = 0; k <= n; k++) { const s = Math.min(tot, k*3), p = pt(s), q = pt(Math.min(tot, s + 1.5)), r = pt(Math.max(0, s - 1.5)), dx = q.x - r.x, dz = q.z - r.z, l = Math.hypot(dx, dz) || 1, nx = dz/l, nz = -dx/l;
+  for (let k = 0; k <= n; k++) { if (k % 9 === 8) yield; const s = Math.min(tot, k*3), p = pt(s), q = pt(Math.min(tot, s + 1.5)), r = pt(Math.max(0, s - 1.5)), dx = q.x - r.x, dz = q.z - r.z, l = Math.hypot(dx, dz) || 1, nx = dz/l, nz = -dx/l;
     for (const u of across) { const x = p.x + nx*u, z = p.z + nz*u, y = H(x, z) + 0.14, edge = Math.abs(u) > 2, mid = Math.abs(u) < 0.1, v = vnoise(x/3, z/3)*0.05; pos.push(x, y, z);
       C.setRGB(0.62 + v - (edge ? 0.08 : 0) + (mid ? 0.03 : 0), 0.57 + v - (edge ? 0.07 : 0), 0.47 + v - (edge ? 0.06 : 0)); col.push(C.r, C.g, C.b); } prev = p; }
-  const A = across.length; for (let k = 0; k < n; k++) for (let i = 0; i < A - 1; i++) { const a = k*A + i, b = a + 1, c = a + A, d = c + 1; idx.push(a, c, b, b, c, d); }
-  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); geo.setIndex(idx); geo.computeVertexNormals();
-  const rib = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 })); rib.receiveShadow = true; G.add(rib);
-  const S = []; if (E.power) { const K = kitNew(), wires = [], tops = []; for (let s = 20; s < tot - 10; s += 48) { const p = pt(s), q = pt(Math.min(tot, s + 2)), dx = q.x - p.x, dz = q.z - p.z, l = Math.hypot(dx, dz) || 1, nx = dz/l, nz = -dx/l, x = p.x + nx*7, z = p.z + nz*7, y = H(x, z), a = Math.atan2(dx, dz);
+  const A = across.length; for (let k = 0; k < n; k++) for (let i = 0; i < A - 1; i++) { const a = base + k*A + i, b = a + 1, c = a + A, d = c + 1; idx.push(a, c, b, b, c, d); }
+  const S = R.S; if (E.power) { const K = R.K, wires = R.wires, tops = []; for (let s = 20; s < tot - 10; s += 48) { if (s % 144 === 116) yield; const p = pt(s), q = pt(Math.min(tot, s + 2)), dx = q.x - p.x, dz = q.z - p.z, l = Math.hypot(dx, dz) || 1, nx = dz/l, nz = -dx/l, x = p.x + nx*7, z = p.z + nz*7, y = H(x, z), a = Math.atan2(dx, dz);
       kitAdd(K, KIT.cyl, x, y + 4.2, z, 0, 0.26, 8.4, 0.26, 0x4a3a2a); kitAdd(K, KIT.box, x, y + 8.1, z, a, 2.4, 0.14, 0.16, 0x4a3a2a); S.push({ x, z, yaw: 0, hw: 0.2, hl: 0.2, kind: 'pole' });
       const t = [-1.05, 0, 1.05].map(o => new THREE.Vector3(x + Math.cos(a)*o, y + 8.25 + (o ? 0 : 0.35), z - Math.sin(a)*o)); if (tops.length) { const T0 = tops[tops.length - 1]; for (let w = 0; w < 3; w++) for (let m = 0; m < 8; m++) { const t0 = m/8, t1 = (m + 1)/8, A0 = T0[w], B0 = t[w], sag = (u) => -1.1*4*u*(1 - u);
           wires.push(A0.x + (B0.x - A0.x)*t0, A0.y + (B0.y - A0.y)*t0 + sag(t0), A0.z + (B0.z - A0.z)*t0, A0.x + (B0.x - A0.x)*t1, A0.y + (B0.y - A0.y)*t1 + sag(t1), A0.z + (B0.z - A0.z)*t1); } } tops.push(t);
-      for (const v of t) kitAdd(K, KIT.cyl, v.x, v.y - 0.1, v.z, 0, 0.1, 0.2, 0.1, 0xe8e8e0); }
-    if (K.p.length) G.add(kitMesh(K)); if (wires.length) { const wg = new THREE.BufferGeometry(); wg.setAttribute('position', new THREE.Float32BufferAttribute(wires, 3)); G.add(new THREE.LineSegments(wg, new THREE.LineBasicMaterial({ color: 0x1a1a1a }))); } }
-  E.solid = S; scene.add(G); return G; }
-function groupDrop(G) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material !== KIT.mat && !o.userData.shared) { if (o.material.map && !FIELD_TEX.includes(o.material.map)) o.material.map.dispose(); o.material.dispose(); } }); }
+      for (const v of t) kitAdd(K, KIT.box, v.x, v.y - 0.1, v.z, 0, 0.1, 0.2, 0.1, 0xe8e8e0); }
+  } }
+function roadCellBuild(i, j) { const it = roadCellGen(i, j); let r; while (!(r = it.next()).done); return r.value; }
+function* roadCellGen(i, j) { const c = RD.cell.get(i*100003 + j), G = new THREE.Group(), R = { pos: [], col: [], idx: [], K: kitNew(), wires: [], S: [] };
+  if (c) for (const k of c.keys) { const E = RD.edges.get(k); if (E && E.pts) { yield* roadGeom(E, R); yield; } }
+  if (!ROADM.rib) { ROADM.rib = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }); ROADM.wire = new THREE.LineBasicMaterial({ color: 0x1a1a1a }); }
+  if (R.pos.length) { const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(R.pos, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(R.col, 3)); geo.setIndex(R.idx); geo.computeVertexNormals(); geo.computeBoundingSphere();
+    const rib = new THREE.Mesh(geo, ROADM.rib); rib.receiveShadow = true; rib.userData.shared = true; G.add(rib); }
+  if (R.K.p.length) G.add(kitMesh(R.K)); if (R.wires.length) { const wg = new THREE.BufferGeometry(); wg.setAttribute('position', new THREE.Float32BufferAttribute(R.wires, 3)); wg.computeBoundingSphere(); const w = new THREE.LineSegments(wg, ROADM.wire); w.userData.shared = true; G.add(w); }
+  G.userData = { ci: i, cj: j, solid: R.S, box: c || null }; scene.add(G); return G; }
+function groupDrop(G) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material !== KIT.mat && !o.userData.shared) { if (o.material.map && !FIELD_TEX.includes(o.material.map) && !o.material.map.keep) o.material.map.dispose(); o.material.dispose(); } }); }
 // streaming: a place within 1.3 km of the camera is built, dropped past 1.7 km; roads likewise by their bounding box; at most one build a frame
 function countryUpdate(cx, cz) { OUT.fG = OUT.fG || new Map(); OUT.rG = OUT.rG || new Map(); let built = false;
-  for (const F of featsNear(cx, cz, 1300)) if (!OUT.fG.has(F.key) && Math.hypot(F.x - cx, F.z - cz) < 1300 + (F.R || 0)) { if (built) break; OUT.fG.set(F.key, featBuild(F)); built = true; }
   for (const [k, G] of OUT.fG) { const F = FEAT.get(k); if (Math.hypot(F.x - cx, F.z - cz) > 1700 + (F.R || 0)) { groupDrop(G); OUT.fG.delete(k); F.solid = null; } }
-  roadsEnsure(cx, cz); const bd = (E) => Math.hypot(Math.max(0, E.x0 - cx, cx - E.x1), Math.max(0, E.z0 - cz, cz - E.z1));
-  for (const E of RD.edges.values()) { if (!E.pts) continue; const d = bd(E), has = OUT.rG.has(E.key); if (!has && d < 1100 && !built) { OUT.rG.set(E.key, roadBuild(E)); built = true; } else if (has && d > 1500) { groupDrop(OUT.rG.get(E.key)); OUT.rG.delete(E.key); E.solid = null; } }
+  const cellD = (b) => Math.hypot(Math.max(0, b.x0 - cx, cx - b.x1), Math.max(0, b.z0 - cz, cz - b.z1));
+  for (const [k, G] of OUT.rG) if (G && (!G.userData.box || cellD(G.userData.box) > 1500)) { groupDrop(G); OUT.rG.delete(k); }   // (null: still being built)
+  if (OUT.fjob) { const t0 = performance.now(); let r; do r = OUT.fjob.it.next(); while (!r.done && performance.now() - t0 < 2.5);   // (one thing being built — a place, a cell's roads: ~2.5 ms of it a frame)
+    if (r.done) { OUT.fjob.done(r.value); OUT.fjob = null; OUT.sx = 1e9; } return true; }
+  for (const F of featsNear(cx, cz, 1300)) if (!OUT.fG.has(F.key) && Math.hypot(F.x - cx, F.z - cz) < 1300 + (F.R || 0)) { OUT.fjob = { key: F.key, it: featBuildGen(F), done: (G) => OUT.fG.set(F.key, G) }; return true; }
+  roadsEnsure(cx, cz); const ci = Math.floor(cx/FC), cj = Math.floor(cz/FC);   // (the roads: a cell's worth at a time, only the cells round the camera are looked at)
+  for (let i = ci - 2; i <= ci + 2 && !built; i++) for (let j = cj - 2; j <= cj + 2 && !built; j++) { const k = i*100003 + j; if (OUT.rG.has(k)) continue; roadCellEnsure(i, j); const c = RD.cell.get(k); if (c && cellD(c) < 1100) { OUT.rG.set(k, null); OUT.fjob = { key: 'R' + k, it: roadCellGen(i, j), done: (G) => OUT.rG.set(k, G) }; return true; } }
+  if (!built) { RD.pre = RD.pre || new Set(); for (let r = 0; r <= 3 && !built; r++) for (let i = ci - r; i <= ci + r && !built; i++) for (let j = cj - r; j <= cj + r && !built; j++) { const k = i*100003 + j; if (RD.pre.has(k)) continue; RD.pre.add(k);   // (the roads ahead worked out before they're needed: a road a frame)
+      OUT.fjob = { key: 'P' + k, it: (function* () { roadExits(); yield; roadEdge(i, j, 'E'); yield; roadEdge(i, j, 'N'); yield; roadCellEnsure(i, j); })(), done: () => {} }; built = true; } }
+  if (FEAT.size > 20000 || RD.edges.size > 6000 || OUT.af.size > 20000) countryPrune();
   if (built) OUT.sx = 1e9;   // (new solids: outerSolids re-does its list)
   const px = PLANE.on ? PLANE.p.x : car.x, pz = PLANE.on ? PLANE.p.z : car.z; let at = null;   // (arriving: the place's name on the screen, once a visit)
   for (const F of featsNear(px, pz, 300)) { if (F.kind === 'village') { const [a, b] = featLoc(F, px, pz); if (Math.abs(a) < F.L + 20 && Math.abs(b) < 60) at = F; } else if (F.kind === 'lake' && featQ(F, px, pz) < 1.1) at = F; }
   if (at && OUT.at !== at.key && gameState !== State.MENU) pizzaMsg(at.kind === 'village' ? '🏡 ' + at.name.toUpperCase() : '🌊 ' + at.name, true); OUT.at = at ? at.key : null;
   return built; }
 // the ground out there: one 2 km sheet round the camera on the height grid's own 20 m lattice (so its edge lies on the village's), rebuilt every 100 m
-function outerGround(cx0, cz0) { const S = 20, N = 111, g = HG, cx = g.x0 + Math.round((cx0 - g.x0)/S)*S, cz = g.z0 + Math.round((cz0 - g.z0)/S)*S;
-  if (OUT.mesh && Math.abs(cx - OUT.cx) < 160 && Math.abs(cz - OUT.cz) < 160) return; OUT.cx = cx; OUT.cz = cz;
-  // (1.10., Ande's worry: was ~23 ms a rebuild — 5 H() a vertex for its normal, new buffers each time. Now each lattice point's height and
-  // colour is cached (a move of 160 m reuses ~85 %), the normal comes from the neighbours on the lattice, the buffers are rewritten in place)
-  const half = (N - 1)/2*S, X1 = g.x0 + (g.n - 1)*g.step, C = OUT.gc || (OUT.gc = new Map()); if (C.size > 120000) C.clear();
-  const M = N + 2, hh = OUT.gh || (OUT.gh = new Float32Array(M*M)), VA = OUT.gv || (OUT.gv = new Array(M*M)), pt = latPt;
-  for (let j = 0; j < M; j++) for (let i = 0; i < M; i++) { const v = pt(cx - half + (i - 1)*S, cz - half + (j - 1)*S); VA[j*M + i] = v; hh[j*M + i] = v[0]; }
+function outerGround(cx0, cz0, budget = Infinity) { const S = 20, N = 111, M = N + 2, g = HG, cx = g.x0 + Math.round((cx0 - g.x0)/S)*S, cz = g.z0 + Math.round((cz0 - g.z0)/S)*S;
+  // (1.10.: was ~23 ms a rebuild — 5 H() a vertex for its normal, new buffers each time; then a lattice cache (latPt), normals from the lattice,
+  // buffers rewritten in place: ~5 ms. Now it is also built in the background: a few rows a frame into a second set of arrays, swapped in
+  // when whole (the 2.2 km sheet has ~200 m in hand past the fog). Only when nothing usable is drawn (a start, a teleport) is it built at once.)
   if (!OUT.mesh) { const geo = new THREE.BufferGeometry(), idx = new Uint32Array((N - 1)*(N - 1)*6); let q = 0;
     for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) { const a = j*N + i, b = a + 1, c = a + N, d = c + 1; idx[q++] = a; idx[q++] = c; idx[q++] = b; idx[q++] = b; idx[q++] = c; idx[q++] = d; }
     for (const k of ['position', 'normal', 'color']) geo.setAttribute(k, new THREE.BufferAttribute(new Float32Array(N*N*3), 3)); geo.setIndex(new THREE.BufferAttribute(idx, 1)); geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e5);
-    OUT.mesh = new THREE.Mesh(geo, addGroundDetail(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), 0.7)); OUT.mesh.receiveShadow = true; OUT.mesh.renderOrder = -3; OUT.mesh.frustumCulled = false; scene.add(OUT.mesh); }
-  const geo = OUT.mesh.geometry, pos = geo.attributes.position.array, nor = geo.attributes.normal.array, col = geo.attributes.color.array;
-  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const x = cx - half + i*S, z = cz - half + j*S, k = (j*N + i)*3, m = (j + 1)*M + i + 1, inside = x > g.x0 + 0.1 && x < X1 - 0.1 && z > g.z0 + 0.1 && z < X1 - 0.1;
-    const dx = (hh[m + 1] - hh[m - 1])/(2*S), dz = (hh[m + M] - hh[m - M])/(2*S), nl = Math.hypot(dx, 1, dz), tx = -dx/nl, ty = 1/nl, tz = -dz/nl;
-    pos[k] = x; pos[k + 1] = inside ? hh[m] - 4 : hh[m]; pos[k + 2] = z; nor[k] = tx; nor[k + 1] = ty; nor[k + 2] = tz;   // (under the village's own ground where they overlap)
-    const af = VA[m][1], n = VA[m][2], lit = Math.max(0.6, Math.min(1.4, 1 + ((tx*HS_L[0] + ty*HS_L[1] + tz*HS_L[2])/HS_L[1] - 1)*1.9)), l = (0.8 + 0.2*n)*lit;   // (lit like the village's ground: NW banks light, hollows dark)
-    const tw = VA[m][6]; col[k] = ((0.36 + 0.07*af)*(1 - tw) + VA[m][3]*tw)*l; col[k + 1] = ((0.54 + 0.06*af)*(1 - tw) + VA[m][4]*tw)*l; col[k + 2] = ((0.27 + 0.03*af)*(1 - tw) + VA[m][5]*tw)*l; }   // (the strip's clearing: mown, a shade lighter; a place's own tint: sand, bog, yard)
-  for (const k of ['position', 'normal', 'color']) geo.attributes[k].needsUpdate = true; }
+    OUT.mesh = new THREE.Mesh(geo, addGroundDetail(new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95 }), 0.7)); OUT.mesh.receiveShadow = true; OUT.mesh.renderOrder = -3; OUT.mesh.frustumCulled = false; scene.add(OUT.mesh);
+    OUT.gs = { pos: new Float32Array(N*N*3), nor: new Float32Array(N*N*3), col: new Float32Array(N*N*3), hh: new Float32Array(M*M), VA: new Array(M*M) }; }
+  let J = OUT.gjob; if (J && Math.hypot(J.cx - cx, J.cz - cz) > 600) J = OUT.gjob = null;   // (jumped away: that one is no use)
+  if (!J) { if (OUT.cx !== undefined && Math.abs(cx - OUT.cx) < 120 && Math.abs(cz - OUT.cz) < 120) return; J = OUT.gjob = { cx, cz, r: 0 }; }
+  if (OUT.cx === undefined || Math.hypot(cx - OUT.cx, cz - OUT.cz) > 700) budget = Infinity;
+  const t0 = performance.now(), B = OUT.gs, hh = B.hh, VA = B.VA, half = (N - 1)/2*S, X1 = g.x0 + (g.n - 1)*g.step;
+  while (J.r < M + N) { if (performance.now() - t0 > budget) return; const r = J.r;
+    if (r < M) { const i0 = J.q || 0, i1 = Math.min(M, i0 + 15); for (let i = i0; i < i1; i++) { const v = latPt(J.cx - half + (i - 1)*S, J.cz - half + (r - 1)*S); VA[r*M + i] = v; hh[r*M + i] = v[0]; }   // (the lattice rows first, a quarter row a step)
+      if (i1 < M) J.q = i1; else { J.q = 0; J.r++; } continue; }
+    J.r++;
+    const j = r - M, pos = B.pos, nor = B.nor, col = B.col;
+    for (let i = 0; i < N; i++) { const x = J.cx - half + i*S, z = J.cz - half + j*S, k = (j*N + i)*3, m = (j + 1)*M + i + 1, inside = x > g.x0 + 0.1 && x < X1 - 0.1 && z > g.z0 + 0.1 && z < X1 - 0.1;
+      const dx = (hh[m + 1] - hh[m - 1])/(2*S), dz = (hh[m + M] - hh[m - M])/(2*S), nl = Math.hypot(dx, 1, dz), tx = -dx/nl, ty = 1/nl, tz = -dz/nl;
+      pos[k] = x; pos[k + 1] = inside ? hh[m] - 4 : hh[m]; pos[k + 2] = z; nor[k] = tx; nor[k + 1] = ty; nor[k + 2] = tz;   // (under the village's own ground where they overlap)
+      const af = VA[m][1], n = VA[m][2], lit = Math.max(0.6, Math.min(1.4, 1 + ((tx*HS_L[0] + ty*HS_L[1] + tz*HS_L[2])/HS_L[1] - 1)*1.9)), l = (0.8 + 0.2*n)*lit;   // (lit like the village's ground: NW banks light, hollows dark)
+      const tw = VA[m][6]; col[k] = ((0.36 + 0.07*af)*(1 - tw) + VA[m][3]*tw)*l; col[k + 1] = ((0.54 + 0.06*af)*(1 - tw) + VA[m][4]*tw)*l; col[k + 2] = ((0.27 + 0.03*af)*(1 - tw) + VA[m][5]*tw)*l; } }   // (the strip's clearing: mown; a place's own tint: sand, bog, yard)
+  const geo = OUT.mesh.geometry; for (const [k, a] of [['position', 'pos'], ['normal', 'nor'], ['color', 'col']]) { const at = geo.attributes[k], old = at.array; at.array = B[a]; B[a] = old; at.needsUpdate = true; }   // (whole: swap it in)
+  OUT.cx = J.cx; OUT.cz = J.cz; OUT.gjob = null; }
 // the sparse forest: pines on 60 m tiles (a hash per tile: 0–5 trees), 950 m round the camera, one instanced draw for trunks, one for crowns
 function outerTreesAt(i, j, fn) { const cx = i*60 + 30, cz = j*60 + 30, W = WORLD_EDGE, e = Math.hypot(Math.max(0, -W - cx, cx - W), Math.max(0, -W - cz, cz - W));   // (from where the village's own forest stops: WORLD_EDGE)   // (thick forest by the village, thinning out over 250 m to the sparse one)
   const d = Math.max(0, 1 - e/160), n = Math.min(60, Math.floor(hsh(i, j, 21)*6) + Math.floor(d*d*48*(0.75 + 0.5*hsh(i, j, 22)))); for (let k = 0; k < n; k++) { const x = i*60 + hsh(i, j, 30 + k)*60, z = j*60 + hsh(i, j, 40 + k)*60; if (Math.abs(x) < WORLD_EDGE + 1 && Math.abs(z) < WORLD_EDGE + 1) continue; if (outerExitNear(x, z)) continue;
-    let ok = true; for (const A of airfieldsNear(x, z, AF_L/2 + 200)) if (afMask(A, x, z) > 0.02) { ok = false; break; } if (ok && featBlocksTree(x, z)) ok = false; if (ok) fn(x, z, 3.8 + hsh(i, j, 50 + k)*4.6, k); } }   // (the village's spruce sizes: 3.8–8.4 m)
+    let ok = true; for (const A of afCells(x, z, AF_L/2 + 200)) if (afMask(A, x, z) > 0.02) { ok = false; break; } if (ok && featBlocksTree(x, z)) ok = false; if (ok) fn(x, z, 3.8 + hsh(i, j, 50 + k)*4.6, k); } }   // (the village's spruce sizes: 3.8–8.4 m)
 function outerExitNear(x, z) {   // (a lane through the forest where a village road meets the edge: the car can drive out along it, 300 m)
   if (!OUT.exits) { OUT.exits = []; for (const r of sideRoads) for (const e of [0, 1]) { const P = r.pts, a = e ? P[P.length - 1] : P[0], b = e ? P[Math.max(0, P.length - 4)] : P[Math.min(P.length - 1, 3)];
       if (Math.max(Math.abs(a.x), Math.abs(a.y)) < 470) continue;   /* (the roads that run out of the village: Tolkinkyläntie, Ylästöntie) */ const l = Math.hypot(a.x - b.x, a.y - b.y) || 1; OUT.exits.push({ x: a.x, z: a.y, dx: (a.x - b.x)/l, dz: (a.y - b.y)/l }); } }
   for (const E of OUT.exits) { const t = (x - E.x)*E.dx + (z - E.z)*E.dz; if (t < -10 || t > 400) continue; if (Math.abs((x - E.x)*E.dz - (z - E.z)*E.dx) < 9) return true; } return false; }
-function outerForest(cx, cz) { const ti = Math.floor(cx/60), tj = Math.floor(cz/60); if (OUT.trees && Math.abs(ti - OUT.tx) < 3 && Math.abs(tj - OUT.tz) < 3) return; OUT.tx = ti; OUT.tz = tj;   // (rebuilt every ~150 m: 840 m round is past the fog anyway)
-  if (!OUT.trees) { const MAX = 20000, cm = () => new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: !!SPRUCE_FOREST[0].attributes.color, roughness: 0.9 });   // (the village's own spruce model and trunk: the forest carries on seamlessly)
-    OUT.trees = new THREE.InstancedMesh(unitTrunk, new THREE.MeshStandardMaterial({ color: 0x5b3d22, roughness: 0.95 }), 4000); OUT.crowns = new THREE.InstancedMesh(SPRUCE_FOREST[0], cm(), 4000); OUT.far = new THREE.InstancedMesh(SPRUCE_FOREST[0], cm(), MAX);
-    for (const m of [OUT.crowns, OUT.far]) m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(m.instanceMatrix.count*3).fill(1), 3);   // (made now: a shader compiled before the first setColorAt would never show the colours)
-    for (const m of [OUT.trees, OUT.crowns, OUT.far]) { m.receiveShadow = true; m.frustumCulled = false; scene.add(m); } OUT.trees.castShadow = OUT.crowns.castShadow = true; OUT.max = MAX; }   // (near ones, 200 m: shadows and trunks; far ones: crowns only, no shadow pass)
-  const M = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), C = new THREE.Color(); let n = 0, f = 0; const R = 14, x0 = ti*60 + 30, z0 = tj*60 + 30;
-  for (let i = ti - R; i <= ti + R; i++) for (let j = tj - R; j <= tj + R; j++) { if ((i - ti)*(i - ti) + (j - tj)*(j - tj) > R*R) continue;
-    outerTreesAt(i, j, (x, z, h, k) => { const near = Math.hypot(x - x0, z - z0) < 200; if (near ? n >= 4000 : f >= OUT.max) return; const y0 = H(x, z), fr = h*(0.27 + hsh(i, j, 70 + k)*0.08); q.setFromAxisAngle(_pA.set(0, 1, 0), hsh(i, j, 60 + k)*6.28);
-      const g = hsh(i, j, 80 + k); C.setHex([0x2f6b3a, 0x3b7d44, 0x2b5e3c, 0x36663e, 0x2c6349][Math.floor(g*5)]).multiplyScalar(1.15); M.compose(p.set(x, y0 + 0.35, z), q, s.set(fr, h, fr));
-      if (near) { OUT.crowns.setMatrixAt(n, M); OUT.crowns.setColorAt(n, C); M.compose(p.set(x, y0 + 0.5, z), q, s.set(0.15, 1, 0.15)); OUT.trees.setMatrixAt(n, M); n++; } else { OUT.far.setMatrixAt(f, M); OUT.far.setColorAt(f, C); f++; } }); }
-  OUT.trees.count = OUT.crowns.count = n; OUT.far.count = f; for (const m of [OUT.trees, OUT.crowns, OUT.far]) { m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true; } }
+// (1.10. optimising) the forest: its trees are worked out in the background, 240 m chunk by chunk (a 60 m tile a step), and kept as ready
+// matrices; every ~50 m of camera travel they're assembled into a few instanced meshes, tree by tree, like the old forest: within 200 m crowns
+// with trunks and shadows, out to 860 m crowns only — in four quarters round the camera, each with its own bounding sphere, so the quarters
+// behind the camera aren't drawn. (Chunks as meshes of their own were tried: more calls, and they reached past the fog.)
+const FCH = 240, FTP = FCH/60, FOR = { data: new Map(), jobs: [], queued: new Set(), ims: null, lx: 1e9, lz: 1e9, dirty: false, tick: 0, M: new THREE.Matrix4(), q: new THREE.Quaternion(), s: new THREE.Vector3(), p: new THREE.Vector3(), C: new THREE.Color() };
+function forestIM(trunk, cap, shadow) { const base = trunk ? unitTrunk : SPRUCE_FOREST[0], g = new THREE.BufferGeometry(); for (const k in base.attributes) g.setAttribute(k, base.attributes[k]); g.setIndex(base.index); g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1);   // (the shape's buffers shared, its own sphere)
+  if (!FOR.mat) { FOR.mat = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: !!SPRUCE_FOREST[0].attributes.color, roughness: 0.9 }); FOR.tmat = new THREE.MeshStandardMaterial({ color: 0x5b3d22, roughness: 0.95 }); }   // (the village's own spruce and trunk)
+  const m = new THREE.InstancedMesh(g, trunk ? FOR.tmat : FOR.mat, cap); if (!trunk) m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(cap*3).fill(1), 3);   // (made now: a shader compiled before the first setColorAt would never show the colours)
+  m.castShadow = shadow; m.receiveShadow = true; m.count = 0; m.frustumCulled = !shadow; scene.add(m); return m; }
+function* forestDataGen(key, ci, cj) { const { M, q, s, p, C } = FOR, cm = [], cc = [], tm = [];
+  for (let i = ci*FTP; i < (ci + 1)*FTP; i++) for (let j = cj*FTP; j < (cj + 1)*FTP; j++) { outerTreesAt(i, j, (x, z, h, k) => { const y = H(x, z), fr = h*(0.27 + hsh(i, j, 70 + k)*0.08); q.setFromAxisAngle(_pA.set(0, 1, 0), hsh(i, j, 60 + k)*6.28);
+      M.compose(p.set(x, y + 0.35, z), q, s.set(fr, h, fr)); for (const e of M.elements) cm.push(e); C.setHex([0x2f6b3a, 0x3b7d44, 0x2b5e3c, 0x36663e, 0x2c6349][Math.floor(hsh(i, j, 80 + k)*5)]).multiplyScalar(1.15); cc.push(C.r, C.g, C.b);
+      M.compose(p.set(x, y + 0.5, z), q, s.set(0.15, 1, 0.15)); for (const e of M.elements) tm.push(e); }); yield; }
+  FOR.data.set(key, { ci, cj, n: cc.length/3, cm: new Float32Array(cm), cc: new Float32Array(cc), tm: new Float32Array(tm) }); FOR.queued.delete(key); FOR.dirty = true; }
+function forestAssemble(cx, cz) { if (!FOR.ims) FOR.ims = { near: forestIM(false, 6000, true), trunk: forestIM(true, 6000, true), far: [0, 1, 2, 3].map(() => forestIM(false, 12000, false)) };
+  const I = FOR.ims, nA = I.near.instanceMatrix.array, nC = I.near.instanceColor.array, tA = I.trunk.instanceMatrix.array, fc = [0, 0, 0, 0], bb = [0, 1, 2, 3].map(() => [Infinity, -Infinity, Infinity, -Infinity, Infinity, -Infinity]); let nn = 0;
+  for (const D of FOR.data.values()) { if (Math.hypot(Math.max(0, Math.abs((D.ci + 0.5)*FCH - cx) - FCH/2), Math.max(0, Math.abs((D.cj + 0.5)*FCH - cz) - FCH/2)) > 860) continue;
+    for (let t = 0; t < D.n; t++) { const o = t*16, x = D.cm[o + 12], y = D.cm[o + 13], z = D.cm[o + 14], dx = x - cx, dz = z - cz, d = Math.hypot(dx, dz); if (d > 860) continue;
+      if (d < 200) { if (nn >= 6000) continue; nA.set(D.cm.subarray(o, o + 16), nn*16); tA.set(D.tm.subarray(o, o + 16), nn*16); nC.set(D.cc.subarray(t*3, t*3 + 3), nn*3); nn++; continue; }
+      const qd = Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? 0 : 1) : (dz > 0 ? 2 : 3), m = I.far[qd], k = fc[qd]; if (k >= 12000) continue;
+      m.instanceMatrix.array.set(D.cm.subarray(o, o + 16), k*16); m.instanceColor.array.set(D.cc.subarray(t*3, t*3 + 3), k*3); fc[qd]++; const b = bb[qd]; b[0] = Math.min(b[0], x); b[1] = Math.max(b[1], x); b[2] = Math.min(b[2], y); b[3] = Math.max(b[3], y + 9); b[4] = Math.min(b[4], z); b[5] = Math.max(b[5], z); } }
+  const up = (m, n) => { m.count = n; m.instanceMatrix.updateRange.offset = 0; m.instanceMatrix.updateRange.count = n*16; m.instanceMatrix.needsUpdate = true; if (m.instanceColor) { m.instanceColor.updateRange.offset = 0; m.instanceColor.updateRange.count = n*3; m.instanceColor.needsUpdate = true; } };
+  up(I.near, nn); up(I.trunk, nn); I.far.forEach((m, qd) => { up(m, fc[qd]); const b = bb[qd], bs = m.geometry.boundingSphere; if (fc[qd]) { bs.center.set((b[0] + b[1])/2, (b[2] + b[3])/2, (b[4] + b[5])/2); bs.radius = Math.hypot(b[1] - b[0], b[3] - b[2], b[5] - b[4])/2 + 6; } else { bs.center.set(0, -1e4, 0); bs.radius = 1; } });
+  FOR.ax = cx; FOR.az = cz; FOR.dirty = false; }
+function forestClear() { FOR.data.clear(); FOR.jobs = []; FOR.queued.clear(); FOR.lx = 1e9; FOR.ax = undefined; }
+function forestCount() { const I = FOR.ims; if (!I) return { all: 0, near: 0, chunks: 0 }; return { all: I.near.count + I.far.reduce((a, m) => a + m.count, 0), near: I.trunk.count, chunks: FOR.data.size, far: I.far.map(m => m.count) }; }
+function outerForest(cx, cz, budget = Infinity) { const t0 = performance.now(), rd = (ci, cj) => Math.hypot(Math.max(0, Math.abs((ci + 0.5)*FCH - cx) - FCH/2), Math.max(0, Math.abs((cj + 0.5)*FCH - cz) - FCH/2));
+  if (budget === Infinity || Math.hypot(cx - FOR.lx, cz - FOR.lz) > 30) { FOR.lx = cx; FOR.lz = cz;   // (what's wanted: re-looked every 30 m)
+    for (const [k, D] of FOR.data) if (rd(D.ci, D.cj) > 1300) FOR.data.delete(k);   // (kept a while behind: turning back costs nothing)
+    for (let ci = Math.floor((cx - 900)/FCH); ci <= Math.floor((cx + 900)/FCH); ci++) for (let cj = Math.floor((cz - 900)/FCH); cj <= Math.floor((cz + 900)/FCH); cj++) { const key = ci*100003 + cj, d = rd(ci, cj); if (d < 900 && !FOR.data.has(key) && !FOR.queued.has(key)) { FOR.queued.add(key); FOR.jobs.push({ key, ci, cj, it: forestDataGen(key, ci, cj) }); } }
+    FOR.jobs = FOR.jobs.filter(J => { const ok = rd(J.ci, J.cj) < 1000; if (!ok) FOR.queued.delete(J.key); return ok; }); FOR.jobs.forEach(J => J.d = rd(J.ci, J.cj)); FOR.jobs.sort((a, b) => a.d - b.d); }
+  let nearDone = false; while (FOR.jobs.length) { const J = FOR.jobs[0]; if (J.d > 220 && performance.now() - t0 > budget) break; if (J.it.next().done) { FOR.jobs.shift(); if (J.d <= 220) nearDone = true; } }   // (the near ones whatever it costs: no hole by the camera)
+  FOR.tick++; if (FOR.ax === undefined || Math.hypot(cx - FOR.ax, cz - FOR.az) > 50 || nearDone || (FOR.dirty && FOR.tick % 15 === 0)) forestAssemble(cx, cz); }
 // an airstrip's things: the strip (a painted texture), the hut with its sign, a windsock, edge markers — built when near, dropped when far
 let _afTex = null;
 function afTexture() { if (_afTex) return _afTex; const c = document.createElement('canvas'); c.width = 64; c.height = 1024; const g = c.getContext('2d'); g.fillStyle = '#5b5d5f'; g.fillRect(0, 0, 64, 1024);
@@ -891,9 +951,9 @@ function outerSolids(x, z) { const si = Math.floor(x/30), sj = Math.floor(z/30);
     outerTreesAt(i, j, (tx, tz) => { if (Math.hypot(tx - x, tz - z) > 70) return; const b = { x: tx, z: tz, yaw: 0, hw: 0.45, hl: 0.45, kind: 'pine' }; staticCellsAdd(b); OUT.sb.push(b); });
   for (const A of airfieldsNear(x, z, AF_L)) if (A.solid) for (const s0 of A.solid) if (Math.hypot(s0.x - x, s0.z - z) < 120) { const b = { ...s0 }; staticCellsAdd(b); OUT.sb.push(b); }
   for (const F of featsNear(x, z, 250)) if (F.solid) for (const s0 of F.solid) if (Math.hypot(s0.x - x, s0.z - z) < 120) { const b = { ...s0 }; staticCellsAdd(b); OUT.sb.push(b); }   // (houses, barns, saunas)
-  for (const E of RD.edges.values()) if (E.solid && x > E.x0 - 80 && x < E.x1 + 80 && z > E.z0 - 80 && z < E.z1 + 80) for (const s0 of E.solid) if (Math.hypot(s0.x - x, s0.z - z) < 70) { const b = { ...s0 }; staticCellsAdd(b); OUT.sb.push(b); } }   // (power poles)
-function outerUpdate() { if (!worldLifted) return; const cx = camera.position.x, cz = camera.position.z; outerGround(cx, cz); outerForest(cx, cz);
-  for (const A of airfieldsNear(cx, cz, 1500)) if (!OUT.afG.has(A.key)) OUT.afG.set(A.key, afBuild(A));
+  if (OUT.rG) for (const G of OUT.rG.values()) if (G) for (const s0 of G.userData.solid) if (Math.hypot(s0.x - x, s0.z - z) < 70) { const b = { ...s0 }; staticCellsAdd(b); OUT.sb.push(b); } }   // (power poles)
+function outerUpdate() { if (!worldLifted) return; const cx = camera.position.x, cz = camera.position.z; outerGround(cx, cz, 2); outerForest(cx, cz, 2);   // (a 2 ms budget each, a frame)
+  for (const A of airfieldsNear(cx, cz, 1500)) if (!OUT.afG.has(A.key) && !(OUT.fjob && OUT.fjob.key === 'A' + A.key)) { if (Math.hypot(A.x - cx, A.z - cz) < 700 || !OUT.fjob) OUT.afG.set(A.key, afBuild(A)); }   // (one a frame, not on top of a build unless it's near)
   if (OUT.ctry === undefined || OUT.ctry || Math.hypot(cx - OUT.ccx, cz - OUT.ccz) > 25) { OUT.ccx = cx; OUT.ccz = cz; OUT.ctry = countryUpdate(cx, cz); }   // (the countryside: re-checked every 25 m, or every frame while it is still building)
   for (const [k, G] of OUT.afG) { const A = OUT.af.get(k); if (Math.hypot(A.x - cx, A.z - cz) > 2000) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); }); OUT.afG.delete(k); } }
   if (PLANE.on) outerSolids(PLANE.p.x, PLANE.p.z); else outerSolids(car.x, car.z); }   // (round whoever is moving: the plane flies far from the parked Pökö)
@@ -4932,6 +4992,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', 'Ulkomaailma ilman nykäyksiä: kylät, tiet, maa ja metsä rakennetaan taustalla muutama millisekunti kerrallaan; kameran takana olevaa metsää ei piirretä, ja vain lähipuut heittävät varjoa; pitkän matkan välimuistit karsitaan', '10.15'],
   ['1.10.', 'Maaseudun talot ovat nyt samoja kuin Ylästössä: rintamamiestalot, matalat 60–70-luvun talot ja kasaritalot lautaverhouksineen, tiilikattoineen ja verhoineen; navetat, aitat, saunat ja ladot samoista laudoista ja tiilistä', '08.30'],
   ['1.10.', '🏡 Maaseutu kylän takana: soratiet Ylästön reunalta naapurikyliin (talot, kyläkauppa, bussikatos, nimikyltit), maatiloille (navetta, aitta, sauna, pelto latoineen ja paaleineen) ja järville (sauna, laituri, vene); suot pitkospuineen; sähkölinjat teiden varsilla. Järvessä auto uppoaa ja kone kaatuu, suolla pyörät uppoavat', '05.40'],
   ['1.10.', 'Lentokone osuu nyt korven puihin ja korpikentän koppiin (esteet seurasivat parkkeerattua Pököä eivätkä konetta); loputtoman maan uudelleenrakennus ~8× nopeampi, ei nykäisyä lentäessä', '04.40'],

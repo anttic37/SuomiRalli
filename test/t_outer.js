@@ -4,7 +4,7 @@ startRace(false); step(20); const out = {};
 const N0 = nearestAirfield(0, 0); out.first = { name: N0.A.name, d: Math.round(N0.d), h: +N0.A.h.toFixed(1) }; out.near5km = airfieldsNear(0, 0, 5000).length;
 // the car out east: straight off the map edge, full throttle for 25 s
 const EX = OUT.exits && OUT.exits.length ? OUT.exits[0] : null; outerUpdate(); const E0 = OUT.exits[0]; out.exits = OUT.exits.length; car.x = RI.x = E0.x - E0.dx*20; car.z = RI.z = E0.z - E0.dz*20; car.angle = RI.a = Math.atan2(E0.dx, E0.dz); car.vx = car.vz = 0; step(5); keys.ArrowUp = true; let maxX = 0; step(60*25, () => { maxX = Math.max(maxX, (car.x - E0.x)*E0.dx + (car.z - E0.z)*E0.dz); }); keys.ArrowUp = false;
-out.car = { maxX: Math.round(maxX), x: Math.round(car.x), kmh: Math.round(Math.hypot(car.vx, car.vz)*3.6), nan: !isFinite(car.x), solids: OUT.sb.length, trees: OUT.trees ? OUT.trees.count : 0 };
+out.car = { maxX: Math.round(maxX), x: Math.round(car.x), kmh: Math.round(Math.hypot(car.vx, car.vz)*3.6), nan: !isFinite(car.x), solids: OUT.sb.length, trees: forestCount().near };
 step(3); { const gy = Y(car.x, car.z); await shot('out_car', car.x, car.z, -14, 6, 7, 1); }
 // a landing on the first strip: over the threshold at 5 m, 95 km/h, idle, a touch nose-up, hands off; brakes once down
 const A = N0.A; planeEnter(true); const [ax, az] = [A.x - A.fx*(AF_L/2 - 40), A.z - A.fz*(AF_L/2 - 40)]; planeInit({ x: ax, z: az, angle: A.a }); PLANE.p.y = A.h + 1.05 + 5; PLANE.v.set(A.fx*26, -1, A.fz*26); PLANE.air = true; PLANE.airT = 1; PLANE.thr = 0; PLANE.upFree = true;
