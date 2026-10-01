@@ -592,7 +592,7 @@ let worldLifted = false;
 function Y(x, z) { return worldLifted ? H(x, z) : 0; }
 function H(x, z) {
   const g = HG, h = g.h; if (!h) return 0;
-  if (x < g.x0 || z < g.z0 || x > g.x0 + (g.n - 1)*g.step || z > g.z0 + (g.n - 1)*g.step) return hOuter(x, z);   // (beyond the village: OUT, below)
+  if (x < g.x0 || z < g.z0 || x > g.x0 + (g.n - 1)*g.step || z > g.z0 + (g.n - 1)*g.step) return inBase(x, z, 40) ? hOuterRaw(x, z) : hLat(x, z);   // (beyond the village: OUT, below — the drawn 20 m lattice itself, smooth right at the seam)
   let fx = (x - g.x0)/g.step, fz = (z - g.z0)/g.step;
   fx = Math.max(0, Math.min(g.n - 1.001, fx)); fz = Math.max(0, Math.min(g.n - 1.001, fz));
   const ix = fx | 0, iz = fz | 0, u = fx - ix, v = fz - iz, a = iz*g.n + ix, b = a + 1, c = a + g.n, d = c + 1;
@@ -622,13 +622,220 @@ function hOuter(x, z) { const g = HG, X1 = g.x0 + (g.n - 1)*g.step, Z1 = g.z0 + 
   const he = H(cx, cz), d = Math.hypot(x - cx, z - cz), t = Math.min(1, d/260), s = t*t*(3 - 2*t); let h = he + (outerBase(x, z) - he)*s;
   for (const A of airfieldsNear(x, z, AF_L/2 + 200)) { const m = afMask(A, x, z); if (m > 0) h += (A.h - h)*m; } return h; }
 function inBase(x, z, m) { const g = HG, X1 = g.x0 + (g.n - 1)*g.step; return x > g.x0 - (m || 0) && x < X1 + (m || 0) && z > g.z0 - (m || 0) && z < X1 + (m || 0); }
+// ── THE COUNTRYSIDE (1.10., Antti: "lisätään kaikki"): lakes with a sauna and a jetty, bogs with duckboards, farms with their field,
+// cowshed and barns, small villages with a shop and name signs, gravel roads joining them (and the village's own exits), power lines
+// along the roads. Like the airstrips everything is a hash of its 1.1 km cell — nothing is stored, it is the same every time. The ground
+// shapes itself (lake bowls, bog hollows, flat yards) in hOuterRaw; outside the village H() is the drawn 20 m lattice itself (what you
+// see is what you drive on). Props are built near the camera, one merged vertex-coloured mesh a place, dropped when far (fog: 900 m).
+const FC = 1100, FEAT = new Map(), RD = { edges: new Map(), buckets: new Map(), done: new Set(), exits: false }, RBK = 100;
+const VIL_NAMES = ['Kuusela', 'Hirvelä', 'Korpela', 'Rajala', 'Niemelä', 'Koivula', 'Haapala', 'Mäkelä', 'Ahola', 'Peltola', 'Suolahti', 'Kaitajärvi'];
+const LAKE_NAMES = ['Ahvenlampi', 'Kotajärvi', 'Särkijärvi', 'Hauklampi', 'Mustalampi', 'Kivijärvi', 'Lahnajärvi', 'Myllylampi'];
+const H_WALL = [0xd8c27a, 0x8a2e22, 0xe8e4d8, 0x9fb8c8, 0x8aa070, 0xc8a070, 0x7a3a28], H_ROOF = [0x5a5e62, 0x9a4632, 0x4a5a4a, 0x6a6e72, 0x7a3a2e];
+const smooth01 = (t) => { t = Math.max(0, Math.min(1, t)); return t*t*(3 - 2*t); };
+function featCell(i, j) { const key = i + ',' + j; let F = FEAT.get(key); if (F !== undefined) return F; F = null;
+  const x = i*FC + 200 + hsh(i, j, 101)*(FC - 400), z = j*FC + 200 + hsh(i, j, 102)*(FC - 400), r = hsh(i, j, 103);
+  if (!inBase(x, z, 480) && !airfieldsNear(x, z, AF_L/2 + 450).length) {
+    const kind = r < 0.2 ? 'lake' : r < 0.32 ? 'bog' : r < 0.64 ? 'farm' : r < 0.77 ? 'village' : null, yaw = hsh(i, j, 104)*Math.PI;
+    if (kind) { F = { kind, x, z, yaw, fx: Math.sin(yaw), fz: Math.cos(yaw), key, i, j, s: hsh(i, j, 105)*97, h: (k) => hsh(i, j, 300 + k) };
+      if (kind === 'lake' || kind === 'bog') { F.R = kind === 'lake' ? 75 + hsh(i, j, 106)*140 : 90 + hsh(i, j, 106)*110; let lo = Infinity;
+        for (let k = 0; k < 24; k++) { const a = k/24*6.283, rr = F.R*1.35*featWob(F, a); lo = Math.min(lo, outerBase(x + Math.sin(a)*rr, z + Math.cos(a)*rr)); }
+        F.level = lo - (kind === 'lake' ? 1.0 : 0.3); F.name = kind === 'lake' ? LAKE_NAMES[Math.floor(hsh(i, j, 107)*LAKE_NAMES.length)] : 'suo';
+        const ha = yaw*2; F.hub = { x: x + Math.sin(ha)*F.R*2.0, z: z + Math.cos(ha)*F.R*2.0 }; }
+      else { F.y = outerBase(x, z); F.hub = kind === 'farm' ? { x: x + F.fx*10, z: z + F.fz*10 } : { x, z };
+        if (kind === 'village') { F.name = VIL_NAMES[Math.floor(hsh(i, j, 107)*VIL_NAMES.length)]; F.L = 160; F.ends = [-1, 1].map(s => ({ x: x + F.fx*F.L*s, z: z + F.fz*F.L*s })); }
+        if (kind === 'farm') { F.field = { a: 100, b: 0, hl: 80, hw: 52 }; F.crop = Math.floor(hsh(i, j, 108)*3); } } } }
+  FEAT.set(key, F); return F; }
+function featWob(F, a) { return 1 + 0.28*vnoise(Math.sin(a)*1.6 + F.s, Math.cos(a)*1.6 - F.s); }   // (a smooth, closed wobble of the shore)
+function featQ(F, x, z) { const dx = x - F.x, dz = z - F.z, d = Math.hypot(dx, dz); return d/(F.R*featWob(F, Math.atan2(dx, dz))); }
+function featLoc(F, x, z) { const dx = x - F.x, dz = z - F.z; return [dx*F.fx + dz*F.fz, dx*F.fz - dz*F.fx]; }   // (along the yaw, across it)
+function featAt(F, a, b) { return [F.x + F.fx*a + F.fz*b, F.z + F.fz*a - F.fx*b]; }
+function featsNear(x, z, R) { const out = [], i0 = Math.floor((x - R)/FC), i1 = Math.floor((x + R)/FC), j0 = Math.floor((z - R)/FC), j1 = Math.floor((z + R)/FC);
+  for (let i = i0; i <= i1; i++) for (let j = j0; j <= j1; j++) { const F = featCell(i, j); if (F && Math.abs(F.x - x) < R + 450 && Math.abs(F.z - z) < R + 450) out.push(F); } return out; }
+function waterAt(x, z) { if (inBase(x, z, 0)) return -Infinity; for (const F of featsNear(x, z, 300)) if (F.kind === 'lake' && featQ(F, x, z) < 1) return F.level; return -Infinity; }
+// the ground's shape round a place (applied to hOuter's hills)
+function featGround(F, x, z, h) {
+  if (F.kind === 'lake') { const q = featQ(F, x, z); if (q >= 1.7) return h; const bank = F.level + 0.5;
+    if (q < 1) return bank - 4.2*Math.pow(1 - q, 0.8) - 1.2*Math.max(0, 0.5 - q);   // (the bowl: the water's edge at q ≈ 0.93, ~4 m deep in the middle)
+    return bank + (h - bank)*smooth01((q - 1)/0.7); }
+  if (F.kind === 'bog') { const q = featQ(F, x, z); if (q >= 1.5) return h; const flat = F.level + 0.3*vnoise(x/14, z/14);   // (hummocks)
+    return q < 1 ? flat : flat + (h - flat)*smooth01((q - 1)/0.5); }
+  const [a, b] = featLoc(F, x, z);
+  if (F.kind === 'farm') { const d = Math.hypot(a + 8, b); if (d >= 75) return h; return F.y + (h - F.y)*smooth01((d - 48)/27); }   // (a flat yard)
+  if (F.kind === 'village') { const ea = Math.max(0, Math.abs(a) - F.L - 10), e = Math.hypot(ea, Math.max(0, Math.abs(b) - 32)); if (e >= 30) return h;
+    const [px, pz] = featAt(F, Math.max(-F.L, Math.min(F.L, a)), 0), s = outerBase(px, pz); return s + (h - s)*smooth01(e/30); }   // (flat across the street, following it along)
+  return h; }
+function hOuterRaw(x, z) { let h = hOuter(x, z); for (const F of featsNear(x, z, 420)) h = featGround(F, x, z, h); return h; }
+// the lattice: each 20 m point's [height, airstrip mask, noise, tint r, g, b, tint weight] — cached; the ground mesh and H() both read it
+function latPt(x, z) { const C = OUT.gc || (OUT.gc = new Map()), key = x*1e6 + z; let v = C.get(key); if (v !== undefined) return v; if (C.size > 150000) C.clear();
+  if (inBase(x, z, -0.1)) v = [H(x, z), 0, 0.5 + 0.5*vnoise(x/90, z/90), 0, 0, 0, 0];
+  else { let af = 0; for (const A of airfieldsNear(x, z, AF_L/2 + 200)) af = Math.max(af, afMask(A, x, z)); v = [hOuterRaw(x, z), af, 0.5 + 0.5*vnoise(x/90, z/90), 0, 0, 0, 0];
+    for (const F of featsNear(x, z, 420)) featTint(F, x, z, v); }
+  C.set(key, v); return v; }
+function featTint(F, x, z, v) { const put = (r, g, b, w) => { if (w > v[6]) { v[3] = r; v[4] = g; v[5] = b; v[6] = w; } };
+  if (F.kind === 'lake') { const q = featQ(F, x, z); if (q < 1.12) put(q < 0.9 ? 0.4 : 0.66, q < 0.9 ? 0.42 : 0.6, q < 0.9 ? 0.3 : 0.42, smooth01((1.12 - q)/0.1)); }   // (sand at the shore, mud under the water)
+  else if (F.kind === 'bog') { const q = featQ(F, x, z), n = vnoise(x/30 + 5, z/30); if (q < 1.25) put(0.55 + 0.12*n, 0.52 + 0.08*n, 0.3, smooth01((1.25 - q)/0.35)*0.95); }
+  else if (F.kind === 'farm') { const [a, b] = featLoc(F, x, z), d = Math.hypot(a + 8, b); if (d < 50) put(0.5, 0.56, 0.3, smooth01((50 - d)/25)*0.6); }
+  else if (F.kind === 'village') { const [a, b] = featLoc(F, x, z); if (Math.abs(a) < F.L + 20 && Math.abs(b) < 45) put(0.36, 0.62, 0.28, 0.5); } }   // (mown lawns)
+const LAT = 20;
+function hLat(x, z) { const g = HG, fx = (x - g.x0)/LAT, fz = (z - g.z0)/LAT, ix = Math.floor(fx), iz = Math.floor(fz), u = fx - ix, v = fz - iz, x0 = g.x0 + ix*LAT, z0 = g.z0 + iz*LAT;
+  const a = latPt(x0, z0)[0], b = latPt(x0 + LAT, z0)[0], c = latPt(x0, z0 + LAT)[0], d = latPt(x0 + LAT, z0 + LAT)[0];
+  return (u + v <= 1) ? a + (b - a)*u + (c - a)*v : d + (c - d)*(1 - u) + (b - d)*(1 - v); }   // (the same triangles as the drawn sheet)
+// ── the gravel roads: hub to hub between neighbouring cells (a village's street ends, a farm's yard, beside a lake), and out of the village
+function hubOf(i, j) { const F = featCell(i, j); if (F) return F; return { hub: { x: i*FC + FC/2 + (hsh(i, j, 120) - 0.5)*500, z: j*FC + FC/2 + (hsh(i, j, 121) - 0.5)*500 }, none: true }; }
+function hubToward(F, x, z) { if (F.kind === 'village') { const [e0, e1] = F.ends; return Math.hypot(e0.x - x, e0.z - z) < Math.hypot(e1.x - x, e1.z - z) ? e0 : e1; } return F.hub; }
+function roadOk(x, z, base) { if (!base && inBase(x, z, 60)) return false; for (const A of airfieldsNear(x, z, AF_L/2 + 200)) if (afMask(A, x, z) > 0.02) return false;
+  for (const F of featsNear(x, z, 300)) { if (F.kind === 'lake' && featQ(F, x, z) < 1.2) return false; const [a, b] = featLoc(F, x, z); if (F.kind === 'farm' && ((Math.abs(a - 100) < 86 && Math.abs(b) < 58) || (a > -52 && a < 4 && Math.abs(b) < 34))) return false; if (F.kind === 'village' && Math.abs(a) < F.L - 4 && Math.abs(b) < 50) return false; } return true; }
+function roadPath(P0, P1, seed, base) { const L = Math.hypot(P1.x - P0.x, P1.z - P0.z); if (L < 30) return null; const n = Math.ceil(L/10), nx = (P1.z - P0.z)/L, nz = -(P1.x - P0.x)/L, W = Math.min(70, L*0.09), pts = [];
+  for (let k = 0; k <= n; k++) { const t = k/n, w = W*Math.sin(Math.PI*t)*vnoise(t*L/240 + seed, seed*0.7), x = P0.x + (P1.x - P0.x)*t + nx*w, z = P0.z + (P1.z - P0.z)*t + nz*w; if (k > 2 && k < n - 2 && !roadOk(x, z, base)) return null; pts.push({ x, z }); }
+  return pts; }
+function roadAdd(key, pts, power) { const E = { key, pts, power, x0: Infinity, z0: Infinity, x1: -Infinity, z1: -Infinity }; RD.edges.set(key, E); if (!pts) return E;
+  for (let k = 0; k < pts.length - 1; k++) { const a = pts[k], b = pts[k + 1], s = { ax: a.x, az: a.z, bx: b.x, bz: b.z };
+    E.x0 = Math.min(E.x0, a.x); E.z0 = Math.min(E.z0, a.z); E.x1 = Math.max(E.x1, a.x); E.z1 = Math.max(E.z1, a.z);
+    for (let i = Math.floor((Math.min(a.x, b.x) - 9)/RBK); i <= Math.floor((Math.max(a.x, b.x) + 9)/RBK); i++) for (let j = Math.floor((Math.min(a.z, b.z) - 9)/RBK); j <= Math.floor((Math.max(a.z, b.z) + 9)/RBK); j++) {
+      const bk = i*100003 + j; let l = RD.buckets.get(bk); if (!l) RD.buckets.set(bk, l = []); l.push(s); } }
+  return E; }
+function roadEdge(i, j, dir) { const key = dir + i + ',' + j; if (RD.edges.has(key)) return RD.edges.get(key);
+  const A = hubOf(i, j), B = dir === 'E' ? hubOf(i + 1, j) : hubOf(i, j + 1), live = (k) => !k.none && (k.kind === 'farm' || k.kind === 'village');
+  const p = live(A) || live(B) ? 0.85 : 0.45; if (hsh(i, j, dir === 'E' ? 130 : 131) >= p) return roadAdd(key, null);
+  const PA = hubToward(A, B.hub.x, B.hub.z), PB = hubToward(B, PA.x, PA.z); return roadAdd(key, roadPath(PA, PB, hsh(i, j, dir === 'E' ? 132 : 133)*50, false), hsh(i, j, dir === 'E' ? 134 : 135) < 0.5); }
+function roadExits() { if (RD.exits) return; RD.exits = true; outerExitNear(0, 0);   // (OUT.exits: where the village's roads run out of it)
+  const seen = []; OUT.exits.forEach((E, k) => { if (seen.some(q => Math.hypot(q.x - E.x, q.z - E.z) < 80)) return; seen.push(E);
+    let dx = E.dx, dz = E.dz; const ox = Math.abs(E.x) >= Math.abs(E.z) ? Math.sign(E.x) : 0, oz = ox ? 0 : Math.sign(E.z); if (dx*ox + dz*oz < 0.6) { dx = ox; dz = oz; }   // (a road running along the edge: out along the edge's normal)
+    const g = HG, X1 = g.x0 + (g.n - 1)*g.step, out = ox ? (ox > 0 ? X1 - E.x : E.x - g.x0) : (oz > 0 ? X1 - E.z : E.z - g.z0), run = Math.max(390, out/Math.max(0.3, dx*ox + dz*oz) + 120);
+    const M = { x: E.x + dx*run, z: E.z + dz*run }; let best = null, bd = Infinity;
+    for (let i = Math.floor(M.x/FC) - 2; i <= Math.floor(M.x/FC) + 2; i++) for (let j = Math.floor(M.z/FC) - 2; j <= Math.floor(M.z/FC) + 2; j++) { const H0 = hubOf(i, j), P = hubToward(H0, M.x, M.z), d = Math.hypot(P.x - M.x, P.z - M.z) + (H0.none ? 300 : 0); if (d < bd && roadPath(M, P, 3 + k, false)) { bd = d; best = P; } }
+    const lane = []; for (let t = 0; t <= run; t += 10) lane.push({ x: E.x + dx*t, z: E.z + dz*t }); const rest = best ? roadPath(M, best, 3 + k, false) : null;
+    roadAdd('X' + k, rest ? lane.concat(rest.slice(1)) : lane, true); }); }
+function roadsEnsure(x, z) { const ci = Math.floor(x/FC), cj = Math.floor(z/FC), key = ci*100003 + cj; if (RD.done.has(key)) return; RD.done.add(key); roadExits();
+  for (let i = ci - 2; i <= ci + 1; i++) for (let j = cj - 2; j <= cj + 1; j++) { roadEdge(i, j, 'E'); roadEdge(i, j, 'N'); const F = featCell(i, j);
+    if (F && F.kind === 'village' && !RD.edges.has('V' + F.key)) { const pts = []; for (let a = -F.L; a <= F.L; a += 10) { const [x, z] = featAt(F, a, 0); pts.push({ x, z }); } roadAdd('V' + F.key, pts, true); } } }   // (the village street, its power line along it)
+function roadDist(x, z) { roadsEnsure(x, z); const l = RD.buckets.get(Math.floor(x/RBK)*100003 + Math.floor(z/RBK)); if (!l) return Infinity; let best = Infinity;
+  for (const s of l) { const dx = s.bx - s.ax, dz = s.bz - s.az, L2 = dx*dx + dz*dz || 1, t = Math.max(0, Math.min(1, ((x - s.ax)*dx + (z - s.az)*dz)/L2)), d = Math.hypot(x - s.ax - dx*t, z - s.az - dz*t); if (d < best) best = d; } return best; }
+// what's under a wheel out there: { road, bog, water: depth }
+function outerSurface(x, z) { const o = { road: false, bog: 0, water: 0 }; if (inBase(x, z, 0)) return o; o.road = roadDist(x, z) < 2.9;
+  for (const F of featsNear(x, z, 300)) { if (F.kind === 'bog') { const q = featQ(F, x, z); if (q < 1) o.bog = Math.max(o.bog, Math.min(1, (1 - q)*4)); } else if (F.kind === 'lake' && featQ(F, x, z) < 1) o.water = Math.max(0, F.level - H(x, z)); }
+  if (o.road) o.bog = 0; return o; }
+function outerSplash(OS, spd, drown) { const y = Y(car.x, car.z), wl = OS.water > 0 ? y + OS.water : y, n = Math.min(4, spd*0.25);
+  for (let i = 0; i < n; i++) if (Math.random() < 0.5) { const a = Math.random()*6.3, w = OS.water > 0; lifeFx.emit(car.x + Math.sin(a)*1.2, wl + 0.1, car.z + Math.cos(a)*1.2, Math.sin(a)*1.5 + car.vx*0.2, 1.5 + Math.random()*2.5, Math.cos(a)*1.5 + car.vz*0.2, 0.6 + Math.random()*0.4, 0.5, 1.4, 0.6, w ? 0.85 : 0.35, w ? 0.92 : 0.28, w ? 0.98 : 0.18, w ? 0.8 : 0.3, w ? 0.88 : 0.25, w ? 0.95 : 0.16); }
+  if (drown && !car.drownMsg) { car.drownMsg = true; pizzaMsg(T('🌊 AUTO UPPOSI JÄRVEEN – R = takaisin'), true); } if (!drown && OS.water < 0.3) car.drownMsg = false; }
+// trees keep off the places and the roads
+function featBlocksTree(x, z) { for (const F of featsNear(x, z, 300)) { if (F.kind === 'lake') { if (featQ(F, x, z) < 1.3) return true; continue; } if (F.kind === 'bog') { if (featQ(F, x, z) < 0.85) return true; continue; }
+    const [a, b] = featLoc(F, x, z); if (F.kind === 'farm' && (Math.hypot(a + 8, b) < 58 || (Math.abs(a - 100) < 92 && Math.abs(b) < 64))) return true; if (F.kind === 'village' && Math.abs(a) < F.L + 25 && Math.abs(b) < 48) return true; }
+  return roadDist(x, z) < 7.5; }
+// ── the kit: boxes, gable roofs, cylinders, cones merged into one vertex-coloured mesh a place (one draw, shadows)
+const KIT = { box: new THREE.BoxGeometry(1, 1, 1).toNonIndexed(), cyl: new THREE.CylinderGeometry(0.5, 0.5, 1, 8).toNonIndexed(), cone: new THREE.ConeGeometry(0.5, 1, 7).toNonIndexed(), mat: null, m: new THREE.Matrix4(), q: new THREE.Quaternion(), e: new THREE.Euler(), p: new THREE.Vector3(), s: new THREE.Vector3(), n3: new THREE.Matrix3(), c: new THREE.Color(), v: new THREE.Vector3() };
+KIT.gab = (P) => { P = P.slice(); for (let i = 0; i < P.length; i += 9) for (let k = 0; k < 3; k++) [P[i + 3 + k], P[i + 6 + k]] = [P[i + 6 + k], P[i + 3 + k]];   // (listed clockwise: turned round so they face out)
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.computeVertexNormals(); return g; };
+KIT.roof = KIT.gab([-0.5, 0, 0.5, -0.5, 0, -0.5, 0, 1, -0.5,  -0.5, 0, 0.5, 0, 1, -0.5, 0, 1, 0.5,  0.5, 0, -0.5, 0.5, 0, 0.5, 0, 1, 0.5,  0.5, 0, -0.5, 0, 1, 0.5, 0, 1, -0.5]);   // (the two slopes: the ridge along z, eaves at y 0, x ±0.5)
+KIT.gable = KIT.gab([-0.5, 0, -0.5, 0.5, 0, -0.5, 0, 1, -0.5,  0.5, 0, 0.5, -0.5, 0, 0.5, 0, 1, 0.5]);   // (the two gable ends, in the wall's colour)
+function kitNew() { return { p: [], n: [], c: [] }; }
+function kitAdd(K, geo, x, y, z, yaw, sx, sy, sz, col, pitch, roll) { KIT.m.compose(KIT.p.set(x, y, z), KIT.q.setFromEuler(KIT.e.set(pitch || 0, yaw || 0, roll || 0, 'YXZ')), KIT.s.set(sx, sy, sz)); KIT.n3.getNormalMatrix(KIT.m); KIT.c.setHex(col);
+  const P = geo.attributes.position.array, N = geo.attributes.normal.array; for (let i = 0; i < P.length; i += 3) { KIT.v.set(P[i], P[i + 1], P[i + 2]).applyMatrix4(KIT.m); K.p.push(KIT.v.x, KIT.v.y, KIT.v.z); KIT.v.set(N[i], N[i + 1], N[i + 2]).applyMatrix3(KIT.n3).normalize(); K.n.push(KIT.v.x, KIT.v.y, KIT.v.z); K.c.push(KIT.c.r, KIT.c.g, KIT.c.b); } }
+function kitMesh(K) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(K.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(K.n, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(K.c, 3)); g.computeBoundingSphere();
+  if (!KIT.mat) KIT.mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 }); const m = new THREE.Mesh(g, KIT.mat); m.castShadow = m.receiveShadow = true; return m; }
+// a local frame on the ground: (a, b) along/across `yaw` from (x, z)
+function kitFrame(x, z, yaw) { const fx = Math.sin(yaw), fz = Math.cos(yaw); return (a, b) => [x + fx*a + fz*b, z + fz*a - fx*b]; }
+function groundMin(x, z, hw, hl, yaw) { const at = kitFrame(x, z, yaw); let lo = Infinity; for (const [a, b] of [[-hl, -hw], [hl, -hw], [-hl, hw], [hl, hw], [0, 0]]) { const [px, pz] = at(a, b); lo = Math.min(lo, H(px, pz)); } return lo; }
+// a house: w across (the gable end), l along the ridge; walls h; a stone plinth down to the lowest ground; windows, a door, white corners, a chimney
+function kitHouse(K, S, x, z, yaw, w, l, h, wall, roof, o) { o = o || {}; const y0 = groundMin(x, z, w/2 + 0.3, l/2 + 0.3, yaw), at = kitFrame(x, z, yaw), fy = y0 + (o.plinth === 0 ? 0 : 0.45), trim = o.trim === undefined ? 0xeeeae0 : o.trim;
+  if (o.plinth !== 0) kitAdd(K, KIT.box, x, y0 - 0.7, z, yaw, w + 0.2, 2.3, l + 0.2, 0x7a7a76);
+  kitAdd(K, KIT.box, x, fy + h/2, z, yaw, w, h, l, wall);
+  const rh = o.roofH || w*0.36; kitAdd(K, KIT.roof, x, fy + h, z, yaw, w + 0.9, rh*(w + 0.9)/w, l + 0.8, roof); kitAdd(K, KIT.gable, x, fy + h, z, yaw, w, rh, l, wall);
+  if (trim !== null) for (const [a, b] of [[-l/2, -w/2], [l/2, -w/2], [-l/2, w/2], [l/2, w/2]]) { const [px, pz] = at(a, b); kitAdd(K, KIT.box, px, fy + h/2, pz, yaw, 0.22, h, 0.22, trim); }
+  if (o.windows !== false) { const nw = Math.max(1, Math.floor(l/3)), fr = trim === null ? 0xd8d0c0 : trim, rows = h > 4.5 ? [1.75, h - 1.35] : [h*0.55];
+    for (const sd of [-1, 1]) for (let k = 0; k < nw; k++) { const a = -l/2 + (k + 0.5)*l/nw, [px, pz] = at(a, sd*(w/2 + 0.03)), [qx, qz] = at(a, sd*(w/2 + 0.08));
+      rows.forEach((ry, r) => { if (r === 0 && sd > 0 && k === Math.floor(nw/2) && o.door !== false) return; kitAdd(K, KIT.box, px, fy + ry, pz, yaw, 0.12, 1.2, 1.0, fr); kitAdd(K, KIT.box, qx, fy + ry, qz, yaw, 0.06, 0.95, 0.75, 0x24303c); }); } }
+  if (o.door !== false) { const [px, pz] = at(0, w/2 + 0.06); kitAdd(K, KIT.box, px, fy + 1.0, pz, yaw, 0.1, 2.0, 1.0, o.doorCol || 0x5a3a24); const [sx2, sz2] = at(0, w/2 + 0.9); kitAdd(K, KIT.box, sx2, fy - 0.1, sz2, yaw, 1.4, 0.5, 1.6, 0x8a8a84); }
+  if (o.chimney !== false) { const [px, pz] = at(l*0.22, -w*0.12); kitAdd(K, KIT.box, px, fy + h + rh*0.75, pz, yaw, 0.6, rh*0.9 + 0.6, 0.6, 0x8a4a3a); }
+  if (S) S.push({ x, z, yaw, hw: w/2 + 0.2, hl: l/2 + 0.2, kind: 'lm' });   // (the static box: hw across, hl along the ridge)
+  return fy; }
+// signs (a canvas texture each: village names, the shop) — kept with the place's group and disposed with it
+function featSign(G, text, x, y, z, yaw, w, h, bg, fg) { const c = document.createElement('canvas'); c.width = 256; c.height = 64; const g = c.getContext('2d'); g.fillStyle = bg; g.fillRect(0, 0, 256, 64); g.strokeStyle = fg; g.lineWidth = 4; g.strokeRect(4, 4, 248, 56);
+  g.fillStyle = fg; g.font = '900 ' + (text.length > 11 ? 30 : 36) + 'px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(text, 128, 34);
+  const tex = new THREE.CanvasTexture(c), m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, side: THREE.DoubleSide })); m.position.set(x, y, z); m.rotation.y = yaw; G.add(m); return m; }
+// a field: a sheet on the ground lattice's own points (so it lies exactly on the drawn ground), the furrows a texture, alpha outside the field
+const FIELD_TEX = [];
+function fieldTex(crop) { if (FIELD_TEX[crop]) return FIELD_TEX[crop]; const c = document.createElement('canvas'); c.width = 64; c.height = 256; const g = c.getContext('2d');
+  const base = ['#b8a456', '#6f9a3e', '#6a4e34'][crop], line = ['#cbb86a', '#5d8a34', '#563e28'][crop]; g.clearRect(0, 0, 64, 256); g.fillStyle = base; g.fillRect(2, 2, 60, 252); g.fillStyle = line;
+  for (let x = 4; x < 60; x += 4) g.fillRect(x, 2, 2, 252); for (let i = 0; i < 500; i++) { g.fillStyle = 'rgba(0,0,0,' + (Math.random()*0.08) + ')'; g.fillRect(2 + Math.random()*58, 2 + Math.random()*250, 2, 3); }
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return FIELD_TEX[crop] = t; }
+function fieldMesh(F) { const f = F.field, [cx, cz] = featAt(F, f.a, f.b), R = Math.hypot(f.hl, f.hw) + 20, g = HG, i0 = Math.floor((cx - R - g.x0)/LAT), i1 = Math.ceil((cx + R - g.x0)/LAT), j0 = Math.floor((cz - R - g.z0)/LAT), j1 = Math.ceil((cz + R - g.z0)/LAT);
+  const nI = i1 - i0 + 1, nJ = j1 - j0 + 1, pos = new Float32Array(nI*nJ*3), uv = new Float32Array(nI*nJ*2), idx = [];
+  for (let j = 0; j < nJ; j++) for (let i = 0; i < nI; i++) { const x = g.x0 + (i0 + i)*LAT, z = g.z0 + (j0 + j)*LAT, k = j*nI + i, [a, b] = featLoc(F, x, z);
+    pos[k*3] = x; pos[k*3 + 1] = latPt(x, z)[0] + 0.03; pos[k*3 + 2] = z; uv[k*2] = 0.5 + (b - f.b)/(2*f.hw)*(60/64); uv[k*2 + 1] = 0.5 + (a - f.a)/(2*f.hl)*(252/256); }
+  for (let j = 0; j < nJ - 1; j++) for (let i = 0; i < nI - 1; i++) { const a = j*nI + i, b = a + 1, c = a + nI, d = c + 1; idx.push(a, c, b, b, c, d); }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.setIndex(idx); geo.computeVertexNormals();
+  const t = fieldTex(F.crop), m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: t, roughness: 0.95, transparent: false, alphaTest: 0.5, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2 })); t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; m.receiveShadow = true; return m; }
+// each kind of place
+function featBuild(F) { const G = new THREE.Group(), K = kitNew(), S = [], at = (a, b) => featAt(F, a, b), h = F.h, yaw = F.yaw;
+  if (F.kind === 'farm') { const wall = H_WALL[Math.floor(h(1)*H_WALL.length)], roof = H_ROOF[Math.floor(h(2)*H_ROOF.length)];
+    { const [x, z] = at(-8, 0); kitHouse(K, S, x, z, yaw + Math.PI/2, 8.5, 12, h(3) < 0.5 ? 3.0 : 5.4, wall, roof); }   // the farmhouse
+    { const [x, z] = at(-34, 10); kitHouse(K, S, x, z, yaw, 11, 24, 4.4, 0x8a2e22, 0x5a5e62, { windows: true, door: false, chimney: false }); const [hx, hz] = at(-34 + 13, 10); kitAdd(K, KIT.box, hx, H(hx, hz) + 0.8, hz, yaw, 6, 1.6, 2, 0xb8b0a0); }   // the cowshed and its manure slab
+    { const [x, z] = at(6, -26); kitHouse(K, S, x, z, yaw, 4.2, 5.5, 2.5, 0x6a3a24, 0x55585c, { trim: null, chimney: true, windows: false }); }   // the sauna
+    { const [x, z] = at(-16, -24); kitHouse(K, S, x, z, yaw + 0.05, 4.5, 6, 2.6, 0x8a2e22, 0x4a4e52, { windows: false }); }   // the granary (aitta)
+    const f = F.field; for (let k = 0; k < 2; k++) { const a = f.a + (h(10 + k) - 0.5)*f.hl*1.4, b = (k ? -1 : 1)*f.hw*0.55, [x, z] = at(a, b); kitHouse(K, S, x, z, yaw + (h(12 + k) - 0.5)*0.3, 6.5, 9, 3.4, 0x6e665a, 0x6a4e3a, { plinth: 0, trim: null, windows: false, chimney: false, doorCol: 0x4e463a, roofH: 2.4 }); }   // barns (lato) on the field
+    if (F.crop === 0) for (let k = 0; k < 8; k++) { const [x, z] = at(f.a + (h(20 + k) - 0.5)*f.hl*1.6, (h(30 + k) - 0.5)*f.hw*1.6); kitAdd(K, KIT.cyl, x, H(x, z) + 0.6, z, h(40 + k)*3, 1.25, 1.2, 1.25, 0xf2f2ee, Math.PI/2); }   // wrapped bales
+    { const [x, z] = at(-8, 14); kitAdd(K, KIT.box, x, H(x, z) + 1.2, z, yaw, 0.12, 2.4, 0.12, 0x6a6a6a); kitAdd(K, KIT.box, x, H(x, z) + 2.5, z, yaw, 0.5, 0.35, 0.3, 0xe8e2d0); }   // the yard light
+    G.add(fieldMesh(F)); }
+  if (F.kind === 'village') { let n = 0;
+    for (let k = 0; k < 13; k++) { const sd = k % 2 ? 1 : -1, a = -F.L + 18 + k*(2*F.L - 36)/12 + (h(50 + k) - 0.5)*6; if (h(60 + k) < 0.12) continue; const b = sd*(13 + h(70 + k)*5), [x, z] = at(a, b);
+      if (k === 6) { kitHouse(K, S, x, z, yaw + (sd > 0 ? Math.PI : 0), 10, 16, 3.6, 0xe8e2c8, 0x6a6e72, { chimney: false }); const [sx, sz] = at(a, sd*(b*sd - 5.9)); featSign(G, 'KYLÄKAUPPA', sx, H(x, z) + 4.2, sz, yaw + (sd > 0 ? -Math.PI/2 : Math.PI/2), 5, 1.25, '#1a4a9a', '#f4f0e0'); continue; }   // the shop
+      kitHouse(K, S, x, z, yaw + (sd > 0 ? Math.PI : 0), 7.5 + h(80 + k)*2, 9 + h(90 + k)*4, h(100 + k) < 0.4 ? 5.2 : 3.0, H_WALL[Math.floor(h(110 + k)*H_WALL.length)], H_ROOF[Math.floor(h(120 + k)*H_ROOF.length)]); n++;
+      const [mx, mz] = at(a + 3, sd*6.5); kitAdd(K, KIT.box, mx, H(mx, mz) + 0.55, mz, yaw, 0.08, 1.1, 0.08, 0x5a4a3a); kitAdd(K, KIT.box, mx, H(mx, mz) + 1.15, mz, yaw, 0.3, 0.25, 0.45, 0x2a5a9a); }   // a mailbox
+    { const [x, z] = at(8, 9); const y = H(x, z); for (const [u, v, w, hh, d] of [[0, -0.9, 3.4, 0.08, 0.1], [-1.6, 0, 0.1, 2.3, 1.8], [1.6, 0, 0.1, 2.3, 1.8]]) { const [px, pz] = at(8 + u, 9 + v); kitAdd(K, KIT.box, px, y + hh/2 + 0.02, pz, yaw, d, hh, w, 0x6a5040); } const [rx, rz] = at(8, 9); kitAdd(K, KIT.box, rx, y + 2.4, rz, yaw, 2.2, 0.12, 3.8, 0x3a3a3c); }   // the bus shelter
+    for (const s of [-1, 1]) { const [x, z] = at(s*(F.L + 14), 5.5), y = H(x, z); kitAdd(K, KIT.box, x, y + 1.0, z, yaw, 0.1, 2.0, 0.1, 0x8a8a8a); featSign(G, F.name.toUpperCase(), x, y + 2.3, z, yaw + (s > 0 ? 0 : Math.PI), 3.2, 0.8, '#1a4a9a', '#ffffff'); }   // the name signs at both ends
+    F.nHouses = n; }
+  if (F.kind === 'lake') { const ap = F.yaw + 1.2; let r = F.R*0.93*featWob(F, ap); const [sx, sz] = [F.x + Math.sin(ap)*r, F.z + Math.cos(ap)*r];
+    { const d = 9, [x, z] = [F.x + Math.sin(ap)*(r + d), F.z + Math.cos(ap)*(r + d)]; kitHouse(K, S, x, z, ap, 4.2, 5, 2.4, 0x5a3a24, 0x55585c, { trim: null, windows: false, chimney: true }); }   // the lakeside sauna
+    for (let k = 0; k < 7; k++) { const t = 2 - k*2.1, x = sx + Math.sin(ap)*t, z = sz + Math.cos(ap)*t; kitAdd(K, KIT.box, x, F.level + 0.45, z, ap, 1.4, 0.12, 2.0, 0x9a8a6a); if (k % 2) for (const s of [-0.6, 0.6]) { const px = x + Math.cos(ap)*s, pz = z - Math.sin(ap)*s; kitAdd(K, KIT.box, px, F.level - 0.4, pz, ap, 0.15, 1.8, 0.15, 0x5a4a3a); } }   // the jetty
+    { const b = ap - 0.09, rr = F.R*0.96*featWob(F, b), x = F.x + Math.sin(b)*rr, z = F.z + Math.cos(b)*rr; kitAdd(K, KIT.box, x, Math.max(F.level, H(x, z)) + 0.25, z, b + 0.3, 1.2, 0.45, 4.2, 0x4a8a5a); }   // a rowing boat, upside down on the shore
+    for (let k = 0; k < 6; k++) { const b = F.yaw + h(130 + k)*6.28, rr = F.R*0.9*featWob(F, b), x = F.x + Math.sin(b)*rr, z = F.z + Math.cos(b)*rr; for (let m = 0; m < 9; m++) { const u = (h(140 + k*9 + m) - 0.5)*7, v = (h(200 + k*9 + m) - 0.5)*4; kitAdd(K, KIT.box, x + u, F.level + 0.5, z + v, h(250 + m)*3, 0.08, 1.6 + h(260 + m), 0.08, 0x7a8a3a); } }   // reeds
+    const N = 72, pos = [F.x, F.level, F.z]; for (let k = 0; k <= N; k++) { const a = k/N*6.2832, rr = F.R*1.02*featWob(F, a); pos.push(F.x + Math.sin(a)*rr, F.level, F.z + Math.cos(a)*rr); }
+    const idx = []; for (let k = 1; k <= N; k++) idx.push(0, k, k + 1); const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+    const w = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x4a7a92, roughness: 0.22, metalness: 0.15, transparent: true, opacity: 0.88 })); w.receiveShadow = true; G.add(w); }
+  if (F.kind === 'bog') { for (let k = 0; k < 46; k++) { const b = h(150 + k)*6.28, rr = F.R*Math.sqrt(h(200 + k))*0.9*featWob(F, b), x = F.x + Math.sin(b)*rr, z = F.z + Math.cos(b)*rr, y = H(x, z), t = 2 + h(250 + k)*3.5, dead = h(300 + k) < 0.4;   // scrawny bog pines, some dead
+      kitAdd(K, KIT.cyl, x, y + t/2, z, 0, 0.12, t, 0.12, dead ? 0x8a8478 : 0x4a3a2a); if (!dead) kitAdd(K, KIT.cone, x, y + t*0.75, z, 0, 1.1 + t*0.15, t*0.7, 1.1 + t*0.15, 0x3a5a32); }
+    for (let k = -14; k <= 14; k++) { const [x, z] = at(k*2.1, 0), y = H(x, z); for (const s of [-0.18, 0.18]) { const [px, pz] = at(k*2.1, s); kitAdd(K, KIT.box, px, y + 0.12, pz, yaw, 0.26, 0.1, 2.0, 0x8a7a5a); } }   // duckboards
+    for (let k = 0; k < 7; k++) { const b = h(350 + k)*6.28, rr = F.R*0.6*h(360 + k), x = F.x + Math.sin(b)*rr, z = F.z + Math.cos(b)*rr; kitAdd(K, KIT.cyl, x, H(x, z) + 0.06, z, 0, 3 + h(370 + k)*4, 0.04, 2 + h(380 + k)*3, 0x2a3a3a); } }   // pools
+  if (K.p.length) G.add(kitMesh(K)); F.solid = S; scene.add(G); return G; }
+// a road's things: the gravel ribbon, and on some the power line (poles every ~50 m, three sagging wires)
+let _gravTex = null;
+function roadBuild(E) { const G = new THREE.Group(), P = E.pts, pos = [], col = [], idx = [], L = [0];
+  for (let k = 1; k < P.length; k++) L.push(L[k - 1] + Math.hypot(P[k].x - P[k - 1].x, P[k].z - P[k - 1].z));
+  const tot = L[L.length - 1], n = Math.ceil(tot/3), pt = (s) => { let k = 1; while (k < P.length - 1 && L[k] < s) k++; const t = (s - L[k - 1])/((L[k] - L[k - 1]) || 1); return { x: P[k - 1].x + (P[k].x - P[k - 1].x)*t, z: P[k - 1].z + (P[k].z - P[k - 1].z)*t }; };
+  const across = [-2.9, -1.4, 0, 1.4, 2.9], C = new THREE.Color(); let prev = pt(0);
+  for (let k = 0; k <= n; k++) { const s = Math.min(tot, k*3), p = pt(s), q = pt(Math.min(tot, s + 1.5)), r = pt(Math.max(0, s - 1.5)), dx = q.x - r.x, dz = q.z - r.z, l = Math.hypot(dx, dz) || 1, nx = dz/l, nz = -dx/l;
+    for (const u of across) { const x = p.x + nx*u, z = p.z + nz*u, y = H(x, z) + 0.14, edge = Math.abs(u) > 2, mid = Math.abs(u) < 0.1, v = vnoise(x/3, z/3)*0.05; pos.push(x, y, z);
+      C.setRGB(0.62 + v - (edge ? 0.08 : 0) + (mid ? 0.03 : 0), 0.57 + v - (edge ? 0.07 : 0), 0.47 + v - (edge ? 0.06 : 0)); col.push(C.r, C.g, C.b); } prev = p; }
+  const A = across.length; for (let k = 0; k < n; k++) for (let i = 0; i < A - 1; i++) { const a = k*A + i, b = a + 1, c = a + A, d = c + 1; idx.push(a, c, b, b, c, d); }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+  const rib = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.97, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 })); rib.receiveShadow = true; G.add(rib);
+  const S = []; if (E.power) { const K = kitNew(), wires = [], tops = []; for (let s = 20; s < tot - 10; s += 48) { const p = pt(s), q = pt(Math.min(tot, s + 2)), dx = q.x - p.x, dz = q.z - p.z, l = Math.hypot(dx, dz) || 1, nx = dz/l, nz = -dx/l, x = p.x + nx*7, z = p.z + nz*7, y = H(x, z), a = Math.atan2(dx, dz);
+      kitAdd(K, KIT.cyl, x, y + 4.2, z, 0, 0.26, 8.4, 0.26, 0x4a3a2a); kitAdd(K, KIT.box, x, y + 8.1, z, a, 2.4, 0.14, 0.16, 0x4a3a2a); S.push({ x, z, yaw: 0, hw: 0.2, hl: 0.2, kind: 'pole' });
+      const t = [-1.05, 0, 1.05].map(o => new THREE.Vector3(x + Math.cos(a)*o, y + 8.25 + (o ? 0 : 0.35), z - Math.sin(a)*o)); if (tops.length) { const T0 = tops[tops.length - 1]; for (let w = 0; w < 3; w++) for (let m = 0; m < 8; m++) { const t0 = m/8, t1 = (m + 1)/8, A0 = T0[w], B0 = t[w], sag = (u) => -1.1*4*u*(1 - u);
+          wires.push(A0.x + (B0.x - A0.x)*t0, A0.y + (B0.y - A0.y)*t0 + sag(t0), A0.z + (B0.z - A0.z)*t0, A0.x + (B0.x - A0.x)*t1, A0.y + (B0.y - A0.y)*t1 + sag(t1), A0.z + (B0.z - A0.z)*t1); } } tops.push(t);
+      for (const v of t) kitAdd(K, KIT.cyl, v.x, v.y - 0.1, v.z, 0, 0.1, 0.2, 0.1, 0xe8e8e0); }
+    if (K.p.length) G.add(kitMesh(K)); if (wires.length) { const wg = new THREE.BufferGeometry(); wg.setAttribute('position', new THREE.Float32BufferAttribute(wires, 3)); G.add(new THREE.LineSegments(wg, new THREE.LineBasicMaterial({ color: 0x1a1a1a }))); } }
+  E.solid = S; scene.add(G); return G; }
+function groupDrop(G) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && o.material !== KIT.mat) { if (o.material.map && !FIELD_TEX.includes(o.material.map)) o.material.map.dispose(); o.material.dispose(); } }); }
+// streaming: a place within 1.3 km of the camera is built, dropped past 1.7 km; roads likewise by their bounding box; at most one build a frame
+function countryUpdate(cx, cz) { OUT.fG = OUT.fG || new Map(); OUT.rG = OUT.rG || new Map(); let built = false;
+  for (const F of featsNear(cx, cz, 1300)) if (!OUT.fG.has(F.key) && Math.hypot(F.x - cx, F.z - cz) < 1300 + (F.R || 0)) { if (built) break; OUT.fG.set(F.key, featBuild(F)); built = true; }
+  for (const [k, G] of OUT.fG) { const F = FEAT.get(k); if (Math.hypot(F.x - cx, F.z - cz) > 1700 + (F.R || 0)) { groupDrop(G); OUT.fG.delete(k); F.solid = null; } }
+  roadsEnsure(cx, cz); const bd = (E) => Math.hypot(Math.max(0, E.x0 - cx, cx - E.x1), Math.max(0, E.z0 - cz, cz - E.z1));
+  for (const E of RD.edges.values()) { if (!E.pts) continue; const d = bd(E), has = OUT.rG.has(E.key); if (!has && d < 1100 && !built) { OUT.rG.set(E.key, roadBuild(E)); built = true; } else if (has && d > 1500) { groupDrop(OUT.rG.get(E.key)); OUT.rG.delete(E.key); E.solid = null; } }
+  if (built) OUT.sx = 1e9;   // (new solids: outerSolids re-does its list)
+  const px = PLANE.on ? PLANE.p.x : car.x, pz = PLANE.on ? PLANE.p.z : car.z; let at = null;   // (arriving: the place's name on the screen, once a visit)
+  for (const F of featsNear(px, pz, 300)) { if (F.kind === 'village') { const [a, b] = featLoc(F, px, pz); if (Math.abs(a) < F.L + 20 && Math.abs(b) < 60) at = F; } else if (F.kind === 'lake' && featQ(F, px, pz) < 1.1) at = F; }
+  if (at && OUT.at !== at.key && gameState !== State.MENU) pizzaMsg(at.kind === 'village' ? '🏡 ' + at.name.toUpperCase() : '🌊 ' + at.name, true); OUT.at = at ? at.key : null;
+  return built; }
 // the ground out there: one 2 km sheet round the camera on the height grid's own 20 m lattice (so its edge lies on the village's), rebuilt every 100 m
 function outerGround(cx0, cz0) { const S = 20, N = 111, g = HG, cx = g.x0 + Math.round((cx0 - g.x0)/S)*S, cz = g.z0 + Math.round((cz0 - g.z0)/S)*S;
   if (OUT.mesh && Math.abs(cx - OUT.cx) < 160 && Math.abs(cz - OUT.cz) < 160) return; OUT.cx = cx; OUT.cz = cz;
   // (1.10., Ande's worry: was ~23 ms a rebuild — 5 H() a vertex for its normal, new buffers each time. Now each lattice point's height and
   // colour is cached (a move of 160 m reuses ~85 %), the normal comes from the neighbours on the lattice, the buffers are rewritten in place)
   const half = (N - 1)/2*S, X1 = g.x0 + (g.n - 1)*g.step, C = OUT.gc || (OUT.gc = new Map()); if (C.size > 120000) C.clear();
-  const M = N + 2, hh = OUT.gh || (OUT.gh = new Float32Array(M*M)), pt = (x, z) => { const key = x*1e6 + z; let v = C.get(key); if (v === undefined) { let af = 0; if (!inBase(x, z, -0.1)) for (const A of airfieldsNear(x, z, AF_L/2 + 200)) af = Math.max(af, afMask(A, x, z)); v = [H(x, z), af, 0.5 + 0.5*vnoise(x/90, z/90)]; C.set(key, v); } return v; }, VA = OUT.gv || (OUT.gv = new Array(M*M));
+  const M = N + 2, hh = OUT.gh || (OUT.gh = new Float32Array(M*M)), VA = OUT.gv || (OUT.gv = new Array(M*M)), pt = latPt;
   for (let j = 0; j < M; j++) for (let i = 0; i < M; i++) { const v = pt(cx - half + (i - 1)*S, cz - half + (j - 1)*S); VA[j*M + i] = v; hh[j*M + i] = v[0]; }
   if (!OUT.mesh) { const geo = new THREE.BufferGeometry(), idx = new Uint32Array((N - 1)*(N - 1)*6); let q = 0;
     for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) { const a = j*N + i, b = a + 1, c = a + N, d = c + 1; idx[q++] = a; idx[q++] = c; idx[q++] = b; idx[q++] = b; idx[q++] = c; idx[q++] = d; }
@@ -639,12 +846,12 @@ function outerGround(cx0, cz0) { const S = 20, N = 111, g = HG, cx = g.x0 + Math
     const dx = (hh[m + 1] - hh[m - 1])/(2*S), dz = (hh[m + M] - hh[m - M])/(2*S), nl = Math.hypot(dx, 1, dz), tx = -dx/nl, ty = 1/nl, tz = -dz/nl;
     pos[k] = x; pos[k + 1] = inside ? hh[m] - 4 : hh[m]; pos[k + 2] = z; nor[k] = tx; nor[k + 1] = ty; nor[k + 2] = tz;   // (under the village's own ground where they overlap)
     const af = VA[m][1], n = VA[m][2], lit = Math.max(0.6, Math.min(1.4, 1 + ((tx*HS_L[0] + ty*HS_L[1] + tz*HS_L[2])/HS_L[1] - 1)*1.9)), l = (0.8 + 0.2*n)*lit;   // (lit like the village's ground: NW banks light, hollows dark)
-    col[k] = (0.36 + 0.07*af)*l; col[k + 1] = (0.54 + 0.06*af)*l; col[k + 2] = (0.27 + 0.03*af)*l; }   // (the strip's clearing: mown, a shade lighter)
+    const tw = VA[m][6]; col[k] = ((0.36 + 0.07*af)*(1 - tw) + VA[m][3]*tw)*l; col[k + 1] = ((0.54 + 0.06*af)*(1 - tw) + VA[m][4]*tw)*l; col[k + 2] = ((0.27 + 0.03*af)*(1 - tw) + VA[m][5]*tw)*l; }   // (the strip's clearing: mown, a shade lighter; a place's own tint: sand, bog, yard)
   for (const k of ['position', 'normal', 'color']) geo.attributes[k].needsUpdate = true; }
 // the sparse forest: pines on 60 m tiles (a hash per tile: 0–5 trees), 950 m round the camera, one instanced draw for trunks, one for crowns
 function outerTreesAt(i, j, fn) { const cx = i*60 + 30, cz = j*60 + 30, W = WORLD_EDGE, e = Math.hypot(Math.max(0, -W - cx, cx - W), Math.max(0, -W - cz, cz - W));   // (from where the village's own forest stops: WORLD_EDGE)   // (thick forest by the village, thinning out over 250 m to the sparse one)
   const d = Math.max(0, 1 - e/160), n = Math.min(60, Math.floor(hsh(i, j, 21)*6) + Math.floor(d*d*48*(0.75 + 0.5*hsh(i, j, 22)))); for (let k = 0; k < n; k++) { const x = i*60 + hsh(i, j, 30 + k)*60, z = j*60 + hsh(i, j, 40 + k)*60; if (Math.abs(x) < WORLD_EDGE + 1 && Math.abs(z) < WORLD_EDGE + 1) continue; if (outerExitNear(x, z)) continue;
-    let ok = true; for (const A of airfieldsNear(x, z, AF_L/2 + 200)) if (afMask(A, x, z) > 0.02) { ok = false; break; } if (ok) fn(x, z, 3.8 + hsh(i, j, 50 + k)*4.6, k); } }   // (the village's spruce sizes: 3.8–8.4 m)
+    let ok = true; for (const A of airfieldsNear(x, z, AF_L/2 + 200)) if (afMask(A, x, z) > 0.02) { ok = false; break; } if (ok && featBlocksTree(x, z)) ok = false; if (ok) fn(x, z, 3.8 + hsh(i, j, 50 + k)*4.6, k); } }   // (the village's spruce sizes: 3.8–8.4 m)
 function outerExitNear(x, z) {   // (a lane through the forest where a village road meets the edge: the car can drive out along it, 300 m)
   if (!OUT.exits) { OUT.exits = []; for (const r of sideRoads) for (const e of [0, 1]) { const P = r.pts, a = e ? P[P.length - 1] : P[0], b = e ? P[Math.max(0, P.length - 4)] : P[Math.min(P.length - 1, 3)];
       if (Math.max(Math.abs(a.x), Math.abs(a.y)) < 470) continue;   /* (the roads that run out of the village: Tolkinkyläntie, Ylästöntie) */ const l = Math.hypot(a.x - b.x, a.y - b.y) || 1; OUT.exits.push({ x: a.x, z: a.y, dx: (a.x - b.x)/l, dz: (a.y - b.y)/l }); } }
@@ -684,9 +891,12 @@ function outerSolids(x, z) { const si = Math.floor(x/30), sj = Math.floor(z/30);
   for (const b of OUT.sb) staticRemove(b, true); OUT.sb.length = 0; if (inBase(x, z, -90)) return;
   for (let i = Math.floor((x - 70)/60); i <= Math.floor((x + 70)/60); i++) for (let j = Math.floor((z - 70)/60); j <= Math.floor((z + 70)/60); j++)
     outerTreesAt(i, j, (tx, tz) => { if (Math.hypot(tx - x, tz - z) > 70) return; const b = { x: tx, z: tz, yaw: 0, hw: 0.45, hl: 0.45, kind: 'pine' }; staticCellsAdd(b); OUT.sb.push(b); });
-  for (const A of airfieldsNear(x, z, AF_L)) if (A.solid) for (const s0 of A.solid) if (Math.hypot(s0.x - x, s0.z - z) < 120) { const b = { ...s0 }; staticCellsAdd(b); OUT.sb.push(b); } }
+  for (const A of airfieldsNear(x, z, AF_L)) if (A.solid) for (const s0 of A.solid) if (Math.hypot(s0.x - x, s0.z - z) < 120) { const b = { ...s0 }; staticCellsAdd(b); OUT.sb.push(b); }
+  for (const F of featsNear(x, z, 250)) if (F.solid) for (const s0 of F.solid) if (Math.hypot(s0.x - x, s0.z - z) < 120) { const b = { ...s0 }; staticCellsAdd(b); OUT.sb.push(b); }   // (houses, barns, saunas)
+  for (const E of RD.edges.values()) if (E.solid && x > E.x0 - 80 && x < E.x1 + 80 && z > E.z0 - 80 && z < E.z1 + 80) for (const s0 of E.solid) if (Math.hypot(s0.x - x, s0.z - z) < 70) { const b = { ...s0 }; staticCellsAdd(b); OUT.sb.push(b); } }   // (power poles)
 function outerUpdate() { if (!worldLifted) return; const cx = camera.position.x, cz = camera.position.z; outerGround(cx, cz); outerForest(cx, cz);
   for (const A of airfieldsNear(cx, cz, 1500)) if (!OUT.afG.has(A.key)) OUT.afG.set(A.key, afBuild(A));
+  if (OUT.ctry === undefined || OUT.ctry || Math.hypot(cx - OUT.ccx, cz - OUT.ccz) > 25) { OUT.ccx = cx; OUT.ccz = cz; OUT.ctry = countryUpdate(cx, cz); }   // (the countryside: re-checked every 25 m, or every frame while it is still building)
   for (const [k, G] of OUT.afG) { const A = OUT.af.get(k); if (Math.hypot(A.x - cx, A.z - cz) > 2000) { scene.remove(G); G.traverse(o => { if (o.geometry) o.geometry.dispose(); }); OUT.afG.delete(k); } }
   if (PLANE.on) outerSolids(PLANE.p.x, PLANE.p.z); else outerSolids(car.x, car.z); }   // (round whoever is moving: the plane flies far from the parked Pökö)
 function nearestAirfield(x, z) { let best = null, bd = Infinity; for (const A of airfieldsNear(x, z, 6000)) { const d = Math.hypot(A.x - x, A.z - z); if (d < bd) { bd = d; best = A; } } return best && { A: best, d: bd }; }
@@ -3492,9 +3702,10 @@ function updateCar(dt, live = true) {
   const spd = Math.abs(vF);
   const ri0 = roadInfo(car.x, car.z);
   const onPitch = inSandPitch(car.x, car.z);
-  const onTrk = onRoad(car.x, car.z, 0.4) || onPitch || inLay(car.x, car.z, 0.3);   // the sand pitch drives like a gravel road
+  const OS = worldLifted && !inBase(car.x, car.z, 0) ? outerSurface(car.x, car.z) : null; car.outer = OS;   // (out in the countryside: gravel roads, bog, lakes)
+  const onTrk = onRoad(car.x, car.z, 0.4) || onPitch || inLay(car.x, car.z, 0.3) || !!(OS && OS.road);   // the sand pitch drives like a gravel road
   car.onTrack = onTrk;
-  const surf = onPitch && !onRoad(car.x, car.z, 0.4) ? 'gravel' : onTrk ? surfaceAt(car.x, car.z) : 'grass'; car.surface = surf;
+  const surf = OS && OS.road ? 'gravel' : onPitch && !onRoad(car.x, car.z, 0.4) ? 'gravel' : onTrk ? surfaceAt(car.x, car.z) : 'grass'; car.surface = surf;
   const gravelOn = surf === 'gravel';
   car.gravelMix = (car.gravelMix || 0) + ((gravelOn ? 1 : 0) - (car.gravelMix || 0)) * (1 - Math.exp(-dt/0.22));   // grip changes over a few metres, not in one step
   if (car.gravelMix > 0.5) car.lastGravelT = performance.now();
@@ -3514,6 +3725,7 @@ function updateCar(dt, live = true) {
   }
   if (handbrake) vF *= Math.max(1 - 0.45*dt, 0);
   if (WRECK.on) { vF *= Math.max(1 - 4*dt, 0); vLat *= Math.max(1 - 4*dt, 0); }   // burnt out: it stays where it stopped
+  if (OS && (OS.bog > 0 || OS.water > 0.05)) { const k = OS.bog*0.45 + Math.min(5, OS.water*3), drown = OS.water > 1.0; vF *= Math.exp(-(drown ? 5 : k)*dt); vLat *= Math.exp(-(drown ? 5 : k*1.6)*dt); outerSplash(OS, spd, drown); }   // (bog sucks at the wheels; water brakes hard and past a metre the engine drowns)
   
   // ── steering: smoothed input rotates the heading directly ──
   car.steerSm += (steerInput - car.steerSm) * Math.min(DRIVE.steerSmooth*dt, 1);
@@ -4711,6 +4923,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['1.10.', '🏡 Maaseutu kylän takana: soratiet Ylästön reunalta naapurikyliin (talot, kyläkauppa, bussikatos, nimikyltit), maatiloille (navetta, aitta, sauna, pelto latoineen ja paaleineen) ja järville (sauna, laituri, vene); suot pitkospuineen; sähkölinjat teiden varsilla. Järvessä auto uppoaa ja kone kaatuu, suolla pyörät uppoavat', '05.40'],
   ['1.10.', 'Lentokone osuu nyt korven puihin ja korpikentän koppiin (esteet seurasivat parkkeerattua Pököä eivätkä konetta); loputtoman maan uudelleenrakennus ~8× nopeampi, ei nykäisyä lentäessä', '04.40'],
   ['30.9.', '✈🎈 Lentokone törmää kuumailmapalloon oikealla fysiikalla: kova osuma kupuun repäisee pallon (kone menettää vauhtia, pallo sinkoaa ja laskeutuu), hiljainen tönäisy vain heilauttaa, ja koriin osuminen pudottaa koneen – kori heiluu heilurina', '02.13'],
   ['30.9.', 'Korjauksia: radio ei kaadu, jos soittolista puuttuu; metsän esteiden poisto loputtomassa maailmassa nopeammaksi', '02.13'],
@@ -4995,6 +5208,10 @@ const LEHTI = [
     img: ['dragster.jpg', 'dragster_b.jpg'], cap: ['Lähtö levikkeeltä: liekit lyövät putkista ja slicksit savuavat. Sata tulee täyteen alle sekunnissa.', 'Talon seinään 170 km/h: dragsteri hajosi kappaleiksi, ja talo syttyi palamaan.'],
     body: ['YLÄSTÖ. Lähtöruudun vieressä Malminrajantiellä on dragsterin oma levike: asfalttia suoraan tien reunasta, punavalkoinen reunakivi ja rengasseinä. Nouse Pököstä F:llä, kävele dragsterin viereen ja paina F.', 'Dragsterilla on oma fysiikka. Se on kolmiulotteinen kappale neljällä jousitetulla pyörällä, ja jokainen rengas pitää, luistaa ja sutii erikseen. Kaasu pohjaan: takarenkaat savuavat, keula nousee ja wheelie-tuet ottavat maahan. Sata tulee täyteen alle sekunnissa, kolmessa sekunnissa mennään yli 300.', 'Ohjaus on huono, kuten dragsterissa kuuluu. Osuma kylkeen pyöräyttää sen ympäri, ja reunakivi tai mäen harja voi heittää sen ilmaan. Kovissa iskuissa irtoavat siipi, renkaat, keula, etusiipi, turvakaari, kone ja pakoputket. Todella kova kolari hajottaa koko auton kappaleiksi. Jos dragsteri jää katolleen tai kyljelleen, se syttyy palamaan, kuski lentää ulos ja palokunta ja ambulanssi tulevat.', 'Äänet on tehty alusta asti: Top Fuel -moottorin epätasainen tyhjäkäynti, pamaus lähdössä, paukkeet kun kaasu nousee, rytinä kun runko raapii asfalttia ja jarruvarjon humahdus. Ennätyksiä dragsterilla ei saa, ja R palauttaa sen levikkeelle.'],
     box: ['NÄIN SE TOIMII', 'F: ulos Pököstä, F dragsterin vieressä: kyytiin', 'Kaasu pohjaan – liekit putkista, keula nousee', 'Kaasu + jarru: burnout paikallaan', 'Ei vaihteita: mittari 9000 rpm, 500 km/h', 'Nosta kaasu kovassa vauhdissa: varjo aukeaa', 'Katolleen: tulipalo, kuski ulos · R: alusta', 'Ennätyksiä ei tule'] },
+  { id: 'maaseutu', size: 'main', n: 65, kick: '🏡 MAASEUTU', title: 'Kylän takana alkaa maaseutu', lede: 'Metsän takana on nyt järviä, soita, maatiloja ja pieniä kyliä. Soratiet vievät niihin suoraan Ylästöstä, ja tienvarressa kulkee sähkölinja.',
+    img: ['kyla.jpg', 'jarvi.jpg'], cap: ['Kylätie, kauppa ja postilaatikot. Kylän nimi lukee sinisessä kyltissä tien päässä.', 'Järven rannalla on sauna ja laituri. Autolla ei kannata ajaa veteen.'],
+    body: ['YLÄSTÖ. Kun ajaa Ylästön reunalta ulos, tie ei enää lopu metsään. Sorateitä pitkin pääsee naapurikyliin, maatiloille ja järvien rannoille. Soralla auto kulkee kuin rallitiellä.', 'Kylissä on kymmenkunta taloa tien molemmin puolin, kyläkauppa ja bussikatos. Maatiloilla on päärakennus, navetta, aitta ja sauna, ja pellolla seisoo latoja. Sängellä on pyöröpaaleja.', 'Järviin ajava auto hidastuu ja metrin syvyydessä uppoaa. Suolla pyörät uppoavat sammaleeseen. Lentokoneella vedelle saa laskeutua vain kävelyvauhtia, muuten kone kaatuu.', 'Talot, ladot ja sähkötolpat ovat kovia. Ne syntyvät näkyviin, kun lähestyt, ja katoavat kun poistut, joten kartta jatkuu loputtomiin.'],
+    box: ['MAASEUTU', 'Soratiet kylän reunalta ulos', 'Kylät, maatilat, järvet, suot', 'Järvi: auto uppoaa, kone kaatuu', 'Suo: pyörät uppoavat'] },
   { id: 'pallo', size: 'half', n: 64, kick: '🎈 ILMATILA', title: 'Pienkone repäisi kuumailmapallon', img: ['pallopamaus.jpg'], cap: ['OH-YLÄ sekuntia ennen osumaa. Kupu repesi, kone lensi läpi.'], body: ['Ylästön pienkone lensi täyttä vauhtia kuumailmapallon kupuun. Kangas repesi, pallo alkoi vajota ja laskeutui pellolle. Kone lensi läpi, mutta vauhtia lähti parikymmentä kilometriä tunnissa.', 'Hiljaa tönäisty pallo vain heilahtaa ja lipuu sivuun. Koriin ei kannata osua: se on raskas, ja kone hajoaa. Kori jää heilumaan polttimen alle kuin heiluri.'] },
   { id: 'korpi', size: 'page', n: 63, kick: '🌲 KORPIKENTTÄ', title: 'Metsä jatkuu – ja korvessa on kiitoratoja', lede: 'Kylän takana alkaa metsä, joka ei lopu. Kuusikko harvenee kumpuileviksi kankaiksi, ja siellä täällä korven keskellä on kiitorata ja pieni koppi.',
     img: ['korpikentta.jpg'], cap: ['Hukanahon korpikenttä kylästä itään. Kopin seinässä lukee kentän nimi.'],
@@ -8536,18 +8753,18 @@ function planePhys(dt, live) { const P = PLANE; if (P.crashed) { car.vx = car.vz
   const Mp = qd*PL_S*PL_C*(0.04 - 0.9*al - 10*qn*cV) + qc*PL_S*PL_C*0.26*P.de, Mr = qd*PL_S*PL_B*(-0.08*be - 0.45*pn*bV) + qc*PL_S*PL_B*0.05*P.da, My = qd*PL_S*PL_B*(0.06*be - 0.1*rn*bV) + qc*PL_S*PL_B*0.035*P.dr;
   const Tq = _pR.set(0, 0, 0).addScaledVector(L, -Mp).addScaledVector(F, Mr).addScaledVector(U, -My);
   // the wheels: springs on the ground, tyres that grip sideways, the nose wheel steered, brakes on the mains
-  let onGround = 0, hard = 0; const steer = (P.dr + P.da)*0.5*Math.max(0, 1 - V/25);
-  for (const [bx, by, bz, ks, nose] of PL_GEAR) { const r = _pV.set(bx, by, bz).applyQuaternion(P.q), px = P.p.x + r.x, py = P.p.y + r.y, pz = P.p.z + r.z, g = Y(px, pz), pen = g - py; if (pen <= 0) continue; if (nose < 2) onGround++;
+  let onGround = 0, hard = 0, wet = false; const steer = (P.dr + P.da)*0.5*Math.max(0, 1 - V/25);
+  for (const [bx, by, bz, ks, nose] of PL_GEAR) { const r = _pV.set(bx, by, bz).applyQuaternion(P.q), px = P.p.x + r.x, py = P.p.y + r.y, pz = P.p.z + r.z, gy = Y(px, pz), wl = waterAt(px, pz), g = Math.max(gy, wl), pen = g - py; if (pen <= 0) continue; if (wl > gy) { wet = true; if (V > 9) hard = 99; } if (nose < 2) onGround++;   // (wheels on a lake: slow, it floats on them; at speed it digs in and flips)
     const vpx = v.x + w.y*r.z - w.z*r.y, vpy = v.y + w.z*r.x - w.x*r.z, vpz = v.z + w.x*r.y - w.y*r.x; if (nose < 2 && -vpy > 6) hard = Math.max(hard, -vpy);
     const N = Math.max(0, ks*pen - 3500*vpy); let hx = F.x, hz = F.z; if (nose) { const c = Math.cos(steer), s = Math.sin(steer); [hx, hz] = [hx*c + hz*s, hz*c - hx*s]; } const hl = Math.hypot(hx, hz) || 1; hx /= hl; hz /= hl;
     const lx = hz, lz = -hx, vl = vpx*hx + vpz*hz, vt = vpx*lx + vpz*lz, br = nose === 2 ? 0.5 : !nose && brakeIn ? 0.6 : 0.025, fl = -Math.sign(vl)*Math.min(br*N, Math.abs(vl)*PL_M*6), ft = -Math.sign(vt)*Math.min((nose === 2 ? 0.5 : 0.8)*N, Math.abs(vt)*PL_M*8);
     const gx = hx*fl + lx*ft, gz = hz*fl + lz*ft; Fo.x += gx; Fo.y += N; Fo.z += gz; Tq.x += r.y*gz - r.z*N; Tq.y += r.z*gx - r.x*gz; Tq.z += r.x*N - r.y*gx; }
-  for (const [bx, by, bz] of PL_HARD) { const r = _pV.set(bx, by, bz).applyQuaternion(P.q), px = P.p.x + r.x, py = P.p.y + r.y, pz = P.p.z + r.z; if (py < Y(px, pz) - 0.05) hard = Math.max(hard, V > 6 ? 99 : 0); }
+  for (const [bx, by, bz] of PL_HARD) { const r = _pV.set(bx, by, bz).applyQuaternion(P.q), px = P.p.x + r.x, py = P.p.y + r.y, pz = P.p.z + r.z; if (py < Math.max(Y(px, pz), waterAt(px, pz)) - 0.05) hard = Math.max(hard, V > 6 ? 99 : 0); }
   { let hit = false; for (const [bx, bz] of [[0, 0], [4.5, 0.3], [-4.5, 0.3]]) { const r = _pV.set(bx, 0, bz).applyQuaternion(P.q), x = P.p.x + r.x, z = P.p.z + r.z, y = P.p.y + r.y - Y(x, z);
       staticNear(x, z, 3, B => { if (hit) return; const dx = x - B.x, dz = z - B.z, c = Math.cos(B.yaw || 0), s = Math.sin(B.yaw || 0), a = dx*c - dz*s, b = dx*s + dz*c, top = B.kind === 'house' ? 8 : B.kind === 'pole' ? 9 : /pine|tree|puu|kuusi/.test(B.kind || '') ? 15 : 4;
         if (Math.abs(a) < B.hw + 0.4 && Math.abs(b) < B.hl + 0.4 && y < top) hit = true; }); } if (hit && V > 5) hard = 99; }
   hard = Math.max(hard, planeVsBalloons());
-  if (hard > 0) { P.crashed = true; boom(P.p.x, P.p.y, P.p.z, true); planeBreak(); P.thr = 0; pizzaMsg(T('💥 LENTOKONE ROMAHTI – R = uusi kone'), true); car.vx = car.vz = car.speed = 0; return; }
+  if (hard > 0) { P.crashed = true; boom(P.p.x, P.p.y, P.p.z, true); planeBreak(); P.thr = 0; pizzaMsg(wet ? T('🌊 LENTOKONE SYÖKSYI JÄRVEEN – R = uusi kone') : T('💥 LENTOKONE ROMAHTI – R = uusi kone'), true); car.vx = car.vz = car.speed = 0; return; }
   v.addScaledVector(Fo, dt/PL_M); P.p.addScaledVector(v, dt);
   const wb = [w.dot(L), w.dot(U), w.dot(F)], tb = [Tq.dot(L), Tq.dot(U), Tq.dot(F)]; for (let i = 0; i < 3; i++) wb[i] += tb[i]/PL_I[i]*dt;
   if (onGround && V < 0.3 && !P.thr) { wb[0] *= 0.8; wb[1] *= 0.8; wb[2] *= 0.8; }
