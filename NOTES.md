@@ -967,6 +967,7 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - 1.10. Paper boy (paperTask/buildPaperBoy, X2.paperBoy): kid on TWO.kidbike rides one street, mailStops(L, st, 16) (shared with the postman, which uses gap 22), drop mode = astride the bike, paper in hand, 1.1 s; knocked → flyLetters 10. Tests t_paperboy, photo t_lh_paperboy.
 - 1.10. LEHTI 'mantti' (page, n 70): the camera changes credited to "Mantti Anttila", iRacing guy, jargon straight from updateCamera/CAM_RIGS. Close-up photo t_lh_mantti (the bearded mower at the tyre wall, camera 1.9 m off his face).
 - 1.10. STRUCK: Mane2 (84.844, 30.9.) off the board, Antti's call (`until` 2026-10-01).
+- 1.10. haamu_b.jpg retaken from the live board (test/t_lh_top.js has the rows inlined; real.js at 1400×900, #top10 cropped ×1.42 onto 1000×625 #0a0a0a).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
