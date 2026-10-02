@@ -15,7 +15,7 @@ const fs = require('fs'), path = require('path');
   await page.exposeFunction('__pageshot', async (name) => { await page.screenshot({ path: name }); });   // the whole page, HUD and menus included
   await page.exposeFunction('__save', async (name, dataUrl) => fs.writeFileSync(name, Buffer.from(dataUrl.split(',')[1], 'base64')));
   const body = fs.readFileSync(scriptFile, 'utf8');
-  const res = await page.evaluate(`(async () => { if (typeof FPS_CAP !== 'undefined') FPS_CAP = 0; window.__shot = async (n) => { renderer.render(scene, camera); await __save(n, renderer.domElement.toDataURL('image/png')); }; ${body} })()`);
+  const res = await page.evaluate(`(async () => { if (typeof FPS_CAP !== 'undefined') FPS_CAP = 0; { const tu = document.getElementById('tune'); if (tu) tu.remove(); } window.__shot = async (n) => { renderer.render(scene, camera); await __save(n, renderer.domElement.toDataURL('image/png')); }; ${body} })()`);
   console.log(JSON.stringify({ result: res, errors: errors.slice(0, 8) }));
   await browser.close();
 })().catch(e => { console.error('HARNESS', e.message); process.exit(1); });
