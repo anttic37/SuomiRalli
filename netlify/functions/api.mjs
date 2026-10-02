@@ -18,7 +18,7 @@ import { getStore } from '@netlify/blobs';
 import { badName } from '../lib/badwords.mjs';
 import { TRACKS } from '../lib/tracks.mjs';
 
-export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck', '/api/stats', '/api/start', '/api/rap', '/api/posti', '/api/postidel', '/api/postireply', '/api/postipub'] };
+export const config = { path: ['/api/top', '/api/ghost', '/api/lap', '/api/struck', '/api/stats', '/api/start', '/api/rap', '/api/posti', '/api/postidel', '/api/postireply', '/api/postipub', '/api/postistats'] };
 export default async (req) => handle(req, getStore({ name: 'suomiralli', consistency: 'strong' }));
 
 const MAX_ROWS = 500;
@@ -122,8 +122,14 @@ export async function handle(req, store) {
     if (req.method === 'POST' && route === 'start') {
       let b; try { b = JSON.parse(await req.text()); } catch (e) { return json({ error: 'bad json' }, 400); }
       const id = String(b && b.id || ''); if (!/^[a-z0-9]{8,32}$/.test(id)) return json({ error: 'id' }, 400);
-      const st = await statsGet(store); st.starts++;
-      if (!(await store.get('players/' + id + '.json', { type: 'json' }))) { await store.setJSON('players/' + id + '.json', { d: new Date().toISOString() }); st.drivers++; }
+      // (2.10.) ev: 'enter' (a race from the menu; also what old clients send, no ev), 'r' (R: a restart), 'load' (the game opened), 'lap' (a lap to the finish line).
+      // Totals in stats.json + a row a day (Helsinki date) for the author's page (/api/postistats); only enter/r count as starts, only they make a driver.
+      const ev = ['enter', 'r', 'load', 'lap'].includes(b.ev) ? b.ev : 'enter', st = await statsGet(store), day = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Helsinki' });
+      st.days = st.days || {}; const D = st.days[day] || (st.days[day] = { l: 0, e: 0, r: 0, k: 0, nd: 0 }); st.ev = st.ev || { since: day, load: 0, enter: 0, r: 0, lap: 0 }; st.ev[ev]++;
+      if (ev === 'load') D.l++; else if (ev === 'lap') D.k++;
+      else { st.starts++; if (ev === 'r') D.r++; else D.e++;
+        if (!(await store.get('players/' + id + '.json', { type: 'json' }))) { await store.setJSON('players/' + id + '.json', { d: new Date().toISOString() }); st.drivers++; D.nd++; } }
+      const ds = Object.keys(st.days).sort(); for (const k of ds.slice(0, Math.max(0, ds.length - 120))) delete st.days[k];
       await store.setJSON('stats.json', st); return json({ starts: st.starts, drivers: st.drivers });
     }
     if (req.method === 'GET' && route === 'rap') { const R = await rapGet(store), rows = Object.values(R.rows);
@@ -138,6 +144,8 @@ export async function handle(req, store) {
       if (name && !badName(name)) r.name = name; r.f += d.f; r.p += d.p; r.a += d.a; r.h = (r.h || 0) + d.h; r.t = (r.t || 0) + d.t; r.o = (r.o || 0) + d.o; if (v > (r.v || 0)) r.v = v; r.d = new Date().toISOString().slice(0, 10);
       const ids = Object.keys(R.rows); if (ids.length > RAP_ROWS) { ids.sort((x, y) => (R.rows[x].f + R.rows[x].p) - (R.rows[y].f + R.rows[y].p)); for (const x of ids.slice(0, ids.length - RAP_ROWS)) delete R.rows[x]; }   // (the mildest go first)
       await store.setJSON('rap.json', R); return json({ ok: true }); }
+    if (req.method === 'GET' && route === 'postistats') { if (!(await keyOk(url.searchParams.get('key')))) return json({ error: 'key' }, 403);
+      const st = await statsGet(store); return json({ starts: st.starts, drivers: st.drivers, since: st.since || null, ev: st.ev || null, days: st.days || {} }); }
     if (req.method === 'GET' && route === 'posti') { if (!(await keyOk(url.searchParams.get('key')))) return json({ error: 'key' }, 403);
       const P = await postiGet(store); return json({ list: P.list.slice().reverse().map(({ id, ...m }) => m) }); }
     if (req.method === 'POST' && route === 'posti') {

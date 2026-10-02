@@ -31,12 +31,17 @@
   .letter .ans .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 6px; font: 13px Arial, sans-serif; color: var(--soft); }
   .letter .ans .save { font: 700 13px Arial, sans-serif; background: var(--ink); color: var(--paper); border: 0; padding: 6px 12px; cursor: pointer; }
   .letter .pubbed { background: #2a6a2a; color: #fff; font: 700 11px Arial, sans-serif; padding: 2px 6px; letter-spacing: 0.08em; }
+  #stats { background: var(--paper); margin-top: 14px; padding: 14px 18px 12px; display: none; font: 14px Arial, sans-serif; }   /* (2.10.) the game's counters, the author's eyes only */
+  #stats h2 { margin: 0 0 8px; font: 900 20px "Times New Roman", serif; } #stats .tot { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 10px; } #stats .tot b { font-size: 20px; display: block; }
+  #stats .tw { overflow-x: auto; } #stats table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; } #stats th, #stats td { padding: 3px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  #stats th:first-child, #stats td:first-child { text-align: left; } #stats th { font-size: 12px; color: var(--soft); font-weight: 700; } #stats .note { color: var(--soft); font-size: 12px; margin-top: 6px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header><h1>✉ Tekijän posti</h1><div class="sub"><span id="count">YLÄSTÖ 1988 · pelaajien kirjeet</span><span><button id="reload">↻ Päivitä</button> <button id="logout">Kirjaudu ulos</button></span></div></header>
   <div id="login"><p>Kirjoita postiavain:</p><input id="key" type="password" autocomplete="current-password"><button id="go">Avaa</button></div>
+  <div id="stats"></div>
   <div id="msg"></div>
   <div id="list"></div>
 </div>
@@ -60,7 +65,18 @@ async function load() {
   $('list').innerHTML = list.map((m) => '<div class="letter" data-i="' + m.i + '"><div class="hd"><span class="from">' + esc(m.name || 'Nimetön') + '</span><span>' + when(m.d) + '</span><span>' + (FLAG[m.lang] || '') + '</span><span>#' + m.i + '</span>' + (m.i > seen ? '<span class="new">UUSI</span>' : '') + (m.pub ? '<span class="pubbed">LEHDESSÄ</span>' : '') + '</div><div class="txt">' + esc(m.text) + '</div><button class="del" title="heitä roskiin">roskiin</button>' +
     '<div class="ans"><textarea placeholder="Vastauksesi lehteen (ei pakko)…" maxlength="2000">' + esc(m.reply || '') + '</textarea><div class="row"><label><input type="checkbox" class="pub"' + (m.pub ? ' checked' : '') + '> Julkaise lehdessä (kirje + vastaus)</label><button class="save">Tallenna</button><span class="st"></span></div></div></div>').join('');
   if (list.length) store.set('posti-seen', String(Math.max(...list.map((m) => m.i))));
+  loadStats();
 }
+async function loadStats() {   // the game's counters: totals and a row a day (Helsinki dates), newest first
+  let j = null; try { const r = await fetch('/api/postistats?key=' + encodeURIComponent(KEY), { cache: 'no-store' }); if (r.ok) j = await r.json(); } catch (e) {}
+  const el = $('stats'); if (!j) { el.style.display = 'none'; return; } const f = (v) => (v || 0).toLocaleString('fi-FI'), E = j.ev || {};
+  const days = Object.keys(j.days || {}).sort().reverse().slice(0, 30), sum = (k) => days.reduce((s, d) => s + (j.days[d][k] || 0), 0);
+  el.innerHTML = '<h2>📊 Pelin luvut</h2><div class="tot"><span><b>' + f(j.starts) + '</b>aloitettuja ajoja</span><span><b>' + f(j.drivers) + '</b>kuskeja</span><span><b>' + f(E.load) + '</b>avauksia</span><span><b>' + f(E.enter) + '</b>Enter-aloituksia</span><span><b>' + f(E.r) + '</b>R-painalluksia</span><span><b>' + f(E.lap) + '</b>maaliin ajettuja</span></div>' +
+    '<div class="tw"><table><tr><th>päivä</th><th>avauksia</th><th>Enter</th><th>R</th><th>maaliin</th><th>uudet</th></tr>' +
+    days.map((d) => { const D = j.days[d]; return '<tr><td>' + new Date(d + 'T12:00:00').toLocaleDateString('fi-FI', { weekday: 'short', day: 'numeric', month: 'numeric' }) + '</td><td>' + f(D.l) + '</td><td>' + f(D.e) + '</td><td>' + f(D.r) + '</td><td>' + f(D.k) + '</td><td>' + f(D.nd) + '</td></tr>'; }).join('') +
+    (days.length ? '' : '<tr><td colspan="6">ei vielä päiviä</td></tr>') + '</table></div>' +
+    '<div class="note">Avaukset, Enter, R ja maaliin lasketaan ' + (E.since ? new Date(E.since + 'T12:00:00').toLocaleDateString('fi-FI') : 'tästä päivästä') + ' alkaen. Aloitetut ajot = Enter + R (R-hakkaus kerran 3 sekunnissa). Kuski = selain.</div>';
+  el.style.display = 'block'; }
 $('list').addEventListener('click', async (e) => { const b = e.target.closest('.save'); if (!b) return; const el = b.closest('.letter'), st = el.querySelector('.st'); st.textContent = 'tallennetaan…';
   const r = await fetch('/api/postireply', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ key: KEY, i: +el.dataset.i, reply: el.querySelector('.ans textarea').value, pub: el.querySelector('.pub').checked }) }).catch(() => null);
   st.textContent = r && r.ok ? (el.querySelector('.pub').checked ? '✔ tallennettu – näkyy lehdessä' : '✔ tallennettu') : 'ei onnistunut'; });
@@ -69,7 +85,7 @@ $('list').onclick = async (e) => { const b = e.target.closest('.del'); if (!b) r
 $('go').onclick = () => { KEY = $('key').value.trim(); load(); };
 $('key').onkeydown = (e) => { if (e.key === 'Enter') $('go').onclick(); };
 $('reload').onclick = load;
-$('logout').onclick = () => { store.del('posti-key'); KEY = ''; $('list').innerHTML = ''; $('count').textContent = ''; load(); };
+$('logout').onclick = () => { store.del('posti-key'); KEY = ''; $('list').innerHTML = ''; $('stats').style.display = 'none'; $('count').textContent = ''; load(); };
 load();
 </script>
 </body>

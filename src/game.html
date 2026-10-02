@@ -4952,9 +4952,11 @@ try { ONLINE.id = localStorage.getItem('ylasto1988-id') || ''; if (!/^[a-z0-9]{8
 function statsShow(d) { const el = document.getElementById('stats'); if (!el || !d || !(d.starts >= 0)) return; const f = (v) => Math.round(v).toLocaleString('fi-FI');
   el.innerHTML = T('ALOITETTUJA AJOJA') + ': <b>' + f(d.starts) + '</b><span class="sl">/</span>' + T('KUSKEJA') + ': <b>' + f(d.drivers) + '</b>'; el.classList.add('on'); STATS_LAST = d; }
 function onlineStats() { if (ONLINE.api) apiGet('/stats').then(statsShow).catch(() => {}); }
-let _startSent = 0;
-function onlineStart() { if (!ONLINE.api || !ONLINE.id || performance.now() - _startSent < 3000) return; _startSent = performance.now();   // (R hammered: one start a few seconds)
-  fetch(ONLINE.api + '/start', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: ONLINE.id }) }).then(r => r.ok ? r.json() : null).then(statsShow).catch(() => {}); }
+let _startSent = 0, START_EV = 'enter';
+function onlineStart() { const ev = START_EV; START_EV = 'enter'; if (!ONLINE.api || !ONLINE.id || performance.now() - _startSent < 3000) return; _startSent = performance.now();   // (R hammered: one start a few seconds)
+  onlineEvent(ev); }
+function onlineEvent(ev) { if (!ONLINE.api || !ONLINE.id) return;   // (2.10.) 'enter' | 'r' | 'load' | 'lap' → the author's counters (posti.html)
+  fetch(ONLINE.api + '/start', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: ONLINE.id, ev }), keepalive: true }).then(r => r.ok ? r.json() : null).then(statsShow).catch(() => {}); }
 const OPP_LOOK = [[0xffc27a, 0x9e5a1a, '#ffd29a'], [0x9dff9a, 0x2e7a2b, '#b8ffb5'], [0xe0a8ff, 0x6a3d9e, '#ecc8ff']];
 const onlineKey = (name) => String(name || '').normalize('NFC').replace(/[^\p{L}\p{N} _.\-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 16).toLowerCase().replace(/ /g, '_');
 async function apiGet(path) { const r = await fetch(ONLINE.api + path, { cache: 'no-store' }); if (!r.ok) throw new Error(r.status); return r.json(); }
@@ -5002,6 +5004,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Tilastot tarkemmiksi: pelin avaukset, Enter-aloitukset, R-painallukset ja maaliin ajetut kierrokset lasketaan nyt erikseen ja päivittäin (tekijän sivulle)', '08.42'],
   ['2.10.', 'Peli nopeutui reilusti: kaukaisista taloista jätetään piirtämättä portaat, ovet, listat, ikkunat ja savupiiput, ja samoin kaukaiset pihapuut, aidat, pensaat ja liikennemerkit. Pienet esineet eivät heitä varjoja, ja pihojen autoilla on varjo vain lähellä. Piirtoja on noin 20 % vähemmän', '05.47'],
   ['2.10.', 'Lentokone on rikki eikä sillä enää lennetä: OH-YLÄ seisoo erään talon pihalla nokka maassa. Lentämisen uutiset poistettu lehdestä', '05.31'],
   ['2.10.', 'Omenavarkaat myös mobiilisivulla: viiden kärki ja esittely. Lehteen Parko Markkisen ja Mantti Anttilan kannanotto omenavarkauksista', '00.29'],
@@ -10756,7 +10759,7 @@ addEventListener('keydown', e => {
   if (e.code==='KeyP' && !e.repeat) { setPause(!PAUSE.on); return; }
   if (PAUSE.on && e.code !== 'KeyR' && e.code !== 'Escape') return;   // (paused: only P, R and Esc)
   if ((e.code==='KeyR' || e.code==='Escape') && PAUSE.on) setPause(false);
-  if (e.code==='KeyR' && !e.repeat && gameState!==State.MENU) { initAudio(); startRace(false); }
+  if (e.code==='KeyR' && !e.repeat && gameState!==State.MENU) { initAudio(); START_EV = 'r'; startRace(false); }
   if (e.code==='KeyL' && !e.repeat && gameState===State.MENU) setLang(LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length]);   // language: FI → EN → NO
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
   if (e.code==='KeyE' && !e.repeat) { initAudio(); radioNext(); }   // (in the menu too: the radio there)
@@ -10836,7 +10839,7 @@ function toMenu() {   // Esc: back to the start screen (the race is dropped; Ent
   onlineRefresh();   // (a fresh leaderboard and rivals for the next start)
 }
 function finishRace() {
-  gameState=State.FINISHED; rapSend(false);
+  gameState=State.FINISHED; rapSend(false); onlineEvent('lap');
   beep(660, 0.12, 0.3); setTimeout(()=>beep(880, 0.25, 0.3), 130);
   document.getElementById('overlay').classList.remove('hidden');
   document.getElementById('overlay').style.background='rgba(10,10,10,0.92)';
@@ -11404,7 +11407,7 @@ addEventListener('resize', () => { camera.aspect=innerWidth/innerHeight; camera.
 // rivals' ghosts): a script that runs on for seconds holds both back — the page stayed blank and the fetches only left after the build
 let BOOTED = false;
 function boot() { if (BOOTED) return; BOOTED = true;
-  generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); renderChangelog(); lehtiInit(); postiInit(); radioLoad();   // (the ground is built by the terrain lift inside generateTrack)
+  generateTrack(); resetCar(); ghostLoad(); onlineRefresh(); onlineEvent('load'); renderChangelog(); lehtiInit(); postiInit(); radioLoad();   // (the ground is built by the terrain lift inside generateTrack)
   { const el = document.getElementById('terrain-label'); if (el) el.textContent = HEIGHT_RAW ? 'maanmittauslaitoksen korkeusmalli' : 'väliaikaiset mäet ' + PLACEHOLDER_AMP + '×'; }
   camPos.set(car.x-Math.sin(car.angle)*10.5, Y(car.x,car.z) + 17.3, car.z-Math.cos(car.angle)*20.2);
   camLookAt.set(car.x+Math.sin(car.angle)*14, Y(car.x,car.z) + 0.2, car.z+Math.cos(car.angle)*14);
