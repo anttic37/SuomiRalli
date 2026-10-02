@@ -5025,6 +5025,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Kamera ei enää nyi jarruttaessa: nousu yläkameraksi alkaa ja loppuu pehmeästi, kun vauhti putoaa alle 80 km/h', '20.30'],
   ['2.10.', 'Radalla nyt vain yksi haamu: se kuski, joka on ennätyslistalla heti sinun edelläsi. Kärjessä ajat omaa ennätystäsi vastaan', '20.19'],
   ['2.10.', 'Nykäyksiä pois: roska-, jäätelö- ja postiautojen sekä ambulanssin reittisuunnittelu ei enää osu samaan ruutuun, ja tieverkon tiedot lasketaan valmiiksi latauksessa. Pahin nykäys testiajossa 75 ms → 16 ms', '19.41'],
   ['2.10.', 'Roskapöntöt uusiksi: tuhannen sijaan noin 50 pönttöä, ja osuma lennättää pöntön oikealla fysiikalla – se kimpoaa seinistä ja aidoista, jää siihen asentoon mihin päätyy, ja siihen voi osua uudestaan. Roska-auton lastaaja ja puristin liikkuvat taas tyhjennyksessä', '19.15'],
@@ -11200,7 +11201,7 @@ function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, 
   const fx = Math.sin(camAngle.current), fz = Math.cos(camAngle.current), gy = Y(Cx, Cz);
   // the boom
   CAM.vs += (speed - CAM.vs)*Math.min(1, 1.5*dt);
-  R = K*Math.min(1, CAM.vs/CAM_FULL);   // (1.10., Antti: standing still the camera is up at the high rig, coming down linearly to the chase one by 80 km/h)
+  { const u = Math.min(1, CAM.vs/CAM_FULL), Rt = K*u*u*(3 - 2*u); if (CAM.R === undefined || C !== car) CAM.R = Rt; CAM.R += (Rt - CAM.R)*Math.min(1, 1.6*dt); R = CAM.R; }   // (1.10., Antti: standing still the camera is up at the high rig, down to the chase one by 80 km/h; 2.10.: 'nykii kun jarruttaa' — the linear blend started rising at full rate the moment the speed fell under 80, a kink: now an S-curve and eased in time)
   if (CAM.py === null || Math.abs(gy + 1 - CAM.py) > 6) CAM.py = gy + 1;   // (a start, a reset, a teleport: straight there)
   CAM.py += (gy + 1 - CAM.py)*Math.min(1, 8*dt);
   const el = mix('el'), ce = Math.cos(el), se = Math.sin(el);

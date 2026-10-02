@@ -367,7 +367,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 17.19 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 17.30 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -5022,6 +5022,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Kamera ei enää nyi jarruttaessa: nousu yläkameraksi alkaa ja loppuu pehmeästi, kun vauhti putoaa alle 80 km/h', '20.30'],
   ['2.10.', 'Radalla nyt vain yksi haamu: se kuski, joka on ennätyslistalla heti sinun edelläsi. Kärjessä ajat omaa ennätystäsi vastaan', '20.19'],
   ['2.10.', 'Nykäyksiä pois: roska-, jäätelö- ja postiautojen sekä ambulanssin reittisuunnittelu ei enää osu samaan ruutuun, ja tieverkon tiedot lasketaan valmiiksi latauksessa. Pahin nykäys testiajossa 75 ms → 16 ms', '19.41'],
   ['2.10.', 'Roskapöntöt uusiksi: tuhannen sijaan noin 50 pönttöä, ja osuma lennättää pöntön oikealla fysiikalla – se kimpoaa seinistä ja aidoista, jää siihen asentoon mihin päätyy, ja siihen voi osua uudestaan. Roska-auton lastaaja ja puristin liikkuvat taas tyhjennyksessä', '19.15'],
@@ -11197,7 +11198,7 @@ function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, 
   const fx = Math.sin(camAngle.current), fz = Math.cos(camAngle.current), gy = Y(Cx, Cz);
   // the boom
   CAM.vs += (speed - CAM.vs)*Math.min(1, 1.5*dt);
-  R = K*Math.min(1, CAM.vs/CAM_FULL);   // (1.10., Antti: standing still the camera is up at the high rig, coming down linearly to the chase one by 80 km/h)
+  { const u = Math.min(1, CAM.vs/CAM_FULL), Rt = K*u*u*(3 - 2*u); if (CAM.R === undefined || C !== car) CAM.R = Rt; CAM.R += (Rt - CAM.R)*Math.min(1, 1.6*dt); R = CAM.R; }   // (1.10., Antti: standing still the camera is up at the high rig, down to the chase one by 80 km/h; 2.10.: 'nykii kun jarruttaa' — the linear blend started rising at full rate the moment the speed fell under 80, a kink: now an S-curve and eased in time)
   if (CAM.py === null || Math.abs(gy + 1 - CAM.py) > 6) CAM.py = gy + 1;   // (a start, a reset, a teleport: straight there)
   CAM.py += (gy + 1 - CAM.py)*Math.min(1, 8*dt);
   const el = mix('el'), ce = Math.cos(el), se = Math.sin(el);
