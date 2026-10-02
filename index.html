@@ -367,7 +367,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 17.30 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 17.38 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -5022,6 +5022,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Kamera ei enää nyi kaasu–jarru–peruutus-vuorottelussa: luistoon kääntyminen tulee pehmeästi vauhdin mukana, eikä peruuttaessa katse heittele puolelta toiselle', '20.38'],
   ['2.10.', 'Kamera ei enää nyi jarruttaessa: nousu yläkameraksi alkaa ja loppuu pehmeästi, kun vauhti putoaa alle 80 km/h', '20.30'],
   ['2.10.', 'Radalla nyt vain yksi haamu: se kuski, joka on ennätyslistalla heti sinun edelläsi. Kärjessä ajat omaa ennätystäsi vastaan', '20.19'],
   ['2.10.', 'Nykäyksiä pois: roska-, jäätelö- ja postiautojen sekä ambulanssin reittisuunnittelu ei enää osu samaan ruutuun, ja tieverkon tiedot lasketaan valmiiksi latauksessa. Pahin nykäys testiajossa 75 ms → 16 ms', '19.41'],
@@ -11186,7 +11187,10 @@ function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, 
   // heading (sideways): turns after the car, the chase rig a little into a slide (the way it's going)
   const rideCam = C === car && PLAYER.R.camAngle;   // (a ride may steer the camera's heading itself: the dragster's calm one)
   let want = rideCam ? rideCam(dt) : C.angle;
-  if (!rideCam && C === car && speed > 5) { const dv = angDiff(Math.atan2(C.vx, C.vz) - C.angle); if (Math.cos(dv) > 0) want += Math.max(-0.6, Math.min(0.6, dv))*0.45*K; }   // (not when reversing)
+  // (2.10., Antti: 'kaasu, jarru, peruutus edestakaisin — kamera nykii'): the slide lean used to switch on at a hard speed (5 / 6 m/s) and, reversing,
+  // flip between ±0.5 as the heading-to-motion angle crossed ±π. Now both fade in with the FORWARD speed (4 → 10 m/s) and are nil going backwards
+  const vF = C.vx*Math.sin(C.angle) + C.vz*Math.cos(C.angle), fw = Math.max(0, Math.min(1, (vF - 4)/6)), fwS = fw*fw*(3 - 2*fw), slip = vF > 0.5 ? angDiff(Math.atan2(C.vx, C.vz) - C.angle) : 0;
+  if (!rideCam && C === car && fwS > 0) want += Math.max(-0.6, Math.min(0.6, slip))*0.45*K*fwS;
   const angleDiff = angDiff(want - camAngle.current);
   camAngle.current+= rideCam ? Math.max(-1.1*dt, Math.min(1.1*dt, angleDiff*1.2*dt)) : angleDiff*Math.min(1, (1.2 + 2.4*K)*dt);   // (the dragster: never faster than ~60°/s round)
   // out of the car / back in (1.10., Antti: 'nykii jos hyppää autosta pois'): the pivot glides from the car to the walker and the boom
@@ -11210,7 +11214,7 @@ function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, 
   CAM.lift += (need - CAM.lift)*Math.min(1, (need > CAM.lift ? 12 : 2)*dt); camPos.y = Math.max(camPos.y + CAM.lift, Y(camPos.x, camPos.z) + 0.8);
   // the look point: ahead along the heading, leaning into a drift; up a hill ahead it rises with the road
   let lookAng = camAngle.current;
-  if (speed > 6) { const dAng = angDiff(Math.atan2(C.vx, C.vz) - C.angle); lookAng += Math.max(-0.5, Math.min(0.5, dAng))*0.55*(1 - 0.6*K); }
+  if (fwS > 0) lookAng += Math.max(-0.5, Math.min(0.5, slip))*0.55*(1 - 0.6*K)*fwS;
   const lfx = Math.sin(lookAng), lfz = Math.cos(lookAng), la = mix('la') + mix('lav')*CAM.vs;
   CAM.ah += (Y(Cx + lfx*la, Cz + lfz*la) - gy - CAM.ah)*Math.min(1, 4*dt);
   camLookAt.set(Cx + lfx*la, CAM.py + mix('lu') + CAM.ah*0.6*R, Cz + lfz*la); CAM.wx = C.x; CAM.wz = C.z;
