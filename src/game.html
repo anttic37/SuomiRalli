@@ -3779,13 +3779,16 @@ function walkPunch(h) {   // a swing at whoever stands in front: they run off, a
   const dx = best.x - h.x, dz = best.z - h.z, l = Math.hypot(dx, dz) || 1; best.dodge = { t: 3.5 + Math.random()*1.5, x: dx/l*5, z: dz/l*5 };   // (off at a run, away from you)
   centerMsg(T('👊 PAM!'), '#ffd23a');
   if (!best.animal && worldT - (WALK.copT || -99) > 12) { WALK.copT = worldT; policeSpawn(1); policeMsg(T('🚨 JOKU SOITTI POLIISIT!'), true); } }
-function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on || POLICE.hold > 0 || Math.hypot(car.vx, car.vz) > 3) return false;
+function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on) return false;   // (2.10., Antti: 'autosta on pystyttävä hyppäämään pois aina': no speed limit, the police can't keep you in either)
+  const sp0 = Math.hypot(car.vx, car.vz), cvx = car.vx, cvz = car.vz;
   const [x, z] = lloc(car.x, car.z, car.angle, 1.35, 0.3);   // the driver's door: local +x is the car's left
   const h = WALK.h = new Human({ x, z, yaw: car.angle + Math.PI/2, rig: makeAdult(0xf2f2ee, 0xf2f2ee, 0x5a3a1e, { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), task: playerWalkTask(), temp: true });
-  h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.camA = camAngle.current; WALK.spPrev = true; WALK.punchT = 0; WALK.downT = 0; WALK.ft = 0; car.vx = car.vz = car.speed = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
+  h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.camA = camAngle.current; WALK.spPrev = true; WALK.punchT = 0; WALK.downT = 0; WALK.ft = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
+  WALK.roll = sp0 > 3 && PLAYER.ride === 'poko'; if (!WALK.roll) car.vx = car.vz = car.speed = 0;   // (out at speed: the car rolls on, handbrake on, and is parked where it stops)
+  if (sp0 > 3) { knock(h, cvx*0.85, cvz*0.85, Math.min(10, sp0*0.4)); if (audio) beep(150, 0.12, 0.1, 'square'); }   // (jumped out of a moving car: down and rolling, up again in a moment)
   centerMsg(T('JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ'), '#ffe9a8', 1800); return true; }
 function walkIn(force) { if (!WALK.on) return false; const h = WALK.h; if (!force && (h.down || Math.hypot(h.x - car.x, h.z - car.z) > 3.8)) return false;
-  if (!h.gone) humanRemove(h); WALK.on = false; WALK.h = null; return true; }
+  if (!h.gone) humanRemove(h); WALK.on = false; WALK.h = null; WALK.roll = false; return true; }
 function walkUpdate(dt) { if (!WALK.on) return; const h = WALK.h; if (h.gone) { WALK.on = false; WALK.h = null; return; }
   if (h.down && !h.ride && h.hop <= 0 && Math.hypot(h.vx, h.vz) < 0.4) { if ((WALK.downT += dt) > 2.5) { h.down = h.hurt = false; h.tilt = h.roll = h.spin = 0; h.vx = h.vz = 0; WALK.downT = 0; } } else WALK.downT = 0; }   // up on their feet again
 function updateCar(dt, live = true) {
@@ -5025,6 +5028,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Autosta pääsee aina ulos F:llä, myös vauhdissa ja poliisin puhuttelussa: kovassa vauhdissa kuski kieriskelee maassa ja auto liukuu pysähdyksiin. Kävelykamera lähempänä (9 m takana) ja ukko keskellä ruutua, siirtymä autosta pehmeä', '20.49'],
   ['2.10.', 'Kamera ei enää nyi kaasu–jarru–peruutus-vuorottelussa: luistoon kääntyminen tulee pehmeästi vauhdin mukana, eikä peruuttaessa katse heittele puolelta toiselle', '20.38'],
   ['2.10.', 'Kamera ei enää nyi jarruttaessa: nousu yläkameraksi alkaa ja loppuu pehmeästi, kun vauhti putoaa alle 80 km/h', '20.30'],
   ['2.10.', 'Radalla nyt vain yksi haamu: se kuski, joka on ennätyslistalla heti sinun edelläsi. Kärjessä ajat omaa ennätystäsi vastaan', '20.19'],
@@ -5299,7 +5303,7 @@ const LEHTI = [
   { id: 'aika', size: 'page', n: 11, kick: '🌅 VUOROKAUSI', title: 'Aamu, päivä ja ilta', lede: 'Jokainen lähtö arpoo vuorokaudenajan: kostea aamu, kirkas päivä tai kultainen kesäilta.',
     img: ['aika.jpg'], cap: ['Sama kylä kolmessa valossa: aamu, päivä, ilta.'],
     body: ['Valo tulee eri suunnasta, varjot pitenevät ja taivas vaihtaa väriä. Illalla ikkunat hehkuvat ja saunan piipussa näkyy kiukaan loimu.'] },
-  { id: 'jalan', size: 'page', n: 12, kick: '🚶 JALKAISIN', title: 'F – ja kuski nousee autosta', lede: 'Pysähdy, paina F, ja kävele – nuolet vievät sinne minne osoittavat. Välilyönti lyö, ja lyöty juoksee karkuun. Joku soittaa aina poliisit.',
+  { id: 'jalan', size: 'page', n: 12, kick: '🚶 JALKAISIN', title: 'F – ja kuski nousee autosta', lede: 'Paina F – vauhdissakin – ja kuski hyppää ulos. Nuolet vievät sinne minne osoittavat. Välilyönti lyö, ja lyöty juoksee karkuun. Joku soittaa aina poliisit.',
     img: ['jalan.jpg'], cap: ['Kuski jaloittelee kylän raitilla. Auto odottaa käsijarru päällä.'],
     body: ['Jalkaisin kuski on ihan tavallinen kyläläinen: hän törmäilee aitoihin ja kaatuu, jos joku ajaa päälle. Hän nousee kyllä itse.', 'Kuski juoksee itsestään eikä väsy. Shift pohjassa hän hiippailee hiljaa. Yli 90 metrin päässä autosta kuski alkaa pelätä, että joku vie sen. 140 metrin jälkeen ei uskalla kauemmas.', 'Kyläläisiä ei kannata lyödä: poliisi tulee paikalle, ja lyöty pakenee paikalta niin kovaa kuin pääsee.'],
     box: ['NÄPPÄIMET', 'F = ulos / takaisin autoon', 'Nuolet = juoksu · Shift = hiippailu', 'Välilyönti = lyö (poliisi tulee)'] },
@@ -11178,6 +11182,7 @@ function camBlock(x0, y0, z0, x1, y1, z1) { let t = 1;
 const CAM_RIGS = {
   chase: { L: 26, Lv: 0.2, el: 0.68, la: 14, lav: 0.15, lu: -0.8 },   // (20 m back, 17 m up at rest; the car at ~80 % of the screen height)
   high:  { L: 47.8, Lv: 0.45, el: 1.12, la: 15, lav: 0.2, lu: -1 },     // (C: the old high view, 21 m back, 43 m up)
+  walk:  { L: 10, Lv: 0, el: 0.5, la: 1.2, lav: 0, lu: -0.1 },            // (2.10., Antti: 'kävelykamera lähemmäs ja keskelle': 8.8 m back, 4.8 m up, looking at the walker)
 };
 const CAM = { py: null, vs: 0, pull: 1, lift: 0, ah: 0, foot: 0, who: null, ox: 0, oz: 0 }, CAM_FULL = 80/3.6;
 function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, auton taakse fiksummin"): the chase boom by default, C = the high one
@@ -11186,7 +11191,7 @@ function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, 
   const speed=Math.min(C === car && PLAYER.R.camSpeedCap || Infinity, Math.sqrt(C.vx*C.vx+C.vz*C.vz));   // (the dragster at 400 km/h: the camera as at 160)
   camZoom += (camZoomTarget - camZoom) * Math.min(6*dt, 1);
   camLowK += ((camLow ? 1 : 0) - camLowK) * Math.min(3*dt, 1);   // smooth switch between the two rigs
-  const K = camLowK, A = CAM_RIGS.chase, B = CAM_RIGS.high; let R = K; const mix = (k) => A[k]*R + B[k]*(1 - R);   // (R: how far along from the high rig to the chase one)
+  const K = camLowK, A = CAM_RIGS.chase, B = CAM_RIGS.high, W = CAM_RIGS.walk; let R = K; const fS = CAM.foot*CAM.foot*(3 - 2*CAM.foot), mix = (k) => (A[k]*R + B[k]*(1 - R))*(1 - fS) + W[k]*fS;   // (R: how far along from the high rig to the chase one; CAM.foot: over to the walking rig)
   // heading (sideways): turns after the car, the chase rig a little into a slide (the way it's going)
   const rideCam = C === car && PLAYER.R.camAngle;   // (a ride may steer the camera's heading itself: the dragster's calm one)
   let want = rideCam ? rideCam(dt) : C.angle;
@@ -11200,7 +11205,7 @@ function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, 
   // shortens over ~1 s instead of jumping (it jumped 19 m in one frame)
   const who = C === car ? 'car' : 'foot', jump = Math.hypot(CAM.wx === undefined ? 0 : CAM.wx - C.x, CAM.wz === undefined ? 0 : CAM.wz - C.z);
   if (CAM.who !== null && who !== CAM.who && jump < 12) { CAM.ox += CAM.wx - C.x; CAM.oz += CAM.wz - C.z; } CAM.who = who;
-  const ok = Math.max(0, 1 - 3*dt); CAM.ox *= ok; CAM.oz *= ok; CAM.foot += ((who === 'foot' ? 1 : 0) - CAM.foot)*Math.min(1, 3*dt);
+  const ok = Math.max(0, 1 - 3*dt); CAM.ox *= ok; CAM.oz *= ok; { const tg = who === 'foot' ? 1 : 0, st = 0.9*dt; CAM.foot += Math.max(-st, Math.min(st, tg - CAM.foot)); }   // (2.10.: a steady 1.1 s glide, eased both ends by fS — the boom from 30–50 m down to 10 m)
   const Cx = C.x + CAM.ox, Cz = C.z + CAM.oz;
   const fx = Math.sin(camAngle.current), fz = Math.cos(camAngle.current), gy = Y(Cx, Cz);
   // the boom
@@ -11209,9 +11214,9 @@ function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, 
   if (CAM.py === null || Math.abs(gy + 1 - CAM.py) > 6) CAM.py = gy + 1;   // (a start, a reset, a teleport: straight there)
   CAM.py += (gy + 1 - CAM.py)*Math.min(1, 8*dt);
   const el = mix('el'), ce = Math.cos(el), se = Math.sin(el);
-  let L = (mix('L') + mix('Lv')*CAM.vs)*(1 - 0.4*K*CAM.foot)*camZoom;   // (on foot: a shorter boom)
-  if (R > 0.01) { const t = camBlock(Cx, CAM.py + 0.3, Cz, Cx - fx*L*ce, CAM.py + L*se, Cz - fz*L*ce);   // a house or a crest in between: in (fast), back out (slowly)
-    const pw = Math.max(0.3, t); CAM.pull += (pw - CAM.pull)*Math.min(1, (pw < CAM.pull ? 10 : 1.5)*dt); L *= 1 - (1 - CAM.pull)*R; }
+  let L = (mix('L') + mix('Lv')*CAM.vs)*camZoom;
+  const Rb = Math.max(R, CAM.foot); if (Rb > 0.01) { const t = camBlock(Cx, CAM.py + 0.3, Cz, Cx - fx*L*ce, CAM.py + L*se, Cz - fz*L*ce);   // a house or a crest in between: in (fast), back out (slowly) — on foot too
+    const pw = Math.max(0.3, t); CAM.pull += (pw - CAM.pull)*Math.min(1, (pw < CAM.pull ? 10 : 1.5)*dt); L *= 1 - (1 - CAM.pull)*Rb; }
   camPos.set(Cx - fx*L*ce, CAM.py + L*se, Cz - fz*L*ce);
   const need = Math.max(0, Y(camPos.x, camPos.z) + 1.5 - camPos.y);   // ground right under the camera: lift it (fast up, slowly down)
   CAM.lift += (need - CAM.lift)*Math.min(1, (need > CAM.lift ? 12 : 2)*dt); camPos.y = Math.max(camPos.y + CAM.lift, Y(camPos.x, camPos.z) + 0.8);
@@ -11447,7 +11452,7 @@ function loop(time) {
     // hot path so there is no hitch on the first real frame at GO.
     acc += dt;
     const live = gameState === State.RACING;
-    while (acc >= PHYS_DT) { RI.x = car.x; RI.z = car.z; RI.a = car.angle; updateCar(PHYS_DT, live); knockUpdate(); if (WALK.on) { car.x = WALK.cx; car.z = WALK.cz; car.angle = WALK.ca; car.vx = car.vz = car.speed = 0; }   /* (parked: it stays put, on any slope) */ updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
+    while (acc >= PHYS_DT) { RI.x = car.x; RI.z = car.z; RI.a = car.angle; updateCar(PHYS_DT, live); knockUpdate(); if (WALK.on) { if (WALK.roll) { if (Math.hypot(car.vx, car.vz) < 0.4) { WALK.roll = false; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle; } } else { car.x = WALK.cx; car.z = WALK.cz; car.angle = WALK.ca; car.vx = car.vz = car.speed = 0; } }   /* (parked: it stays put, on any slope) */ updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
     if (live) updateCheckpoints(dt);
   } else {
     acc = 0;
