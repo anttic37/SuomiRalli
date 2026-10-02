@@ -5026,6 +5026,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Nykäyksiä pois: roska-, jäätelö- ja postiautojen sekä ambulanssin reittisuunnittelu ei enää osu samaan ruutuun, ja tieverkon tiedot lasketaan valmiiksi latauksessa. Pahin nykäys testiajossa 75 ms → 16 ms', '19.41'],
   ['2.10.', 'Roskapöntöt uusiksi: tuhannen sijaan noin 50 pönttöä, ja osuma lennättää pöntön oikealla fysiikalla – se kimpoaa seinistä ja aidoista, jää siihen asentoon mihin päätyy, ja siihen voi osua uudestaan. Roska-auton lastaaja ja puristin liikkuvat taas tyhjennyksessä', '19.15'],
   ['2.10.', 'Käynnistykseen kanavahaku: ”VIRITETÄÄN KANAVAA – SUOMIRALLI” ja 80-luvun ohjelmat vilisevät sillä aikaa, kun kylä rakennetaan ja kaikki piirto-ohjelmat käännetään valmiiksi. Sen jälkeen ei nyi', '18.46'],
   ['2.10.', 'Nykiminen kisan alussa pois: kaikki piirto-ohjelmat käännetään valmiiksi jo alkuruudussa, eikä kesken ajon, kun uusi talo, auto tai kyltti tulee ensimmäistä kertaa näkyviin', '14.46'],
@@ -7016,6 +7017,7 @@ const DISPATCH = { queue: [],
   fire(f) { if (NUKE.on) return; this.queue.push({ kind: 'fire', x: f.x, z: f.z, fire: f, at: worldT + 4 + Math.random()*4 }); },
   update() { for (let i = this.queue.length - 1; i >= 0; i--) { const q = this.queue[i]; if (worldT < q.at) continue;
       const kind = q.kind === 'amb' ? 'ambulance' : 'fire'; if (VEHICLES.filter(o => o.kind === kind && o.job && o.job.phase !== 'wreck').length >= 2) continue;
+      if (!planSlot()) break;   // (its route is planned here: one plan a frame)
       this.queue.splice(i, 1); if (q.kind === 'fire' && q.fire.out) continue;
       if (q.kind === 'amb') { const o = q.victims.find(h => !h.gone); if (o) { q.x = o.x; q.z = o.z; } }
       if (!spawnResponder(q) && q.kind === 'amb') q.victims.forEach(h => { if (!h.gone) { h.gone = true; humanSync(h); } }); } } };
@@ -7872,11 +7874,11 @@ function jingle(v, vol) { if (!audio || gameState === State.MENU) return; const 
 function iceRoute(v, V) { const { nodes, adj } = roadGraph(); if (!nodes.length) return false;
   let si = -1, sd = 1e9; for (let i = 0; i < nodes.length; i++) { const d = (nodes[i].x - v.x)**2 + (nodes[i].z - v.z)**2; if (d < sd) { sd = d; si = i; } }
   const { dist, prev } = rgDijkstra(si); let best = -1, bs = -1e9;
-  for (let k = 0; k < 90; k++) { const i = Math.floor(Math.random()*nodes.length), d = dist[i], n = nodes[i]; if (!isFinite(d) || d < (V.dMin || 100) || d > (V.dMax || 340) || Math.abs(n.x) > 540 || Math.abs(n.z) > 540 || distRoute(n.x, n.z) < 20) continue;
-    let bad = 0; for (let j = i; j >= 0 && j !== si; j = prev[j]) { const q = nodes[j]; if (distRoute(q.x, q.z) < 9) bad++; if (V.blocks.some(b => Math.hypot(b[0] - q.x, b[1] - q.z) < 7)) bad += 6; }   // (not back the way it got stuck)
+  for (let k = 0; k < 90; k++) { const i = Math.floor(Math.random()*nodes.length), d = dist[i], n = nodes[i]; if (!isFinite(d) || d < (V.dMin || 100) || d > (V.dMax || 340) || Math.abs(n.x) > 540 || Math.abs(n.z) > 540 || nodeRoute(i) < 20) continue;
+    let bad = 0; for (let j = i; j >= 0 && j !== si; j = prev[j]) { const q = nodes[j]; if (nodeRoute(j) < 9) bad++; if (V.blocks.some(b => Math.hypot(b[0] - q.x, b[1] - q.z) < 7)) bad += 6; }   // (not back the way it got stuck)
     let j = i, back = null; while (j >= 0 && j !== si) { if (dist[j] >= 7) back = nodes[j]; j = prev[j]; }   // the way out: straight on, or a turn in the road first?
     const turn = back && Math.abs(angDiff(Math.atan2(back.x - v.x, back.z - v.z) - v.yaw)) > 1.6, dead = adj[i].length < 2;   // (and not into a dead end: it'd have to turn there next time)
-    let homes = 0; staticNear(n.x, n.z, 30, B => { if (B.kind === 'house') homes++; }); const sc = Math.min(homes, 8)*2 - bad*8 - Math.abs(d - (V.dAim || 200))*0.04 + Math.random()*5 - (turn ? 30 : 0) - (dead ? 25 : 0); if (sc > bs) { bs = sc; best = i; } }
+    const homes = nodeHomes(i), sc = Math.min(homes, 8)*2 - bad*8 - Math.abs(d - (V.dAim || 200))*0.04 + Math.random()*5 - (turn ? 30 : 0) - (dead ? 25 : 0); if (sc > bs) { bs = sc; best = i; } }
   if (best < 0) return false; const P = []; for (let j = best; j >= 0; j = prev[j]) { P.push({ x: nodes[j].x, z: nodes[j].z, hw: nodes[j].hw }); if (j === si) break; } P.reverse(); if (P.length < 3) return false;
   setPath(v, rightSide(P)); v.blockT = v.passT = v.unstickT = 0; v.passSide = 1; v.sw = 0; v.turn = { dir: 1, legT: 0, n: 0 };
   const [tx, tz] = pathAt(v, Math.min(v.total, 7)); V.mode = Math.abs(angDiff(Math.atan2(tx - v.x, tz - v.z) - v.yaw)) > 1.6 ? 'turn' : 'drive'; return true; }
@@ -7907,7 +7909,7 @@ function serviceVanAI(V, S) { const f = (v, dt) => { V.v = v; const C = v.ctrl;
 function iceVanAI(V) { return serviceVanAI(V, { vmax: 8,
   onFire: () => { if (V.mode !== 'dead') { V.mode = 'dead'; for (const h of V.order) if (h.st) h.st.mode = 'leave'; V.order.length = 0; } },
   atStop: (v) => { V.order = V.order.filter(h => !h.down && !h.gone && !h.inside); V.wt = 0; V.wx = v.x; V.wz = v.z;
-    if (V.t <= 0 && (!V.order.length || V.t < -25)) { for (const h of V.order) if (h.st) h.st.mode = 'leave'; V.order.length = 0; if (iceRoute(v, V)) jingle(v, 0.6); else V.t = 8; } },
+    if (V.t <= 0 && (!V.order.length || V.t < -25)) { for (const h of V.order) if (h.st) h.st.mode = 'leave'; V.order.length = 0; if (!planSlot()) return; if (iceRoute(v, V)) jingle(v, 0.6); else V.t = 8; } },
   arrive: () => { V.t = 24 + Math.random()*16; }, after: (v) => { iceCall(V); jingle(v, 1); },
   reset: () => { V.mode = 'stop'; V.t = 10 + Math.random()*8; V.order.length = 0; V.blocks.length = 0; V.wt = 0; V.dmg = 0; } }); }
 function buildIceVan() { const { nodes, adj } = roadGraph(); if (!nodes.length) return;
@@ -8221,7 +8223,7 @@ function postVanAI(V) { return serviceVanAI(V, { vmax: 9,
     if (V.t > 0 && !V.out && !V.sent && man && !man.down && !man.gone) { let best = null, bd = 30; staticNear(v.x, v.z, 30, B => { if (B.kind !== 'house') return; const d = Math.hypot(B.x - v.x, B.z - v.z); if (d < bd) { bd = d; best = B; } });   // the nearest house: to its wall facing the van
       if (best) { const dx = v.x - best.x, dz = v.z - best.z, l = Math.hypot(dx, dz) || 1, px = best.x + dx/l*(Math.max(best.hw, best.hl) + 1.4), pz = best.z + dz/l*(Math.max(best.hw, best.hl) + 1.4);
         const [sx, sz] = lloc(v.x, v.z, v.yaw, -(v.hw + 0.5), 0.8); man.x = sx; man.z = sz; man.inside = false; man.st = null; humanSync(man); V.dx = px; V.dz = pz; V.hx = best.x; V.hz = best.z; V.out = true; V.deliveries = (V.deliveries || 0) + 1; } V.sent = true; }
-    if (V.t <= 0 && (!V.out || V.t < -30)) { if (V.out && man) { man.inside = true; man.st = null; humanSync(man); V.out = false; } if (iceRoute(v, V)) V.sent = false; else V.t = 6; } },
+    if (V.t <= 0 && (!V.out || V.t < -30)) { if (V.out && man) { man.inside = true; man.st = null; humanSync(man); V.out = false; } if (!planSlot()) return; if (iceRoute(v, V)) V.sent = false; else V.t = 6; } },
   arrive: () => { V.t = 10 + Math.random()*5; }, after: () => { V.sent = false; },
   reset: () => { V.mode = 'stop'; V.t = 4; V.out = false; V.sent = false; V.blocks.length = 0; V.dmg = 0; V.tt = 0; V.wt = 0; } }); }
 function buildPostVan() { const { nodes, adj } = roadGraph(); if (!nodes.length) return;
@@ -8331,18 +8333,25 @@ function makeGarbageTruck() { const G = new THREE.Group(), green = lmat(0x2f6a3a
   for (const sx of [-1, 1]) { const m = new THREE.Mesh(lgeo('jateside', () => new THREE.PlaneGeometry(3.6, 0.6)), new THREE.MeshBasicMaterial({ map: canvasTex('jate', 512, 96, (g) => { g.font = 'bold 64px Arial'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#f4f4ee'; g.fillText('JÄTEHUOLTO', 256, 52); }), transparent: true, depthWrite: false })); m.position.set(sx*1.21, 2.45, -0.75); m.rotation.y = sx*Math.PI/2; G.add(m); }
   G.userData.plate = plate; G.userData.beacon = beacon; return G; }
 // the way from here to (tx, tz) by the streets, on the right of the road, the last bit to the side the target is on
-function vanTo(v, V, tx, tz, ni, ahead) { const { nodes } = roadGraph(), si = vanNode(v); if (si < 0) return false; const { prev } = rgDijkstra(si);
+function vanTo(v, V, tx, tz, ni, ahead, pre) { const { nodes } = roadGraph(), si = pre ? pre.si : vanNode(v); if (si < 0) return false; const { prev } = pre || rgDijkstra(si);   // (pre: the search the caller already ran from the same node)
   const P = []; for (let j = ni; j >= 0; j = prev[j]) { P.push({ x: nodes[j].x, z: nodes[j].z, hw: nodes[j].hw }); if (j === si) break; } P.reverse(); if (P.length < 3 || P[0].x !== nodes[si].x) return false;
   if (ahead) { const a = P[P.length - 2], b = P[P.length - 1], l = Math.hypot(b.x - a.x, b.z - a.z) || 1; P.push({ x: b.x + (b.x - a.x)/l*ahead, z: b.z + (b.z - a.z)/l*ahead, hw: b.hw }); }   // (on past it: a lorry stops with its back by the bin)
   setPath(v, rightSide(P, tx, tz)); v.blockT = v.passT = v.unstickT = 0; v.passSide = 1; v.sw = 0; v.turn = { dir: 1, legT: 0, n: 0 };
   const [px, pz] = pathAt(v, Math.min(v.total, 7)); V.mode = Math.abs(angDiff(Math.atan2(px - v.x, pz - v.z) - v.yaw)) > 1.6 ? 'turn' : 'drive'; return true; }
+// 2.10.: one van/responder plans a route a frame (a planning frame was 5–21 ms; two in the same frame was a visible hitch); the per-node
+// route distance and house count are worked out once, at load (routeCachesWarm, behind the tuning screen), not mid-race
+const PLAN = { f: -1 };
+function planSlot() { if (PLAN.f === HFRAME) return false; PLAN.f = HFRAME; return true; }
+function nodeHomes(i) { const G = roadGraph(); if (!G.nh) G.nh = new Int16Array(G.nodes.length).fill(-1); if (G.nh[i] < 0) { let n = 0; staticNear(G.nodes[i].x, G.nodes[i].z, 30, B => { if (B.kind === 'house') n++; }); G.nh[i] = n; } return G.nh[i]; }
+function routeCachesWarm() { const G = roadGraph(); for (let i = 0; i < G.nodes.length; i++) { nodeRoute(i); nodeHomes(i); } }
 function nodeRoute(i) { const G = roadGraph(); if (!G.dr) G.dr = new Float32Array(G.nodes.length).fill(-1); if (G.dr[i] < 0) G.dr[i] = distRoute(G.nodes[i].x, G.nodes[i].z); return G.dr[i]; }   // (a street node's distance from the rally route, worked out once)
 const vanNode = (v) => { const [x, z] = lloc(v.x, v.z, v.yaw, 0, v.hl + 3); return nearestNode(x, z); };   // (the street node just in front of it: routes start ahead, not behind)
 function garbageNext(v, V) { const { nodes } = roadGraph(), si = vanNode(v); if (si < 0) return false; const { dist, prev } = rgDijkstra(si); let best = null, bs = Infinity;
-  for (const B of BINS.list) { if (!B.full || B.down || B.ni < 0 || Math.hypot(B.x - v.x, B.z - v.z) < 14) continue; const d = dist[B.ni]; if (!isFinite(d) || d > 2500 || B.route < 20) continue;   // (2.10.: 50 bins, far apart — the next one can be across the village)
+  const cands = BINS.list.filter(B => B.full && !B.down && B.ni >= 0 && Math.hypot(B.x - v.x, B.z - v.z) >= 14).sort((a, b) => Math.hypot(a.x - v.x, a.z - v.z) - Math.hypot(b.x - v.x, b.z - v.z)).slice(0, 8);   // (the 8 nearest as the crow flies: their route chains walked, not all 50)
+  for (const B of cands) { const d = dist[B.ni]; if (!isFinite(d) || d > 2500 || B.route < 20) continue;   // (2.10.: 50 bins, far apart — the next one can be across the village)
     let bad = 0, out = null; for (let j = B.ni; j >= 0 && j !== si; j = prev[j]) { if (nodeRoute(j) < 9) bad++; if (dist[j] >= 9) out = nodes[j]; }
     const turn = out && Math.abs(angDiff(Math.atan2(out.x - v.x, out.z - v.z) - v.yaw)) > 1.6, sc = d + bad*40 + (turn ? 150 : 0); if (sc < bs) { bs = sc; best = B; } }   // (the nearest full one ahead, not by way of the rally route)
-  if (!best) return false; V.target = best; return vanTo(v, V, best.x, best.z, best.ni, v.hl); }
+  if (!best) return false; V.target = best; return vanTo(v, V, best.x, best.z, best.ni, v.hl, { si, prev }); }
 const binmanTask = (V) => ({ kind: 'binman', update(h, dt, t) { const v = V.v, S = V.w, P = h.pose;
   if (h.seat) { h.x = v.x; h.z = v.z; P.armR = -2.7; P.armL = -0.3; P.legs = 0; return; }   // on the back step, a hand on the rail (x, z follow the lorry: 'far' is judged from them)
   const [rx, rz] = lloc(v.x, v.z, v.yaw, 0, -(v.hl + 0.9)), B = V.job[0];
@@ -8363,7 +8372,7 @@ function garbageAI(V) { return serviceVanAI(V, { vmax: 8,
     if (!V.job.length && S.m === 'ride' && !V.sent) { V.sent = true; V.job = BINS.list.filter(B => B.full && !B.down && Math.hypot(B.x - v.x, B.z - v.z) < 18).sort((a, b) => Math.hypot(a.x - v.x, a.z - v.z) - Math.hypot(b.x - v.x, b.z - v.z)).slice(0, 4);   // the bins here: off he hops
       if (V.job.length && h && !h.down && !h.gone) { const [sx, sz] = lloc(v.x, v.z, v.yaw, 0.6, -(v.hl + 0.6)); h.seat = null; h.x = sx; h.z = sz; S.m = 'go'; humanSync(h); } else V.job.length = 0; }
     const away = h && (h.down || h.gone || h.hurt);   // (knocked over: the lorry carries on without him)
-    if ((S.m === 'ride' || away) && V.sent && V.t <= 0) { bc.material.emissiveIntensity = 0.2; if (garbageNext(v, V)) V.sent = false; else V.t = 8; } },
+    if ((S.m === 'ride' || away) && V.sent && V.t <= 0 && planSlot()) { bc.material.emissiveIntensity = 0.2; if (garbageNext(v, V)) V.sent = false; else V.t = 8; } },
   arrive: () => { V.t = 2; }, after: () => { V.sent = false; V.job = []; },
   reset: () => { V.mode = 'stop'; V.t = 3; V.sent = false; V.job = []; V.blocks.length = 0; V.dmg = 0; V.tt = 0; V.wt = 0; } }); }
 function buildGarbageTruck() { if (!BINS.list.length) return; const { nodes, adj } = roadGraph(); let c = null;
@@ -10176,6 +10185,7 @@ function worldBuild() {
   lifeExtras3Build();
   crowdBuild();
   dedupeStaticMaterials();
+  routeCachesWarm();
 }
 // 2.10.: the static world's look-alike materials (same type, colour, roughness, map…) made one — fewer material switches a frame. People, vehicles,
 // the car, life props, see-through and glowing things, checkpoints and anything with its own shader keep theirs (their materials change at run time)
