@@ -367,7 +367,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 18.42 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 18.53 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -534,7 +534,7 @@ const I18N = {
   'KERRO KAVERILLE!': ['TELL A FRIEND!', 'SI DET TIL EN VENN!'], 'ota kuva ja jaa peliä': ['snap it and share the game', 'ta et bilde og del spillet'],
   'TAUKO': ['PAUSED', 'PAUSE'], 'P jatka · R uusi lähtö · Esc alkuruutu': ['P resume · R restart · Esc menu', 'P fortsett · R ny start · Esc meny'],
   '💾 PC-PELI · TOIMII 486-KONEELLA': ['💾 PC GAME · RUNS ON A 486', '💾 PC-SPILL · KJØRER PÅ EN 486'], 'ei mobiilipeli – voi kyynel 😢': ["not a mobile game – boo hoo 😢", 'ikke et mobilspill – snufs 😢'], '✔ 28.9. TESTATTU: PELI SKULAA': ['✔ TESTED 28.9.: GAME WORKS', '✔ TESTET 28.9.: SPILLET FUNKER'], '– jos ei, niin voi voi': ['– if not, oh well', '– hvis ikke, synd det'],
-  'P tauko': ['P pause', 'P pause'], 'RUUDUNPÄIVITYS: ENINTÄÄN 60': ['FRAME RATE: UP TO 60', 'BILDEFREKVENS: OPPTIL 60'], 'RUUDUNPÄIVITYS: RAJOITTAMATON': ['FRAME RATE: UNLIMITED', 'BILDEFREKVENS: UBEGRENSET'], 'fps-raja 60 / vapaa': ['fps limit 60 / free', 'fps-grense 60 / fri'], 'AVAA LEHTI': ['OPEN THE PAPER', 'ÅPNE AVISEN'], 'F jalkaisin': ['F on foot', 'F til fots'], 'ulos autosta / jalkaisin': ['get out / on foot', 'gå ut / til fots'], 'JALKAISIN · F = TAKAISIN AUTOON': ['ON FOOT · F = BACK IN THE CAR', 'TIL FOTS · F = TILBAKE I BILEN'], 'tauko': ['pause', 'pause'],
+  'P tauko': ['P pause', 'P pause'], 'RUUDUNPÄIVITYS: NOIN 60, TASAISESTI': ['FRAME RATE: ABOUT 60, EVEN', 'BILDEFREKVENS: CIRKA 60, JÄMNT'], 'RUUDUNPÄIVITYS: RAJOITTAMATON': ['FRAME RATE: UNLIMITED', 'BILDEFREKVENS: UBEGRENSET'], 'fps-raja 60 / vapaa': ['fps limit 60 / free', 'fps-grense 60 / fri'], 'AVAA LEHTI': ['OPEN THE PAPER', 'ÅPNE AVISEN'], 'F jalkaisin': ['F on foot', 'F til fots'], 'ulos autosta / jalkaisin': ['get out / on foot', 'gå ut / til fots'], 'JALKAISIN · F = TAKAISIN AUTOON': ['ON FOOT · F = BACK IN THE CAR', 'TIL FOTS · F = TILBAKE I BILEN'], 'tauko': ['pause', 'pause'],
   '👽 OSUMA! {0}/{1}': ['👽 HIT! {0}/{1}', '👽 TREFF! {0}/{1}'],
   'virta': ['power', 'på/av'], 'viritys': ['tuning', 'tuning'], 'kanava': ['station', 'kanal'], 'ääni': ['volume', 'volum'],
   'paina virtaa — radio soi täälläkin': ['press power — the radio plays here too', 'trykk på — radioen spiller her også'], 'RADIO POIS': ['RADIO OFF', 'RADIO AV'],
@@ -5029,6 +5029,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Kävelyn nykiminen korjattu: 60 fps -rajoitin piirsi 144 Hz -näytöllä kuvat vuoroin 14 ja 21 ms välein. Nyt joka toinen ruudunpäivitys tasaisesti (144 Hz → 72 fps, 165 Hz → 55 fps)', '21.52'],
   ['2.10.', 'Kaatunut kävelijä nousee heti kun pyöriminen loppuu (ei enää pakkomakoilua). Isäntä ei nappaa heti: hän ravistelee 3 s, ja sillä aikaa ehdit lyödä irti välilyönnillä – autoon ehtinyttä hän repii ovesta, kaasuta pois niin hän putoaa. Omenan poiminta näkyy: ukko kurottaa kädet puuhun ja omena lentää käteen', '21.42'],
   ['2.10.', 'Omenat tallentuvat nyt varmasti: autolla 100 m:n päähän isännästä riittää, eikä maassa makaava (lyöty tai yliajettu) isäntä estä tallennusta. Omenat lähtevät nettiin heti. Kävelykamera taas korkeammalla', '21.26'],
   ['2.10.', 'Omenavarkaus: isäntä saa kiinni vasta oikeasti kosketuksesta ja pitää kauluksesta – välilyönnillä lyöt itsesi irti. Matka isäntään näkyy autolla paetessa, ja 200 m:n päässä omenat tallentuvat. Vauhdissa autosta hypännyt kuski pyörii maassa kuin tukki. Kävelykamera ylempänä', '21.06'],
@@ -10849,7 +10850,7 @@ addEventListener('keydown', e => {
   if (e.code==='KeyP' && !e.repeat) { setPause(!PAUSE.on); return; }
   if (PAUSE.on && e.code !== 'KeyR' && e.code !== 'Escape') return;   // (paused: only P, R and Esc)
   if ((e.code==='KeyR' || e.code==='Escape') && PAUSE.on) setPause(false);
-  if (e.code==='KeyV' && !e.repeat) { FPS_CAP = FPS_CAP ? 0 : 60; try { localStorage.setItem('ylasto1988-fps', FPS_CAP ? '60' : '0'); } catch (er) {} centerMsg(T(FPS_CAP ? 'RUUDUNPÄIVITYS: ENINTÄÄN 60' : 'RUUDUNPÄIVITYS: RAJOITTAMATON'), '#ffe9a8', 1400); }
+  if (e.code==='KeyV' && !e.repeat) { FPS_CAP = FPS_CAP ? 0 : 60; try { localStorage.setItem('ylasto1988-fps', FPS_CAP ? '60' : '0'); } catch (er) {} centerMsg(T(FPS_CAP ? 'RUUDUNPÄIVITYS: NOIN 60, TASAISESTI' : 'RUUDUNPÄIVITYS: RAJOITTAMATON'), '#ffe9a8', 1400); }
   if (e.code==='KeyR' && !e.repeat && gameState!==State.MENU) { initAudio(); START_EV = 'r'; startRace(false); }
   if (e.code==='KeyL' && !e.repeat && gameState===State.MENU) setLang(LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length]);   // language: FI → EN → NO
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
@@ -11460,10 +11461,13 @@ function setPause(on) { if (on === PAUSE.on) return; if (on && gameState !== Sta
   if (RADIO.el) { if (on) { PAUSE.radio = !RADIO.el.paused; RADIO.el.pause(); } else if (PAUSE.radio && !RADIO.off) RADIO.el.play().catch(() => {}); } }
 document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
 let MM_TICK = 0;
-let FPS_CAP = 60, FPS_NEXT = 0; try { if (localStorage.getItem('ylasto1988-fps') === '0') FPS_CAP = 0; } catch (e) {}   // (2.10.: 60 by default — a 144 Hz screen drew 144 a second and heated the laptop; V: no limit)
+let FPS_CAP = 60, FPS_N = 1, FPS_K = 0, FPS_EMA = 0, FPS_PREV = -1; try { if (localStorage.getItem('ylasto1988-fps') === '0') FPS_CAP = 0; } catch (e) {}   // (2.10.: 60 by default — a 144 Hz screen drew 144 a second and heated the laptop; V: no limit)
 function loop(time) {
   requestAnimationFrame(loop);
-  if (FPS_CAP) { if (time < FPS_NEXT - 2) return; FPS_NEXT += 1000/FPS_CAP; if (FPS_NEXT < time - 1000/FPS_CAP) FPS_NEXT = time; }   // (a beat of 60 a second: a 144 Hz screen draws every 2nd–3rd refresh, ~60 in all; after a stall it starts again from now)
+  // (2.10., Antti: 'ukon kävelynykiminen'): the cap drew a 144 Hz screen's refreshes 2-3-2-3 apart (14 / 21 ms in turn: a steady judder, worst
+  // walking). Now every n-th refresh, evenly: n from the screen's measured rate (144 / 120 Hz: every 2nd, 165: every 3rd, 60–90: all)
+  if (FPS_PREV >= 0) { const d = time - FPS_PREV; if (d > 2 && d < 50) FPS_EMA = FPS_EMA ? FPS_EMA + (d - FPS_EMA)*0.05 : d; } FPS_PREV = time;
+  if (FPS_CAP && FPS_EMA) { const r = 1000/FPS_EMA/FPS_CAP; if (Math.abs(r - FPS_N) > 0.6) FPS_N = Math.max(1, Math.round(r)); if ((FPS_K = (FPS_K + 1) % FPS_N)) return; }
   if (PAUSE.on) { lastTime = time; renderer.render(scene, camera); return; }
   adaptResolution((time - lastTime)/1000);
   const dt = Math.max(0, Math.min((time-lastTime)/1000, 0.05));
