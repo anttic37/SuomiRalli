@@ -367,7 +367,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 19.43 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 20.06 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -3969,10 +3969,15 @@ const glassMat = new THREE.MeshStandardMaterial({ color: 0x1e2230, roughness: 0.
 const houseGlass = new THREE.MeshStandardMaterial({ color: 0x1e2230, roughness: 0.1, metalness: 0.1, emissive: 0xffc070, emissiveIntensity: 0 });
 const accentMat = new THREE.MeshStandardMaterial({ color: 0xff3a3a, roughness: 0.4, emissive: 0x330000 });
 
+// a soft dark rectangle (contact shadows) drawn pixel by pixel: ctx.filter 'blur' isn't in every browser (2.10., Antti: 'autojen alla
+// oleva varjo on musta laatikko' — without it the blur fell away and a hard box was left)
+function softRectTex(W, H, x0, y0, x1, y1, f, a) { const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d'), D = g.createImageData(W, H), ss = (t) => { t = Math.max(0, Math.min(1, t)); return t*t*(3 - 2*t); };
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const u = ss((Math.min(x + 0.5 - x0, x1 - x - 0.5) + f)/(2*f)), v = ss((Math.min(y + 0.5 - y0, y1 - y - 0.5) + f)/(2*f)); D.data[(y*W + x)*4 + 3] = Math.round(255*a*u*v); }
+  g.putImageData(D, 0, 0); return new THREE.CanvasTexture(c); }
 const bodyGroup = new THREE.Group();
 carGroup.add(bodyGroup);
 const carAO = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 4.4).rotateX(-Math.PI/2), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3,
-  map: (() => { const c = document.createElement('canvas'); c.width = 32; c.height = 64; const g = c.getContext('2d'); g.filter = 'blur(5px)'; g.fillStyle = 'rgba(0,0,0,0.8)'; g.fillRect(7, 8, 18, 48); return new THREE.CanvasTexture(c); })() }));
+  map: softRectTex(32, 64, 7, 8, 25, 56, 6, 0.8) }));
 carAO.position.y = 0.035; carAO.renderOrder = 2; carGroup.add(carAO);
 
 // ── body: rounded extrusions of a 205-style side profile (x of the shape = car forward, y = up), width along car x ──
@@ -4680,7 +4685,7 @@ const SOLID_RECTS = [];
 const AO = (() => {
   const tex = (rect) => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
     if (!rect) { const gr = g.createRadialGradient(32, 32, 2, 32, 32, 31); gr.addColorStop(0, 'rgba(0,0,0,0.62)'); gr.addColorStop(0.55, 'rgba(0,0,0,0.3)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }
-    else { g.filter = 'blur(6px)'; g.fillStyle = 'rgba(0,0,0,0.5)'; g.fillRect(12, 12, 40, 40); }
+    else return softRectTex(64, 64, 12, 12, 52, 52, 8, 0.5);
     return new THREE.CanvasTexture(c); };
   const geo = new THREE.PlaneGeometry(1, 1); geo.rotateX(-Math.PI/2);
   const mk = (rect) => new THREE.MeshBasicMaterial({ map: tex(rect), color: 0x000000, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
@@ -5033,6 +5038,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Autojen ja talojen alla olevat varjot pehmeiksi kaikissa selaimissa: ennen niiden pehmennys tehtiin selaimen blur-suotimella, ja ilman sitä varjo oli tumma laatikko', '23.06'],
   ['2.10.', 'Omenat kasvavat nyt latvassa: ukko astuu omenan alle ja hyppää, käsi osuu omenaan. Isäntä tulee ulos talosta, katselee käsi otsalla missä varas on, huutaa jotain ("MINUN OMENANI!") ja vasta sitten lähtee perään', '22.43'],
   ['2.10.', 'Kävelyn nykiminen korjattu: 60 fps -rajoitin piirsi 144 Hz -näytöllä kuvat vuoroin 14 ja 21 ms välein. Nyt joka toinen ruudunpäivitys tasaisesti (144 Hz → 72 fps, 165 Hz → 55 fps)', '21.52'],
   ['2.10.', 'Kaatunut kävelijä nousee heti kun pyöriminen loppuu (ei enää pakkomakoilua). Isäntä ei nappaa heti: hän ravistelee 3 s, ja sillä aikaa ehdit lyödä irti välilyönnillä – autoon ehtinyttä hän repii ovesta, kaasuta pois niin hän putoaa. Omenan poiminta näkyy: ukko kurottaa kädet puuhun ja omena lentää käteen', '21.42'],
