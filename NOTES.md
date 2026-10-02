@@ -993,6 +993,7 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - 2.10. 22.43: apples hang 2.4–3 m up (e 0.22–0.55); applePick takes the nearest left (swapped into the next slot), WALK.pickF steps the walker 0.4 m outside the crown under it, then a jump (vy ≥ 4.2, to put APPLES.HAND=2.0 + hop at the apple) — the apple stays on the branch till the top (F.tp), then rides the hand. Owner: spawns inside the wall (task.through), 'out' → 'look' (hand over eyes, 1.3 s) → 'shout' (appleShout: own canvas sprite, 2.6 s) → 'run'; re-noticing goes straight to 'shout'. Message 200 → 100 M.
 - 2.10. 23.06: contact-shadow textures (carAO, AO.rect) drawn pixel by pixel by softRectTex (smoothstep feather) instead of ctx.filter='blur()', which some browsers (older Safari) lack — there they were hard dark boxes.
 - 2.10. 23.51: walker 'jousto' — WALK.spd ramps (+11 / −16 m/s²), pose.dy stride bob |cos ph|·0.075, tilt 0.13·k + accel lean, roll from yaw rate (−0.035·rate·k, ±0.22, smoothed). t_walkflex.
+- 3.10. 00.30: the black boxes were carAO baked into carKit (yard cars) as an opaque black 'misc' plate — carKit now skips carAO. Orchards: spotOk() split out of freeSpot; plots with area/110 (+2 for a big house) ≥ 3 trees (70 %) get the best-fitting 2/3-column grid of up to 8 apple trees (3.1 × 3.0 m) → 755 apple trees, 3765 apples.
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)

@@ -367,7 +367,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 20.51 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 21.30 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -2281,6 +2281,10 @@ function buildScenery() { KNOCK.items.length = 0; YARD_SOLID.length = 0; YARDG =
     // yard things: 1–3 per plot, somewhere free on the lawn
     const xs = pl.P.map(p => p[0]), zs = pl.P.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), z0 = Math.min(...zs), z1 = Math.max(...zs);
     const spots = []; const nItems = 1 + Math.floor(hashN(bi, 10)*3);
+    const spotOk = (px, pz, r) => { if (!inPoly(pl.P, px, pz) || blocked(px, pz, r + 0.6) || inPaved(px, pz)) return false;
+        if (DRIVE_STRIPS.some(S => { const vx = S.bx - S.ax, vz = S.bz - S.az, L2 = vx*vx + vz*vz || 1; let t = ((px - S.ax)*vx + (pz - S.az)*vz)/L2; t = Math.max(-0.1, Math.min(1.05, t)); return Math.hypot(S.ax + vx*t - px, S.az + vz*t - pz) < 1.4 + r; })) return false;
+        if (spots.some(q => Math.hypot(q[0]-px, q[1]-pz) < r + q[2] + 0.6)) return false;
+        return !pl.P.some((p, k) => { const q = pl.P[(k+1) % pl.P.length], vx = q[0]-p[0], vz = q[1]-p[1], L2 = vx*vx+vz*vz || 1; let t = ((px-p[0])*vx + (pz-p[1])*vz)/L2; t = Math.max(0, Math.min(1, t)); return Math.hypot(p[0]+vx*t-px, p[1]+vz*t-pz) < r + 0.4; }); };
     const freeSpot = (r) => { for (let tries = 0; tries < 30; tries++) { const px = x0 + (x1-x0)*Math.random(), pz = z0 + (z1-z0)*Math.random();
         if (!inPoly(pl.P, px, pz) || blocked(px, pz, r + 0.6) || inPaved(px, pz)) continue;
         if (DRIVE_STRIPS.some(S => { const vx = S.bx - S.ax, vz = S.bz - S.az, L2 = vx*vx + vz*vz || 1; let t = ((px - S.ax)*vx + (pz - S.az)*vz)/L2; t = Math.max(-0.1, Math.min(1.05, t)); return Math.hypot(S.ax + vx*t - px, S.az + vz*t - pz) < 1.4 + r; })) continue;   // anyone's drive, not only this plot's
@@ -2328,6 +2332,19 @@ function buildScenery() { KNOCK.items.length = 0; YARD_SOLID.length = 0; YARDG =
       if ((bi + k) % 3 === 0) { const hT = 3.0 + Math.random()*1.5, r = 1.0 + Math.random()*0.5; M.begin(tx, tz, r*0.5, r*0.5, 0); M.add(unitCyl, 'btrunk', birchTrunk, tx, hT/2, tz, 0, 0.11, hT, 0.11); M.add(CROWN_BIRCH[(bi+k) % 2], 'gbcrown', birchLeafV, tx, hT+r*0.5, tz, Math.random()*6.3, r, r*1.1, r); M.end(); }
       else { const hT = 0.9 + Math.random()*0.4, r = 1.3 + Math.random()*0.6; M.begin(tx, tz, r*0.6, r*0.6, 0); M.add(unitCyl, 'atrunk', appleTrunk, tx, hT/2, tz, 0, 0.14, hT, 0.14); M.add(CROWN_VILLAGE[(bi+k) % 3], 'acrown', appleLeafV, tx, hT+r*0.5, tz, Math.random()*6.3, r*1.15, r*0.72, r*1.15); M.end(); APPLE_TREES.push({ x: tx, z: tz, cy: hT + r*0.5, r, pl }); }
       placed.push({ x: tx, z: tz, r: 1.2 }); }
+    // (2.10., Antti: 'enemmän omenapuita, isompi talo — max 8 puuta, ryhmittelyä'): an orchard on the roomier plots, 3–8 apple trees in
+    // rows of two along the house, more the bigger the plot and the house
+    { let area = 0; for (let k = 0; k < pl.P.length; k++) { const a = pl.P[k], b = pl.P[(k+1) % pl.P.length]; area += a[0]*b[1] - b[0]*a[1]; } area = Math.abs(area)/2;
+      const big = pl.B[2]*pl.B[3], want = Math.min(8, Math.floor(area/110) + (big > 130 ? 2 : 0));
+      if (want >= 3 && hashN(bi, 95) < 0.7) { const th = pl.B[4] || 0, ca = Math.cos(th), sa = Math.sin(th); let best = [];   // (the spot on the plot where most of them fit)
+        for (let tries = 0; tries < 30 && best.length < want; tries++) { const cx = x0 + (x1-x0)*Math.random(), cz = z0 + (z1-z0)*Math.random(), cols = tries % 2 ? 2 : 3, rows = Math.ceil(want/cols), L = [];
+          for (let k = 0; k < want; k++) { const lx = ((k % cols) - (cols - 1)/2)*3.1 + (Math.random() - 0.5)*0.5, lz = (Math.floor(k/cols) - (rows - 1)/2)*3.0 + (Math.random() - 0.5)*0.5, tx = cx + ca*lx + sa*lz, tz = cz - sa*lx + ca*lz;
+            if (spotOk(tx, tz, 1.05) && L.every(q => Math.hypot(q[0] - tx, q[1] - tz) > 2.7)) L.push([tx, tz]); }
+          if (L.length > best.length) best = L; }
+        if (best.length >= 2) { best.forEach(([tx, tz], k) => { spots.push([tx, tz, 1.05]); YARD_SOLID.push([tx, tz, 0.14]);
+            const hT = 0.9 + Math.random()*0.4, r = 1.2 + Math.random()*0.45; M.begin(tx, tz, r*0.6, r*0.6, 0); M.add(unitCyl, 'atrunk', appleTrunk, tx, hT/2, tz, 0, 0.14, hT, 0.14); M.add(CROWN_VILLAGE[(bi+k) % 3], 'acrown', appleLeafV, tx, hT+r*0.5, tz, Math.random()*6.3, r*1.15, r*0.72, r*1.15); M.end(); APPLE_TREES.push({ x: tx, z: tz, cy: hT + r*0.5, r, pl });
+            placed.push({ x: tx, z: tz, r: 1.2 }); });
+          (sceneryDebug.orchards || (sceneryDebug.orchards = [])).push(best.length); } } }
     spots.forEach(([px, pz, r]) => placed.push({ x: px, z: pz, r: r + 0.3 }));
   });
   // ── landmarks from the editor ──
@@ -2675,7 +2692,7 @@ function carKit() {
   if (_carKit) return _carKit;
   const inv = new THREE.Matrix4(); carGroup.updateMatrixWorld(true); inv.copy(carGroup.matrixWorld).invert();
   const cats = { paint: [], dark: [], glass: [], misc: [], wheel: [] }, m = new THREE.Matrix4(), v = new THREE.Vector3();   // (wheel: kept whole — clustering turned the round tyres into chevrons)
-  carGroup.traverse(o => { if (!o.isMesh || !o.visible || !o.geometry || !o.geometry.attributes.position) return;
+  carGroup.traverse(o => { if (!o.isMesh || !o.visible || o === carAO || !o.geometry || !o.geometry.attributes.position) return;   // (2.10.: not the contact shadow — it came along as an opaque black plate under every yard car)
     const g0 = o.geometry === tireGeo ? tireGeoLow : o.geometry === rimGeo ? rimGeoLow : o.geometry, g = g0.index ? g0.toNonIndexed() : g0; m.multiplyMatrices(inv, o.matrixWorld);
     const mt = o.material, cat = o.geometry === tireGeo || o.geometry === rimGeo || o.geometry === hubGeo ? 'wheel' : mt === paintMat ? 'paint' : mt === darkMat ? 'dark' : mt === glassMat ? 'glass' : 'misc', col = mt.color ? mt.color : new THREE.Color(0.5, 0.5, 0.5);
     const P = g.attributes.position; for (let i = 0; i < P.count; i++) { v.fromBufferAttribute(P, i).applyMatrix4(m); cats[cat].push([v.x, v.y, v.z, col.r, col.g, col.b]); } });
@@ -5045,6 +5062,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Mustat laatikot pihojen autojen alta pois (auton varjolevy oli kopioitunut niihin mustana levynä). Isompiin pihoihin omenatarhoja: 2–6 puuta riveissä, omenapuita nyt 755', '00.30'],
   ['2.10.', 'Kävelijään joustoa: vauhti kiihtyy ja hiipuu pehmeästi, keho pomppii askelten tahdissa, nojaa juostessa eteen ja kaarteissa sisään', '23.51'],
   ['2.10.', 'Autojen ja talojen alla olevat varjot pehmeiksi kaikissa selaimissa: ennen niiden pehmennys tehtiin selaimen blur-suotimella, ja ilman sitä varjo oli tumma laatikko', '23.06'],
   ['2.10.', 'Omenat kasvavat nyt latvassa: ukko astuu omenan alle ja hyppää, käsi osuu omenaan. Isäntä tulee ulos talosta, katselee käsi otsalla missä varas on, huutaa jotain ("MINUN OMENANI!") ja vasta sitten lähtee perään', '22.43'],
