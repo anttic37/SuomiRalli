@@ -1923,7 +1923,8 @@ function spruceGeo(tiers, segs, seed) {
 // broadleaf crown: a cluster of soft lumps, darker underneath, lit on top
 function crownGeo(detail, lumps, seed, elong) {
   const L = [[0, 0, 0, 1], [0.55, -0.12, 0.22, 0.72], [-0.52, -0.08, -0.26, 0.66], [0.06, 0.42, -0.1, 0.62], [-0.2, 0.05, 0.52, 0.58]].slice(0, lumps);
-  return mergeParts(L.map(([x, y, z, r], k) => ({ geo: weldGeo(lumpyGeo(detail, seed*5 + k)), m: M4(x, y*(elong || 1), z, r, r*0.9*(elong || 1), r, k),
+  // (2.10.: only the main lump rounder — the side lumps at detail 0; the village crown 320 → 140 triangles)
+  return mergeParts(L.map(([x, y, z, r], k) => ({ geo: weldGeo(lumpyGeo(k === 0 ? detail : 0, seed*5 + k)), m: M4(x, y*(elong || 1), z, r, r*0.9*(elong || 1), r, k),
     shade: (p, nn) => { const v = 0.64 + 0.3*Math.max(0, Math.min(1, (p.y + 0.8)/1.6)) + 0.12*Math.max(0, nn.y); return [v, v, v]; } }))); }
 // granite boulder: a flattened lumpy stone, grey-pink, lichen on the up-facing parts
 function rockGeo(seed) { const base = weldGeo(lumpyGeo(1, seed + 40)); let s = seed*7 + 3; const r = () => (s = (s*9301 + 49297) % 233280) / 233280;
@@ -5004,6 +5005,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Peli kevyemmäksi: puiden latvoissa vähemmän kulmia, kaukaiset ihmiset päivittyvät harvemmin (50 m:stä alkaen) ja kaukaisia savuja tehdään vähemmän mutta isompina. Pelin logiikka noin neljänneksen kevyempi', '12.15'],
   ['2.10.', 'Tilastot tarkemmiksi: pelin avaukset, Enter-aloitukset, R-painallukset ja maaliin ajetut kierrokset lasketaan nyt erikseen ja päivittäin (tekijän sivulle)', '08.42'],
   ['2.10.', 'Peli nopeutui reilusti: kaukaisista taloista jätetään piirtämättä portaat, ovet, listat, ikkunat ja savupiiput, ja samoin kaukaiset pihapuut, aidat, pensaat ja liikennemerkit. Pienet esineet eivät heitä varjoja, ja pihojen autoilla on varjo vain lähellä. Piirtoja on noin 20 % vähemmän', '05.47'],
   ['2.10.', 'Lentokone on rikki eikä sillä enää lennetä: OH-YLÄ seisoo erään talon pihalla nokka maassa. Lentämisen uutiset poistettu lehdestä', '05.31'],
@@ -5777,9 +5779,13 @@ function makeParticleSystem(max, additive, soft, atlas) {
     transparent: true, depthWrite: false, blending: additive ? THREE.AdditiveBlending : THREE.NormalBlending });
   const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; pts.renderOrder = additive ? 3 : 2; scene.add(pts);
   const P = []; for (let i = 0; i < max; i++) P.push({ life: 0, max: 1, x: 0, y: -99, z: 0, vx: 0, vy: 0, vz: 0, s0: 0, s1: 0, a0: 0, r: 0, g: 0, b: 0, r1: 0, g1: 0, b1: 0, ang: 0, spin: 0 });
-  let next = 0, liveN = 0, dirty = false;   // (nothing alive and nothing changed: no loop, no upload)
+  let next = 0, liveN = 0, dirty = false, lodAcc = 0;   // (nothing alive and nothing changed: no loop, no upload)
   return {
-    emit(x, y, z, vx, vy, vz, life, s0, s1, a0, r, g, b, r1, g1, b1) { const p = P[next++ % max]; if (!(p.life > 0)) liveN++; dirty = true; p.life = p.max = life; p.x = x; p.y = y; p.z = z; p.vx = vx; p.vy = vy; p.vz = vz; p.s0 = s0; p.s1 = s1; p.a0 = a0; p.r = r; p.g = g; p.b = b;   // (fields set in place: no object per particle, no garbage for the collector to stop the game over)
+    emit(x, y, z, vx, vy, vz, life, s0, s1, a0, r, g, b, r1, g1, b1) {
+      // (2.10., Antti: 'savut niin että kauempana vähemmän'): past 80 m from the camera only every 2nd–4th puff is made, each a bit bigger so the plume
+      // reads the same; a counter, not Math.random, so nothing else's random sequence shifts
+      { const dx = x - camera.position.x, dz = z - camera.position.z, d2 = dx*dx + dz*dz; if (d2 > 6400) { const keep = d2 > 62500 ? 0.25 : d2 > 22500 ? 0.4 : 0.6; lodAcc += keep; if (lodAcc < 1) return; lodAcc -= 1; const k = 1/Math.sqrt(keep); s0 *= k; s1 *= k; } }
+      const p = P[next++ % max]; if (!(p.life > 0)) liveN++; dirty = true; p.life = p.max = life; p.x = x; p.y = y; p.z = z; p.vx = vx; p.vy = vy; p.vz = vz; p.s0 = s0; p.s1 = s1; p.a0 = a0; p.r = r; p.g = g; p.b = b;   // (fields set in place: no object per particle, no garbage for the collector to stop the game over)
       p.r1 = r1 === undefined ? r : r1; p.g1 = g1 === undefined ? g : g1; p.b1 = b1 === undefined ? b : b1; p.ang = Math.random()*6.3; p.spin = (Math.random() - 0.5)*1.6; },
     update(dt, rise, dragK) {
       if (!liveN && !dirty) return; dirty = false; const dr = Math.exp(-dt*dragK);
@@ -6487,8 +6493,8 @@ function humansUpdate(dt0) { HFRAME++;
   for (let i = 0; i < HUMANS.length; i++) { const h = HUMANS[i]; if (h.gone) continue;
     const dx = h.x - car.x, dz = h.z - car.z, d2 = dx*dx + dz*dz, near = h.player || d2 < 240*240, P = h.pose; let dt = dt0;
     if (!!h.far === near) { h.far = !near; if (h.view.kind === 'rig') humanSync(h); }   // far from the car: rigged people aren't drawn
-    if (d2 > 70*70 && !h.player && !h.down && !h.ride && !h.mad && !h.dodge && !h.settle && !(h.hop > 0) && !h.vy) {   // (level of detail: 70–150 m every 2nd frame, to 240 m every 3rd, beyond that every 6th, with the time saved up — nobody notices a far walker at 30 or 10 Hz)
-      const every = d2 > 240*240 ? 6 : d2 > 150*150 ? 3 : 2; h.lodAcc = (h.lodAcc || 0) + dt0; if ((HFRAME + i) % every) continue; dt = Math.min(h.lodAcc, 0.12); h.lodAcc = 0; } else h.lodAcc = 0;
+    if (d2 > 50*50 && !h.player && !h.down && !h.ride && !h.mad && !h.dodge && !h.settle && !(h.hop > 0) && !h.vy) {   // (level of detail: 50–100 m every 2nd frame, to 200 m every 3rd, beyond that every 6th, with the time saved up — nobody notices a far walker at 30, 20 or 10 Hz; 2.10.: was 70/150/240)
+      const every = d2 > 200*200 ? 6 : d2 > 100*100 ? 3 : 2; h.lodAcc = (h.lodAcc || 0) + dt0; if ((HFRAME + i) % every) continue; dt = Math.min(h.lodAcc, 0.12); h.lodAcc = 0; } else h.lodAcc = 0;
     P.armL = P.armR = P.legs = P.legsR = null; P.armLz = P.armRz = 0; P.walk = 0; P.dy = 0;
     if (h.ride) { rideStep(h, dt); humanSync(h); continue; }
     if (!h.down && !h.inside && h.mad) madStep(h, dt, t); else if (!h.down && !h.inside && h.task) h.task.update(h, dt, t, near);
