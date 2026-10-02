@@ -464,6 +464,7 @@ const I18N = {
   '💥 SELITTÄMÄTÖN VIKA – R = uusi kone': ['💥 UNEXPLAINED FAILURE – R = new plane', '💥 UFORKLARLIG FEIL – R = nytt fly'],
   '🍎 OMENA! ({0} mukana)': ['🍎 AN APPLE! ({0} on you)', '🍎 ET EPLE! ({0} på deg)'], '👴 ISÄNTÄ HUOMASI! AUTOLLE JA 200 M PÄÄHÄN!': ['👴 THE OWNER SAW YOU! TO THE CAR, 200 M AWAY!', '👴 EIEREN SÅ DEG! TIL BILEN, 200 M UNNA!'],
   '👴 KIINNI JÄIT! OMENAT TAKAISIN': ['👴 CAUGHT! THE APPLES GO BACK', '👴 TATT! EPLENE TILBAKE'], '🍎 KARKUUN! +{0} OMENAA (yht. {1})': ['🍎 GOT AWAY! +{0} APPLES ({1} in all)', '🍎 SLAPP UNNA! +{0} EPLER ({1} i alt)'],
+  '👴 ISÄNTÄ SAI KIINNI! LYÖ (VÄLILYÖNTI) NIIN PÄÄSET IRTI': ['👴 THE OWNER GOT YOU! PUNCH (SPACE) TO BREAK FREE', '👴 EIEREN TOK DEG! SLÅ (MELLOMROM) FOR Å KOMME LØS'], '👊 PÄÄSIT IRTI! JUOKSE AUTOLLE': ['👊 FREE! RUN TO THE CAR', '👊 LØS! LØP TIL BILEN'], '🍎 {0} · ISÄNTÄ {1} / {2} M': ['🍎 {0} · OWNER {1} / {2} M', '🍎 {0} · EIEREN {1} / {2} M'],
   'Omenavarkaat · kaikki kuskit': ['Apple thieves · all drivers', 'Epletyver · alle sjåfører'], 'ei vielä omenavarkaita — kävele (F) pihan omenapuulle': ['no apple thieves yet — walk (F) to a yard apple tree', 'ingen epletyver ennå — gå (F) til et epletre i en hage'],
   '🔥 ENNÄTYSVAUHTI': ['🔥 RECORD PACE', '🔥 REKORDFART'],
   'JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ': ['ON FOOT · F = BACK IN THE CAR · SPACE = PUNCH', 'TIL FOTS · F = TILBAKE I BILEN · MELLOMROM = SLÅ'], '👊 PAM!': ['👊 POW!', '👊 PANG!'], '🚨 JOKU SOITTI POLIISIT!': ['🚨 SOMEONE CALLED THE POLICE!', '🚨 NOEN RINGTE POLITIET!'],
@@ -3761,7 +3762,7 @@ const WALK = { on: false, h: null, cy: 0, downT: 0, cx: 0, cz: 0, ca: 0, ft: 0, 
 const WALK_FEAR = 90, WALK_MAX = 140;
 function centerMsg(t, col, ms) { const cpd = document.getElementById('checkpoint-display'); if (!cpd) return; cpd.textContent = t; cpd.style.color = col || '#ffe9a8'; cpd.style.opacity = 1; clearTimeout(centerMsg.tm); centerMsg.tm = setTimeout(() => cpd.style.opacity = 0, ms || 1600); }   // (the one centre-screen message: a new one isn't cut short by an old one's fade)
 const playerWalkTask = () => ({ kind: 'walker', update(h, dt, t) { const W = WALK;   // the arrows move you the way they point on the screen (the camera holds still while you walk), runs by default, Shift creeps, Space punches
-  const ix = -INPUT.steer(), iz = (INPUT.thr() ? 1 : 0) - (INPUT.brk() ? 1 : 0), sneak = keys['ShiftLeft'] || keys['ShiftRight'], wantRun = !sneak;
+  const held = !!(W.grab && W.grab.m === 'grab'), ix = held ? 0 : -INPUT.steer(), iz = held ? 0 : (INPUT.thr() ? 1 : 0) - (INPUT.brk() ? 1 : 0), sneak = keys['ShiftLeft'] || keys['ShiftRight'], wantRun = !sneak;   // (held by the collar: nowhere to go — punch)
   const A = W.camA, mx = Math.sin(A)*iz - Math.cos(A)*ix, mz = Math.cos(A)*iz + Math.sin(A)*ix,   /* (screen right = (−cos A, sin A): a bigger heading is a left turn) */ ml = Math.hypot(mx, mz), fwd = ml > 0.01 ? 1 : 0;
   if (fwd) h.yaw += angDiff(Math.atan2(mx, mz) - h.yaw)*Math.min(1, dt*12);   // (turns to where it goes, quickly)
   if (INPUT.hand() && !W.spPrev && !h.down && !h.ride) walkPunch(h); W.spPrev = INPUT.hand(); if (W.punchT > 0) { W.punchT -= dt; h.pose.armR = -1.55; } if (W.reachT > 0) { W.reachT -= dt; h.pose.armL = h.pose.armR = -2.7; }   // (an apple picked: both hands up in the tree)
@@ -3776,7 +3777,9 @@ function walkPunch(h) {   // a swing at whoever stands in front: they run off, a
   WALK.punchT = 0.3; const fx = Math.sin(h.yaw), fz = Math.cos(h.yaw); let best = null, bd = 1.9;
   forHumansNear(h.x, h.z, 2, o => { if (o === h || o.gone || o.down || o.seat || o.inside || o.ride) return; const dx = o.x - h.x, dz = o.z - h.z, d = Math.hypot(dx, dz); if (d < bd && (dx*fx + dz*fz)/(d || 1) > 0.25) { bd = d; best = o; } });
   if (audio) beep(best ? 140 : 300, best ? 0.12 : 0.06, best ? 0.25 : 0.05, best ? 'square' : 'triangle'); if (!best) return;
-  const dx = best.x - h.x, dz = best.z - h.z, l = Math.hypot(dx, dz) || 1; best.dodge = { t: 3.5 + Math.random()*1.5, x: dx/l*5, z: dz/l*5 };   // (off at a run, away from you)
+  const dx = best.x - h.x, dz = best.z - h.z, l = Math.hypot(dx, dz) || 1;
+  if (best.mApple) { knock(best, dx/l*4, dz/l*4, 6); if (WALK.grab === best.mApple) { WALK.grab = null; pizzaMsg(T('👊 PÄÄSIT IRTI! JUOKSE AUTOLLE'), true); } return; }   // (the apple owner floored: he lets go, and nobody calls the police over an apple)
+  best.dodge = { t: 3.5 + Math.random()*1.5, x: dx/l*5, z: dz/l*5 };   // (off at a run, away from you)
   centerMsg(T('👊 PAM!'), '#ffd23a');
   if (!best.animal && worldT - (WALK.copT || -99) > 12) { WALK.copT = worldT; policeSpawn(1); policeMsg(T('🚨 JOKU SOITTI POLIISIT!'), true); } }
 function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on) return false;   // (2.10., Antti: 'autosta on pystyttävä hyppäämään pois aina': no speed limit, the police can't keep you in either)
@@ -3785,7 +3788,7 @@ function walkOut() { if (WALK.on || gameState !== State.RACING || WRECK.on) retu
   const h = WALK.h = new Human({ x, z, yaw: car.angle + Math.PI/2, rig: makeAdult(0xf2f2ee, 0xf2f2ee, 0x5a3a1e, { sel: { hair: 2, top: 11, longSleeve: 1, longPants: 1, tache: 1 }, acc: 0xd9262e, shoes: 0x1c1c20 }), task: playerWalkTask(), temp: true });
   h.player = true; h.ao = aoAlloc(); humanSync(h); WALK.on = true; WALK.cy = car.angle; WALK.camA = camAngle.current; WALK.spPrev = true; WALK.punchT = 0; WALK.downT = 0; WALK.ft = 0; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle;
   WALK.roll = sp0 > 3 && PLAYER.ride === 'poko'; if (!WALK.roll) car.vx = car.vz = car.speed = 0;   // (out at speed: the car rolls on, handbrake on, and is parked where it stops)
-  if (sp0 > 3) { knock(h, cvx*0.85, cvz*0.85, Math.min(10, sp0*0.4)); if (audio) beep(150, 0.12, 0.1, 'square'); }   // (jumped out of a moving car: down and rolling, up again in a moment)
+  if (sp0 > 3) { knock(h, cvx*0.85, cvz*0.85, Math.min(10, sp0*0.4)); h.cyl = { yaw: Math.atan2(cvx, cvz) }; h.spin = 0; if (audio) beep(150, 0.12, 0.1, 'square'); }   // (rolls like a log: lying across the way it goes, turning about its own length — Antti: 'pyörii kuin sylinteri')   // (jumped out of a moving car: down and rolling, up again in a moment)
   centerMsg(T('JALKAISIN · F = TAKAISIN AUTOON · VÄLILYÖNTI = LYÖ'), '#ffe9a8', 1800); return true; }
 function walkIn(force) { if (!WALK.on) return false; const h = WALK.h; if (!force && (h.down || Math.hypot(h.x - car.x, h.z - car.z) > 3.8)) return false;
   if (!h.gone) humanRemove(h); WALK.on = false; WALK.h = null; WALK.roll = false; return true; }
@@ -5028,6 +5031,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Omenavarkaus: isäntä saa kiinni vasta oikeasti kosketuksesta ja pitää kauluksesta – välilyönnillä lyöt itsesi irti. Matka isäntään näkyy autolla paetessa, ja 200 m:n päässä omenat tallentuvat. Vauhdissa autosta hypännyt kuski pyörii maassa kuin tukki. Kävelykamera ylempänä', '21.06'],
   ['2.10.', 'Autosta pääsee aina ulos F:llä, myös vauhdissa ja poliisin puhuttelussa: kovassa vauhdissa kuski kieriskelee maassa ja auto liukuu pysähdyksiin. Kävelykamera lähempänä (9 m takana) ja ukko keskellä ruutua, siirtymä autosta pehmeä', '20.49'],
   ['2.10.', 'Kamera ei enää nyi kaasu–jarru–peruutus-vuorottelussa: luistoon kääntyminen tulee pehmeästi vauhdin mukana, eikä peruuttaessa katse heittele puolelta toiselle', '20.38'],
   ['2.10.', 'Kamera ei enää nyi jarruttaessa: nousu yläkameraksi alkaa ja loppuu pehmeästi, kun vauhti putoaa alle 80 km/h', '20.30'],
@@ -5357,7 +5361,7 @@ const LEHTI = [
     box: ['ASIANTUNTIJAT', 'Isäntä 7,3 m/s · sinä 6,8', 'Omena 0,45 s välein', 'Isäntä huutaa 1 s ennen juoksua', 'Karkuun: 200 m autolla', 'Lista: päävalikko ja mobiili'] },
   { id: 'omenat', size: 'page', n: 71, kick: '🍎 OMENAVARKAAT', title: 'Omenavarkaat liikkeellä – isännät juoksevat perässä', lede: 'Ylästön pihojen omenapuut ovat täynnä punaisia omenoita, ja rallikuskit ovat huomanneet sen. Isännät eivät ole ilahtuneita.',
     img: ['omenavaras.jpg', 'omenapuu.jpg'], cap: ['Varas juoksee kohti autoa, ja talon isäntä on jo kintereillä nyrkki pystyssä.', 'Pihan omenapuu. Muutamassa minuutissa sen oksat voivat olla tyhjät.'],
-    body: ['YLÄSTÖ. Kun kuski nousee autosta (F) ja kävelee pihan omenapuun alle, omenoita tarttuu käteen yksi kerrallaan. Talon isäntä huomaa sen heti ja ryntää ulos ovesta.', 'Isäntä juoksee kovempaa kuin kuski. Jalkaisin karkuun ei pääse: kun isäntä saa kiinni, kaikki taskussa olevat omenat menevät takaisin, ja kuski saa saarnan päälle.', 'Ainoa keino on hypätä autoon ja ajaa vähintään 200 metrin päähän isännästä. Silloin isäntä luovuttaa, ja omenat ovat sinun. Paikallaan seisovan auton ovesta isäntä kiskoo kuskin vielä kiinni.', 'Karkuun viedyt omenat kirjataan nettiin. Päävalikossa on nyt omenavarkaiden lista: eniten omenoita vieneet kuskit, kaikkien pelien yhteissummat. R-napilla puut kasvattavat omenansa takaisin.'],
+    body: ['YLÄSTÖ. Kun kuski nousee autosta (F) ja kävelee pihan omenapuun alle, omenoita tarttuu käteen yksi kerrallaan. Talon isäntä huomaa sen heti ja ryntää ulos ovesta.', 'Isäntä juoksee kovempaa kuin kuski. Kun isäntä saa kauluksesta kiinni, on lyötävä (välilyönti) itsensä irti – muuten omenat menevät takaisin ja kuski saa saarnan päälle. Lyöty isäntä nousee ja jatkaa jahtia.', 'Ainoa keino on hypätä autoon ja ajaa vähintään 200 metrin päähän isännästä. Silloin isäntä luovuttaa, ja omenat ovat sinun. Paikallaan seisovan auton ovesta isäntä kiskoo kuskin vielä kiinni.', 'Karkuun viedyt omenat kirjataan nettiin. Päävalikossa on nyt omenavarkaiden lista: eniten omenoita vieneet kuskit, kaikkien pelien yhteissummat. R-napilla puut kasvattavat omenansa takaisin.'],
     box: ['OMENAVARKAUS', 'F = ulos autosta', 'Kävele omenapuun alle', 'Isäntä juoksee perään', 'Autolla 200 m päähän = omenat sinun', 'Lista päävalikossa'] },
   { id: 'mantti', size: 'page', n: 70, kick: '🎥 KAMERAUUDISTUS', title: 'Mantti Anttila: ”Puomi 26 metriä, elevaatio 0,68 radiaania. Siinä se.”', lede: 'Kylän uusi takakamera on iRacing-veteraanin käsialaa. Tavoitimme hänet ruohonleikkuun lomasta ja ymmärsimme noin puolet.',
     img: ['mantti.jpg'], cap: ['Mantti Anttila rengasmuurin luona: ”80 km/h:ssa en edes näe tätä muuria. Siinä koko pointti.”'],
@@ -6431,7 +6435,8 @@ function humanStep(h, dt) {   // body physics shared by everyone
   if (h.down) { h.vy -= 22*dt; h.hop += h.vy*dt;
     if (h.hop <= 0) { h.hop = 0; h.vy = h.vy < -4 ? -h.vy*0.22 : 0;   // a hard landing bounces a little; on the ground: sliding, tumbling friction
       const sp = Math.hypot(h.vx, h.vz), d = Math.min(sp, (5.5 + 1.2*sp)*dt); if (sp > 1e-5) { h.vx -= h.vx/sp*d; h.vz -= h.vz/sp*d; } h.spin *= Math.exp(-dt*7); }
-    h.yaw += h.spin*dt; h.tilt += ((-Math.PI/2 + 0.15) - h.tilt)*Math.min(1, dt*8); h.roll *= Math.exp(-dt*8); }
+    if (h.cyl) { const sp = Math.hypot(h.vx, h.vz); h.yaw = h.cyl.yaw; h.roll = Math.PI/2; h.tilt += sp/0.3*dt; if (sp < 0.6) { h.cyl = null; h.roll = 0; h.tilt = -Math.PI/2 + 0.15; } }   // (YXZ: yaw · pitch(the roll angle) · roll(π/2, on its side) = a log across the way it goes)
+    else { h.yaw += h.spin*dt; h.tilt += ((-Math.PI/2 + 0.15) - h.tilt)*Math.min(1, dt*8); h.roll *= Math.exp(-dt*8); } }
   else { if (!h.vx && !h.vz && !(h.hop > 0) && !(h.vy > 0)) return;   // standing still: nothing to integrate
     const f = Math.exp(-dt*2.5); h.vx *= f; h.vz *= f; if (h.hop > 0 || h.vy > 0) { h.vy -= 22*dt; h.hop += h.vy*dt; if (h.hop <= 0) { h.hop = 0; h.vy = 0; } } }
   h.x += h.vx*dt; h.z += h.vz*dt;
@@ -6475,7 +6480,7 @@ function rideStep(h, dt) {   // folded onto the bonnet: carried until the car br
 // how people look: every person is one BODY instance (their look, posed in the shader); 'rig' people also carry a group of joints for
 // what they hold or wear. Animals and aliens: their own meshes.
 const CROWD = { ao: null, aoFree: [] };
-const _hq = new THREE.Quaternion(), _he = new THREE.Euler(0, 0, 0, 'YXZ'), _hp = new THREE.Vector3(), _hs = new THREE.Vector3(1, 1, 1), _hm = new THREE.Matrix4(), _haq = new THREE.Quaternion(), _hzero = new THREE.Matrix4().makeScale(0, 0, 0);
+const _hv = new THREE.Vector3(), _hq = new THREE.Quaternion(), _he = new THREE.Euler(0, 0, 0, 'YXZ'), _hp = new THREE.Vector3(), _hs = new THREE.Vector3(1, 1, 1), _hm = new THREE.Matrix4(), _haq = new THREE.Quaternion(), _hzero = new THREE.Matrix4().makeScale(0, 0, 0);
 function crowdBuild() {
   if (CROWD.ao) scene.remove(CROWD.ao); bodyInit();
   const n = HUMANS.length + 80, ao = new THREE.InstancedMesh(AO.geo, AO.round, n); ao.renderOrder = 2; for (let k = 0; k < n; k++) ao.setMatrixAt(k, _hzero); CROWD.ao = ao; scene.add(ao);
@@ -6486,6 +6491,7 @@ function humanSync(h) {
   const hidden = h.gone || h.inside, V = h.view, P = h.pose, L = h.look;
   let x = h.x, z = h.z, y, yaw = h.yaw, tilt = h.tilt, roll = h.roll;
   if (h.seat) { const v = h.seat.v, p = lloc(v.x, v.z, v.yaw, h.seat.a, h.seat.b); x = p[0]; z = p[1]; y = v.gy + h.seat.y + (P.dy || 0); yaw = v.yaw + (h.seat.yaw || 0); tilt = h.seat.tilt || 0; roll = 0; }   // (seat.tilt: the band on the gig bus's roof rocks)
+  else if (h.cyl) { _he.set(tilt, yaw, roll); _hq.setFromEuler(_he); _hv.set(0, 0.85, 0).applyQuaternion(_hq); x -= _hv.x; z -= _hv.z; y = Y(h.x, h.z) + h.hop + 0.28 - _hv.y; }   // (rolling about the body's middle, not its feet)
   else y = Y(x, z) + h.hop + (h.down ? 0.08*Math.min(1, -h.tilt/1.4) : 0) + P.dy;
   if (L) { const lg = P.legs !== null ? (P.legs + (P.legsR !== null ? P.legsR : P.legs))/2 : 0; if (lg < -0.6 || lg > 0.8) y += L.kid ? 0.08 : 0.18;   // sitting or kneeling: the poses were set for the old, longer legs
     bodyPoseInto(P, h.down, h.propR, h.bp); }
@@ -6521,11 +6527,11 @@ function activeCrash() { return crashAt && worldT - crashAt.t < 16 && Math.hypot
 let HFRAME = 0;
 function humansUpdate(dt0) { HFRAME++;
   HGRID.reset(); for (const h of HUMANS) { if (h.gone || h.inside || h.seat || h.ride) continue; HGRID.put(h, h.x, h.z); }
-  const t = worldT;
+  const t = worldT, PL = WALK.on && WALK.h ? WALK.h : car;
   for (let i = 0; i < HUMANS.length; i++) { const h = HUMANS[i]; if (h.gone) continue;
-    const dx = h.x - car.x, dz = h.z - car.z, d2 = dx*dx + dz*dz, near = h.player || d2 < 240*240, P = h.pose; let dt = dt0;
+    const dx = h.x - PL.x, dz = h.z - PL.z, d2 = dx*dx + dz*dz, near = h.player || d2 < 240*240, P = h.pose; let dt = dt0;   // (2.10.: from the walker on foot — the owner chasing you 100 m from the car was thinned to every 3rd frame and jumped)
     if (!!h.far === near) { h.far = !near; if (h.view.kind === 'rig') humanSync(h); }   // far from the car: rigged people aren't drawn
-    if (d2 > 50*50 && !h.player && !h.down && !h.ride && !h.mad && !h.dodge && !h.settle && !(h.hop > 0) && !h.vy) {   // (level of detail, with the time saved up: 50–100 m every 2nd frame, to 200 m every 3rd, to 300 m every 10th, beyond that once a second — each on their own beat (HFRAME + i); 2.10.)
+    if (d2 > 50*50 && !h.player && !h.down && !h.ride && !h.mad && !h.dodge && !h.settle && !(h.hop > 0) && !h.vy && !h.mApple) {   // (level of detail, with the time saved up: 50–100 m every 2nd frame, to 200 m every 3rd, to 300 m every 10th, beyond that once a second — each on their own beat (HFRAME + i); 2.10.)
       const every = d2 > 300*300 ? 60 : d2 > 200*200 ? 10 : d2 > 100*100 ? 3 : 2; h.lodAcc = (h.lodAcc || 0) + dt0; if ((HFRAME + i) % every) continue; dt = Math.min(h.lodAcc, every > 10 ? 1.05 : 0.2); h.lodAcc = 0; } else h.lodAcc = 0;
     P.armL = P.armR = P.legs = P.legsR = null; P.armLz = P.armRz = 0; P.walk = 0; P.dy = 0;
     if (h.ride) { rideStep(h, dt); humanSync(h); continue; }
@@ -8297,21 +8303,26 @@ function appleOwner(A) {   // out of the house, on the tree's side
 const appleOwnerTask = () => ({ kind: 'appleowner', update(h, dt, t) { const C = h.mApple; C.t += dt; h.tilt = 0;
   if (C.m === 'home') { h.pose.armR = -0.2; if (walkTo(h, C.hx, C.hz, 1.6, dt) || C.t > 60) humanRemove(h); return; }
   const P = WALK.on && WALK.h ? WALK.h : car, dx = P.x - h.x, dz = P.z - h.z, d = Math.hypot(dx, dz);
+  if (C.m === 'grab') { const W = WALK.h; if (!WALK.on || !W || W.down) { C.m = 'run'; WALK.grab = null; return; } h.vx = h.vz = 0; h.yaw = Math.atan2(dx, dz); h.x = W.x - Math.sin(h.yaw)*0.55; h.z = W.z - Math.cos(h.yaw)*0.55;   // (holding on to you by the collar)
+    h.pose.armL = h.pose.armR = -1.4; if (C.t > 2.6) { WALK.grab = null; appleCaught(C); } return; }
   if (C.m === 'scold') { h.vx = h.vz = 0; h.yaw = Math.atan2(dx, dz); h.pose.armR = -2.2 + Math.sin(t*18)*0.25; if (C.t > 2.2) { C.m = 'home'; C.t = 0; } return; }   // the finger wagged
   h.pose.armR = -2.75 + Math.sin(t*15)*0.4; h.pose.armRz = 0.25;   // a fist shaken
   if (C.m === 'lag') { h.vx = h.vz = 0; h.yaw = Math.atan2(dx, dz); if (C.t > 1.0) { C.m = 'run'; C.t = 0; } return; }
   walkTo(h, P.x, P.z, 7.3, dt);   // (a touch faster than you run: on foot they get you)
-  if (WALK.on ? d < 0.95 && !WALK.h.down : d < 2.9 && Math.hypot(car.vx, car.vz) < 2.5) appleCaught(C); },
-  knocked(h) { const C = h.mApple; if (C && C.m !== 'home') { C.m = 'home'; C.t = 0; } },
+  if (WALK.on ? d < 0.75 && !WALK.h.down : d < 2.3 && Math.hypot(car.vx, car.vz) < 2.5) { if (WALK.on) appleGrab(C); else appleCaught(C); } },
+  knocked(h) { const C = h.mApple; if (C && C.m === 'grab') { C.m = 'run'; C.t = 0; } },   // (floored: lets go — and once up, comes after you again; the 200 m still stands)
   reset(h) {} });
+function appleGrab(C) { if (C.m === 'grab') return; C.m = 'grab'; C.t = 0; WALK.grab = C; pizzaMsg(T('👴 ISÄNTÄ SAI KIINNI! LYÖ (VÄLILYÖNTI) NIIN PÄÄSET IRTI'), true); if (audio) beep(200, 0.2, 0.08, 'sawtooth'); }
 function appleCaught(C) { for (const o of APPLES.chase) if (o.m !== 'home') { o.m = o === C ? 'scold' : 'home'; o.t = 0; } APPLES.bag = 0;
   pizzaMsg(T('👴 KIINNI JÄIT! OMENAT TAKAISIN'), true); if (audio) beep(140, 0.3, 0.08, 'square'); }
 function applesUpdate(dt) { if (!APPLES.im) return;
   for (const C of APPLES.chase) { if (C.m === 'home' || C.m === 'scold') continue; const h = C.h;
-    if (h.gone || h.down) { C.m = 'home'; C.t = 0; continue; }
+    if (h.gone) { C.m = 'home'; C.t = 0; continue; } if (h.down) continue;   // (down: still a chaser, up again in a moment)
     if (!WALK.on && Math.hypot(car.x - h.x, car.z - h.z) > APPLES.ESC) { C.m = 'home'; C.t = 0; } else if (C.t > 120 && C.m === 'run') { C.m = 'home'; C.t = 0; } }   // (out of reach in the car: they give up)
   for (let i = APPLES.chase.length - 1; i >= 0; i--) { const C = APPLES.chase[i]; if (C.h.gone) { if (C.A.owner === C) C.A.owner = null; APPLES.chase.splice(i, 1); } }
-  if (APPLES.bag > 0 && !APPLES.chase.some(C => C.m === 'run' || C.m === 'lag') && !WALK.on) { const n = APPLES.bag; APPLES.bag = 0; rapCount('o', n);   // away with them
+  if (APPLES.bag > 0 && !WALK.on && (APPLES.rd = (APPLES.rd || 0) - dt) <= 0) { APPLES.rd = 0.5; let far = Infinity; for (const C of APPLES.chase) if (C.m === 'run' || C.m === 'lag') far = Math.min(far, Math.hypot(car.x - C.h.x, car.z - C.h.z));   // (how far to go: shown while you drive off)
+    if (far < Infinity) centerMsg(T('🍎 {0} · ISÄNTÄ {1} / {2} M', APPLES.bag, Math.round(far), APPLES.ESC), '#ff8a7a', 700); }
+  if (APPLES.bag > 0 && !APPLES.chase.some(C => C.m === 'run' || C.m === 'lag' || C.m === 'grab') && !WALK.on) { const n = APPLES.bag; APPLES.bag = 0; rapCount('o', n);   // away with them
     pizzaMsg(T('🍎 KARKUUN! +{0} OMENAA (yht. {1})', n, RAP.life.o), true); rapSend(false); }
   if (!WALK.on || gameState !== State.RACING) return; const h = WALK.h; if (!h || h.down) return;
   if ((APPLES.t -= dt) > 0) return; APPLES.t = 0.45; let best = null, bd = 2.1;
@@ -11182,7 +11193,7 @@ function camBlock(x0, y0, z0, x1, y1, z1) { let t = 1;
 const CAM_RIGS = {
   chase: { L: 26, Lv: 0.2, el: 0.68, la: 14, lav: 0.15, lu: -0.8 },   // (20 m back, 17 m up at rest; the car at ~80 % of the screen height)
   high:  { L: 47.8, Lv: 0.45, el: 1.12, la: 15, lav: 0.2, lu: -1 },     // (C: the old high view, 21 m back, 43 m up)
-  walk:  { L: 10, Lv: 0, el: 0.5, la: 1.2, lav: 0, lu: -0.1 },            // (2.10., Antti: 'kävelykamera lähemmäs ja keskelle': 8.8 m back, 4.8 m up, looking at the walker)
+  walk:  { L: 18, Lv: 0, el: 0.85, la: 1.5, lav: 0, lu: -0.2 },           // (2.10., Antti: 'lähemmäs ja keskelle', then 'ylempänä, vähän kuin alkuperäinen': 12 m back, 14 m up, the walker in the middle)
 };
 const CAM = { py: null, vs: 0, pull: 1, lift: 0, ah: 0, foot: 0, who: null, ox: 0, oz: 0 }, CAM_FULL = 80/3.6;
 function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, auton taakse fiksummin"): the chase boom by default, C = the high one

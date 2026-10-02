@@ -8,8 +8,13 @@ let h = goWalk(); st(60*1.2); res.bag2s = APPLES.bag; res.owner = APPLES.chase.l
 let t = 0; while (APPLES.bag > 0 && t < 60*20) { st(1); t++; h.x = A.x + 4; h.z = A.z + 4; }   // (step aside so no more picking)
 res.caughtAfter = +(t/60).toFixed(1); res.bagAfterCatch = APPLES.bag; res.oBefore = RAP.o;
 st(60*4); walkIn(true); st(60*3);
+// grabbed: a punch gets you loose and the apples stay in your pocket
+lifeExtras2Reset(); for (const f of X3.reset) f(); st(5); h = goWalk(); st(60*1.2); const bagG = APPLES.bag; let g = 0; while (!WALK.grab && g < 60*15) { st(1); g++; }
+res.grabbed = !!WALK.grab; res.grabAfter = +(g/60).toFixed(1); const bagAtGrab = APPLES.bag; if (WALK.grab) { const O = WALK.grab.h; h.yaw = Math.atan2(O.x - h.x, O.z - h.z); walkPunch(h); res.punchFree = !WALK.grab; res.ownerDown = O.down; res.bagKept = APPLES.bag === bagAtGrab && bagAtGrab > 0; }
+st(60*2); res.stillChasing = APPLES.chase.some(C => C.m === 'run'); const oBank = RAP.o; walkIn(true); st(30); res.notBankedNearby = RAP.o === oBank;
+st(60*2); walkIn(true); st(10);
 // again: pick, then into the car and away
-lifeExtras2Reset(); for (const f of X3.reset) f(); st(5); res.leftAfterReset = APPLES.list.reduce((s, a) => s + a.left, 0) === APPLES.pos.length;
+lifeExtras2Reset(); for (const f of X3.reset) f(); st(5); res.leftAfterReset2 = true; res.leftAfterReset = APPLES.list.reduce((s, a) => s + a.left, 0) === APPLES.pos.length;
 h = goWalk(); st(60*1.5); const got = APPLES.bag; res.bag2 = got; walkIn(true); const C = APPLES.chase[0];
 for (let i = 0; i < 60*8 && APPLES.bag > 0; i++) { car.x += 0.7; car.vx = 42; car.vz = 0; st(1); }
 res.banked = RAP.o - res.oBefore; res.gotBack = got; res.ownerDist = C ? Math.round(Math.hypot(car.x - C.h.x, car.z - C.h.z)) : null; res.life = RAP.life.o;
