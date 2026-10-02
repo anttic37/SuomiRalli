@@ -36,7 +36,7 @@ try:
     print('track for the server:', fnv(T['sig']), len(T['x']), 'points')
     open(p('mobiili.json'), 'w', encoding='utf-8').write(json.dumps({'sig': T['sig']}) + '\n')   # (the phone page's top-5 asks /api/top with it)
 except Exception as e: print('WARNING: track export failed (the server keeps the previous tracks.mjs):', str(e)[:200], r.stderr[-300:])
-# the paper as a PDF beside the photos (lehti/ylaston-sanomat.pdf, the ⬇ PDF button in the paper): every page of the built game's PAPER
-if not os.environ.get('NOPDF'):
+# the paper as a PDF beside the photos (and lehti.json) (lehti/ylaston-sanomat.pdf, the ⬇ PDF button in the paper): every page of the built game's PAPER
+if os.environ.get('PDF'):   # (2.10., Antti: the paper only when asked — PDF=1 python3 build.py; otherwise lehti.json and the PDF stay as they were)
     r = subprocess.run(['node', p('test', 'lehti_pdf.js'), p('index.html'), p('lehti', 'ylaston-sanomat.pdf')], capture_output=True, text=True, cwd=p('test'))
     print(r.stdout.strip() or 'WARNING: paper pdf failed: ' + r.stderr[-400:])

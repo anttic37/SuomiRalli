@@ -35,6 +35,11 @@ In test scripts: stub `renderer.render` while simulating, step with `loop(lastTi
 
 ## Working rules from Antti
 - Every change gets a one-line Finnish entry at the top of `CHANGES` in src/game.html: `['d.m.', 'text', 'hh.mm']` with the Finnish time (Europe/Helsinki) — the newest five show on the start screen with day and time, all of them in the paper's "Lyhyesti" pages.
-- Every new feature also gets a story in `LEHTI` (Ylästön Sanomat): size 'main' (spread) / 'page' / 'half', n bigger than the rest if it's the newest main (the front page's lead is the police rap sheet, LH_POLLEAD n 9, until a main story with n > 9 comes), and photo(s) in lehti/ taken with the test/lhrun.sh scripts (from a distance and a little from above: lh_common.inc's LH_FAR scales every view).
+- Speed (2.10., Antti: 'pikkuhommaan menee 30 min'): small fixes = edit, `python3 build.py` (no PDF by default), only the tests for what changed;
+  full regressions (t_ghost, t_paper_fit…) once at the end of an evening or for big changes. The paper (LEHTI stories, photos, `PDF=1 python3 build.py`)
+  ONLY when Antti asks for it.
+- Leftovers go to `JONO.md` (things left undone / unverified / ideas). When Antti hasn't asked for anything new for a while, or a task is done,
+  suggest a couple from it briefly.
+- (Paper rule, only when asked:) a new feature gets a story in `LEHTI` (Ylästön Sanomat): size 'main' (spread) / 'page' / 'half', n bigger than the rest if it's the newest main (the front page's lead is the police rap sheet, LH_POLLEAD n 9, until a main story with n > 9 comes), and photo(s) in lehti/ taken with the test/lhrun.sh scripts (from a distance and a little from above: lh_common.inc's LH_FAR scales every view).
 - Keep earlier versions safe (he asked for new versions so the old one stays intact); the flat original game is separate.
 - He plays from the published build; deliver the built game, keep the editor in sync (editor is the source of truth).
