@@ -367,7 +367,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 21.30 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 22.06 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -5062,6 +5062,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Omenat luodaan lennossa: puu muistaa vain montako omenaa siitä on poimittu, ja omenat piirretään vain lähipuihin (170 m)', '01.06'],
   ['3.10.', 'Mustat laatikot pihojen autojen alta pois (auton varjolevy oli kopioitunut niihin mustana levynä). Isompiin pihoihin omenatarhoja: 2–6 puuta riveissä, omenapuita nyt 755', '00.30'],
   ['2.10.', 'Kävelijään joustoa: vauhti kiihtyy ja hiipuu pehmeästi, keho pomppii askelten tahdissa, nojaa juostessa eteen ja kaarteissa sisään', '23.51'],
   ['2.10.', 'Autojen ja talojen alla olevat varjot pehmeiksi kaikissa selaimissa: ennen niiden pehmennys tehtiin selaimen blur-suotimella, ja ilman sitä varjo oli tumma laatikko', '23.06'],
@@ -8317,21 +8318,30 @@ function binUnRB(B, drop) { if (!B.rb) return; const i = RB.list.indexOf(B.rb); 
 // ── apple thieving (1.10., Antti): the yard apple trees bear apples; walk (F) up to one and you pick them, one a moment. The owner
 //    sees it and runs out of the house after you — faster than you on foot. Caught: the apples go back. Into the car and 200 m off
 //    from them: away, and the apples are yours → the rap sheet's 'o' → the menu's apple-thief list. R: the trees bear again. ──
-const APPLES = { im: null, list: [], bag: 0, chase: [], t: 0, near: null, ESC: 100, fly: [], HAND: 2.0 };   // (HAND: the raised hand's height over the ground, reaching up and forward)   // (ESC: 200 → 100 m on 2.10., Antti: '100 m riittää')
-function buildApples() { if (APPLES.im) { scene.remove(APPLES.im); APPLES.im.geometry.dispose(); } APPLES.list.length = 0; APPLES.chase.length = 0; APPLES.bag = 0;
-  const pos = []; for (const T0 of APPLE_TREES) { if (!T0.pl || !T0.pl.B) continue; const n = 4 + Math.floor(Math.random()*3), A = { x: T0.x, z: T0.z, pl: T0.pl, i0: pos.length, n, left: n, owner: null }, gy = Y(T0.x, T0.z);
-    for (let k = 0; k < n; k++) { const a = k*6.2832/n + Math.random()*0.6, e = 0.22 + Math.random()*0.33, ce = Math.cos(e);   // (round the crown, up on it: 2.10., Antti wants a jump for each — 2.4–3 m up, a hand's reach plus a hop)
-      pos.push([T0.x + Math.sin(a)*ce*T0.r*1.3, gy + T0.cy + Math.sin(e)*T0.r*0.8, T0.z + Math.cos(a)*ce*T0.r*1.3]); }   // (just outside the crown's lumps)
-    APPLES.list.push(A); }
-  if (!pos.length) return; const im = APPLES.im = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.13, 1), new THREE.MeshStandardMaterial({ color: 0xd0201a, roughness: 0.45 }), pos.length);
-  APPLES.pos = pos; im.castShadow = false; im.receiveShadow = false; im.frustumCulled = false; applesGrow(); scene.add(im);
+const APPLES = { im: null, fx: null, list: [], bag: 0, chase: [], t: 0, near: null, ESC: 100, fly: [], HAND: 2.0, CAP: 900, R: 170, STEP: 12, total: 0 };   // (HAND: the raised hand's height over the ground, reaching up and forward)   // (ESC: 200 → 100 m on 2.10., Antti: '100 m riittää')
+// (2.10., Antti: 'eikö omenoita voisi luoda lennossa — puuhun vain talteen paljonko on poimittu'): a tree keeps only its apple count, a
+// seed and a bit per picked apple (mask); where its apples hang comes from the seed (appleAt). Only the trees round you get theirs drawn:
+// one pool of APPLES.CAP instances refilled when you've moved APPLES.STEP m (applesShow), picked ones left out
+function buildApples() { if (APPLES.im) { scene.remove(APPLES.im); scene.remove(APPLES.fx); APPLES.im.geometry.dispose(); } APPLES.list.length = 0; APPLES.chase.length = 0; APPLES.bag = 0; APPLES.total = 0;
+  for (const T0 of APPLE_TREES) { if (!T0.pl || !T0.pl.B) continue; const n = 4 + Math.floor(Math.random()*3);
+    APPLES.list.push({ x: T0.x, z: T0.z, pl: T0.pl, n, left: n, mask: 0, owner: null, seed: Math.random()*1000, gy: Y(T0.x, T0.z), cy: T0.cy, r: T0.r }); APPLES.total += n; }
+  if (!APPLES.list.length) return; const geo = new THREE.IcosahedronGeometry(0.13, 1), mat = new THREE.MeshStandardMaterial({ color: 0xd0201a, roughness: 0.45 });
+  const im = APPLES.im = new THREE.InstancedMesh(geo, mat, APPLES.CAP), fx = APPLES.fx = new THREE.InstancedMesh(geo, mat, 8);   // (fx: the ones on their way to the hand)
+  for (const m of [im, fx]) { m.count = 0; m.castShadow = m.receiveShadow = false; m.frustumCulled = false; scene.add(m); } applesGrow();
   X3.upd.push(applesUpdate); X3.reset.push(applesReset); }
-const _apM = new THREE.Matrix4(), _apZ = new THREE.Matrix4().makeScale(0, 0, 0);
-function applesGrow() { const im = APPLES.im; if (!im) return; APPLES.pos.forEach((p, i) => { _apM.makeTranslation(p[0], p[1], p[2]); im.setMatrixAt(i, _apM); }); im.instanceMatrix.needsUpdate = true; for (const A of APPLES.list) A.left = A.n; }
+const _apM = new THREE.Matrix4(), _apZ = new THREE.Matrix4().makeScale(0, 0, 0), _apFr = (v) => { const q = Math.sin(v)*43758.5453; return q - Math.floor(q); };
+function appleAt(A, k, out) { const a = k*6.2832/A.n + _apFr(A.seed + k*12.9898)*0.6, e = 0.22 + _apFr(A.seed*1.7 + k*78.233)*0.33, ce = Math.cos(e);   // (round the crown, up on it: 2.4–3 m, a hand's reach plus a hop)
+  out[0] = A.x + Math.sin(a)*ce*A.r*1.3; out[1] = A.gy + A.cy + Math.sin(e)*A.r*0.8; out[2] = A.z + Math.cos(a)*ce*A.r*1.3; return out; }   // (just outside the crown's lumps)
+const _apP = [0, 0, 0];
+function applesShow(force) { const im = APPLES.im; if (!im) return; const c = WALK.on && WALK.h ? WALK.h : car;
+  if (!force && APPLES.at && Math.hypot(c.x - APPLES.at[0], c.z - APPLES.at[1]) < APPLES.STEP) return; APPLES.at = [c.x, c.z];
+  const R2 = APPLES.R*APPLES.R, near = []; for (const A of APPLES.list) { const d2 = (A.x - c.x)**2 + (A.z - c.z)**2; if (d2 < R2 && A.left) near.push([d2, A]); } near.sort((a, b) => a[0] - b[0]);
+  let i = 0; for (const [, A] of near) { for (let k = 0; k < A.n && i < APPLES.CAP; k++) { if (A.mask >> k & 1) continue; appleAt(A, k, _apP); _apM.makeTranslation(_apP[0], _apP[1], _apP[2]); im.setMatrixAt(i++, _apM); } if (i >= APPLES.CAP) break; }
+  im.count = i; im.instanceMatrix.needsUpdate = true; APPLES.shown = i; }
+function applesGrow() { for (const A of APPLES.list) { A.mask = 0; A.left = A.n; } applesShow(true); }
 function applesReset() { APPLES.fly.length = 0; WALK.pickF = null; applesGrow(); for (const C of APPLES.chase) { if (C.say && C.say.parent) scene.remove(C.say); if (!C.h.gone) humanRemove(C.h); } APPLES.chase.length = 0; APPLES.bag = 0; for (const A of APPLES.list) A.owner = null; }
-function applePick(A, h) { const i = A.i0 + A.n - A.left, P = APPLES.pos; let lo = i; const dd = (k) => Math.hypot(P[k][0] - h.x, P[k][2] - h.z); for (let k = i + 1; k < A.i0 + A.n; k++) if (dd(k) < dd(lo)) lo = k;   // (the nearest one left: swapped into the next slot)
-  if (lo !== i) { const q = P[i]; P[i] = P[lo]; P[lo] = q; _apM.makeTranslation(P[lo][0], P[lo][1], P[lo][2]); APPLES.im.setMatrixAt(lo, _apM); }
-  A.left--; APPLES.bag++; const p = P[i], F = { i, p, t: 0, tp: Infinity, go: 0 }, a = Math.atan2(p[0] - h.x, p[2] - h.z); APPLES.fly.push(F);   // (2.10., Antti: 'hyppy sillee että käsi osuu omenaan': a step in under it, then a jump with the hand up at it at the top)
+function applePick(A, h) { let lo = -1, bd = Infinity; for (let k = 0; k < A.n; k++) { if (A.mask >> k & 1) continue; appleAt(A, k, _apP); const d = Math.hypot(_apP[0] - h.x, _apP[2] - h.z); if (d < bd) { bd = d; lo = k; } }   // (the nearest one left)
+  if (lo < 0) return; A.mask |= 1 << lo; A.left--; APPLES.bag++; const p = appleAt(A, lo, []), F = { p, t: 0, tp: Infinity, go: 0 }; applesShow(true), a = Math.atan2(p[0] - h.x, p[2] - h.z); APPLES.fly.push(F);   // (2.10., Antti: 'hyppy sillee että käsi osuu omenaan': a step in under it, then a jump with the hand up at it at the top)
   const ao = Math.atan2(p[0] - A.x, p[2] - A.z); WALK.pickF = F; WALK.jx = p[0] + Math.sin(ao)*0.4; WALK.jz = p[2] + Math.cos(ao)*0.4;   /* (just outside the crown, under the apple) */ WALK.reachYaw = a; WALK.reachT = 1.6;
   if (audio) beep(700 + Math.random()*80, 0.05, 0.05, 'sine'); centerMsg(T('🍎 OMENA! ({0} mukana)', APPLES.bag), '#ff8a7a', 1200);
   if (!A.owner) appleOwner(A); else if (A.owner.m === 'scold' || A.owner.m === 'home') { A.owner.m = 'shout'; A.owner.t = 0; pizzaMsg(T('👴 ISÄNTÄ HUOMASI! AUTOLLE JA 100 M PÄÄHÄN!'), true); } }   // (at it again under their nose)
@@ -8377,11 +8387,12 @@ function appleCaught(C) { for (const o of APPLES.chase) if (o.m !== 'home') { o.
   pizzaMsg(T('👴 KIINNI JÄIT! OMENAT TAKAISIN'), true); if (audio) beep(140, 0.3, 0.08, 'square'); }
 function applesUpdate(dt) { if (!APPLES.im) return; appleShoutsUpdate(dt);
   if (APPLES.fly.length) { const h = WALK.h; for (let k = APPLES.fly.length - 1; k >= 0; k--) { const F = APPLES.fly[k]; if (F.tp === Infinity) { if (h && !h.down && WALK.pickF === F) continue; F.t = F.tp = 0; } F.t += dt; const u = Math.min(1, (F.t - F.tp)/0.35);   // a picked apple: on the branch till the hand's there at the top of the jump, then in the hand, then into the pocket
-      if (u >= 1 || !h) { APPLES.im.setMatrixAt(F.i, _apZ); APPLES.fly.splice(k, 1); continue; }
-      if (F.t < F.tp) continue;   // (still on the branch: the hand's on its way up)
+      if (u >= 1 || !h) { APPLES.fly.splice(k, 1); continue; }
+      if (F.t < F.tp) { F.at = F.p; continue; }   // (still on the branch: the hand's on its way up)
       const w = Math.min(1, (F.t - F.tp)/0.1), hx = h.x + Math.sin(h.yaw)*0.4, hz = h.z + Math.cos(h.yaw)*0.4, hy = Y(h.x, h.z) + h.hop + APPLES.HAND;
-      _apM.makeTranslation(F.p[0] + (hx - F.p[0])*w, F.p[1] + (hy - F.p[1])*w, F.p[2] + (hz - F.p[2])*w); APPLES.im.setMatrixAt(F.i, _apM); }
-    APPLES.im.instanceMatrix.needsUpdate = true; }
+      F.at = [F.p[0] + (hx - F.p[0])*w, F.p[1] + (hy - F.p[1])*w, F.p[2] + (hz - F.p[2])*w]; } }
+  { const fx = APPLES.fx; let n = 0; for (const F of APPLES.fly) { const q = F.at || F.p; if (n < 8) { _apM.makeTranslation(q[0], q[1], q[2]); fx.setMatrixAt(n++, _apM); } } if (n || fx.count) { fx.count = n; fx.instanceMatrix.needsUpdate = true; } }
+  applesShow(false);
   for (const C of APPLES.chase) { if (C.m === 'home' || C.m === 'scold') continue; const h = C.h;
     if (h.gone) { C.m = 'home'; C.t = 0; continue; } if (h.down) continue;   // (down: still a chaser, up again in a moment)
     if (!WALK.on && Math.hypot(car.x - h.x, car.z - h.z) > APPLES.ESC) { C.m = 'home'; C.t = 0; } else if (C.t > 120 && C.m === 'run') { C.m = 'home'; C.t = 0; } }   // (out of reach in the car: they give up)

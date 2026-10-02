@@ -994,6 +994,7 @@ Separate versions; the flat game (artifact 4Rz3NsHQYUDk9uEgt7NLWm, ylasto-race.h
 - 2.10. 23.06: contact-shadow textures (carAO, AO.rect) drawn pixel by pixel by softRectTex (smoothstep feather) instead of ctx.filter='blur()', which some browsers (older Safari) lack — there they were hard dark boxes.
 - 2.10. 23.51: walker 'jousto' — WALK.spd ramps (+11 / −16 m/s²), pose.dy stride bob |cos ph|·0.075, tilt 0.13·k + accel lean, roll from yaw rate (−0.035·rate·k, ±0.22, smoothed). t_walkflex.
 - 3.10. 00.30: the black boxes were carAO baked into carKit (yard cars) as an opaque black 'misc' plate — carKit now skips carAO. Orchards: spotOk() split out of freeSpot; plots with area/110 (+2 for a big house) ≥ 3 trees (70 %) get the best-fitting 2/3-column grid of up to 8 apple trees (3.1 × 3.0 m) → 755 apple trees, 3765 apples.
+- 3.10. 01.06: apples on the fly — a tree holds n, seed, mask (picked bits), left; appleAt(A,k) derives the spot from the seed; applesShow refills one pool (CAP 900) with the unpicked apples of trees within R 170 m, sorted by distance, when you've moved STEP 12 m (or at once on a pick); flying apples drawn by APPLES.fx (8). APPLES.pos/i0 gone; APPLES.total. t_apples picks a lone tree (an orchard neighbour's owner joins the chase).
 - Ghost key `ylasto1988-haamu-korkeus-v1`; track signature includes terrain source, so laps on other ground don't mix.
 
 ## How to add something to the world (v5 pattern)
