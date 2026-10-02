@@ -348,7 +348,7 @@
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
   <div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
-    <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
+    <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
       <div class="mr-knobcell"><button class="mr-knob" id="mr-power" title="virta · rulla: ääni"></button><span class="mr-cap" data-t>virta</span></div>
       <div class="mr-mid"><div class="mr-brand"><span><i class="led"></i>YLÄSTÖ SOUND</span><small>CR-85 · FM STEREO</small></div>
@@ -511,7 +511,7 @@ const I18N = {
   'KERRO KAVERILLE!': ['TELL A FRIEND!', 'SI DET TIL EN VENN!'], 'ota kuva ja jaa peliä': ['snap it and share the game', 'ta et bilde og del spillet'],
   'TAUKO': ['PAUSED', 'PAUSE'], 'P jatka · R uusi lähtö · Esc alkuruutu': ['P resume · R restart · Esc menu', 'P fortsett · R ny start · Esc meny'],
   '💾 PC-PELI · TOIMII 486-KONEELLA': ['💾 PC GAME · RUNS ON A 486', '💾 PC-SPILL · KJØRER PÅ EN 486'], 'ei mobiilipeli – voi kyynel 😢': ["not a mobile game – boo hoo 😢", 'ikke et mobilspill – snufs 😢'], '✔ 28.9. TESTATTU: PELI SKULAA': ['✔ TESTED 28.9.: GAME WORKS', '✔ TESTET 28.9.: SPILLET FUNKER'], '– jos ei, niin voi voi': ['– if not, oh well', '– hvis ikke, synd det'],
-  'P tauko': ['P pause', 'P pause'], 'AVAA LEHTI': ['OPEN THE PAPER', 'ÅPNE AVISEN'], 'F jalkaisin': ['F on foot', 'F til fots'], 'ulos autosta / jalkaisin': ['get out / on foot', 'gå ut / til fots'], 'JALKAISIN · F = TAKAISIN AUTOON': ['ON FOOT · F = BACK IN THE CAR', 'TIL FOTS · F = TILBAKE I BILEN'], 'tauko': ['pause', 'pause'],
+  'P tauko': ['P pause', 'P pause'], 'RUUDUNPÄIVITYS: ENINTÄÄN 60': ['FRAME RATE: UP TO 60', 'BILDEFREKVENS: OPPTIL 60'], 'RUUDUNPÄIVITYS: RAJOITTAMATON': ['FRAME RATE: UNLIMITED', 'BILDEFREKVENS: UBEGRENSET'], 'fps-raja 60 / vapaa': ['fps limit 60 / free', 'fps-grense 60 / fri'], 'AVAA LEHTI': ['OPEN THE PAPER', 'ÅPNE AVISEN'], 'F jalkaisin': ['F on foot', 'F til fots'], 'ulos autosta / jalkaisin': ['get out / on foot', 'gå ut / til fots'], 'JALKAISIN · F = TAKAISIN AUTOON': ['ON FOOT · F = BACK IN THE CAR', 'TIL FOTS · F = TILBAKE I BILEN'], 'tauko': ['pause', 'pause'],
   '👽 OSUMA! {0}/{1}': ['👽 HIT! {0}/{1}', '👽 TREFF! {0}/{1}'],
   'virta': ['power', 'på/av'], 'viritys': ['tuning', 'tuning'], 'kanava': ['station', 'kanal'], 'ääni': ['volume', 'volum'],
   'paina virtaa — radio soi täälläkin': ['press power — the radio plays here too', 'trykk på — radioen spiller her også'], 'RADIO POIS': ['RADIO OFF', 'RADIO AV'],
@@ -570,12 +570,12 @@ document.body.prepend(renderer.domElement);
 
 const hemiLight = new THREE.HemisphereLight(0xcfe3f5, 0x5c7a45, 0.5); scene.add(hemiLight);
 const ambLight = new THREE.AmbientLight(0x405060, 0.15); scene.add(ambLight);
-const dirLight = new THREE.DirectionalLight(0xfff3e0, 1.05);
+const dirLight = new THREE.DirectionalLight(0xfff3e0, 1.05), SHADOW_R = 85;   // (the shadowed square's half side: 100 → 85 m on 2.10. — less in the shadow pass, sharper near shadows)
 dirLight.position.set(70, 65, 25);
 dirLight.castShadow = true;
 dirLight.shadow.mapSize.set(4096, 4096);
-dirLight.shadow.camera.left = -100; dirLight.shadow.camera.right = 100;
-dirLight.shadow.camera.top = 100; dirLight.shadow.camera.bottom = -100;   // centred ahead of the car (see updateCamera)
+dirLight.shadow.camera.left = -SHADOW_R; dirLight.shadow.camera.right = SHADOW_R;
+dirLight.shadow.camera.top = SHADOW_R; dirLight.shadow.camera.bottom = -SHADOW_R;   // centred ahead of the car (see updateCamera)
 dirLight.shadow.camera.near = 1; dirLight.shadow.camera.far = 320;
 dirLight.shadow.bias = -0.0004; dirLight.shadow.normalBias = 0.08;   // texel ≈ 7 cm: small bias keeps the car's own shadow (0.6 used to erase it)
 scene.add(dirLight); scene.add(dirLight.target);
@@ -2690,7 +2690,7 @@ function buildYardCars() {
     let cx = 0, cz = 0; list.forEach(c => { cx += c.x; cz += c.z; }); cx /= list.length; cz /= list.length; let r = 0; list.forEach(c => { r = Math.max(r, Math.hypot(c.x - cx, c.z - cz)); });
     carKit().forEach(({ geo, mat, paint }) => {
       const g = new THREE.BufferGeometry(); for (const name in geo.attributes) g.setAttribute(name, geo.attributes[name]);   // shared data, own bounds
-      const im = new THREE.InstancedMesh(g, mat, list.length); im.frustumCulled = true; im.castShadow = true; im.receiveShadow = true; im.userData.key = 'yardcars';
+      const im = new THREE.InstancedMesh(g, mat, list.length); im.frustumCulled = true; im.castShadow = true; im.receiveShadow = true; im.userData.key = paint || mat === glassMat ? 'yardcars' : 'yardcarsfine';   // (2.10.: wheels, black and trim leave first, at 150 m; body and glass at 320)
       list.forEach((c, k) => { (c.inst || (c.inst = [])).push({ im, k }); let gy = 0; if (worldLifted) { const f = wheelFit(c.x, c.z, c.yaw, 0.7, 1.25, -1.25, _wf); _we.set(f.pitch, c.yaw, f.roll); q.setFromEuler(_we); gy = f.y; } else q.setFromAxisAngle(up, c.yaw);
         p.set(c.x, (c.street ? ROAD_Y : 0.05) + gy, c.z); M4.compose(p, q, s); im.setMatrixAt(k, M4); if (paint) im.setColorAt(k, col.setHex(c.color)); });
       im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; fitInstanceBounds(im, 0.5); scene.add(im); yardCarMeshes.push(im); });
@@ -5005,6 +5005,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Lisää kevennystä: ruudunpäivitys enintään 60 (V = rajoittamaton), varjot tiiviimmällä alueella ja terävämpinä, kaukaisista pihojen autoista lähtevät renkaat ja pikkuosat 150 m:stä, kaukaiset ihmiset liikkuvat 300 m:n takana kerran sekunnissa kukin omaan tahtiinsa', '12.41'],
   ['2.10.', 'Peli kevyemmäksi: puiden latvoissa vähemmän kulmia, kaukaiset ihmiset päivittyvät harvemmin (50 m:stä alkaen) ja kaukaisia savuja tehdään vähemmän mutta isompina. Pelin logiikka noin neljänneksen kevyempi', '12.15'],
   ['2.10.', 'Tilastot tarkemmiksi: pelin avaukset, Enter-aloitukset, R-painallukset ja maaliin ajetut kierrokset lasketaan nyt erikseen ja päivittäin (tekijän sivulle)', '08.42'],
   ['2.10.', 'Peli nopeutui reilusti: kaukaisista taloista jätetään piirtämättä portaat, ovet, listat, ikkunat ja savupiiput, ja samoin kaukaiset pihapuut, aidat, pensaat ja liikennemerkit. Pienet esineet eivät heitä varjoja, ja pihojen autoilla on varjo vain lähellä. Piirtoja on noin 20 % vähemmän', '05.47'],
@@ -5894,7 +5895,7 @@ function batchFill() {
 // 2.10. (Antti: 'tehdään kaikki viis'): the same for the scenery's small merged parts per chunk (house steps, doors, plinths, trims,
 // glass, chimneys, decks, swings, bushes, yard trees, fences) and the road signs; the distance is from the camera to the chunk's
 // nearest edge. Tiny things cast no shadow at all (SHADOW_OFF); yard cars cast one only near the camera.
-const FAR_DETAIL = { verge: 220, yardcars: 320, step: 180, sokkeli: 180, woodend: 180, door: 200, swing: 180, deck: 200, bush: 260, trim: 280, glass: 300, chimney: 300, roofflat: 320,
+const FAR_DETAIL = { verge: 220, yardcars: 320, yardcarsfine: 150, step: 180, sokkeli: 180, woodend: 180, door: 200, swing: 180, deck: 200, bush: 260, trim: 280, glass: 300, chimney: 300, roofflat: 320,
   fwhite: 280, fbrown: 280, hedgeP: 320, trunk: 260, btrunk: 260, acrown: 380, gbcrown: 380, sign: 140 };
 const SHADOW_OFF = new Set(['step', 'swing', 'deck', 'bush']), YARDCAR_SHADOW = 110;
 let _fdList = null, _fdKey = '';
@@ -5906,7 +5907,7 @@ function farDetail(cam) { const key = trackMeshGroup.children.length + ':' + yar
       if (SHADOW_OFF.has(k)) o.castShadow = false; _fdList.push(o); }); }
   const cx = cam.position.x, cz = cam.position.z;
   for (const o of _fdList) { const C = o.userData.fdC, d = Math.hypot(C.x - cx, C.z - cz) - o.userData.fdR, k = o.userData.key, far = d > FAR_DETAIL[k];
-    if (k === 'yardcars') o.castShadow = d < YARDCAR_SHADOW;
+    if (k === 'yardcars' || k === 'yardcarsfine') o.castShadow = d < YARDCAR_SHADOW;
     if (far === !!o.userData.farHid) continue;
     if (far) { if (o.visible) { o.visible = false; o.userData.farHid = true; } } else { o.visible = true; o.userData.farHid = false; } } }   // (hidden by something else meanwhile — the nuke — it stays so)
 scene.onBeforeRender = (r, sc, cam) => { batchFill(); bodyFill(cam); farDetail(cam); };
@@ -6493,8 +6494,8 @@ function humansUpdate(dt0) { HFRAME++;
   for (let i = 0; i < HUMANS.length; i++) { const h = HUMANS[i]; if (h.gone) continue;
     const dx = h.x - car.x, dz = h.z - car.z, d2 = dx*dx + dz*dz, near = h.player || d2 < 240*240, P = h.pose; let dt = dt0;
     if (!!h.far === near) { h.far = !near; if (h.view.kind === 'rig') humanSync(h); }   // far from the car: rigged people aren't drawn
-    if (d2 > 50*50 && !h.player && !h.down && !h.ride && !h.mad && !h.dodge && !h.settle && !(h.hop > 0) && !h.vy) {   // (level of detail: 50–100 m every 2nd frame, to 200 m every 3rd, beyond that every 6th, with the time saved up — nobody notices a far walker at 30, 20 or 10 Hz; 2.10.: was 70/150/240)
-      const every = d2 > 200*200 ? 6 : d2 > 100*100 ? 3 : 2; h.lodAcc = (h.lodAcc || 0) + dt0; if ((HFRAME + i) % every) continue; dt = Math.min(h.lodAcc, 0.12); h.lodAcc = 0; } else h.lodAcc = 0;
+    if (d2 > 50*50 && !h.player && !h.down && !h.ride && !h.mad && !h.dodge && !h.settle && !(h.hop > 0) && !h.vy) {   // (level of detail, with the time saved up: 50–100 m every 2nd frame, to 200 m every 3rd, to 300 m every 10th, beyond that once a second — each on their own beat (HFRAME + i); 2.10.)
+      const every = d2 > 300*300 ? 60 : d2 > 200*200 ? 10 : d2 > 100*100 ? 3 : 2; h.lodAcc = (h.lodAcc || 0) + dt0; if ((HFRAME + i) % every) continue; dt = Math.min(h.lodAcc, every > 10 ? 1.05 : 0.2); h.lodAcc = 0; } else h.lodAcc = 0;
     P.armL = P.armR = P.legs = P.legsR = null; P.armLz = P.armRz = 0; P.walk = 0; P.dy = 0;
     if (h.ride) { rideStep(h, dt); humanSync(h); continue; }
     if (!h.down && !h.inside && h.mad) madStep(h, dt, t); else if (!h.down && !h.inside && h.task) h.task.update(h, dt, t, near);
@@ -10141,7 +10142,17 @@ function worldBuild() {
   lifeExtras2Build();
   lifeExtras3Build();
   crowdBuild();
+  dedupeStaticMaterials();
 }
+// 2.10.: the static world's look-alike materials (same type, colour, roughness, map…) made one — fewer material switches a frame. People, vehicles,
+// the car, life props, see-through and glowing things, checkpoints and anything with its own shader keep theirs (their materials change at run time)
+function dedupeStaticMaterials() { const skip = new Set(), mark = (g) => g && g.traverse(o => skip.add(o)); mark(lifeGroup); mark(carGroup); VEHICLES.forEach(v => mark(v.view && v.view.g)); checkpointMeshes.forEach(mark);
+  const C = new Map(); let n = 0;
+  scene.traverse(o => { if (!o.isMesh || skip.has(o) || Array.isArray(o.material)) return; const m = o.material;
+    if (!m || m.transparent || m.onBeforeCompile.toString().length > 20 || m.isShaderMaterial || (m.emissive && m.emissive.getHex()) || m.userData.keep) return;
+    const k = [m.type, m.color && m.color.getHex(), m.roughness, m.metalness, m.map && m.map.uuid, m.vertexColors, m.side, m.envMap && m.envMap.uuid, m.envMapIntensity, m.polygonOffset, m.polygonOffsetFactor, m.polygonOffsetUnits, m.depthWrite, m.depthTest, m.flatShading, m.alphaTest, m.clearcoat, m.wireframe].join('|');
+    const c = C.get(k); if (!c) C.set(k, m); else if (c !== m) { o.material = c; n++; } });
+  return n; }
 const NEAR_VIS = []; let nearVisT = 0;   // props only drawn near the car (grills, mowers, bikes, flags)
 function nearVis(g, x, z) { NEAR_VIS.push({ g, x, z }); }
 function nearVisUpdate(dt) { if ((nearVisT -= dt) > 0) return; nearVisT = 0.25; for (const e of NEAR_VIS) { const n = !e.g.userData.hide && (e.x - car.x)**2 + (e.z - car.z)**2 < 240*240; if (e.g.visible !== n) e.g.visible = n; } }
@@ -10765,6 +10776,7 @@ addEventListener('keydown', e => {
   if (e.code==='KeyP' && !e.repeat) { setPause(!PAUSE.on); return; }
   if (PAUSE.on && e.code !== 'KeyR' && e.code !== 'Escape') return;   // (paused: only P, R and Esc)
   if ((e.code==='KeyR' || e.code==='Escape') && PAUSE.on) setPause(false);
+  if (e.code==='KeyV' && !e.repeat) { FPS_CAP = FPS_CAP ? 0 : 60; try { localStorage.setItem('ylasto1988-fps', FPS_CAP ? '60' : '0'); } catch (er) {} centerMsg(T(FPS_CAP ? 'RUUDUNPÄIVITYS: ENINTÄÄN 60' : 'RUUDUNPÄIVITYS: RAJOITTAMATON'), '#ffe9a8', 1400); }
   if (e.code==='KeyR' && !e.repeat && gameState!==State.MENU) { initAudio(); START_EV = 'r'; startRace(false); }
   if (e.code==='KeyL' && !e.repeat && gameState===State.MENU) setLang(LANGS[(LANGS.indexOf(LANG) + 1) % LANGS.length]);   // language: FI → EN → NO
   if (e.code==='Escape' && !e.repeat && gameState!==State.MENU) toMenu();
@@ -11171,7 +11183,7 @@ function updateCamera(dt) {   // 1.10. (Antti: "kamera aivan liian ylhäällä, 
   // Shadow stability: re-anchor the light only when the car has moved ~30 m, and snap
   // the anchor to the shadow-map texel grid so the map never "swims" between frames.
   {
-    const texel = 200 / 4096, ahead = 30;   // the camera looks forward: keep the shadowed square mostly in front of the car
+    const texel = 2*SHADOW_R / 4096, ahead = 30;   // the camera looks forward: keep the shadowed square mostly in front of the car
     const ax = Math.round((C.x + Math.sin(C.angle)*ahead) / texel) * texel, az = Math.round((C.z + Math.cos(C.angle)*ahead) / texel) * texel;
     if (Math.hypot(ax - lightAnchor.x, az - lightAnchor.z) > 24) {
       lightAnchor.x = ax; lightAnchor.z = az;
@@ -11371,8 +11383,10 @@ function setPause(on) { if (on === PAUSE.on) return; if (on && gameState !== Sta
   if (RADIO.el) { if (on) { PAUSE.radio = !RADIO.el.paused; RADIO.el.pause(); } else if (PAUSE.radio && !RADIO.off) RADIO.el.play().catch(() => {}); } }
 document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
 let MM_TICK = 0;
+let FPS_CAP = 60, FPS_NEXT = 0; try { if (localStorage.getItem('ylasto1988-fps') === '0') FPS_CAP = 0; } catch (e) {}   // (2.10.: 60 by default — a 144 Hz screen drew 144 a second and heated the laptop; V: no limit)
 function loop(time) {
   requestAnimationFrame(loop);
+  if (FPS_CAP) { if (time < FPS_NEXT - 2) return; FPS_NEXT += 1000/FPS_CAP; if (FPS_NEXT < time - 1000/FPS_CAP) FPS_NEXT = time; }   // (a beat of 60 a second: a 144 Hz screen draws every 2nd–3rd refresh, ~60 in all; after a stall it starts again from now)
   if (PAUSE.on) { lastTime = time; renderer.render(scene, camera); return; }
   adaptResolution((time - lastTime)/1000);
   const dt = Math.max(0, Math.min((time-lastTime)/1000, 0.05));

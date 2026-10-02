@@ -1,5 +1,5 @@
 // judder: the drawn car against the camera, frame to frame, at 144 Hz and at a jittery 60 Hz (driving along the route); the step count per frame varies, the drawn motion must not
-initAudio = () => {}; renderer.render = () => {};
+initAudio = () => {}; renderer.render = () => {}; FPS_CAP = 0;   // (the limiter off: this measures the uncapped 144 Hz drawing)
 const steer = () => { const n = trackPoints.length, tp = trackPoints[(car.prog + 6) % n]; let dA = Math.atan2(tp.x - car.x, tp.y - car.z) - car.angle; while (dA > Math.PI) dA -= 2*Math.PI; while (dA < -Math.PI) dA += 2*Math.PI; keys.ArrowLeft = dA > 0.04; keys.ArrowRight = dA < -0.04; keys.ArrowUp = Math.hypot(car.vx, car.vz) < 22; };
 startRace(false); for (let i = 0; i < 60*3.3; i++) loop(lastTime + 1000/60); for (let i = 0; i < 60*6; i++) { steer(); loop(lastTime + 1000/60); }
 const run = (dts) => { const sp = []; let px = carGroup.position.x, pz = carGroup.position.z;
