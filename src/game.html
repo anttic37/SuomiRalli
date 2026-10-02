@@ -4984,10 +4984,9 @@ const onlineKey = (name) => String(name || '').normalize('NFC').replace(/[^\p{L}
 async function apiGet(path) { const r = await fetch(ONLINE.api + path, { cache: 'no-store' }); if (!r.ok) throw new Error(r.status); return r.json(); }
 // the ghosts to race: with a time of your own, the next three rungs up the board (never the leaders); with none yet, drivers
 // from around tenth place but never more than 10 % slower than the leader, so the first run is against a decent pace
-function oppPick(others, myT, mine) {
-  let pick = myT < Infinity ? others.filter(r => r.t < myT).slice(-3) : others.filter(r => r.t <= others[0].t*1.1).slice(0, 10).slice(-3);
-  if (!pick.length) pick = (mine ? [mine] : []).concat(others.slice(0, 2));   // (online the local ghost isn't drawn: the leader's own record always comes from the board)   // (already on top: your own record on the road — the fastest time there is — and the two nearest chasers)
-  if (!pick.length && mine) pick = [mine];       // (alone on the board: your own best, under your name)
+function oppPick(others, myT, mine) {   // 2.10. (Antti: 'vain yksi ghost, se seuraava'): one rival on the road — the nearest time above yours
+  let pick = myT < Infinity ? others.filter(r => r.t < myT).slice(-1) : others.filter(r => r.t <= others[0].t*1.1).slice(0, 10).slice(-1);   // (no time yet: the slowest of the leading pack)
+  if (!pick.length) pick = mine ? [mine] : others.slice(0, 1);   // (already on top: your own record on the road; online the local ghost isn't drawn)
   return pick.sort((a, b) => b.t - a.t); }       // nearest first
 // ── the police's rap sheet: fires the driver set, people and animals they ran over → /api/rap (as deltas), and the list back for the paper's "Poliisi tiedottaa" ──
 const RAP = { f: 0, p: 0, a: 0, h: 0, t: 0, o: 0, v: 0, vSent: 0, sent: { f: 0, p: 0, a: 0, h: 0, t: 0, o: 0 }, life: { f: 0, p: 0, a: 0, h: 0, t: 0, o: 0 }, list: null, at: -1e9, busy: false };   // (h: rides given to hitchhikers — the good deeds; t: trees felled; o: apples got away with)
@@ -5026,6 +5025,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Radalla nyt vain yksi haamu: se kuski, joka on ennätyslistalla heti sinun edelläsi. Kärjessä ajat omaa ennätystäsi vastaan', '20.19'],
   ['2.10.', 'Nykäyksiä pois: roska-, jäätelö- ja postiautojen sekä ambulanssin reittisuunnittelu ei enää osu samaan ruutuun, ja tieverkon tiedot lasketaan valmiiksi latauksessa. Pahin nykäys testiajossa 75 ms → 16 ms', '19.41'],
   ['2.10.', 'Roskapöntöt uusiksi: tuhannen sijaan noin 50 pönttöä, ja osuma lennättää pöntön oikealla fysiikalla – se kimpoaa seinistä ja aidoista, jää siihen asentoon mihin päätyy, ja siihen voi osua uudestaan. Roska-auton lastaaja ja puristin liikkuvat taas tyhjennyksessä', '19.15'],
   ['2.10.', 'Käynnistykseen kanavahaku: ”VIRITETÄÄN KANAVAA – SUOMIRALLI” ja 80-luvun ohjelmat vilisevät sillä aikaa, kun kylä rakennetaan ja kaikki piirto-ohjelmat käännetään valmiiksi. Sen jälkeen ei nyi', '18.46'],
@@ -5260,7 +5260,7 @@ const LEHTI = [
     box: ['NÄIN LÄHDET', 'Enter = lähtö · ↑ kaasu · ↓ jarru/peruutus', '← → ohjaus · välilyönti käsijarru', 'R = uusi lähtö milloin vain'] },
   { id: 'haamu', size: 'main', n: 2, kick: '👻 HAAMU', title: 'Aja kaveria vastaan – haamuna', lede: 'Paras aikasi ajaa vierelläsi läpikuultavana haamuna. Netin ennätyslistalla näet, kuka kylässä on nopein.',
     img: ['haamu_a.jpg', 'haamu_b.jpg'], cap: ['Haamuauto näyttää, missä olit viime kerralla. Tässä se vie.', 'Ennätyslista päivittyy netistä – kaikki kuskit samalla listalla.'],
-    body: ['Kun ajat maaliin, aikasi tallentuu nimelläsi ennätyslistaan. Seuraavalla kierroksella nopein kuski ajaa haamuna rinnallasi.', 'Haamu ei törmää, se vain näyttää linjan. Väliajoissa näkyy vihreällä, kun olet edellä, ja punaisella, kun jäät.', 'G-näppäin piilottaa haamun, jos se hermostuttaa.'],
+    body: ['Kun ajat maaliin, aikasi tallentuu nimelläsi ennätyslistaan. Seuraavalla kierroksella haamuna ajaa kuski, joka on listalla heti edelläsi.', 'Haamu ei törmää, se vain näyttää linjan. Väliajoissa näkyy vihreällä, kun olet edellä, ja punaisella, kun jäät.', 'G-näppäin piilottaa haamun, jos se hermostuttaa.'],
     box: ['VINKKI', 'Aja haamun sisäkaarteesta ohi.', 'Väliaikojen erotus näkyy ruudun yläosassa.'] },
   { id: 'gta', size: 'main', n: 3, kick: '🚗 GTA-TILA', title: 'Koko kylä on sinun', lede: 'Lähdössä oikea kaista vie pois radalta: ei kelloa, ei sääntöjä – vain Ylästö, bussit, pizzeria ja kaikki mitä kylässä tapahtuu.',
     img: ['gta_a.jpg', 'gta_b.jpg'], cap: ['Bussi, mopot ja ohikulkijat liikkuvat omia reittejään.', 'Kylä ylhäältä: kadut, pihat ja pellot.'],
