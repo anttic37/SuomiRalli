@@ -5026,6 +5026,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Roskapöntöt uusiksi: tuhannen sijaan noin 50 pönttöä, ja osuma lennättää pöntön oikealla fysiikalla – se kimpoaa seinistä ja aidoista, jää siihen asentoon mihin päätyy, ja siihen voi osua uudestaan. Roska-auton lastaaja ja puristin liikkuvat taas tyhjennyksessä', '19.15'],
   ['2.10.', 'Käynnistykseen kanavahaku: ”VIRITETÄÄN KANAVAA – SUOMIRALLI” ja 80-luvun ohjelmat vilisevät sillä aikaa, kun kylä rakennetaan ja kaikki piirto-ohjelmat käännetään valmiiksi. Sen jälkeen ei nyi', '18.46'],
   ['2.10.', 'Nykiminen kisan alussa pois: kaikki piirto-ohjelmat käännetään valmiiksi jo alkuruudussa, eikä kesken ajon, kun uusi talo, auto tai kyltti tulee ensimmäistä kertaa näkyviin', '14.46'],
   ['2.10.', 'Lisää kevennystä: ruudunpäivitys enintään 60 (V = rajoittamaton), varjot tiiviimmällä alueella ja terävämpinä, kaukaisista pihojen autoista lähtevät renkaat ja pikkuosat 150 m:stä, kaukaiset ihmiset liikkuvat 300 m:n takana kerran sekunnissa kukin omaan tahtiinsa', '12.41'],
@@ -5361,10 +5362,10 @@ const LEHTI = [
     body: ['Kylän autoilijat ovat oppineet tavoille. Kun takaa tai vastaan tulee ambulanssi tai paloauto hälytysajossa tai poliisi takaa-ajossa, auto ajaa tien oikeaan reunaan ja pysähtyy.', 'Matka jatkuu, kun sireeni on mennyt ohi. Vapaassa ajossa tämän näkee hyvin: koko katu väistää, kun poliisi ajaa sinua takaa.'] },
   { id: 'hinaus', size: 'half', n: 67, kick: '🛻 HINAUS', title: 'Hinausauto korjaa romut pois kylän kaduilta', img: ['hinaus.jpg', 'hinaus2.jpg'], cap: ['Palanut auto vinssataan keula koholla hinausauton perään.', 'Romu lähtee kylästä. Seuraavassa kisassa se on taas paikallaan.'],
     body: ['Kun palanut tai romuksi ajettu auto on sammunut ja palokunta lähtenyt, paikalle ajaa keltainen HINAUS-auto. Kuljettaja käy kiinnittämässä vaijerin, ja romu vinssataan auton perään keula koholla.', 'Hinausauto vie romun kylästä pois. Jos tie on tukossa, se peruuttaa ja yrittää uudelleen, ja tarvittaessa betonipossut saavat väistyä. R-napilla kaikki autot ovat taas paikoillaan.'] },
-  { id: 'jate', size: 'page', n: 66, kick: '🗑 JÄTEHUOLTO', title: 'Roska-auto kiertää Ylästöä – pöntöt talojen eteen', lede: 'Jokaisen talon eteen on tuotu vihreä pyörällinen jäteastia. Roska-auto ajaa pöntöltä toiselle, ja lastaaja hyppää takasillalta tyhjentämään ne.',
+  { id: 'jate', size: 'page', n: 66, kick: '🗑 JÄTEHUOLTO', title: 'Roska-auto kiertää Ylästöä – pöntöt talojen eteen', lede: 'Viidenkymmenen talon eteen on tuotu vihreä pyörällinen jäteastia. Roska-auto ajaa pöntöltä toiselle, ja lastaaja hyppää takasillalta tyhjentämään ne.',
     img: ['roskaauto.jpg', 'ponttorivi.jpg', 'ponttolentaa.jpg'], cap: ['Lastaaja nostaa pöntön auton perään. Puristin jyskyttää, ja pönttö palaa paikalleen.', 'Täysistä pöntöistä pilkottaa musta pussi ja kansi on raollaan.', 'Kisavauhdissa kadun reunaa pitkin ajava auto lennättää pöntön pihalle.'],
-    body: ['YLÄSTÖ. Kylässä on nyt jätehuolto. Jokaisen omakotitalon eteen, tontin reunaan kadun puolelle, on tuotu vihreä 240 litran pyörällinen jäteastia. Täydestä pöntöstä näkee mustan pussin kannen alta.', 'Vihreä JÄTEHUOLTO-auto ajaa lähimmälle täydelle pöntölle eikä aja rallireitin kautta. Se pysähtyy niin, että perä on pöntön kohdalla. Lastaaja hyppää takasillalta, taluttaa pöntön auton perään, nostaa sen kippiin ja puristin jyskyttää. Tyhjä pönttö palaa paikalleen, ja mies hyppää takaisin sillalle.', 'Pönttöön kannattaa varoa osumasta. Reunaa pitkin kovaa ajava auto lennättää pöntön metrien päähän, ja roskat leviävät pihalle. Kaatunutta pönttöä lastaaja ei tyhjennä. R-napilla pöntöt nousevat takaisin paikoilleen.', 'Tyhjät pöntöt täyttyvät taas muutamassa minuutissa, joten roska-autolla riittää ajettavaa.'],
-    box: ['JÄTEHUOLTO', 'Pönttö joka talon edessä', 'Täysi: pussi kannen alla', 'Auto kiertää lähimmälle täydelle', 'Osuma: pönttö lentää, roskat leviävät'] },
+    body: ['YLÄSTÖ. Kylässä on nyt jätehuolto. Viidenkymmenen omakotitalon eteen, tontin reunaan kadun puolelle, on tuotu vihreä 240 litran pyörällinen jäteastia. Täydestä pöntöstä näkee mustan pussin kannen alta.', 'Vihreä JÄTEHUOLTO-auto ajaa lähimmälle täydelle pöntölle eikä aja rallireitin kautta. Se pysähtyy niin, että perä on pöntön kohdalla. Lastaaja hyppää takasillalta, taluttaa pöntön auton perään, nostaa sen kippiin ja puristin jyskyttää. Tyhjä pönttö palaa paikalleen, ja mies hyppää takaisin sillalle.', 'Pönttöön kannattaa varoa osumasta. Reunaa pitkin kovaa ajava auto lennättää pöntön metrien päähän, ja roskat leviävät pihalle. Kaatunutta pönttöä lastaaja ei tyhjennä. R-napilla pöntöt nousevat takaisin paikoilleen.', 'Tyhjät pöntöt täyttyvät taas muutamassa minuutissa, joten roska-autolla riittää ajettavaa.'],
+    box: ['JÄTEHUOLTO', '50 pönttöä pitkin kylää', 'Täysi: pussi kannen alla', 'Auto kiertää lähimmälle täydelle', 'Osuma: pönttö lentää, roskat leviävät'] },
   { id: 'maaseutu', outer: true, size: 'main', n: 65, kick: '🏡 MAASEUTU', title: 'Kylän takana alkaa maaseutu', lede: 'Metsän takana on nyt järviä, soita, maatiloja ja pieniä kyliä. Soratiet vievät niihin suoraan Ylästöstä, ja tienvarressa kulkee sähkölinja.',
     img: ['kyla.jpg', 'jarvi.jpg'], cap: ['Kylätie, kauppa ja postilaatikot. Kylän nimi lukee sinisessä kyltissä tien päässä.', 'Järven rannalla on sauna ja laituri. Autolla ei kannata ajaa veteen.'],
     body: ['YLÄSTÖ. Kun ajaa Ylästön reunalta ulos, tie ei enää lopu metsään. Sorateitä pitkin pääsee naapurikyliin, maatiloille ja järvien rannoille. Soralla auto kulkee kuin rallitiellä.', 'Kylissä on kymmenkunta taloa tien molemmin puolin, kyläkauppa ja bussikatos. Maatiloilla on päärakennus, navetta, aitta ja sauna, ja pellolla seisoo latoja. Sängellä on pyöröpaaleja.', 'Järviin ajava auto hidastuu ja metrin syvyydessä uppoaa. Suolla pyörät uppoavat sammaleeseen. Lentokoneella vedelle saa laskeutua vain kävelyvauhtia, muuten kone kaatuu.', 'Talot, ladot ja sähkötolpat ovat kovia. Ne syntyvät näkyviin, kun lähestyt, ja katoavat kun poistut, joten kartta jatkuu loputtomiin.'],
@@ -8245,13 +8246,22 @@ function makeBin() { const G = new THREE.Group(), col = lmat(0x2f6a3a, 0.6), dk 
   G.rotation.order = 'YXZ'; G.userData.lid = lid; G.userData.bag = bag; return G; }
 function binFull(B, full) { B.full = full; B.g.userData.bag.visible = full; const lid = B.g.userData.lid; lid.rotation.x = full ? -0.32 : 0; lid.updateMatrix(); }
 function binPlace(B) { placeAt(B.g, B.x, B.z, B.yaw); B.g.rotation.x = B.g.rotation.z = 0; }
-function buildBins() { BINS.list.length = 0; BINS.grid.clear(); BINS.fly.length = 0;
-  for (const pl of PLOTS) { const F = pl.F; if (F.street < 0 || Math.abs(F.x) > 520 || Math.abs(F.z) > 520) continue;
+// 2.10. (Antti: 'noin 50 kpl riittää, kuten muutkin'): ~50 bins spread ≥ 28 m apart (a fixed per-plot order, no Math.random), and a bin that's hit
+// flies as a real rigid body (RB: off walls and fences, comes to rest however it lands, can be hit again) instead of its own scripted arc
+const BINS_MAX = 50;
+function buildBins() { for (const B of BINS.list) binUnRB(B, true); BINS.list.length = 0; BINS.grid.clear(); BINS.fly.length = 0;
+  const order = PLOTS.slice().sort((a, b) => ((a.bi*2654435761) >>> 0) % 9973 - ((b.bi*2654435761) >>> 0) % 9973);
+  for (const pl of order) { if (BINS.list.length >= BINS_MAX) break; const F = pl.F; if (F.street < 0 || Math.abs(F.x) > 520 || Math.abs(F.z) > 520) continue;
+    if (BINS.list.some(o => Math.abs(o.x - F.x) < 28 && Math.abs(o.z - F.z) < 28)) continue;
     const u = (pl.bi % 2 ? -1 : 1)*Math.min(F.hu + 1.2, Math.max(1.2, F.u1 - 1.0)), nn = F.n0 - 0.4, x = F.x + F.u[0]*u + F.n[0]*nn, z = F.z + F.u[1]*u + F.n[1]*nn;   // at the front edge, to one side of the house
     if (onRoad(x, z, 0.35) || staticHit(x, z, 3, 0.45) || vehicleWithin(x, z, 3) || planWithin(x, z, 0.8)) continue;
     const yaw = Math.atan2(-F.n[0], -F.n[1]), g = makeBin(); lifeGroup.add(g); nearVis(g, x, z);   // (the lid's hinge away from the street)
     const ni = nearestNode(x, z), B = { x, z, hx: x, hz: z, yaw, g, route: distRoute(x, z), full: true, down: false, ni, refill: 0, vx: 0, vy: 0, vz: 0, y: 0, sp: 0 }; binPlace(B); binFull(B, true); BINS.list.push(B); BINS.grid.add(B, x, z, 0.5); }
-  X3.upd.push(binsUpdate); X3.reset.push(() => { BINS.fly.length = 0; for (const B of BINS.list) { B.down = false; B.held = false; B.x = B.hx; B.z = B.hz; binPlace(B); binFull(B, true); } }); }
+  X3.upd.push(binsUpdate); X3.reset.push(() => { BINS.fly.length = 0; for (const B of BINS.list) { binUnRB(B); B.down = false; B.held = false; B.x = B.hx; B.z = B.hz; binPlace(B); binFull(B, true); } }); }
+// the rigid body: a holder at the body's centre (the bin's own pivot is at its base, where the bin man's code holds it), the bin inside it
+function binRB(B, v, w) { const g = B.g, H = B.hold || (B.hold = new THREE.Group()); g.updateMatrixWorld(); H.position.set(0, 0.46, 0).applyMatrix4(g.matrixWorld); H.quaternion.copy(g.quaternion); lifeGroup.add(H);
+  H.add(g); g.position.set(0, -0.46, 0); g.rotation.set(0, 0, 0); H.updateMatrixWorld(true); B.rb = rbAdd(H, 0.29, 0.46, 0.35, v, w, { m: 14, mu: 0.6, e: 0.3, drag: 0.4 }); }
+function binUnRB(B, drop) { if (!B.rb) return; const i = RB.list.indexOf(B.rb); if (i >= 0) RB.list.splice(i, 1); B.rb = null; if (B.hold) { lifeGroup.remove(B.hold); if (!drop) lifeGroup.add(B.g); } }
 // ── apple thieving (1.10., Antti): the yard apple trees bear apples; walk (F) up to one and you pick them, one a moment. The owner
 //    sees it and runs out of the house after you — faster than you on foot. Caught: the apples go back. Into the car and 200 m off
 //    from them: away, and the apples are yours → the rap sheet's 'o' → the menu's apple-thief list. R: the trees bear again. ──
@@ -8301,14 +8311,13 @@ function applesUpdate(dt) { if (!APPLES.im) return;
   if (best) applePick(best, h); else APPLES.t = 0.1; }
 function binsUpdate(dt) { const sp1 = Math.hypot(car.vx, car.vz), sp = Math.max(sp1, BINS.sp0 || 0), cvx = sp1 >= (BINS.sp0 || 0) ? car.vx : BINS.vx0, cvz = sp1 >= (BINS.sp0 || 0) ? car.vz : BINS.vz0; BINS.sp0 = sp1; BINS.vx0 = car.vx; BINS.vz0 = car.vz;   // (last frame's speed too: the bin and a fence behind it in the same frame)
   if (sp > 2 && gameState === State.RACING && !WALK.on) { const P = playerBox();
+    for (const B of BINS.list) { if (!B.rb || B.held) continue; const p = B.rb.p, c = (Math.abs(p.x - car.x) < 4 && Math.abs(p.z - car.z) < 4) ? boxPush(P, p.x, p.z, 0.42) : null; if (!c) continue;   // one already down: hit again
+      const b = B.rb; b.sleep = false; b.still = 0; b.v.set(cvx*0.8 - c.nx*1.5, 1 + sp*0.08, cvz*0.8 - c.nz*1.5); b.w.set((Math.random() - 0.5)*8, (Math.random() - 0.5)*8, (Math.random() - 0.5)*8); if (RB.list.indexOf(b) < 0) RB.list.push(b); }
     BINS.grid.near(car.x, car.z, 4, B => { if (B.down || B.held) return; const c = boxPush(P, B.x, B.z, 0.42); if (!c) return;   // knocked flying: the bag goes, the rubbish with it
-      B.down = true; B.vx = cvx*0.9 - c.nx*2; B.vz = cvz*0.9 - c.nz*2; B.vy = 2 + sp*0.12; B.y = 0; B.sp = (Math.random() - 0.5)*10; B.sx = 4 + Math.random()*6; BINS.fly.push(B); B.g.userData.bag.visible = false;
+      B.down = true; B.g.userData.bag.visible = false; binRB(B, new THREE.Vector3(cvx*0.9 - c.nx*2, 2 + sp*0.12, cvz*0.9 - c.nz*2), new THREE.Vector3((Math.random() - 0.5)*10, (Math.random() - 0.5)*6, 4 + Math.random()*6));
       const y = Y(B.x, B.z) + 0.9; for (let k = 0; k < 10; k++) lifeFx.emit(B.x, y, B.z, B.vx*0.5 + (Math.random() - 0.5)*3, 1 + Math.random()*2.5, B.vz*0.5 + (Math.random() - 0.5)*3, 1.2 + Math.random(), 0.12, 0.18, 0.9, 0.2, 0.18, 0.14, 0.3, 0.26, 0.2);
       if (audio) beep(160, 0.15, 0.12, 'square'); }); }
-  for (let i = BINS.fly.length - 1; i >= 0; i--) { const B = BINS.fly[i], g = B.g; B.vy -= 9.8*dt; B.x += B.vx*dt; B.z += B.vz*dt; B.y += B.vy*dt; g.rotation.y += B.sp*dt; g.rotation.x += B.sx*dt;
-    if (B.y <= 0 && B.vy < 0) { B.y = 0; B.vy *= -0.3; B.vx *= 0.6; B.vz *= 0.6; B.sp *= 0.5; B.sx *= 0.5; if (Math.hypot(B.vx, B.vz) < 0.6) { g.rotation.x = Math.PI/2; g.rotation.z = 0; BINS.fly.splice(i, 1); } }   // lands on its side and stays
-    g.position.set(B.x, Y(B.x, B.z) + B.y + 0.35, B.z); }   // (pivot at the base: on its side the body's half depth up)
-  if ((BINS.rt = (BINS.rt || 0) + dt) >= 1) { for (const B of BINS.list) if (!B.full && !B.down && (B.refill -= BINS.rt) <= 0) binFull(B, true); BINS.rt = 0; } }   // (a week later, in game minutes; looked at once a second)
+  if ((BINS.rt = (BINS.rt || 0) + dt) >= 1) { for (const B of BINS.list) { if (!B.full && !B.down && (B.refill -= BINS.rt) <= 0) binFull(B, true); if (B.rb) { B.x = B.rb.p.x; B.z = B.rb.p.z; } } BINS.rt = 0; } }   // (a week later, in game minutes; looked at once a second)
 function makeGarbageTruck() { const G = new THREE.Group(), green = lmat(0x2f6a3a, 0.5), white = lmat(0xf0f0ea, 0.45), glass = lmat(0x223040, 0.15), black = lmat(0x141414, 0.8), hub = lmat(0xc8c8c8, 0.35), steel = lmat(0x8a8e92, 0.4), amber = new THREE.MeshStandardMaterial({ color: 0xffa020, emissive: 0xff8a10, emissiveIntensity: 0.2, roughness: 0.3 });
   G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z, rx, sh) => { const me = lmesh(lbox(w, h, d), m, x, y, z, G, sh); if (rx) me.rotation.x = rx; return me; };
   B(2.3, 0.4, 7.6, black, 0, 0.75, -0.1);                                            // chassis
@@ -8330,7 +8339,7 @@ function vanTo(v, V, tx, tz, ni, ahead) { const { nodes } = roadGraph(), si = va
 function nodeRoute(i) { const G = roadGraph(); if (!G.dr) G.dr = new Float32Array(G.nodes.length).fill(-1); if (G.dr[i] < 0) G.dr[i] = distRoute(G.nodes[i].x, G.nodes[i].z); return G.dr[i]; }   // (a street node's distance from the rally route, worked out once)
 const vanNode = (v) => { const [x, z] = lloc(v.x, v.z, v.yaw, 0, v.hl + 3); return nearestNode(x, z); };   // (the street node just in front of it: routes start ahead, not behind)
 function garbageNext(v, V) { const { nodes } = roadGraph(), si = vanNode(v); if (si < 0) return false; const { dist, prev } = rgDijkstra(si); let best = null, bs = Infinity;
-  for (const B of BINS.list) { if (!B.full || B.down || B.ni < 0 || Math.hypot(B.x - v.x, B.z - v.z) < 14) continue; const d = dist[B.ni]; if (!isFinite(d) || d > 600 || B.route < 20) continue;
+  for (const B of BINS.list) { if (!B.full || B.down || B.ni < 0 || Math.hypot(B.x - v.x, B.z - v.z) < 14) continue; const d = dist[B.ni]; if (!isFinite(d) || d > 2500 || B.route < 20) continue;   // (2.10.: 50 bins, far apart — the next one can be across the village)
     let bad = 0, out = null; for (let j = B.ni; j >= 0 && j !== si; j = prev[j]) { if (nodeRoute(j) < 9) bad++; if (dist[j] >= 9) out = nodes[j]; }
     const turn = out && Math.abs(angDiff(Math.atan2(out.x - v.x, out.z - v.z) - v.yaw)) > 1.6, sc = d + bad*40 + (turn ? 150 : 0); if (sc < bs) { bs = sc; best = B; } }   // (the nearest full one ahead, not by way of the rally route)
   if (!best) return false; V.target = best; return vanTo(v, V, best.x, best.z, best.ni, v.hl); }
@@ -8342,7 +8351,8 @@ const binmanTask = (V) => ({ kind: 'binman', update(h, dt, t) { const v = V.v, S
     B.g.position.set(bx, Y(bx, bz), bz); B.g.rotation.set(-0.3, h.yaw + Math.PI, 0); P.armL = P.armR = -0.9;   // tilted back on its wheels, pulled along
     if (done) { if (S.m === 'wheel') { S.m = 'lift'; S.t = 0; } else { B.held = false; binPlace(B); V.job.shift(); S.m = 'go'; } } return; }
   if (S.m === 'lift') { S.t += dt; h.vx = h.vz = 0; h.yaw = v.yaw + Math.PI; const k = Math.min(1, S.t/0.8)*Math.min(1, Math.max(0, (2.6 - S.t)/0.8)), [bx, bz] = lloc(v.x, v.z, v.yaw, 0, -(v.hl + 0.85 - k*0.35));
-    B.g.position.set(bx, Y(bx, bz) + k*1.25, bz); B.g.rotation.set(-k*2.0, v.yaw, 0);   // (on the lift at the back: up and tipped over the hopper's lip) P.armL = P.armR = -1.2 - k*1.2; const pl = v.view.g.userData.plate; pl.rotation.x = S.t > 1.2 && S.t < 2.4 ? Math.sin((S.t - 1.2)/1.2*Math.PI)*1.1 : 0;   // up, tipped, the press comes down
+    B.g.position.set(bx, Y(bx, bz) + k*1.25, bz); B.g.rotation.set(-k*2.0, v.yaw, 0);   // (on the lift at the back: up and tipped over the hopper's lip)
+    P.armL = P.armR = -1.2 - k*1.2; const pl = v.view.g.userData.plate; pl.rotation.x = S.t > 1.2 && S.t < 2.4 ? Math.sin((S.t - 1.2)/1.2*Math.PI)*1.1 : 0;   // up, tipped, the press comes down (2.10.: this line had been swallowed by the comment before it)
     if (S.t > 1.0 && B.full) { binFull(B, false); B.refill = 300 + Math.random()*300; V.emptied = (V.emptied || 0) + 1; if (audio && Math.hypot(car.x - v.x, car.z - v.z) < 60) { beep(90, 0.35, 0.1, 'sawtooth'); setTimeout(() => beep(70, 0.4, 0.08, 'sawtooth'), 300); } }
     if (S.t > 2.8) S.m = 'back'; return; }
   if (S.m === 'board') { if (walkTo(h, rx, rz, 2.6, dt)) { h.seat = V.step; S.m = 'ride'; } } },
@@ -8350,7 +8360,7 @@ const binmanTask = (V) => ({ kind: 'binman', update(h, dt, t) { const v = V.v, S
   reset(h) { V.w.m = 'ride'; h.seat = V.step; } });
 function garbageAI(V) { return serviceVanAI(V, { vmax: 8,
   atStop: (v) => { const h = V.man, S = V.w, bc = v.view.g.userData.beacon; bc.material.emissiveIntensity = 0.2 + Math.max(0, Math.sin(worldT*9))*2.5;
-    if (!V.job.length && S.m === 'ride' && !V.sent) { V.sent = true; V.job = BINS.list.filter(B => B.full && !B.down && Math.hypot(B.x - v.x, B.z - v.z) < 12).sort((a, b) => Math.hypot(a.x - v.x, a.z - v.z) - Math.hypot(b.x - v.x, b.z - v.z)).slice(0, 4);   // the bins here: off he hops
+    if (!V.job.length && S.m === 'ride' && !V.sent) { V.sent = true; V.job = BINS.list.filter(B => B.full && !B.down && Math.hypot(B.x - v.x, B.z - v.z) < 18).sort((a, b) => Math.hypot(a.x - v.x, a.z - v.z) - Math.hypot(b.x - v.x, b.z - v.z)).slice(0, 4);   // the bins here: off he hops
       if (V.job.length && h && !h.down && !h.gone) { const [sx, sz] = lloc(v.x, v.z, v.yaw, 0.6, -(v.hl + 0.6)); h.seat = null; h.x = sx; h.z = sz; S.m = 'go'; humanSync(h); } else V.job.length = 0; }
     const away = h && (h.down || h.gone || h.hurt);   // (knocked over: the lorry carries on without him)
     if ((S.m === 'ride' || away) && V.sent && V.t <= 0) { bc.material.emissiveIntensity = 0.2; if (garbageNext(v, V)) V.sent = false; else V.t = 8; } },

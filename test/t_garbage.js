@@ -14,7 +14,9 @@ out.run = { emptied: V.emptied, drove: Math.round(Math.hypot(v.x - p0[0], v.z - 
 // (along the street with the near side clipping it, as it happens in a race)
 const B = BINS.list.find(b => !b.down && b.full && Math.hypot(b.x - v.x, b.z - v.z) > 40 && distRoute(b.x, b.z) > 10); if (B) { const a = B.yaw, fx = Math.sin(a), fz = Math.cos(a), dx = Math.cos(a), dz = -Math.sin(a), ang = Math.atan2(dx, dz);
   car.angle = ang; car.x = B.x + fx*1.1 - dx*20; car.z = B.z + fz*1.1 - dz*20; car.vx = dx*15; car.vz = dz*15; let flew = 0;
-  step(60*2.5, (i) => { if (i < 90) { car.vx = dx*15; car.vz = dz*15; car.angle = ang; } if (B.down) flew = Math.max(flew, B.y); });
-  out.hit = { down: B.down, maxHeight: +flew.toFixed(2), moved: +Math.hypot(B.x - B.hx, B.z - B.hz).toFixed(1), lying: +B.g.rotation.x.toFixed(2) }; }
+  step(60*2.5, (i) => { if (i < 90) { car.vx = dx*15; car.vz = dz*15; car.angle = ang; } if (B.rb) flew = Math.max(flew, B.rb.p.y - 0.46 - Y(B.rb.p.x, B.rb.p.z)); });
+  const up = B.rb ? new THREE.Vector3(0, 1, 0).applyQuaternion(B.rb.q).y : 1; out.hit = { down: B.down, rb: !!B.rb, maxHeight: +flew.toFixed(2), moved: B.rb ? +Math.hypot(B.rb.p.x - B.hx, B.rb.p.z - B.hz).toFixed(1) : 0, tiltDeg: Math.round(Math.acos(Math.max(-1, Math.min(1, up)))*57.3), asleep: B.rb ? B.rb.sleep : null };
+  // drive into it again where it lies
+  if (B.rb) { const p0 = B.rb.p.clone(); car.x = p0.x - dx*12; car.z = p0.z - dz*12; car.angle = ang; step(60*2, (i) => { if (i < 60) { car.vx = dx*12; car.vz = dz*12; car.angle = ang; } }); out.hit.again = +Math.hypot(B.rb.p.x - p0.x, B.rb.p.z - p0.z).toFixed(1); } }
 startRace(false); step(10); out.afterR = { down: BINS.list.filter(b => b.down).length, empty: BINS.list.filter(b => !b.full).length, worker: V.w.m, home: Math.round(Math.hypot(v.x - v.home.x, v.z - v.home.z)) };
 return out;
