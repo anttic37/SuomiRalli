@@ -5005,6 +5005,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Nykiminen kisan alussa pois: kaikki piirto-ohjelmat käännetään valmiiksi jo alkuruudussa, eikä kesken ajon, kun uusi talo, auto tai kyltti tulee ensimmäistä kertaa näkyviin', '14.46'],
   ['2.10.', 'Lisää kevennystä: ruudunpäivitys enintään 60 (V = rajoittamaton), varjot tiiviimmällä alueella ja terävämpinä, kaukaisista pihojen autoista lähtevät renkaat ja pikkuosat 150 m:stä, kaukaiset ihmiset liikkuvat 300 m:n takana kerran sekunnissa kukin omaan tahtiinsa', '12.41'],
   ['2.10.', 'Peli kevyemmäksi: puiden latvoissa vähemmän kulmia, kaukaiset ihmiset päivittyvät harvemmin (50 m:stä alkaen) ja kaukaisia savuja tehdään vähemmän mutta isompina. Pelin logiikka noin neljänneksen kevyempi', '12.15'],
   ['2.10.', 'Tilastot tarkemmiksi: pelin avaukset, Enter-aloitukset, R-painallukset ja maaliin ajetut kierrokset lasketaan nyt erikseen ja päivittäin (tekijän sivulle)', '08.42'],
@@ -11433,7 +11434,11 @@ function boot() { if (BOOTED) return; BOOTED = true;
   camLookAt.set(car.x+Math.sin(car.angle)*14, Y(car.x,car.z) + 0.2, car.z+Math.cos(car.angle)*14);
   camera.position.copy(camPos);
   requestAnimationFrame(loop);
+  // 2.10.: every shader the world needs compiled now, while the start screen is up — not mid-race the first time a house, a yard car or a sign
+  // comes into view (13 compiles in the first 20 s of a lap, each a 20–100 ms hitch on Windows); compile() walks the whole scene, hidden things too
+  setTimeout(() => { try { const t0 = performance.now(); renderer.compile(scene, camera); WARM.ms = Math.round(performance.now() - t0); WARM.n = renderer.info.programs.length; } catch (e) {} }, 400);
 }
+const WARM = { ms: 0, n: 0 };
 requestAnimationFrame(() => setTimeout(boot, 0)); setTimeout(boot, 120);   // (the timer: a background tab gets no frames)
 </script>
 </body>

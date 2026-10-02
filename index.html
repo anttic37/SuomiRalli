@@ -346,7 +346,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 09.41 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 11.46 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -5002,6 +5002,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['2.10.', 'Nykiminen kisan alussa pois: kaikki piirto-ohjelmat käännetään valmiiksi jo alkuruudussa, eikä kesken ajon, kun uusi talo, auto tai kyltti tulee ensimmäistä kertaa näkyviin', '14.46'],
   ['2.10.', 'Lisää kevennystä: ruudunpäivitys enintään 60 (V = rajoittamaton), varjot tiiviimmällä alueella ja terävämpinä, kaukaisista pihojen autoista lähtevät renkaat ja pikkuosat 150 m:stä, kaukaiset ihmiset liikkuvat 300 m:n takana kerran sekunnissa kukin omaan tahtiinsa', '12.41'],
   ['2.10.', 'Peli kevyemmäksi: puiden latvoissa vähemmän kulmia, kaukaiset ihmiset päivittyvät harvemmin (50 m:stä alkaen) ja kaukaisia savuja tehdään vähemmän mutta isompina. Pelin logiikka noin neljänneksen kevyempi', '12.15'],
   ['2.10.', 'Tilastot tarkemmiksi: pelin avaukset, Enter-aloitukset, R-painallukset ja maaliin ajetut kierrokset lasketaan nyt erikseen ja päivittäin (tekijän sivulle)', '08.42'],
@@ -11430,7 +11431,11 @@ function boot() { if (BOOTED) return; BOOTED = true;
   camLookAt.set(car.x+Math.sin(car.angle)*14, Y(car.x,car.z) + 0.2, car.z+Math.cos(car.angle)*14);
   camera.position.copy(camPos);
   requestAnimationFrame(loop);
+  // 2.10.: every shader the world needs compiled now, while the start screen is up — not mid-race the first time a house, a yard car or a sign
+  // comes into view (13 compiles in the first 20 s of a lap, each a 20–100 ms hitch on Windows); compile() walks the whole scene, hidden things too
+  setTimeout(() => { try { const t0 = performance.now(); renderer.compile(scene, camera); WARM.ms = Math.round(performance.now() - t0); WARM.n = renderer.info.programs.length; } catch (e) {} }, 400);
 }
+const WARM = { ms: 0, n: 0 };
 requestAnimationFrame(() => setTimeout(boot, 0)); setTimeout(boot, 120);   // (the timer: a background tab gets no frames)
 </script>
 </body>
