@@ -464,7 +464,7 @@ const I18N = {
   '💥 SELITTÄMÄTÖN VIKA – R = uusi kone': ['💥 UNEXPLAINED FAILURE – R = new plane', '💥 UFORKLARLIG FEIL – R = nytt fly'],
   '🍎 OMENA! ({0} mukana)': ['🍎 AN APPLE! ({0} on you)', '🍎 ET EPLE! ({0} på deg)'], '👴 ISÄNTÄ HUOMASI! AUTOLLE JA 100 M PÄÄHÄN!': ['👴 THE OWNER SAW YOU! TO THE CAR, 100 M AWAY!', '👴 EIEREN SÅ DEG! TIL BILEN, 100 M UNNA!'], 'HEI! OMENAVARAS!': ['HEY! APPLE THIEF!', 'HEI! EPLETYV!'], 'MINUN OMENANI!': ['MY APPLES!', 'EPLENE MINE!'], 'ODOTAPPAS KUN SAAN KIINNI!': ['JUST WAIT TILL I CATCH YOU!', 'VENT TIL JEG TAR DEG!'], 'SEIS SIINÄ, ROSVO!': ['STOP RIGHT THERE, ROBBER!', 'STOPP DER, RØVER!'], 'NYT LÄHTEE!': ['NOW YOU GET IT!', 'NÅ SKAL DU FÅ!'],
   '👴 KIINNI JÄIT! OMENAT TAKAISIN': ['👴 CAUGHT! THE APPLES GO BACK', '👴 TATT! EPLENE TILBAKE'], '🍎 KARKUUN! +{0} OMENAA (yht. {1})': ['🍎 GOT AWAY! +{0} APPLES ({1} in all)', '🍎 SLAPP UNNA! +{0} EPLER ({1} i alt)'],
-  '👴 ISÄNTÄ SAI KIINNI! LYÖ (VÄLILYÖNTI) NIIN PÄÄSET IRTI': ['👴 THE OWNER GOT YOU! PUNCH (SPACE) TO BREAK FREE', '👴 EIEREN TOK DEG! SLÅ (MELLOMROM) FOR Å KOMME LØS'], '👊 PÄÄSIT IRTI! JUOKSE AUTOLLE': ['👊 FREE! RUN TO THE CAR', '👊 LØS! LØP TIL BILEN'], '🍎 {0} · ISÄNTÄ {1} / {2} M': ['🍎 {0} · OWNER {1} / {2} M', '🍎 {0} · EIEREN {1} / {2} M'],
+  '👰 MORSIAN SUUTTUI! HÄÄT PILALLA – JUOKSE!': ['👰 THE BRIDE IS FURIOUS! WEDDING RUINED – RUN!', '👰 BRUDEN ER RASENDE! BRYLLUPET ØDELAGT – LØP!'], '👰 MORSIAN PALASI AUTOON – HÄÄT JATKUVAT': ['👰 THE BRIDE IS BACK IN THE CAR – THE WEDDING GOES ON', '👰 BRUDEN ER TILBAKE I BILEN – BRYLLUPET FORTSETTER'], '🎉 LIITYIT HÄÄSAATTUEESEEN! VIERAAT HEITTÄVÄT RIISIÄ': ['🎉 YOU JOINED THE WEDDING CONVOY! THE GUESTS THROW RICE', '🎉 DU BLE MED I BRYLLUPSFØLGET! GJESTENE KASTER RIS'], '👴 ISÄNTÄ SAI KIINNI! LYÖ (VÄLILYÖNTI) NIIN PÄÄSET IRTI': ['👴 THE OWNER GOT YOU! PUNCH (SPACE) TO BREAK FREE', '👴 EIEREN TOK DEG! SLÅ (MELLOMROM) FOR Å KOMME LØS'], '👊 PÄÄSIT IRTI! JUOKSE AUTOLLE': ['👊 FREE! RUN TO THE CAR', '👊 LØS! LØP TIL BILEN'], '🍎 {0} · ISÄNTÄ {1} / {2} M': ['🍎 {0} · OWNER {1} / {2} M', '🍎 {0} · EIEREN {1} / {2} M'],
   '👴 ISÄNTÄ REPII OVESTA! AJA!': ['👴 THE OWNER IS AT THE DOOR! DRIVE!', '👴 EIEREN RISTER I DØRA! KJØR!'], '🚗 ISÄNTÄ PUTOSI KYYDISTÄ!': ['🚗 THE OWNER FELL OFF!', '🚗 EIEREN FALT AV!'],
   'Omenavarkaat · kaikki kuskit': ['Apple thieves · all drivers', 'Epletyver · alle sjåfører'], 'ei vielä omenavarkaita — kävele (F) pihan omenapuulle': ['no apple thieves yet — walk (F) to a yard apple tree', 'ingen epletyver ennå — gå (F) til et epletre i en hage'],
   '🔥 ENNÄTYSVAUHTI': ['🔥 RECORD PACE', '🔥 REKORDFART'],
@@ -5065,6 +5065,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Hääsaattue kiertää kylää: valkoinen hääauto peltipurkkeineen ja kolme vierasautoa tööttäilee. Aja jonon perään, niin vieraat heittävät riisiä – törmää, niin morsian ja sulhanen juoksevat perääsi', '13.14'],
   ['3.10.', 'Lehdessä uusi juttu: Omenasota – isäntä tulee ovesta ja huutaa, hyppy omenaan, ravistelu, ovesta repiminen ja omenatarhat', '07.07'],
   ['3.10.', 'Omenat luodaan lennossa: puu muistaa vain montako omenaa siitä on poimittu, ja omenat piirretään vain lähipuihin (170 m)', '01.06'],
   ['3.10.', 'Mustat laatikot pihojen autojen alta pois (auton varjolevy oli kopioitunut niihin mustana levynä). Isompiin pihoihin omenatarhoja: 2–6 puuta riveissä, omenapuita nyt 755', '00.30'],
@@ -8296,6 +8297,82 @@ function buildPostVan() { const { nodes, adj } = roadGraph(); if (!nodes.length)
   V.man = new Human({ x: c.x, z: c.z, rig, task: postVanManTask(V) }); V.man.inside = true; V.letter = handProp(V.man, lmesh(lbox(0.02, 0.12, 0.2), lmat(0xf4f2ea, 0.7), 0, 0, 0)); V.letter.visible = false;
   X3.postVan = V; X3.reset.push(() => { V.man.inside = true; V.man.st = null; V.out = false; V.letter.visible = false; humanSync(V.man); }); }
 
+// ── the wedding convoy (3.10., Antti): a white car with ribbons and tin cans, three guests' cars behind, hooting their way round the
+//    side streets. Tag on behind it and the guests throw rice and hoot along; hit one and the convoy stops — the bride (and the groom
+//    after her) jump out and come after you. The lead drives like the post van (serviceVanAI, stop to stop); the others follow its trail. ──
+const WED = { gen: 0, cars: [], trail: [], on: false, joinT: 0, joined: false, angry: 0, hootT: 0, riceT: 0 };
+function makeWedCar(col, lead) { const G = new THREE.Group(); G.rotation.order = 'YXZ';
+  for (const { geo, mat, paint } of carKit()) { let m = mat; if (paint) { m = mat.clone(); m.color.setHex(col); } const me = new THREE.Mesh(geo, m); me.castShadow = true; G.add(me); }
+  const rib = lmat(0xffffff, 0.5), pink = lmat(0xf0a0c0, 0.6);
+  for (const sx of [-1, 1]) lmesh(lbox(0.05, 0.02, 1.5), lead ? pink : rib, sx*0.38, 1.27, -0.35, G, false);   // ribbons over the roof
+  if (lead) { lmesh(lbox(0.5, 0.35, 0.05), rib, 0, 1.0, 2.05, G, false); for (const sx of [-1, 1]) lmesh(lgeo('wedbow', () => new THREE.SphereGeometry(0.12, 8, 6)), pink, sx*0.25, 1.05, 2.1, G, false);   // a bow on the bonnet
+    const sign = new THREE.Mesh(lgeo('wedsign', () => new THREE.PlaneGeometry(1.1, 0.3)), new THREE.MeshBasicMaterial({ map: canvasTex('wedSign', 512, 140, (g, w, h) => { g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h); g.fillStyle = '#c0306a'; g.font = 'bold 74px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('VASTANAINEET', w/2, h/2 + 4); }) }));
+    sign.position.set(0, 0.95, -2.02); sign.rotation.y = Math.PI; G.add(sign);
+    const cans = []; for (let k = 0; k < 5; k++) { const c = lmesh(lgeo('wedcan', () => new THREE.CylinderGeometry(0.07, 0.07, 0.16, 8)), lmat(0xc8c8cc, 0.3), (k - 2)*0.22, 0.08, -2.6 - (k % 2)*0.5, G, false); c.rotation.z = Math.PI/2; cans.push(c); } G.userData.cans = cans; }
+  else lmesh(lbox(0.02, 0.35, 0.2), lmat(0x2050c0, 0.6), 0.6, 1.62, -1.2, G, false);   // a little flag on the aerial
+  return G; }
+function wedHoot(k) { if (!audio || gameState === State.MENU) return; const L = WED.cars[0]; if (!L) return; const d = Math.hypot(L.x - car.x, L.z - car.z); if (d > 90) return; const a = Math.min(0.16, 4/(d + 10))*(k || 1);
+  [0, 0.3, 0.6, 0.75].forEach((t, i) => setTimeout(() => beep(i === 3 ? 523 : 440, i === 3 ? 0.35 : 0.18, a, 'sawtooth'), t*1000)); }   // tuut – tuut – tuu-tuuut
+function wedLeadAI(base) { const f = (v, dt) => {   // the lead waits while the bride and the groom are out (back in by 40 s at most)
+    const out = WED.pair && WED.pair.some(h => !h.inside && !h.down && !h.gone);
+    let lag = 0; for (let k = 1; k < WED.cars.length; k++) lag = Math.max(lag, Math.hypot(WED.cars[k].x - WED.cars[k - 1].x, WED.cars[k].z - WED.cars[k - 1].z)); v.vCap = lag > 26 ? 0 : lag > 16 ? 4 : undefined;   // (somebody left behind: wait)
+    if (WED.angry > 0 || out) { WED.waitT = (WED.waitT || 0) + dt; if (WED.angry <= 0 && WED.waitT > 40) WED.pair.forEach(h => { h.inside = true; humanSync(h); }); speedTo(v, 0); v.ctrl.steer = 0; return; }
+    WED.waitT = 0; base(v, dt); };
+  f.reset = base.reset; f.V = base.V; return f; }
+function wedFollowAI(k) { const f = (v, dt) => { const C = v.ctrl, L = WED.cars[0], pred = WED.cars[k - 1], TR = WED.trail;   // the lead's route, from where I am: the trail between us + its path on
+  if (v.fire || v.charred) { C.hand = true; C.thr = 0; return; }
+  if (v.gen !== WED.gen && L.path) { v.gen = WED.gen; let bi = 0, bd = 1e9; for (let i = 0; i < TR.length; i++) { const d = (TR[i][0] - v.x)**2 + (TR[i][1] - v.z)**2; if (d < bd) { bd = d; bi = i; } }
+    const P = [[v.x, v.z]]; for (let i = bi + 1; i < TR.length; i++) P.push([TR[i][0], TR[i][1]]); P.push([L.x, L.z]); for (let i = 0; i < L.path.length; i++) if (L.cum[i] > L.s + 1) P.push(L.path[i]);
+    const Q = [P[0]]; for (const q of P) if (Math.hypot(q[0] - Q[Q.length - 1][0], q[1] - Q[Q.length - 1][1]) > 0.6) Q.push(q); if (Q.length > 1) setPath(v, Q); v.blockT = v.passT = v.unstickT = 0; v.sw = 0; }
+  if (WED.angry > 0 || !v.path) { speedTo(v, 0); C.steer = 0; return; }
+  const gap = Math.hypot(pred.x - v.x, pred.z - v.z); v.follow = pred; v.vCap = gap < 6.5 ? 0 : gap > 28 ? 15 : Math.max(0, Math.max(0, pred.vF) + (gap - 10)*0.6);
+  if (driveAlong(v, dt, 15)) speedTo(v, 0); };
+  f.reset = () => {}; return f; }
+const wedPairTask = (who) => ({ kind: 'wedding', update(h, dt, t) { const L = WED.cars[0]; if (!L) return; const P = WALK.on && WALK.h ? WALK.h : car;
+  if (WED.angry > 0) { const d = Math.hypot(P.x - h.x, P.z - h.z); if (d > 1.6) walkTo(h, P.x, P.z, who ? 5.6 : 6.4, dt); else { h.vx = h.vz = 0; h.yaw = Math.atan2(P.x - h.x, P.z - h.z); }
+    h.pose.armR = -2.6 + Math.sin(t*15 + who)*0.4; if (!who) h.pose.armL = -2.4 + Math.sin(t*13)*0.4; return; }   // the bride: both fists; the groom one
+  const [bx, bz] = lloc(L.x, L.z, L.yaw, who ? -1.3 : 1.3, 0.3); if (walkTo(h, bx, bz, 3.5, dt)) { h.inside = true; humanSync(h); } } });
+function buildWedding() { const { nodes, adj } = roadGraph(); if (!nodes.length) return;
+  let c = null; for (let k = 0; k < 600 && !c; k++) { const i = Math.floor(Math.random()*nodes.length), n = nodes[i], d = distRoute(n.x, n.z); if (d < 40 || d > 220 || Math.abs(n.x) > 500 || Math.abs(n.z) > 500 || adj[i].length < 2) continue;
+    // a line of 4 along the street: from this node back the way the convoy has come, 26 m of road
+    const fwd = adj[i][0][0], back = [[n.x, n.z]]; let prev = fwd, cur = i, len = 0, ok = true;
+    while (len < 31) { const nx = adj[cur].map(a => a[0]).filter(q => q !== prev); if (!nx.length) { ok = false; break; } const q = nx[0], A = nodes[cur], Bn = nodes[q]; len += Math.hypot(Bn.x - A.x, Bn.z - A.z); back.push([Bn.x, Bn.z]); prev = cur; cur = q; }
+    if (!ok) continue; const at = (s0) => { let acc = 0; for (let m = 1; m < back.length; m++) { const a = back[m-1], b = back[m], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (acc + l >= s0) { const t = (s0 - acc)/(l || 1); return [a[0] + (b[0] - a[0])*t, a[1] + (b[1] - a[1])*t, Math.atan2(a[0] - b[0], a[1] - b[1])]; } acc += l; } return null; };
+    const P = [0, 10, 20, 30].map(at); if (P.some(q => !q) || P.some(q => vehicleWithin(q[0], q[1], 6) || planWithin(q[0], q[1], 5, true))) continue; c = { x: P[0][0], z: P[0][1], yaw: Math.atan2(nodes[fwd].x - n.x, nodes[fwd].z - n.z), P }; }
+  if (!c) return; reserve('wedding', [c.x, c.z], 30);
+  const V = { mode: 'stop', t: 5, blocks: [], dMin: 140, dMax: 380, dAim: 260 }, cols = [0xf4f4f0, 0x1c2c5a, 0x8a1c1c, 0x2a5a3a];
+  for (let k = 0; k < 4; k++) { const G = makeWedCar(cols[k], k === 0); lifeGroup.add(G); const x = c.P[k][0], z = c.P[k][1], yk = k ? c.P[k][2] : c.yaw;
+    const ai = k === 0 ? wedLeadAI(serviceVanAI(V, { vmax: 8, atStop: (v) => { if (WED.angry > 0) { V.t = Math.max(V.t, 1); return; } if (V.t <= 0) { if (!planSlot()) return; let ok = false; for (let q = 0; q < 6 && !ok; q++) ok = iceRoute(v, V) && (V.mode === 'drive' || (V.tries || 0) > 3);   // (no turning round in the road: the others are right behind)
+        if (ok) { V.tries = 0; WED.gen++; wedHoot(); } else { V.mode = 'stop'; V.t = 4; V.tries = (V.tries || 0) + 1; } } },
+      arrive: () => { V.t = 3 + Math.random()*3; }, reset: () => { V.mode = 'stop'; V.t = 5; V.blocks.length = 0; V.dmg = 0; V.wt = 0; } })) : wedFollowAI(k);
+    const v = new Vehicle({ kind: 'car', x, z, yaw: yk, hw: 0.86, hl: 1.95, view: { kind: 'mesh', g: G }, axle: [0.8, 1.4, -1.35], ai }); v.blockT = v.passT = 0; v.passSide = 1; v.sw = 0; v.wed = k; WED.cars.push(v); }
+  const L = WED.cars[0]; for (let k = 3; k >= 0; k--) WED.trail.push([c.P[k][0], c.P[k][1], k === 3 ? 0 : Math.hypot(c.P[k][0] - c.P[k+1][0], c.P[k][1] - c.P[k+1][1])]);
+  const bride = makeAdult(0xfaf8f2, 0xfaf8f2, 0x8a6a3a, { sel: { hair: 3, top: 6, bareLegs: 1 } }), groom = makeAdult(0x18181c, 0x18181c, 0x3a2a1a, { sel: { hair: 0, top: 2, bottom: 2, longSleeve: 1, longPants: 1 } });
+  WED.pair = [new Human({ x: c.x, z: c.z, rig: bride, task: wedPairTask(0) }), new Human({ x: c.x, z: c.z, rig: groom, task: wedPairTask(1) })]; WED.pair.forEach(h => { h.inside = true; h.wed = true; L.crew.push(h); humanSync(h); });
+  lmesh(lbox(0.36, 0.5, 0.06), lmat(0xffffff, 0.4), 0, 1.62, -0.12, bride, false);   // the veil
+  WED.dmg = WED.cars.map(v => v.damage); WED.on = true; X3.upd.push(weddingUpdate);
+  X3.reset.push(() => { WED.angry = 0; WED.joined = false; WED.joinT = 0; WED.pair.forEach(h => { h.inside = true; h.st = null; humanSync(h); }); }); }
+function weddingUpdate(dt) { if (!WED.on) return; const L = WED.cars[0], TR = WED.trail;
+  { const e = TR[TR.length - 1], d = Math.hypot(L.x - e[0], L.z - e[1]); if (d > 0.8) { TR.push([L.x, L.z, d]); if (TR.length > 500) { const cut = TR.length - 400; TR.splice(0, cut); for (const v of WED.cars) if (v.ti !== undefined) v.ti = Math.max(0, v.ti - cut); } } }
+  const cans = L.view.g.userData.cans; if (cans && Math.abs(L.vF) > 0.5) cans.forEach((c, k) => { c.position.x = (k - 2)*0.22 + Math.sin(worldT*13 + k*2)*0.08; c.rotation.y = Math.sin(worldT*9 + k)*0.6; });   // rattling behind
+  const dP = Math.hypot(L.x - car.x, L.z - car.z);
+  // hit: the convoy stops, the bride and the groom come after you
+  WED.cars.forEach((v, k) => { if (v.damage > WED.dmg[k] + 0.4 && Math.hypot(v.x - car.x, v.z - car.z) < 9 && WED.angry <= 0 && gameState === State.RACING) { WED.angry = 22;
+      WED.pair.forEach((h, i) => { const [ox, oz] = lloc(L.x, L.z, L.yaw, i ? -1.3 : 1.3, 0.3); h.x = ox; h.z = oz; h.inside = false; h.st = null; humanSync(h); });
+      pizzaMsg(T('👰 MORSIAN SUUTTUI! HÄÄT PILALLA – JUOKSE!'), true); if (audio) { beep(660, 0.25, 0.1, 'square'); setTimeout(() => beep(330, 0.4, 0.1, 'square'), 220); } }
+    WED.dmg[k] = v.damage; });
+  if (WED.angry > 0) { const P = WALK.on && WALK.h ? WALK.h : car; const far = Math.min(...WED.pair.map(h => Math.hypot(h.x - P.x, h.z - P.z)));
+    if ((WED.angry -= dt) <= 0 || far > 70) { WED.angry = 0; pizzaMsg(T('👰 MORSIAN PALASI AUTOON – HÄÄT JATKUVAT'), true); } return; }
+  // tagging along behind the last car: the guests throw rice and hoot with you
+  const B = WED.cars[3], sy = Math.sin(B.yaw), cy = Math.cos(B.yaw), dx = car.x - B.x, dz = car.z - B.z, back = -(sy*dx + cy*dz), lat = Math.abs(cy*dx - sy*dz);
+  const tag = gameState === State.RACING && !WALK.on && back > 4 && back < 26 && lat < 4 && Math.abs(angDiff(car.angle - B.yaw)) < 0.7 && Math.hypot(car.vx, car.vz) > 2;
+  WED.joinT = tag ? WED.joinT + dt : Math.max(0, WED.joinT - dt*2);
+  if (!WED.joined && WED.joinT > 3) { WED.joined = true; pizzaMsg(T('🎉 LIITYIT HÄÄSAATTUEESEEN! VIERAAT HEITTÄVÄT RIISIÄ'), true); wedHoot(1.3); }
+  if (WED.joined && WED.joinT <= 0) WED.joined = false;
+  if (WED.joined && (WED.riceT -= dt) <= 0) { WED.riceT = 0.06; const v = WED.cars[1 + Math.floor(Math.random()*3)], sd = Math.random() < 0.5 ? -1 : 1, [rx, rz] = lloc(v.x, v.z, v.yaw, sd*0.9, -0.3);
+    for (let q = 0; q < 3; q++) lifeFx.emit(rx, v.gy + 1.3, rz, Math.cos(v.yaw)*sd*1.5 + (Math.random() - 0.5)*2, 1.5 + Math.random()*1.5, -Math.sin(v.yaw)*sd*1.5 + (Math.random() - 0.5)*2, 1.1, 0.12, 0.1, 0.95, 0.98, 0.97, 0.9, 0.95, 0.94, 0.88); }
+  if (dP < 70 && (WED.hootT -= dt) <= 0) { WED.hootT = WED.joined ? 4 + Math.random()*2 : 9 + Math.random()*8; if (Math.abs(L.vF) > 1) wedHoot(); } }
+
 // ── the bin lorry: green 240-litre wheelie bins at the front of every house by its street, a bag sticking out of the full ones. The
 //    lorry goes from bin to bin (nearest full one first, not along the rally route); the binman hops off the back step, wheels the bins
 //    round it to the back, up they go, the press thumps, back they go, and he rides on. The rally car sends a bin flying. ──
@@ -10041,7 +10118,7 @@ function nukeReset() { NUKE.armT = -1; if (!NUKE.on) return; NUKE.on = false; NU
 
 function lifeExtras3Build() {
   TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.heli = null; X3.station = null; X3.sauna = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
-  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildBins(); buildApples(); buildGarbageTruck(); buildTow(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
+  buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildWedding(); buildBins(); buildApples(); buildGarbageTruck(); buildTow(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
 }
 // ── the hitchhiker: by the race route a few hundred metres before the K-shop, a cardboard sign "K-KAUPPA" and a thumb out.
 //    Stop by him and he walks to the window and gets in; stop in the K-shop yard and he gets out, thanks you and goes in —
