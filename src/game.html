@@ -5065,6 +5065,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Tyhjällä kentällä (?tyhja) auto on nyt kokonaan Rapierin fysiikkaa: 1000 kg kori jousitetuilla pyörillä, etuveto. Vanha tapa: ?tyhja=oma', '19.54'],
   ['3.10.', 'Tyhjä testikenttä fysiikalle: suomiralli.netlify.app/?tyhja – tasainen kenttä, kuutioita, palloja, sylintereitä, paali, roskis, pyramidi, keilat ja seinä. Fysiikassa auto on nyt auton muotoinen (viisto konepelti): esineet nousevat pellille ja lentävät eivätkä jää keulaan', '19.47'],
   ['3.10.', 'Paalit eivät enää jää auton sisään: törmäys toimii nyt molempiin suuntiin, ja auto hidastuu paalin painon mukaan. Uusi testipenkki: suomiralli.netlify.app/?fysiikka näyttää törmäysmuodot rautalankana ja paalirivin lähtösuoralla', '19.29'],
   ['3.10.', 'Heinäpaali ei enää lennä 500 km/h kuuseen kovassa vauhdissa törmätessä (fysiikka laskee nyt tiheämmin)', '19.19'],
@@ -6975,7 +6976,7 @@ function staticNear(x, z, r, fn) { STATIC.near(x, z, r, fn); }
 // Rapier (rapier3d-compat, WASM, from the CDN; loaded once, cached). The car stays the game's own hand-tuned model — in Rapier it's a
 // kinematic box that shoves things. The ground is one heightfield of Y() over the world; houses, sheds and trees go in as fixed colliders
 // round whatever is awake. First user: the hay bales (if Rapier doesn't load, they keep their old code).
-const TESTBED = { want: /[?&]tyhja\b/.test(location.search), on: false, X0: 4000, Z0: 4000, items: [], G: null };
+const TESTBED = { want: /[?&]tyhja\b/.test(location.search), rcarWant: !/[?&]tyhja=oma\b/.test(location.search), rcar: false, on: false, X0: 4000, Z0: 4000, items: [], G: null };
 const PHYS = { R: null, world: null, ready: false, carB: null, carC: null, fixed: new Set(), acc: 0, failed: false, debug: /[?&]fysiikka\b/.test(location.search), dbg: null, CAR_M: 1000 };
 function physLoad() { if (PHYS.R || PHYS.failed || PHYS.loading) return; PHYS.loading = true;
   import('https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/rapier.es.js').then(async m => { const R = m.default || m; await R.init(); PHYS.R = R; physWorld(); })
@@ -7005,7 +7006,7 @@ function physCar(k) {   // the car's box along the way it went this frame (k of 
   const q = new THREE.Quaternion().setFromAxisAngle(THREE.Object3D.DefaultUp, a), t = { x, y: Y(x, z) + 0.6, z }, r = { x: q.x, y: q.y, z: q.z, w: q.w };
   if (jump) { PHYS.carB.setTranslation(t, true); PHYS.carB.setRotation(r, true); } else { PHYS.carB.setNextKinematicTranslation(t); PHYS.carB.setNextKinematicRotation(r); } }
 function physStep(dt) { if (!PHYS.ready) return; PHYS.acc = Math.min(PHYS.acc + dt, 4/120); const n = Math.floor(PHYS.acc*120 + 1e-6); if (!n) return;
-  for (let i = 1; i <= n; i++) { physCar(i/n); const near = physNearBodies(), v0 = near.map(o => o.rb.linvel()); PHYS.world.step(); physCarExchange(near, v0); } PHYS.acc -= n/120; PHYS.cp = { x: car.x, z: car.z, a: car.angle }; }
+  for (let i = 1; i <= n; i++) { if (PHYS.vc) { PHYS.vc.updateVehicle(1/120); PHYS.world.step(); continue; } physCar(i/n); const near = physNearBodies(), v0 = near.map(o => o.rb.linvel()); PHYS.world.step(); physCarExchange(near, v0); } PHYS.acc -= n/120; PHYS.cp = { x: car.x, z: car.z, a: car.angle }; }
 // two ways (3.10., Antti: 'menee sisään, kimpoaa kuuseen'): Rapier moves the car's box as if it weighed infinitely much — the bale took all of
 // the blow and the car drove on into it. After each step, a body the car's box touched gets the share it would have got from a 1000 kg car
 // (momentum kept: its change scaled by m_car/(m_car + m), the car's velocity changed by the rest the other way)
@@ -7062,17 +7063,33 @@ function testbedSetup() { const R = PHYS.R, W = PHYS.world; if (!R || !W || TEST
   add('seinä', new THREE.BoxGeometry(12, 2, 0.6), 0x506070, R.ColliderDesc.cuboid(6, 1, 0.3), 0, 1, 140, null, true); addStaticBox({ x: X, z: Z + 140, hw: 6, hl: 0.3, yaw: 0, kind: 'wall', h: 2 });   // (the car's own physics bounces off it too)
   add('pylväs', new THREE.BoxGeometry(1, 2.5, 1), 0x506070, R.ColliderDesc.cuboid(0.5, 1.25, 0.5), 22, 1.25, 60, null, true); addStaticBox({ x: X + 22, z: Z + 60, hw: 0.5, hl: 0.5, yaw: 0, kind: 'pole', h: 2.5 });
   lay(G); TESTBED.items.forEach(o => { if (o.wire) lay(o.wire); });
-  car.x = X; car.z = Z; car.angle = 0; car.vx = car.vz = car.speed = 0; PHYS.cp = null;
+  car.x = X; car.z = Z; car.angle = 0; car.vx = car.vz = car.speed = 0; PHYS.cp = null; if (TESTBED.rcarWant) rcarSetup();
   centerMsg(T('TYHJÄ KENTTÄ – aja muotoja päin · R = muodot takaisin'), '#ffe9a8', 3000); }
+// the whole car in Rapier (3.10., Antti: 'ehkä meidän oma ei-fyssa hajottaa rapierin — tee testi autorapierilla'): a 1000 kg body of the car's
+// own shape on four ray-cast wheels (Rapier's vehicle controller), front-wheel drive like the 205; the game's car follows it. ?tyhja=oma: the old way.
+function rcarSetup() { const R = PHYS.R, W = PHYS.world, X = TESTBED.X0, Z = TESTBED.Z0; PHYS.carC.setEnabled(false);
+  const prof = [[-CAR_HL, 0.22], [-CAR_HL, 0.95], [-1.25, 1.33], [0.25, 1.36], [0.95, 0.9], [CAR_HL, 0.68], [CAR_HL, 0.3], [CAR_HL - 0.25, 0.18]], pts = []; for (const [z, y] of prof) for (const sx of [-1, 1]) pts.push(sx*CAR_HW*(y > 1.0 ? 0.88 : 1), y - 0.6, z);
+  const ch = W.createRigidBody(R.RigidBodyDesc.dynamic().setTranslation(X, 0.75, Z).setCanSleep(false).setCcdEnabled(true).setAngularDamping(0.5));
+  const cc = W.createCollider(R.ColliderDesc.convexHull(new Float32Array(pts)).setFriction(0.5).setDensity(1), ch); cc.setMass(1000); ch.setAdditionalMassProperties(0, { x: 0, y: -0.25, z: 0.1 }, { x: 1200, y: 1500, z: 400 }, { x: 0, y: 0, z: 0, w: 1 }, true);
+  const vc = W.createVehicleController(ch); for (const [x, z] of [[0.78, 1.3], [-0.78, 1.3], [0.78, -1.3], [-0.78, -1.3]]) vc.addWheel({ x, y: -0.25, z }, { x: 0, y: -1, z: 0 }, { x: -1, y: 0, z: 0 }, 0.3, WHEEL_RADIUS);
+  for (let i = 0; i < 4; i++) { vc.setWheelSuspensionStiffness(i, 28); vc.setWheelSuspensionCompression(i, 3.5); vc.setWheelSuspensionRelaxation(i, 2.8); vc.setWheelFrictionSlip(i, 2.2); vc.setWheelMaxSuspensionForce(i, 20000); vc.setWheelSideFrictionStiffness(i, 1.0); }
+  PHYS.vc = vc; PHYS.rch = ch; TESTBED.rcar = true; }
+function rcarStep(dt) { const vc = PHYS.vc, ch = PHYS.rch; if (!vc) return; const v = ch.linvel(), r = ch.rotation(), q = new THREE.Quaternion(r.x, r.y, r.z, r.w), f = new THREE.Vector3(0, 0, 1).applyQuaternion(q), vF = v.x*f.x + v.z*f.z;
+  const thr = INPUT.thr() ? 1 : 0, brk = INPUT.brk() ? 1 : 0, st = INPUT.steer(); let eng = thr*3200, brake = 0; if (brk) { if (vF > 1) brake = 25; else eng = -1800; }   // (brake held at a stop: reverse)
+  for (let i = 0; i < 2; i++) { vc.setWheelEngineForce(i, eng); vc.setWheelSteering(i, st*0.5/(1 + Math.abs(vF)*0.04)); } for (let i = 0; i < 4; i++) vc.setWheelBrake(i, brake + (keys['Space'] && i > 1 ? 40 : 0));
+  physStep(dt); const t = ch.translation(), r2 = ch.rotation(); q.set(r2.x, r2.y, r2.z, r2.w); f.set(0, 0, 1).applyQuaternion(q);
+  car.x = t.x; car.z = t.z; car.angle = Math.atan2(f.x, f.z); const v2 = ch.linvel(); car.vx = v2.x; car.vz = v2.z; car.speed = v2.x*f.x + v2.z*f.z;
+  const off = new THREE.Vector3(0, -0.6, 0).applyQuaternion(q); carGroup.position.set(t.x + off.x, t.y + off.y, t.z + off.z); carGroup.quaternion.copy(q); }
 function testbedReset() { for (const o of TESTBED.items) { const h = o.home; o.rb.setTranslation({ x: h.x, y: h.y, z: h.z }, true); o.rb.setRotation({ x: h.q.x, y: h.q.y, z: h.q.z, w: h.q.w }, true); if (o.rb.bodyType() === 0) { o.rb.setLinvel({ x: 0, y: 0, z: 0 }, true); o.rb.setAngvel({ x: 0, y: 0, z: 0 }, true); } }
-  car.x = TESTBED.X0; car.z = TESTBED.Z0; car.angle = 0; car.vx = car.vz = car.speed = 0; PHYS.cp = null; }
+  car.x = TESTBED.X0; car.z = TESTBED.Z0; car.angle = 0; car.vx = car.vz = car.speed = 0; PHYS.cp = null;
+  if (PHYS.rch) { PHYS.rch.setTranslation({ x: TESTBED.X0, y: 0.75, z: TESTBED.Z0 }, true); PHYS.rch.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true); PHYS.rch.setLinvel({ x: 0, y: 0, z: 0 }, true); PHYS.rch.setAngvel({ x: 0, y: 0, z: 0 }, true); } }
 function testbedUpdate(dt) { if (!TESTBED.want) return; if (!TESTBED.on) { if (PHYS.ready && gameState !== State.MENU) testbedSetup(); return; }
-  physStep(dt); let near = null, nd = 1e9, awake = 0;
+  if (!TESTBED.rcar) physStep(dt); let near = null, nd = 1e9, awake = 0;
   for (const o of TESTBED.items) { const t = o.rb.translation(), r = o.rb.rotation(); o.mesh.position.set(t.x, t.y, t.z); o.mesh.quaternion.set(r.x, r.y, r.z, r.w); if (o.wire) { o.wire.position.copy(o.mesh.position); o.wire.quaternion.copy(o.mesh.quaternion); }
     if (o.rb.bodyType() !== 0) continue; if (!o.rb.isSleeping()) awake++; const d = Math.hypot(t.x - car.x, t.z - car.z); if (d < nd) { nd = d; near = o; } }
-  if (PHYS.dbg && PHYS.dbg.car) { const t = PHYS.carB.translation(), r = PHYS.carB.rotation(); PHYS.dbg.car.position.set(t.x, t.y, t.z); PHYS.dbg.car.quaternion.set(r.x, r.y, r.z, r.w); }
+  if (PHYS.dbg && PHYS.dbg.car) { const cb = PHYS.rch || PHYS.carB, t = cb.translation(), r = cb.rotation(); PHYS.dbg.car.position.set(t.x, t.y, t.z); PHYS.dbg.car.quaternion.set(r.x, r.y, r.z, r.w); }
   else if (!PHYS.dbg) { physDbgUpdate(); if (PHYS.dbg) { PHYS.dbg.car.layers.enable(2); } }
-  if (PHYS.dbg && PHYS.dbg.hud && near) { const v = near.rb.linvel(); PHYS.dbg.hud.textContent = 'TYHJÄ KENTTÄ (Rapier)\nauto ' + (Math.hypot(car.vx, car.vz)*3.6).toFixed(0) + ' km/h\nlähin: ' + near.kind + ' ' + nd.toFixed(1) + ' m, ' + (Math.hypot(v.x, v.y, v.z)*3.6).toFixed(0) + ' km/h' + (near.rb.isSleeping() ? ' (nukkuu)' : '') + '\nhereillä ' + awake + '/' + TESTBED.items.filter(o => o.rb.bodyType() === 0).length + '\nR = muodot takaisin'; } }
+  if (PHYS.dbg && PHYS.dbg.hud && near) { const v = near.rb.linvel(); PHYS.dbg.hud.textContent = 'TYHJÄ KENTTÄ – auto: ' + (TESTBED.rcar ? 'RAPIER (oikea fysiikka)' : 'pelin oma') + '\nauto ' + (Math.hypot(car.vx, car.vz)*3.6).toFixed(0) + ' km/h\nlähin: ' + near.kind + ' ' + nd.toFixed(1) + ' m, ' + (Math.hypot(v.x, v.y, v.z)*3.6).toFixed(0) + ' km/h' + (near.rb.isSleeping() ? ' (nukkuu)' : '') + '\nhereillä ' + awake + '/' + TESTBED.items.filter(o => o.rb.bodyType() === 0).length + '\nR = muodot takaisin'; } }
 // ════════ HAY BALES ════════
 // Round bales on the fields (≈ 400 kg, Ø 1.5 m, 1.3 m long, lying on their side): the car knocks them — they roll across their axis and
 // barely slide along it, lose the car a good deal of speed and dent it; they stop against trees, houses and each other. R puts them back.
@@ -11794,7 +11811,7 @@ function loop(time) {
     // hot path so there is no hitch on the first real frame at GO.
     acc += dt;
     const live = gameState === State.RACING;
-    while (acc >= PHYS_DT) { RI.x = car.x; RI.z = car.z; RI.a = car.angle; updateCar(PHYS_DT, live); knockUpdate(); if (WALK.on) { if (WALK.roll) { if (Math.hypot(car.vx, car.vz) < 0.4) { WALK.roll = false; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle; } } else { car.x = WALK.cx; car.z = WALK.cz; car.angle = WALK.ca; car.vx = car.vz = car.speed = 0; } }   /* (parked: it stays put, on any slope) */ updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
+    while (acc >= PHYS_DT) { RI.x = car.x; RI.z = car.z; RI.a = car.angle; (TESTBED.rcar ? rcarStep(PHYS_DT) : updateCar(PHYS_DT, live)); knockUpdate(); if (WALK.on) { if (WALK.roll) { if (Math.hypot(car.vx, car.vz) < 0.4) { WALK.roll = false; WALK.cx = car.x; WALK.cz = car.z; WALK.ca = car.angle; } } else { car.x = WALK.cx; car.z = WALK.cz; car.angle = WALK.ca; car.vx = car.vz = car.speed = 0; } }   /* (parked: it stays put, on any slope) */ updateTires(PHYS_DT); balesUpdate(PHYS_DT); vehiclesPhysics(PHYS_DT); acc -= PHYS_DT; }
     if (live) updateCheckpoints(dt);
   } else {
     acc = 0;
