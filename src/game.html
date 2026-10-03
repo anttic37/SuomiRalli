@@ -462,7 +462,7 @@ const I18N = {
   '😰 AUTO JÄI YKSIN – JOKU VOI VIEDÄ SEN!': ['😰 THE CAR’S ALL ALONE – SOMEONE COULD TAKE IT!', '😰 BILEN STÅR ALENE – NOEN KAN TA DEN!'],
   '😱 EI USKALLA KAUEMMAS – AUTO VARASTETAAN!': ['😱 TOO SCARED TO GO FURTHER – THEY’LL STEAL THE CAR!', '😱 TØR IKKE GÅ LENGRE – BILEN BLIR STJÅLET!'],
   '💥 SELITTÄMÄTÖN VIKA – R = uusi kone': ['💥 UNEXPLAINED FAILURE – R = new plane', '💥 UFORKLARLIG FEIL – R = nytt fly'],
-  '🍎 OMENA! ({0} mukana)': ['🍎 AN APPLE! ({0} on you)', '🍎 ET EPLE! ({0} på deg)'], '👴 ISÄNTÄ HUOMASI! AUTOLLE JA 100 M PÄÄHÄN!': ['👴 THE OWNER SAW YOU! TO THE CAR, 100 M AWAY!', '👴 EIEREN SÅ DEG! TIL BILEN, 100 M UNNA!'], 'HEI! OMENAVARAS!': ['HEY! APPLE THIEF!', 'HEI! EPLETYV!'], 'MINUN OMENANI!': ['MY APPLES!', 'EPLENE MINE!'], 'ODOTAPPAS KUN SAAN KIINNI!': ['JUST WAIT TILL I CATCH YOU!', 'VENT TIL JEG TAR DEG!'], 'SEIS SIINÄ, ROSVO!': ['STOP RIGHT THERE, ROBBER!', 'STOPP DER, RØVER!'], 'NYT LÄHTEE!': ['NOW YOU GET IT!', 'NÅ SKAL DU FÅ!'],
+  '🍎 OMENA! ({0} mukana)': ['🍎 AN APPLE! ({0} on you)', '🍎 ET EPLE! ({0} på deg)'], '👴 ISÄNTÄ HUOMASI! AUTOLLE JA 100 M PÄÄHÄN!': ['👴 THE OWNER SAW YOU! TO THE CAR, 100 M AWAY!', '👴 EIEREN SÅ DEG! TIL BILEN, 100 M UNNA!'], 'HEI! MUN OMENAT!': ['HEY! MY APPLES!', 'HEI! EPLENE MINE!'], 'OOTAPPAS KU SAAN KII!': ['JUST WAIT TILL I CATCH YOU!', 'VENT TIL JEG TAR DEG!'],
   '👴 KIINNI JÄIT! OMENAT TAKAISIN': ['👴 CAUGHT! THE APPLES GO BACK', '👴 TATT! EPLENE TILBAKE'], '🍎 KARKUUN! +{0} OMENAA (yht. {1})': ['🍎 GOT AWAY! +{0} APPLES ({1} in all)', '🍎 SLAPP UNNA! +{0} EPLER ({1} i alt)'],
   '👰 MORSIAN SUUTTUI! HÄÄT PILALLA – JUOKSE!': ['👰 THE BRIDE IS FURIOUS! WEDDING RUINED – RUN!', '👰 BRUDEN ER RASENDE! BRYLLUPET ØDELAGT – LØP!'], '👰 MORSIAN PALASI AUTOON – HÄÄT JATKUVAT': ['👰 THE BRIDE IS BACK IN THE CAR – THE WEDDING GOES ON', '👰 BRUDEN ER TILBAKE I BILEN – BRYLLUPET FORTSETTER'], '🎉 LIITYIT HÄÄSAATTUEESEEN! VIERAAT HEITTÄVÄT RIISIÄ': ['🎉 YOU JOINED THE WEDDING CONVOY! THE GUESTS THROW RICE', '🎉 DU BLE MED I BRYLLUPSFØLGET! GJESTENE KASTER RIS'], '👴 ISÄNTÄ SAI KIINNI! LYÖ (VÄLILYÖNTI) NIIN PÄÄSET IRTI': ['👴 THE OWNER GOT YOU! PUNCH (SPACE) TO BREAK FREE', '👴 EIEREN TOK DEG! SLÅ (MELLOMROM) FOR Å KOMME LØS'], '👊 PÄÄSIT IRTI! JUOKSE AUTOLLE': ['👊 FREE! RUN TO THE CAR', '👊 LØS! LØP TIL BILEN'], '🍎 {0} · ISÄNTÄ {1} / {2} M': ['🍎 {0} · OWNER {1} / {2} M', '🍎 {0} · EIEREN {1} / {2} M'],
   '👴 ISÄNTÄ REPII OVESTA! AJA!': ['👴 THE OWNER IS AT THE DOOR! DRIVE!', '👴 EIEREN RISTER I DØRA! KJØR!'], '🚗 ISÄNTÄ PUTOSI KYYDISTÄ!': ['🚗 THE OWNER FELL OFF!', '🚗 EIEREN FALT AV!'],
@@ -5065,6 +5065,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Omenaisäntä huutaa nyt ääneen: ”HEI! MUN OMENAT!” ja ”OOTAPPAS KU SAAN KII!” (ElevenLabs-äänet)', '17.50'],
   ['3.10.', 'Hääsaattue kiertää kylää: valkoinen hääauto peltipurkkeineen ja kolme vierasautoa tööttäilee. Aja jonon perään, niin vieraat heittävät riisiä – törmää, niin morsian ja sulhanen juoksevat perääsi', '13.14'],
   ['3.10.', 'Lehdessä uusi juttu: Omenasota – isäntä tulee ovesta ja huutaa, hyppy omenaan, ravistelu, ovesta repiminen ja omenatarhat', '07.07'],
   ['3.10.', 'Omenat luodaan lennossa: puu muistaa vain montako omenaa siitä on poimittu, ja omenat piirretään vain lähipuihin (170 m)', '01.06'],
@@ -8459,12 +8460,12 @@ const appleOwnerTask = () => ({ kind: 'appleowner', update(h, dt, t) { const C =
   if (WALK.on ? d < 0.75 && !WALK.h.down : d < 2.3 && Math.hypot(car.vx, car.vz) < 2.5) { if (WALK.on) appleGrab(C); else { C.m = 'door'; C.t = 0; pizzaMsg(T('👴 ISÄNTÄ REPII OVESTA! AJA!'), true); } } },
   knocked(h) { const C = h.mApple; if (C && (C.m === 'grab' || C.m === 'door' || C.m === 'out' || C.m === 'look' || C.m === 'shout')) { C.m = 'run'; C.t = 0; h.task.through = false; } if (C) C.cool = 2; if (WALK.h) WALK.h.sway = 0; },   // (floored: lets go — and once up, comes after you again; the 200 m still stands)
   reset(h) {} });
-const APPLE_SHOUTS = ['HEI! OMENAVARAS!', 'MINUN OMENANI!', 'ODOTAPPAS KUN SAAN KIINNI!', 'SEIS SIINÄ, ROSVO!', 'NYT LÄHTEE!'];
+const APPLE_SHOUTS = ['HEI! MUN OMENAT!', 'OOTAPPAS KU SAAN KII!'], APPLE_VOICE = ['omena1', 'omena2'];   // (3.10., Antti: these two, spoken — audio/omena1–2.mp3)
 function appleShout(C) {   // the shout over his head for a couple of seconds (a sprite of its own in the scene: the people's rigs are batched)
-  const text = T(APPLE_SHOUTS[Math.floor(Math.random()*APPLE_SHOUTS.length)]), c = document.createElement('canvas'), g = c.getContext('2d'), f = 'bold 64px Arial, sans-serif'; g.font = f; const w = Math.ceil(g.measureText(text).width) + 40;
+  const si = C.si = ((C.si === undefined ? Math.floor(Math.random()*2) - 1 : C.si) + 1) % APPLE_SHOUTS.length, text = T(APPLE_SHOUTS[si]), c = document.createElement('canvas'), g = c.getContext('2d'), f = 'bold 64px Arial, sans-serif'; g.font = f; const w = Math.ceil(g.measureText(text).width) + 40;
   c.width = w; c.height = 100; g.font = f; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 12; g.strokeStyle = 'rgba(0,0,0,0.75)'; g.strokeText(text, w/2, 52); g.fillStyle = '#ffdf6a'; g.fillText(text, w/2, 52);
   const sp = C.say = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, depthWrite: false, transparent: true })); sp.renderOrder = 10; sp.scale.set(w/100*0.95, 0.95, 1); sp.userData.t = 2.6; scene.add(sp);
-  if (audio) { beep(260, 0.18, 0.07, 'sawtooth'); setTimeout(() => beep(320, 0.22, 0.07, 'sawtooth'), 190); } }
+  if (audio && !voicePlay(APPLE_VOICE[si], C.h.x, C.h.z)) { beep(260, 0.18, 0.07, 'sawtooth'); setTimeout(() => beep(320, 0.22, 0.07, 'sawtooth'), 190); } }
 function appleShoutsUpdate(dt) { for (const C of APPLES.chase) { const sp = C.say; if (!sp || !sp.parent) continue; if ((sp.userData.t -= dt) <= 0 || C.h.gone) { scene.remove(sp); sp.material.map.dispose(); sp.material.dispose(); continue; }
   sp.position.set(C.h.x, Y(C.h.x, C.h.z) + 2.9, C.h.z); sp.material.opacity = Math.min(1, sp.userData.t*2); } }
 function appleGrab(C) { if (C.m === 'grab') return; C.m = 'grab'; C.t = 0; WALK.grab = C; pizzaMsg(T('👴 ISÄNTÄ SAI KIINNI! LYÖ (VÄLILYÖNTI) NIIN PÄÄSET IRTI'), true); if (audio) beep(200, 0.2, 0.08, 'sawtooth'); }
@@ -10942,10 +10943,16 @@ function initAudio() {
   noise2.start();
   
   const dragSynth = createDragSynth(ctx, master);
-  audio = { ctx, engineSynth, tyreSynth, scGain, grGain, master, dragSynth, noiseBuf: buf };
+  audio = { ctx, engineSynth, tyreSynth, scGain, grGain, master, dragSynth, noiseBuf: buf }; voiceLoad();
   if (ctx.state === 'suspended') ctx.resume();
 }
 
+// recorded voices (3.10.: made with ElevenLabs, audio/*.mp3 beside the game; none in the editor's blob page — then the old beeps)
+const VOICE = { buf: {}, want: ['omena1', 'omena2'], loading: false };
+function voiceLoad() { if (!audio || VOICE.loading || !/^https?:$/.test(location.protocol)) return; VOICE.loading = true;
+  for (const n of VOICE.want) fetch('audio/' + n + '.mp3').then(r => r.ok ? r.arrayBuffer() : null).then(b => b && audio.ctx.decodeAudioData(b)).then(d => { if (d) VOICE.buf[n] = d; }).catch(() => {}); }
+function voicePlay(n, x, z, vol) { if (!audio || !VOICE.buf[n]) return false; const P = WALK.on && WALK.h ? WALK.h : car, d = x === undefined ? 0 : Math.hypot(x - P.x, z - P.z); if (d > 90) return true;
+  const s = audio.ctx.createBufferSource(), g = audio.ctx.createGain(); s.buffer = VOICE.buf[n]; g.gain.value = (vol || 1)*Math.min(1.2, 14/(d + 8)); s.connect(g); g.connect(audio.master); s.start(); return true; }
 function beep(freq, dur = 0.1, vol = 0.25, type = 'sine') {
   if (!audio) return;
   const { ctx, master } = audio;
