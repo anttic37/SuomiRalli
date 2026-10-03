@@ -1,6 +1,6 @@
 # TESTIT — tarkistusketjun kirjanpito (uusin ylimpänä)
 
-- ODOTTAA: ac1cd68 (3.10. 18.18, pääketju) — hääsaattue + ääniefektit. Aja: python3 build.py, regressiot (t_ghost 129.972/118.157/144.414, t_paper_fit "bad":[], t_lap, t_start, t_phases) sekä test/t_wedding.js (gap n. 7–21 m, dmg 0, joined true), test/t_wedding_hit.js (angry, pairOut, calm, backIn true) ja test/t_apples.js. Tarkista että audio/*.mp3 (omena1–2, morsian1–2) latautuvat http:llä (test/serve.mjs, portti 8787). Älä ota isoja PNG-kuvia: __save on tässä ympäristössä hyvin hidas. OK → kirjaa ja kerro Antille, että lehti voi tehdä hääsaattuejutun.
+- 3.10. OK ac1cd68 (tarkistusketju; hääsaattue + äänet): t_ghost 129.972 / 118.157 / 144.414, t_paper_fit "bad":[], t_lap kierros 148.83 s stuck 0, t_start ja t_phases OK, t_wedding gap 3.8–19 m (ilman SEEDiä; SEED=1: 7.4–20.7) dmg 0 joined true, t_wedding_hit angry/pairOut/calm/backIn true, t_apples OK, virheitä 0. Äänet http:llä (serve.mjs 8787, uusi test/t_voice.js via runall_http.sh): omena1–2 ja morsian1–2 latautuvat ja dekoodautuvat (2.0/2.08/2.08/1.2 s), voicePlay OK. Huom: väli-min 3.8 m alittaa "n. 7" kerran ilman siementä – ei törmäystä. serve.mjs vaatii juuren `npm i` (@netlify/blobs).
 
 - 3.10. OK cb0311c (tarkistusketju, lähtötaso): t_ghost 129.972 / 118.157 / 144.414, t_paper_fit "bad":[]. Huom: kaksi rinnakkain → page.goto-aikakatkaisu, yksin OK.
 - 3.10. lähtötaso: t_ghost 129.972 / 118.157 / 144.414, t_paper_fit "bad":[] (pääketju).
