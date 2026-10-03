@@ -5065,6 +5065,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Paalit eivät enää jää auton sisään: törmäys toimii nyt molempiin suuntiin, ja auto hidastuu paalin painon mukaan. Uusi testipenkki: suomiralli.netlify.app/?fysiikka näyttää törmäysmuodot rautalankana ja paalirivin lähtösuoralla', '19.29'],
   ['3.10.', 'Heinäpaali ei enää lennä 500 km/h kuuseen kovassa vauhdissa törmätessä (fysiikka laskee nyt tiheämmin)', '19.19'],
   ['3.10.', 'Peliin oikea fysiikkamoottori (Rapier) irtotavaralle. Ensimmäisenä heinäpaalit: ne kierivät, kolahtavat toisiinsa, puihin ja aittoihin ja pysähtyvät oikean fysiikan mukaan', '19.13'],
   ['3.10.', 'Roskikset ovat nyt tavallisia irto-obuja (tagi "roskis"): auto törmää niihin samalla fysiikalla kuin kaikkeen irtotavaraan, ne eivät jää keulaan kiinni, ja niitä on 100. Roska-auto hakee vain pystyssä olevat', '18.47'],
@@ -6973,7 +6974,7 @@ function staticNear(x, z, r, fn) { STATIC.near(x, z, r, fn); }
 // Rapier (rapier3d-compat, WASM, from the CDN; loaded once, cached). The car stays the game's own hand-tuned model — in Rapier it's a
 // kinematic box that shoves things. The ground is one heightfield of Y() over the world; houses, sheds and trees go in as fixed colliders
 // round whatever is awake. First user: the hay bales (if Rapier doesn't load, they keep their old code).
-const PHYS = { R: null, world: null, ready: false, carB: null, fixed: new Set(), acc: 0, failed: false };
+const PHYS = { R: null, world: null, ready: false, carB: null, carC: null, fixed: new Set(), acc: 0, failed: false, debug: /[?&]fysiikka\b/.test(location.search), dbg: null, CAR_M: 1000 };
 function physLoad() { if (PHYS.R || PHYS.failed || PHYS.loading) return; PHYS.loading = true;
   import('https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/rapier.es.js').then(async m => { const R = m.default || m; await R.init(); PHYS.R = R; physWorld(); })
     .catch(e => { PHYS.failed = true; console.warn('Rapier ei latautunut, vanha fysiikka käytössä', e); }); }
@@ -6985,20 +6986,40 @@ function physWorld() { const R = PHYS.R; if (!R || !HG || !HG.n) return; PHYS.wo
   PHYS.world.createCollider(R.ColliderDesc.heightfield(n, n, h, { x: W, y: 1, z: W }).setFriction(0.9), gb);
   // the car: a kinematic box the size of playerBox, moved to the car every step
   PHYS.carB = PHYS.world.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(car.x, Y(car.x, car.z) + 0.6, car.z));
-  PHYS.world.createCollider(R.ColliderDesc.cuboid(CAR_HW, 0.6, CAR_HL).setFriction(0.6), PHYS.carB);
+  PHYS.carC = PHYS.world.createCollider(R.ColliderDesc.cuboid(CAR_HW, 0.6, CAR_HL).setFriction(0.6), PHYS.carB);
   PHYS.ready = true; if (BALE.im) physBales(); }
 function physFixedNear(x, z, r) {   // houses, sheds, poles (STATIC boxes) and trees round (x, z) as fixed colliders, each once
   const R = PHYS.R, W = PHYS.world;
   staticNear(x, z, r, B => { if (PHYS.fixed.has(B)) return; PHYS.fixed.add(B); const q = new THREE.Quaternion().setFromAxisAngle(THREE.Object3D.DefaultUp, B.yaw || 0), gy = Y(B.x, B.z);
-    W.createCollider(R.ColliderDesc.cuboid(B.hw, 3, B.hl).setTranslation(B.x, gy + 2.5, B.z).setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }).setFriction(0.6)); });
+    W.createCollider(R.ColliderDesc.cuboid(B.hw, 3, B.hl).setTranslation(B.x, gy + 2.5, B.z).setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }).setFriction(0.6)); physDbgAdd(new THREE.BoxGeometry(B.hw*2, 6, B.hl*2), 0x4080ff, B.x, gy + 2.5, B.z, q); });
   if (!TREEG) treeNear(0, 0, 0); for (let cx = Math.floor((x - r)/8); cx <= Math.floor((x + r)/8); cx++) for (let cz = Math.floor((z - r)/8); cz <= Math.floor((z + r)/8); cz++) { const l = TREEG.get(cx*7919 + cz); if (l) for (const t of l) {
-    if (PHYS.fixed.has(t)) continue; PHYS.fixed.add(t); const tr = t[2] ? 0.28 : 0.22, gy = Y(t[0], t[1]); W.createCollider(R.ColliderDesc.cylinder(2, tr).setTranslation(t[0], gy + 2, t[1]).setFriction(0.5)); } } }
+    if (PHYS.fixed.has(t)) continue; PHYS.fixed.add(t); const tr = t[2] ? 0.28 : 0.22, gy = Y(t[0], t[1]); W.createCollider(R.ColliderDesc.cylinder(2, tr).setTranslation(t[0], gy + 2, t[1]).setFriction(0.5)); physDbgAdd(new THREE.CylinderGeometry(tr, tr, 4, 10), 0x40c040, t[0], gy + 2, t[1]); } } }
 function physCar(k) {   // the car's box along the way it went this frame (k of the steps), a jump (a reset, R) taken straight — not as a kick
   if (!PHYS.carB) return; const P = PHYS.cp || (PHYS.cp = { x: car.x, z: car.z, a: car.angle }), jump = Math.hypot(car.x - P.x, car.z - P.z) > 4, x = jump ? car.x : P.x + (car.x - P.x)*k, z = jump ? car.z : P.z + (car.z - P.z)*k, a = jump ? car.angle : P.a + angDiff(car.angle - P.a)*k;
   const q = new THREE.Quaternion().setFromAxisAngle(THREE.Object3D.DefaultUp, a), t = { x, y: Y(x, z) + 0.6, z }, r = { x: q.x, y: q.y, z: q.z, w: q.w };
   if (jump) { PHYS.carB.setTranslation(t, true); PHYS.carB.setRotation(r, true); } else { PHYS.carB.setNextKinematicTranslation(t); PHYS.carB.setNextKinematicRotation(r); } }
 function physStep(dt) { if (!PHYS.ready) return; PHYS.acc = Math.min(PHYS.acc + dt, 4/120); const n = Math.floor(PHYS.acc*120 + 1e-6); if (!n) return;
-  for (let i = 1; i <= n; i++) { physCar(i/n); PHYS.world.step(); } PHYS.acc -= n/120; PHYS.cp = { x: car.x, z: car.z, a: car.angle }; }
+  for (let i = 1; i <= n; i++) { physCar(i/n); const near = physNearBodies(), v0 = near.map(o => o.rb.linvel()); PHYS.world.step(); physCarExchange(near, v0); } PHYS.acc -= n/120; PHYS.cp = { x: car.x, z: car.z, a: car.angle }; }
+// two ways (3.10., Antti: 'menee sisään, kimpoaa kuuseen'): Rapier moves the car's box as if it weighed infinitely much — the bale took all of
+// the blow and the car drove on into it. After each step, a body the car's box touched gets the share it would have got from a 1000 kg car
+// (momentum kept: its change scaled by m_car/(m_car + m), the car's velocity changed by the rest the other way)
+function physNearBodies() { const out = []; for (const b of BALES) { if (!b.rb || b.rb.isSleeping() && (Math.abs(b.x - car.x) > 6 || Math.abs(b.z - car.z) > 6)) continue; if (Math.abs(b.x - car.x) < 6 && Math.abs(b.z - car.z) < 6) out.push(b); } return out; }
+function physCarExchange(near, v0) { near.forEach((b, k) => { let touch = false; PHYS.world.contactPair(PHYS.carC, b.col, (m) => { if (m.numContacts() > 0) touch = true; }); if (!touch) return;
+  const v1 = b.rb.linvel(), m = b.rb.mass(), M = PHYS.CAR_M, dx = v1.x - v0[k].x, dz = v1.z - v0[k].z, f = M/(M + m);
+  b.rb.setLinvel({ x: v0[k].x + dx*f, y: v1.y, z: v0[k].z + dz*f }, true); car.vx -= dx*m/(M + m); car.vz -= dz*m/(M + m); b.touched = 0.25; }); }
+// ?fysiikka: every collider as a wireframe over the scene (blue houses, green trunks, yellow the car's box, orange the bales), a row of bales
+// on the road ahead of the start for testing, and the numbers in the corner
+function physDbgAdd(geo, col, x, y, z, q) { if (!PHYS.debug) return null; const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col, wireframe: true, depthTest: false, transparent: true, opacity: 0.8 })); m.renderOrder = 20; m.position.set(x, y, z); if (q) m.quaternion.copy(q); scene.add(m); return m; }
+function physDbgUpdate() { if (!PHYS.debug || !PHYS.ready) return;
+  if (!PHYS.dbg) { PHYS.dbg = { car: physDbgAdd(new THREE.BoxGeometry(CAR_HW*2, 1.2, CAR_HL*2), 0xffe040, 0, 0, 0), bales: BALES.map(() => physDbgAdd(new THREE.CylinderGeometry(BALE.R, BALE.R, BALE.HL*2, 16).rotateZ(Math.PI/2), 0xff8020, 0, 0, 0)) };
+    const el = document.createElement('div'); el.id = 'phys-hud'; el.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:50;font:12px monospace;color:#fff;background:rgba(0,0,0,.6);padding:6px 8px;white-space:pre;pointer-events:none'; document.body.appendChild(el); PHYS.dbg.hud = el; }
+  const t = PHYS.carB.translation(), r = PHYS.carB.rotation(); PHYS.dbg.car.position.set(t.x, t.y, t.z); PHYS.dbg.car.quaternion.set(r.x, r.y, r.z, r.w);
+  let nb = null, nd = 1e9; BALES.forEach((b, i) => { const m = PHYS.dbg.bales[i], bt = b.rb.translation(), br = b.rb.rotation(); m.position.set(bt.x, bt.y, bt.z); m.quaternion.set(br.x, br.y, br.z, br.w); m.material.color.setHex(b.rb.isSleeping() ? 0x806040 : 0xff8020); const d = Math.hypot(bt.x - car.x, bt.z - car.z); if (d < nd) { nd = d; nb = b; } });
+  if (nb) { const v = nb.rb.linvel(); PHYS.dbg.hud.textContent = 'FYSIIKKA (Rapier)\nauto ' + (Math.hypot(car.vx, car.vz)*3.6).toFixed(0) + ' km/h\nlähin paali ' + nd.toFixed(1) + ' m, ' + (Math.hypot(v.x, v.y, v.z)*3.6).toFixed(0) + ' km/h' + (nb.rb.isSleeping() ? ' (nukkuu)' : '') + '\nhereillä ' + (PHYS.awake || 0) + '/' + BALES.length + '   kiinteitä ' + PHYS.fixed.size; } }
+function physTestbed() { if (!PHYS.debug || !BALES.length || !trackPoints.length) return;   // six bales on the road 30–90 m ahead of the start, a pair side by side
+  const at = (s) => { let acc = 0; for (let i = 1; i < trackPoints.length; i++) { const a = trackPoints[i-1], b = trackPoints[i], l = Math.hypot(b.x - a.x, b.y - a.y); if (acc + l >= s) { const f = (s - acc)/l; return { x: a.x + (b.x - a.x)*f, z: a.y + (b.y - a.y)*f, dx: (b.x - a.x)/l, dz: (b.y - a.y)/l }; } acc += l; } return null; };
+  [[30, 0], [45, -1.5], [60, 1.5], [75, -0.9], [75, 0.9], [90, 0]].forEach(([d, o], k) => { const p = at(d), b = BALES[k]; if (!p) return; b.ox = p.x - p.dz*o; b.oz = p.z + p.dx*o; b.oyaw = Math.atan2(p.dx, p.dz) + (k % 2 ? 0 : Math.PI/2); }); }   // (every other one across the road: it rolls; the rest along it: hit on the end, it slides)
+
 // ════════ HAY BALES ════════
 // Round bales on the fields (≈ 400 kg, Ø 1.5 m, 1.3 m long, lying on their side): the car knocks them — they roll across their axis and
 // barely slide along it, lose the car a good deal of speed and dent it; they stop against trees, houses and each other. R puts them back.
@@ -7015,16 +7036,17 @@ function baleSync(b, i) { if (i === undefined) i = BALES.indexOf(b);
   _bm.compose(_bp.set(b.x, Y(b.x, b.z) + BALE.R - 0.04, b.z), _bq, _bs); BALE.im.setMatrixAt(i, _bm); BALE.ie.setMatrixAt(i, _bm); BALE.im.instanceMatrix.needsUpdate = BALE.ie.instanceMatrix.needsUpdate = true; }
 function physBales() { const R = PHYS.R, W = PHYS.world; if (!W) return; for (const b of BALES) if (b.rb) { W.removeRigidBody(b.rb); b.rb = null; }
   const cq = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI/2);   // (Rapier's cylinder stands on y: laid along the bale's x)
-  BALES.forEach(b => { const q = new THREE.Quaternion().setFromAxisAngle(THREE.Object3D.DefaultUp, b.yaw - Math.PI/2);
+  physTestbed(); BALES.forEach(b => { if (PHYS.debug) { b.x = b.ox; b.z = b.oz; b.yaw = b.oyaw; } const q = new THREE.Quaternion().setFromAxisAngle(THREE.Object3D.DefaultUp, b.yaw - Math.PI/2);
     b.rb = W.createRigidBody(R.RigidBodyDesc.dynamic().setTranslation(b.x, Y(b.x, b.z) + BALE.R, b.z).setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }).setLinearDamping(0.35).setAngularDamping(2.2).setCanSleep(true).setCcdEnabled(true));   // (straw on stubble: a gentle slope won't keep it rolling)
-    W.createCollider(R.ColliderDesc.cylinder(BALE.HL, BALE.R).setRotation({ x: cq.x, y: cq.y, z: cq.z, w: cq.w }).setDensity(170).setFriction(0.9).setRestitution(0.1), b.rb); b.rb.sleep(); b.wasAwake = false; });
+    b.col = W.createCollider(R.ColliderDesc.cylinder(BALE.HL, BALE.R).setRotation({ x: cq.x, y: cq.y, z: cq.z, w: cq.w }).setDensity(170).setFriction(0.9).setRestitution(0.1), b.rb); b.rb.sleep(); b.wasAwake = false; });
+  BALES.forEach((b, i) => { const t = b.rb.translation(), r = b.rb.rotation(); _bq.set(r.x, r.y, r.z, r.w); _bm.compose(_bp.set(t.x, t.y, t.z), _bq, _bs); BALE.im.setMatrixAt(i, _bm); BALE.ie.setMatrixAt(i, _bm); }); BALE.im.instanceMatrix.needsUpdate = BALE.ie.instanceMatrix.needsUpdate = true;
   PHYS.balesOn = true; PHYS.awake = 0; }   // (asleep where they lie, exactly on the ground: woken by a touch)
 function physBalesUpdate(dt) {   // the car's contact is Rapier's; what the bale does to the car (speed lost, a dent, a thud) stays the game's
   let near = false; for (const b of BALES) { if (Math.abs(b.x - car.x) > 8 || Math.abs(b.z - car.z) > 8) continue; near = true; if (Math.abs(b.x - car.x) > 5 || Math.abs(b.z - car.z) > 5) continue; physFixedNear(b.x, b.z, 8);
     for (const [px, pz] of balePts(b)) { const hit = boxPush(playerBox(), px, pz, BALE.R*0.95); if (!hit) continue; const v = b.rb.linvel(), rel = (v.x - car.vx)*hit.nx + (v.z - car.vz)*hit.nz;
-      if (rel < -0.5 && !b.hitT) { b.hitT = 0.3; car.vx += hit.nx*rel*0.28; car.vz += hit.nz*rel*0.28; carDamage(hit.nx, hit.nz, -rel*0.7); const now = performance.now(); if (audio && now - lastThud > 110) { lastThud = now; beep(55 + Math.random()*20, 0.16, Math.min(0.32, -rel*0.03), 'triangle'); } }
+      if (rel < -0.5 && !b.hitT) { b.hitT = 0.3; carDamage(hit.nx, hit.nz, -rel*0.7); const now = performance.now(); if (audio && now - lastThud > 110) { lastThud = now; beep(55 + Math.random()*20, 0.16, Math.min(0.32, -rel*0.03), 'triangle'); } }
       break; } if (b.hitT) b.hitT = Math.max(0, b.hitT - dt); }
-  if (!near && !PHYS.awake) { PHYS.acc = 0; PHYS.cp = null; return; }   // (all asleep and the car nowhere near: nothing to step)
+  if (!near && !PHYS.awake) { PHYS.acc = 0; PHYS.cp = null; physDbgUpdate(); return; }   // (all asleep and the car nowhere near: nothing to step)
   physStep(dt); let awake = 0; const vmax = Math.hypot(car.vx, car.vz)*1.6 + 6;   // (a safety net: nothing the car hits leaves faster than it could have been sent)
   for (const b of BALES) { if (b.rb.isSleeping()) continue; const v = b.rb.linvel(), sp = Math.hypot(v.x, v.y, v.z); if (sp > vmax) { const k = vmax/sp; b.rb.setLinvel({ x: v.x*k, y: v.y*k, z: v.z*k }, true); }
     const w = b.rb.angvel(), ws = Math.hypot(w.x, w.y, w.z), wmax = vmax/BALE.R; if (ws > wmax) { const k = wmax/ws; b.rb.setAngvel({ x: w.x*k, y: w.y*k, z: w.z*k }, true); } }
@@ -7033,7 +7055,7 @@ function physBalesUpdate(dt) {   // the car's contact is Rapier's; what the bale
       if ((b.awT = (b.awT || 0) + dt) > 5 && Math.hypot(b.x - car.x, b.z - car.z) > 30) { b.rb.sleep(); b.awT = 0; } } else b.awT = 0;   // (nearly still a second with the car away, or out of sight of it 5 s: to sleep — on a slope or against a shed they'd tremble on for ever)
     if (b.wasAwake) awake++; const t = b.rb.translation(), r = b.rb.rotation(); b.x = t.x; b.z = t.z;
     if (!b.wasAwake) physFixedNear(b.x, b.z, 8); else physFixedNear(b.x, b.z, 6);
-    _bq.set(r.x, r.y, r.z, r.w); _bm.compose(_bp.set(t.x, t.y, t.z), _bq, _bs); BALE.im.setMatrixAt(i, _bm); BALE.ie.setMatrixAt(i, _bm); BALE.im.instanceMatrix.needsUpdate = BALE.ie.instanceMatrix.needsUpdate = true; }); PHYS.awake = awake; }
+    _bq.set(r.x, r.y, r.z, r.w); _bm.compose(_bp.set(t.x, t.y, t.z), _bq, _bs); BALE.im.setMatrixAt(i, _bm); BALE.ie.setMatrixAt(i, _bm); BALE.im.instanceMatrix.needsUpdate = BALE.ie.instanceMatrix.needsUpdate = true; }); PHYS.awake = awake; physDbgUpdate(); }
 function balesReset() { if (PHYS.balesOn) BALES.forEach(b => { if (!b.rb) return; const q = new THREE.Quaternion().setFromAxisAngle(THREE.Object3D.DefaultUp, b.oyaw - Math.PI/2); b.rb.setTranslation({ x: b.ox, y: Y(b.ox, b.oz) + BALE.R, z: b.oz }, true); b.rb.setRotation({ x: q.x, y: q.y, z: q.z, w: q.w }, true); b.rb.setLinvel({ x: 0, y: 0, z: 0 }, true); b.rb.setAngvel({ x: 0, y: 0, z: 0 }, true); b.wasAwake = true; }); PHYS.awake = BALES.length;
  BALES.forEach((b, i) => { if (b.x === b.ox && b.z === b.oz && b.yaw === b.oyaw && !b.roll) return; Object.assign(b, { x: b.ox, z: b.oz, yaw: b.oyaw, vx: 0, vz: 0, w: 0, roll: 0, moving: false }); if (BALE.im) baleSync(b, i); }); BALE.moving.clear(); }
 // the bale as a capsule: two circles on its axis
