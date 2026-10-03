@@ -367,7 +367,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 15.33 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 15.47 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -5062,6 +5062,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Roskikset ovat nyt tavallisia irto-obuja (tagi "roskis"): auto törmää niihin samalla fysiikalla kuin kaikkeen irtotavaraan, ne eivät jää keulaan kiinni, ja niitä on 100. Roska-auto hakee vain pystyssä olevat', '18.47'],
   ['3.10.', 'Traktorin renkaat: eivät enää näy läpi (renkaan sisäreuna suljettu) ja kumi on harmaanmusta, ei pikimusta', '18.33'],
   ['3.10.', 'GTA-tilan liikenneautoilta ei enää puutu renkaita, eikä maahan jää varjoa ilman autoa', '18.22'],
   ['3.10.', 'Äänet suomalaisilla puhujilla: omenaisäntänä vanha Väinö, ja suuttunut morsian (Kaisa) huutaa ”SÄ PILASIT MEIDÄN HÄÄT!” ja ”TULE TÄNNE!”', '18.10'],
@@ -8388,20 +8389,36 @@ function binFull(B, full) { B.full = full; B.g.userData.bag.visible = full; cons
 function binPlace(B) { placeAt(B.g, B.x, B.z, B.yaw); B.g.rotation.x = B.g.rotation.z = 0; }
 // 2.10. (Antti: 'noin 50 kpl riittää, kuten muutkin'): ~50 bins spread ≥ 28 m apart (a fixed per-plot order, no Math.random), and a bin that's hit
 // flies as a real rigid body (RB: off walls and fences, comes to rest however it lands, can be hit again) instead of its own scripted arc
-const BINS_MAX = 50;
-function buildBins() { for (const B of BINS.list) binUnRB(B, true); BINS.list.length = 0; BINS.grid.clear(); BINS.fly.length = 0;
+const BINS_MAX = 100;   // (3.10.: 50 → 100 now that they're plain loose props)
+// ── LOOSE (3.10., Antti: 'miksei ne voi olla normi obuja jotka on tägätty roskis'): one system for every loose prop that stands somewhere
+//    till the car knocks it over — o = { g (pivot at its base), x, z, hx, hz (home), yaw, tag, r, ex, ey, ez (half size), m, down, onKnock }. Standing:
+//    a circle the car hits once → down, a rigid body (RB) from then on, its own physics. Down ones the car never 'hits' again (that was
+//    the bins riding along on the bonnet); the RB push-out in rbUpdate keeps it from passing through them. Who wants them asks by tag. ──
+const LOOSE = { list: [], grid: new Grid(8, true) };
+function looseAdd(o) { o.down = false; o.hold = null; o.rb = null; LOOSE.list.push(o); LOOSE.grid.add(o, o.x, o.z, o.r); return o; }
+function looseTagged(tag) { return LOOSE.list.filter(o => o.tag === tag); }
+function looseRB(o, v, w) { const g = o.g, H = o.hold || (o.hold = new THREE.Group()); g.updateMatrixWorld(); H.position.set(0, o.ey, 0).applyMatrix4(g.matrixWorld); H.quaternion.copy(g.quaternion); lifeGroup.add(H);
+  H.add(g); g.position.set(0, -o.ey, 0); g.rotation.set(0, 0, 0); H.updateMatrixWorld(true); o.rb = rbAdd(H, o.ex, o.ey, o.ez, v, w, { m: o.m, mu: 0.6, e: 0.3, drag: 0.4 }); }
+function looseUnRB(o, drop) { if (!o.rb) return; const i = RB.list.indexOf(o.rb); if (i >= 0) RB.list.splice(i, 1); o.rb = null; if (o.hold) { lifeGroup.remove(o.hold); if (!drop) lifeGroup.add(o.g); } }
+function looseReset(o) { looseUnRB(o); o.down = false; o.x = o.hx; o.z = o.hz; placeAt(o.g, o.x, o.z, o.yaw); o.g.rotation.x = o.g.rotation.z = 0; }
+const _lUp = new THREE.Vector3();
+function looseSettle() { let moved = false;   // a body come to rest standing up (just nudged): standing again, where it is now; lying down: down
+  for (const o of LOOSE.list) { const b = o.rb; if (!b || !b.sleep || o.held) continue; _lUp.set(0, 1, 0).applyQuaternion(b.q); if (_lUp.y < 0.9) continue;
+    const yaw = Math.atan2(2*(b.q.w*b.q.y + b.q.x*b.q.z), 1 - 2*(b.q.y*b.q.y + b.q.x*b.q.x)); looseUnRB(o); o.x = b.p.x; o.z = b.p.z; o.yaw = yaw; placeAt(o.g, o.x, o.z, o.yaw); o.g.rotation.x = o.g.rotation.z = 0; o.down = false; moved = true; }
+  if (moved) { LOOSE.grid.clear(); for (const o of LOOSE.list) LOOSE.grid.add(o, o.x, o.z, o.r); } }
+function looseUpdate() { if ((LOOSE.st = (LOOSE.st || 0) + 1) % 30 === 0) looseSettle(); if (gameState !== State.RACING || WALK.on) return; const sp = Math.hypot(car.vx, car.vz); if (sp < 2) return; const P = playerBox();
+  LOOSE.grid.near(car.x, car.z, 4, o => { if (o.down || o.held) return; const c = boxPush(P, o.x, o.z, o.r); if (!c) return;
+    o.down = true; looseRB(o, new THREE.Vector3(), new THREE.Vector3()); if (o.onKnock) o.onKnock(o, sp); }); }   // (at rest: the car's contact in rbCarPush does the rest, the same physics for everything)
+function buildBins() { for (const B of BINS.list) looseUnRB(B, true); LOOSE.list = LOOSE.list.filter(o => o.tag !== 'roskis'); LOOSE.grid.clear(); LOOSE.list.forEach(o => LOOSE.grid.add(o, o.x, o.z, o.r)); BINS.list.length = 0; BINS.grid.clear(); BINS.fly.length = 0;
   const order = PLOTS.slice().sort((a, b) => ((a.bi*2654435761) >>> 0) % 9973 - ((b.bi*2654435761) >>> 0) % 9973);
   for (const pl of order) { if (BINS.list.length >= BINS_MAX) break; const F = pl.F; if (F.street < 0 || Math.abs(F.x) > 520 || Math.abs(F.z) > 520) continue;
     if (BINS.list.some(o => Math.abs(o.x - F.x) < 28 && Math.abs(o.z - F.z) < 28)) continue;
     const u = (pl.bi % 2 ? -1 : 1)*Math.min(F.hu + 1.2, Math.max(1.2, F.u1 - 1.0)), nn = F.n0 - 0.4, x = F.x + F.u[0]*u + F.n[0]*nn, z = F.z + F.u[1]*u + F.n[1]*nn;   // at the front edge, to one side of the house
     if (onRoad(x, z, 0.35) || staticHit(x, z, 3, 0.45) || vehicleWithin(x, z, 3) || planWithin(x, z, 0.8)) continue;
     const yaw = Math.atan2(-F.n[0], -F.n[1]), g = makeBin(); lifeGroup.add(g); nearVis(g, x, z);   // (the lid's hinge away from the street)
-    const ni = nearestNode(x, z), B = { x, z, hx: x, hz: z, yaw, g, route: distRoute(x, z), full: true, down: false, ni, refill: 0, vx: 0, vy: 0, vz: 0, y: 0, sp: 0 }; binPlace(B); binFull(B, true); BINS.list.push(B); BINS.grid.add(B, x, z, 0.5); }
-  X3.upd.push(binsUpdate); X3.reset.push(() => { BINS.fly.length = 0; for (const B of BINS.list) { binUnRB(B); B.down = false; B.held = false; B.x = B.hx; B.z = B.hz; binPlace(B); binFull(B, true); } }); }
-// the rigid body: a holder at the body's centre (the bin's own pivot is at its base, where the bin man's code holds it), the bin inside it
-function binRB(B, v, w) { const g = B.g, H = B.hold || (B.hold = new THREE.Group()); g.updateMatrixWorld(); H.position.set(0, 0.46, 0).applyMatrix4(g.matrixWorld); H.quaternion.copy(g.quaternion); lifeGroup.add(H);
-  H.add(g); g.position.set(0, -0.46, 0); g.rotation.set(0, 0, 0); H.updateMatrixWorld(true); B.rb = rbAdd(H, 0.29, 0.46, 0.35, v, w, { m: 14, mu: 0.6, e: 0.3, drag: 0.4 }); }
-function binUnRB(B, drop) { if (!B.rb) return; const i = RB.list.indexOf(B.rb); if (i >= 0) RB.list.splice(i, 1); B.rb = null; if (B.hold) { lifeGroup.remove(B.hold); if (!drop) lifeGroup.add(B.g); } }
+    const ni = nearestNode(x, z), B = looseAdd({ tag: 'roskis', x, z, hx: x, hz: z, yaw, g, r: 0.42, ex: 0.29, ey: 0.46, ez: 0.35, m: 14, onKnock: binKnock, route: distRoute(x, z), full: true, ni, refill: 0 }); binPlace(B); binFull(B, true); BINS.list.push(B); }
+  X3.upd.push(binsUpdate); X3.reset.push(() => { BINS.fly.length = 0; for (const B of BINS.list) { looseReset(B); B.held = false; binFull(B, true); } }); }
+function binKnock(B, sp) { B.g.userData.bag.visible = false; const y = Y(B.x, B.z) + 0.9; for (let k = 0; k < 10; k++) lifeFx.emit(B.x, y, B.z, (Math.random() - 0.5)*3, 1 + Math.random()*2.5, (Math.random() - 0.5)*3, 1.2 + Math.random(), 0.12, 0.18, 0.9, 0.2, 0.18, 0.14, 0.3, 0.26, 0.2); if (audio) beep(160, 0.15, 0.12, 'square'); }   // knocked flying: the bag goes, the rubbish with it
 // ── apple thieving (1.10., Antti): the yard apple trees bear apples; walk (F) up to one and you pick them, one a moment. The owner
 //    sees it and runs out of the house after you — faster than you on foot. Caught: the apples go back. Into the car and 200 m off
 //    from them: away, and the apples are yours → the rap sheet's 'o' → the menu's apple-thief list. R: the trees bear again. ──
@@ -8495,14 +8512,7 @@ function applesUpdate(dt) { if (!APPLES.im) return; appleShoutsUpdate(dt);
   if ((APPLES.t -= dt) > 0) return; APPLES.t = 0.45; let best = null, bd = 2.1;
   for (const A of APPLES.list) { if (!A.left) continue; const dd = Math.abs(A.x - h.x) + Math.abs(A.z - h.z); if (dd > 3) continue; const e = Math.hypot(A.x - h.x, A.z - h.z); if (e < bd) { bd = e; best = A; } }
   if (best) applePick(best, h); else APPLES.t = 0.1; }
-function binsUpdate(dt) { const sp1 = Math.hypot(car.vx, car.vz), sp = Math.max(sp1, BINS.sp0 || 0), cvx = sp1 >= (BINS.sp0 || 0) ? car.vx : BINS.vx0, cvz = sp1 >= (BINS.sp0 || 0) ? car.vz : BINS.vz0; BINS.sp0 = sp1; BINS.vx0 = car.vx; BINS.vz0 = car.vz;   // (last frame's speed too: the bin and a fence behind it in the same frame)
-  if (sp > 2 && gameState === State.RACING && !WALK.on) { const P = playerBox();
-    for (const B of BINS.list) { if (!B.rb || B.held) continue; const p = B.rb.p, c = (Math.abs(p.x - car.x) < 4 && Math.abs(p.z - car.z) < 4) ? boxPush(P, p.x, p.z, 0.42) : null; if (!c) continue;   // one already down: hit again
-      const b = B.rb; b.sleep = false; b.still = 0; b.v.set(cvx*0.8 - c.nx*1.5, 1 + sp*0.08, cvz*0.8 - c.nz*1.5); b.w.set((Math.random() - 0.5)*8, (Math.random() - 0.5)*8, (Math.random() - 0.5)*8); if (RB.list.indexOf(b) < 0) RB.list.push(b); }
-    BINS.grid.near(car.x, car.z, 4, B => { if (B.down || B.held) return; const c = boxPush(P, B.x, B.z, 0.42); if (!c) return;   // knocked flying: the bag goes, the rubbish with it
-      B.down = true; B.g.userData.bag.visible = false; binRB(B, new THREE.Vector3(cvx*0.9 - c.nx*2, 2 + sp*0.12, cvz*0.9 - c.nz*2), new THREE.Vector3((Math.random() - 0.5)*10, (Math.random() - 0.5)*6, 4 + Math.random()*6));
-      const y = Y(B.x, B.z) + 0.9; for (let k = 0; k < 10; k++) lifeFx.emit(B.x, y, B.z, B.vx*0.5 + (Math.random() - 0.5)*3, 1 + Math.random()*2.5, B.vz*0.5 + (Math.random() - 0.5)*3, 1.2 + Math.random(), 0.12, 0.18, 0.9, 0.2, 0.18, 0.14, 0.3, 0.26, 0.2);
-      if (audio) beep(160, 0.15, 0.12, 'square'); }); }
+function binsUpdate(dt) { looseUpdate();   // (3.10.: the bins are LOOSE props now — the car's hit, the flight and the rest are that system's)
   if ((BINS.rt = (BINS.rt || 0) + dt) >= 1) { for (const B of BINS.list) { if (!B.full && !B.down && (B.refill -= BINS.rt) <= 0) binFull(B, true); if (B.rb) { B.x = B.rb.p.x; B.z = B.rb.p.z; } } BINS.rt = 0; } }   // (a week later, in game minutes; looked at once a second)
 function makeGarbageTruck() { const G = new THREE.Group(), green = lmat(0x2f6a3a, 0.5), white = lmat(0xf0f0ea, 0.45), glass = lmat(0x223040, 0.15), black = lmat(0x141414, 0.8), hub = lmat(0xc8c8c8, 0.35), steel = lmat(0x8a8e92, 0.4), amber = new THREE.MeshStandardMaterial({ color: 0xffa020, emissive: 0xff8a10, emissiveIntensity: 0.2, roughness: 0.3 });
   G.rotation.order = 'YXZ'; const B = (w, h, d, m, x, y, z, rx, sh) => { const me = lmesh(lbox(w, h, d), m, x, y, z, G, sh); if (rx) me.rotation.x = rx; return me; };
@@ -8531,7 +8541,7 @@ function routeCachesWarm() { const G = roadGraph(); for (let i = 0; i < G.nodes.
 function nodeRoute(i) { const G = roadGraph(); if (!G.dr) G.dr = new Float32Array(G.nodes.length).fill(-1); if (G.dr[i] < 0) G.dr[i] = distRoute(G.nodes[i].x, G.nodes[i].z); return G.dr[i]; }   // (a street node's distance from the rally route, worked out once)
 const vanNode = (v) => { const [x, z] = lloc(v.x, v.z, v.yaw, 0, v.hl + 3); return nearestNode(x, z); };   // (the street node just in front of it: routes start ahead, not behind)
 function garbageNext(v, V) { const { nodes } = roadGraph(), si = vanNode(v); if (si < 0) return false; const { dist, prev } = rgDijkstra(si); let best = null, bs = Infinity;
-  const cands = BINS.list.filter(B => B.full && !B.down && B.ni >= 0 && Math.hypot(B.x - v.x, B.z - v.z) >= 14).sort((a, b) => Math.hypot(a.x - v.x, a.z - v.z) - Math.hypot(b.x - v.x, b.z - v.z)).slice(0, 8);   // (the 8 nearest as the crow flies: their route chains walked, not all 50)
+  const cands = looseTagged('roskis').filter(B => B.full && !B.down && B.ni >= 0 && Math.hypot(B.x - v.x, B.z - v.z) >= 14).sort((a, b) => Math.hypot(a.x - v.x, a.z - v.z) - Math.hypot(b.x - v.x, b.z - v.z)).slice(0, 8);   // (the 8 nearest as the crow flies: their route chains walked, not all 50)
   for (const B of cands) { const d = dist[B.ni]; if (!isFinite(d) || d > 2500 || B.route < 20) continue;   // (2.10.: 50 bins, far apart — the next one can be across the village)
     let bad = 0, out = null; for (let j = B.ni; j >= 0 && j !== si; j = prev[j]) { if (nodeRoute(j) < 9) bad++; if (dist[j] >= 9) out = nodes[j]; }
     const turn = out && Math.abs(angDiff(Math.atan2(out.x - v.x, out.z - v.z) - v.yaw)) > 1.6, sc = d + bad*40 + (turn ? 150 : 0); if (sc < bs) { bs = sc; best = B; } }   // (the nearest full one ahead, not by way of the rally route)
@@ -8553,7 +8563,7 @@ const binmanTask = (V) => ({ kind: 'binman', update(h, dt, t) { const v = V.v, S
   reset(h) { V.w.m = 'ride'; h.seat = V.step; } });
 function garbageAI(V) { return serviceVanAI(V, { vmax: 8,
   atStop: (v) => { const h = V.man, S = V.w, bc = v.view.g.userData.beacon; bc.material.emissiveIntensity = 0.2 + Math.max(0, Math.sin(worldT*9))*2.5;
-    if (!V.job.length && S.m === 'ride' && !V.sent) { V.sent = true; V.job = BINS.list.filter(B => B.full && !B.down && Math.hypot(B.x - v.x, B.z - v.z) < 18).sort((a, b) => Math.hypot(a.x - v.x, a.z - v.z) - Math.hypot(b.x - v.x, b.z - v.z)).slice(0, 4);   // the bins here: off he hops
+    if (!V.job.length && S.m === 'ride' && !V.sent) { V.sent = true; V.job = looseTagged('roskis').filter(B => B.full && !B.down && Math.hypot(B.x - v.x, B.z - v.z) < 18).sort((a, b) => Math.hypot(a.x - v.x, a.z - v.z) - Math.hypot(b.x - v.x, b.z - v.z)).slice(0, 4);   // the bins here: off he hops
       if (V.job.length && h && !h.down && !h.gone) { const [sx, sz] = lloc(v.x, v.z, v.yaw, 0.6, -(v.hl + 0.6)); h.seat = null; h.x = sx; h.z = sz; S.m = 'go'; humanSync(h); } else V.job.length = 0; }
     const away = h && (h.down || h.gone || h.hurt);   // (knocked over: the lorry carries on without him)
     if ((S.m === 'ride' || away) && V.sent && V.t <= 0 && planSlot()) { bc.material.emissiveIntensity = 0.2; if (garbageNext(v, V)) V.sent = false; else V.t = 8; } },
@@ -9088,13 +9098,21 @@ function rbStep(b, h, boxes, lift) {
   const wl = b.w.length(); if (wl > 18) b.w.multiplyScalar(18/wl);   // (a light piece hit on a corner: no propeller)
   b.p.addScaledVector(b.v, h); const w = b.w; _rQ.set(w.x*h*0.5, w.y*h*0.5, w.z*h*0.5, 0).multiply(b.q); b.q.set(b.q.x + _rQ.x, b.q.y + _rQ.y, b.q.z + _rQ.z, b.q.w + _rQ.w).normalize();
   return hitMax; }
-function rbUpdate(dt) { if (!RB.list.length || !(dt > 1e-4)) return; dt = Math.min(dt, 0.05);   /* (a zero-length frame: nothing to step — it divided by zero) */ const n = Math.max(2, Math.ceil(dt/0.006));
+function rbUpdate(dt) { if (!RB.list.length || !(dt > 1e-4)) return; dt = Math.min(dt, 0.05); const nc = Math.max(1, Math.ceil(dt/0.008)); for (let i = 0; i < nc; i++) rbCarPush(dt/nc);   /* (a zero-length frame: nothing to step — it divided by zero) */ const n = Math.max(2, Math.ceil(dt/0.006));
   for (const b of RB.list) { if (b.sleep) continue; const boxes = []; staticNear(b.p.x, b.p.z, b.r + 2, B => { if (B !== DRAG.sb) boxes.push(B); }); const lift = onRoad(b.p.x, b.p.z, 0) || (LAY.pts.length && inLay(b.p.x, b.p.z, 0)) ? ROAD_Y : 0;
     let hit = 0; for (let i = 0; i < n; i++) hit = Math.max(hit, rbStep(b, dt/n, boxes, lift));
     if (hit > 4 && audio && Math.random() < 0.5) beep(120 + Math.random()*200, 0.08, Math.min(0.25, hit*0.02), 'square');   // (a clank as it lands)
     if (!isFinite(b.p.x + b.p.y + b.q.w)) { b.sleep = true; b.obj.visible = false; continue; }
     b.obj.position.copy(b.p); b.obj.quaternion.copy(b.q);
     if (b.v.lengthSq() < 0.04 && b.w.lengthSq() < 0.05) { if ((b.still += dt) > 0.6) b.sleep = true; } else b.still = 0; } }
+function rbCarPush(h) { if (!RB.list.length || gameState !== State.RACING || WALK.on) return; let P = null;   // (3.10.) the car as a moving solid box against every loose body: the contact impulse
+  // worked out in the car's frame (its velocity taken off, rbContact as against a wall, put back on) — restitution, friction and the spin from
+  // where it touches all come from the same code as the ground and the houses; nothing hand-made per object
+  for (const b of RB.list) { if (Math.abs(b.p.x - car.x) > 5 || Math.abs(b.p.z - car.z) > 5) continue; const gy = Y(b.p.x, b.p.z); if (b.p.y - b.r > gy + 1.4) continue; P = P || playerBox();
+    b.qi.copy(b.q).invert(); let hit = false;
+    for (const Q of b.pts) { _rB.set(Q[0], Q[1], Q[2]).applyQuaternion(b.q).add(b.p); if (_rB.y > Y(_rB.x, _rB.z) + 1.3) continue; const c = boxPush(P, _rB.x, _rB.z, 0.02); if (!c) continue;
+      b.v.x -= car.vx; b.v.z -= car.vz; rbContact(b, _rB.x, _rB.y, _rB.z, c.nx, 0, c.nz, c.ov, 0.5, 0.3, h); b.v.x += car.vx; b.v.z += car.vz; b.p.x += c.nx*Math.min(c.ov, 0.3)*0.5; b.p.z += c.nz*Math.min(c.ov, 0.3)*0.5; hit = true; }
+    if (hit) { b.sleep = false; b.still = 0; b.obj.position.copy(b.p); } } }
 function rbClear() { for (const b of RB.list) scene.remove(b.obj); RB.list.length = 0; }
 function dpStep(h, thr, brk, steerIn, hand) {
   const G = DRAG_GEOM, q = DP.q; DP.qi.copy(q).invert();
