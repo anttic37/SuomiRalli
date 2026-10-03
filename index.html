@@ -367,7 +367,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 14.50 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 15.10 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -5062,6 +5062,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Äänet suomalaisilla puhujilla: omenaisäntänä vanha Väinö, ja suuttunut morsian (Kaisa) huutaa ”SÄ PILASIT MEIDÄN HÄÄT!” ja ”TULE TÄNNE!”', '18.10'],
   ['3.10.', 'Omenaisäntä huutaa nyt ääneen: ”HEI! MUN OMENAT!” ja ”OOTAPPAS KU SAAN KII!” (ElevenLabs-äänet)', '17.50'],
   ['3.10.', 'Hääsaattue kiertää kylää: valkoinen hääauto peltipurkkeineen ja kolme vierasautoa tööttäilee. Aja jonon perään, niin vieraat heittävät riisiä – törmää, niin morsian ja sulhanen juoksevat perääsi', '13.14'],
   ['3.10.', 'Lehdessä uusi juttu: Omenasota – isäntä tulee ovesta ja huutaa, hyppy omenaan, ravistelu, ovesta repiminen ja omenatarhat', '07.07'],
@@ -8357,9 +8358,10 @@ function weddingUpdate(dt) { if (!WED.on) return; const L = WED.cars[0], TR = WE
   // hit: the convoy stops, the bride and the groom come after you
   WED.cars.forEach((v, k) => { if (v.damage > WED.dmg[k] + 0.4 && Math.hypot(v.x - car.x, v.z - car.z) < 9 && WED.angry <= 0 && gameState === State.RACING) { WED.angry = 22;
       WED.pair.forEach((h, i) => { const [ox, oz] = lloc(L.x, L.z, L.yaw, i ? -1.3 : 1.3, 0.3); h.x = ox; h.z = oz; h.inside = false; h.st = null; humanSync(h); });
-      pizzaMsg(T('👰 MORSIAN SUUTTUI! HÄÄT PILALLA – JUOKSE!'), true); if (audio) { beep(660, 0.25, 0.1, 'square'); setTimeout(() => beep(330, 0.4, 0.1, 'square'), 220); } }
+      pizzaMsg(T('👰 MORSIAN SUUTTUI! HÄÄT PILALLA – JUOKSE!'), true); WED.sayT = 5; if (audio && !voicePlay('morsian1', L.x, L.z, 1.3)) { beep(660, 0.25, 0.1, 'square'); setTimeout(() => beep(330, 0.4, 0.1, 'square'), 220); } }
     WED.dmg[k] = v.damage; });
   if (WED.angry > 0) { const P = WALK.on && WALK.h ? WALK.h : car; const far = Math.min(...WED.pair.map(h => Math.hypot(h.x - P.x, h.z - P.z)));
+    if ((WED.sayT -= dt) <= 0 && far < 35) { WED.sayT = 5 + Math.random()*3; const b = WED.pair[0]; if (!b.down) voicePlay('morsian2', b.x, b.z, 1.2); }   // 'TULE TÄNNE!'
     if ((WED.angry -= dt) <= 0 || far > 70) { WED.angry = 0; pizzaMsg(T('👰 MORSIAN PALASI AUTOON – HÄÄT JATKUVAT'), true); } return; }
   // tagging along behind the last car: the guests throw rice and hoot with you
   const B = WED.cars[3], sy = Math.sin(B.yaw), cy = Math.cos(B.yaw), dx = car.x - B.x, dz = car.z - B.z, back = -(sy*dx + cy*dz), lat = Math.abs(cy*dx - sy*dz);
@@ -10945,7 +10947,7 @@ function initAudio() {
 }
 
 // recorded voices (3.10.: made with ElevenLabs, audio/*.mp3 beside the game; none in the editor's blob page — then the old beeps)
-const VOICE = { buf: {}, want: ['omena1', 'omena2'], loading: false };
+const VOICE = { buf: {}, want: ['omena1', 'omena2', 'morsian1', 'morsian2'], loading: false };
 function voiceLoad() { if (!audio || VOICE.loading || !/^https?:$/.test(location.protocol)) return; VOICE.loading = true;
   for (const n of VOICE.want) fetch('audio/' + n + '.mp3').then(r => r.ok ? r.arrayBuffer() : null).then(b => b && audio.ctx.decodeAudioData(b)).then(d => { if (d) VOICE.buf[n] = d; }).catch(() => {}); }
 function voicePlay(n, x, z, vol) { if (!audio || !VOICE.buf[n]) return false; const P = WALK.on && WALK.h ? WALK.h : car, d = x === undefined ? 0 : Math.hypot(x - P.x, z - P.z); if (d > 90) return true;
