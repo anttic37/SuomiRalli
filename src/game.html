@@ -2859,7 +2859,7 @@ function onRoad(x, z, margin = 0.3) {
 const ROAD_Y = 0.15;
 // ── ONE ground question for every wheel in the world: the village's streets, the start/finish layout and the sand pitch inside the base,
 //    the generated countryside roads (with their bogs and lakes) outside it → { on: drivable, surf: 'asphalt' | 'gravel' | 'grass', outer } ──
-function groundAt(x, z, m = 0.4) { const OS = OUTER_WORLD && worldLifted && !inBase(x, z, 0) ? outerSurface(x, z) : null, road = onRoad(x, z, m), pitch = inSandPitch(x, z), on = road || pitch || inLay(x, z, 0.3) || !!(OS && OS.road);
+function groundAt(x, z, m = 0.4) { if (x > TESTBED.X0 - 300) return { on: true, outer: null, surf: 'asphalt' };   /* (the empty testbed level: all of it tarmac — it read the countryside's bog there) */ const OS = OUTER_WORLD && worldLifted && !inBase(x, z, 0) ? outerSurface(x, z) : null, road = onRoad(x, z, m), pitch = inSandPitch(x, z), on = road || pitch || inLay(x, z, 0.3) || !!(OS && OS.road);
   return { on, outer: OS, surf: OS && OS.road ? 'gravel' : pitch && !road ? 'gravel' : on ? surfaceAt(x, z) : 'grass' }; }
 let _asphalt = null, _gravel = null;
 function orientUp(verts, idx) {   // flip any triangle whose XZ winding would give a downward normal
@@ -5065,6 +5065,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Tyhjä kenttä on nyt asfalttia myös pelin omalle autolle (se luuli olevansa suolla eikä liikkunut)', '19.59'],
   ['3.10.', 'Tyhjällä kentällä (?tyhja) auto on nyt kokonaan Rapierin fysiikkaa: 1000 kg kori jousitetuilla pyörillä, etuveto. Vanha tapa: ?tyhja=oma', '19.54'],
   ['3.10.', 'Tyhjä testikenttä fysiikalle: suomiralli.netlify.app/?tyhja – tasainen kenttä, kuutioita, palloja, sylintereitä, paali, roskis, pyramidi, keilat ja seinä. Fysiikassa auto on nyt auton muotoinen (viisto konepelti): esineet nousevat pellille ja lentävät eivätkä jää keulaan', '19.47'],
   ['3.10.', 'Paalit eivät enää jää auton sisään: törmäys toimii nyt molempiin suuntiin, ja auto hidastuu paalin painon mukaan. Uusi testipenkki: suomiralli.netlify.app/?fysiikka näyttää törmäysmuodot rautalankana ja paalirivin lähtösuoralla', '19.29'],
