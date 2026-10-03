@@ -34,6 +34,7 @@ In test scripts: stub `renderer.render` while simulating, step with `loop(lastTi
   (t_lap, t_start, t_phases, t_ghost) plus the tests for what changed.
 
 ## Working rules from Antti
+- THREE CHAINS (3.10.): main chain 'Suomiralli' codes; 'SuomiRalli – tarkistus' runs the big tests; 'SuomiRalli – lehti' lays out the paper. Read AGENTIT.md for who touches what and the hand-off order.
 - Every change gets a one-line Finnish entry at the top of `CHANGES` in src/game.html: `['d.m.', 'text', 'hh.mm']` with the Finnish time (Europe/Helsinki) — the newest five show on the start screen with day and time, all of them in the paper's "Lyhyesti" pages.
 - Speed (2.10., Antti: 'pikkuhommaan menee 30 min'): small fixes = edit, `python3 build.py` (no PDF by default), only the tests for what changed;
   full regressions (t_ghost, t_paper_fit…) once at the end of an evening or for big changes. The paper (LEHTI stories, photos, `PDF=1 python3 build.py`)
