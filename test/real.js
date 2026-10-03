@@ -10,6 +10,7 @@ const fs = require('fs'), path = require('path');
   const errors = []; page.on('pageerror', e => errors.push(String(e))); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.route('**/three.min.js', r => r.fulfill({ body: fs.readFileSync(require.resolve('three/build/three.min.js')), contentType: 'text/javascript' }));
   await page.route('https://fonts.googleapis.com/**', r => r.fulfill({ body: '', contentType: 'text/css' }));
+  await page.route('**/@dimforge/rapier3d-compat@*/rapier.es.js', r => r.fulfill({ body: fs.readFileSync(require('path').join(__dirname, 'node_modules/@dimforge/rapier3d-compat/rapier.es.js')), contentType: 'text/javascript', headers: { 'Access-Control-Allow-Origin': '*' } }));   // (Rapier served locally, like three.js)
   await page.goto(/^https?:/.test(game) ? game : 'file://' + path.resolve(game));   // (http: the game served by serve.mjs, with its /api)
   await page.waitForFunction(() => typeof generateTrack === 'function' && typeof trackPoints !== 'undefined' && trackPoints.length > 10, null, { timeout: 90000 });
   await page.exposeFunction('__pageshot', async (name) => { await page.screenshot({ path: name }); });   // the whole page, HUD and menus included
