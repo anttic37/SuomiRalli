@@ -4088,7 +4088,7 @@ const plate = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.1, 0.02), new THREE.M
 // ── tyres: one shape for every wheel in the world — a rounded tread with block ribs, bulging sidewalls, the bead going in to the rim.
 //    Lathed round the Y axis (like a cylinder: the callers turn it onto the axle). Tractor tyres get chevron lugs as well. ──
 function tyreLathe(R, W, seg) { const h = W/2, Ri = R*0.64, n = seg || 22;
-  const P = [[Ri, -h*0.86], [R*0.8, -h], [R*0.93, -h*0.94], [R*0.985, -h*0.74], [R, -h*0.36], [R, h*0.36], [R*0.985, h*0.74], [R*0.93, h*0.94], [R*0.8, h], [Ri, h*0.86]].map(([r, y]) => new THREE.Vector2(r, y));
+  const P = [[Ri, -h*0.86], [R*0.8, -h], [R*0.93, -h*0.94], [R*0.985, -h*0.74], [R, -h*0.36], [R, h*0.36], [R*0.985, h*0.74], [R*0.93, h*0.94], [R*0.8, h], [Ri, h*0.86], [Ri*0.995, -h*0.86]].map(([r, y]) => new THREE.Vector2(r, y));   // (3.10.: the inner wall closed — open, the tractor's big tyres were see-through from some angles)
   const g = new THREE.LatheGeometry(P, n), pa = g.attributes.position, per = P.length;
   for (let i = 0; i < pa.count; i++) { const k = i % per, sgi = Math.floor(i/per); if (k === 4 || k === 5 || ((k === 3 || k === 6) && sgi % 2)) { const f = (sgi + (k === 5 ? 1 : 0)) % 2 ? 0.965 : 1; pa.setX(i, pa.getX(i)*f); pa.setZ(i, pa.getZ(i)*f); } }   // (the tread: blocks, staggered across it)
   g.computeVertexNormals(); return g; }
@@ -5065,6 +5065,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Traktorin renkaat: eivät enää näy läpi (renkaan sisäreuna suljettu) ja kumi on harmaanmusta, ei pikimusta', '18.33'],
   ['3.10.', 'GTA-tilan liikenneautoilta ei enää puutu renkaita, eikä maahan jää varjoa ilman autoa', '18.22'],
   ['3.10.', 'Äänet suomalaisilla puhujilla: omenaisäntänä vanha Väinö, ja suuttunut morsian (Kaisa) huutaa ”SÄ PILASIT MEIDÄN HÄÄT!” ja ”TULE TÄNNE!”', '18.10'],
   ['3.10.', 'Omenaisäntä huutaa nyt ääneen: ”HEI! MUN OMENAT!” ja ”OOTAPPAS KU SAAN KII!” (ElevenLabs-äänet)', '17.50'],
@@ -10305,8 +10306,8 @@ function makeTractorMesh(paint) { const G = new THREE.Group(), red = lmat(paint 
       lmesh(lbox(0.75, 0.62, 1.9), red, 0, 1.0, 0.55, G); lmesh(lbox(0.8, 0.12, 1.95), lmat(0xf0f0f0, 0.5), 0, 1.3, 0.55, G); lmesh(lbox(1.25, 0.08, 1.35), lmat(0xf0f0f0, 0.5), 0, 2.45, -0.62, G); lmesh(lbox(1.15, 0.95, 1.2), glass, 0, 1.9, -0.62, G);
       for (const [a, b] of [[-0.58, -0.02], [0.58, -0.02], [-0.58, -1.22], [0.58, -1.22]]) lmesh(lbox(0.07, 1.3, 0.07), red, a, 1.78, b, G);
       lmesh(lbox(1.0, 0.25, 1.2), red, 0, 1.35, -0.62, G); lmesh(lcyl(0.045, 1.1, 6), black, 0.25, 1.85, 1.1, G);
-      const wheels = []; for (const s of [-1, 1]) { const w = lmesh(ltractorTyre(0.75, 0.42), black, s*0.82, 0.75, -0.6, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.46, 0.4, 14), rim, s*0.82, 0.75, -0.6, G); h.rotation.z = Math.PI/2; wheels.push([w, 0.75], [h, 0.75]);
-        const f = lmesh(ltractorTyre(0.42, 0.24), black, s*0.62, 0.42, 1.15, G); f.rotation.z = Math.PI/2; const fh = lmesh(lcyl(0.26, 0.22, 12), rim, s*0.62, 0.42, 1.15, G); fh.rotation.z = Math.PI/2; wheels.push([f, 0.42], [fh, 0.42]); }
+      const wheels = [], rub = lmat(0x34322e, 0.95); for (const s of [-1, 1]) { const w = lmesh(ltractorTyre(0.75, 0.42), rub, s*0.82, 0.75, -0.6, G); w.rotation.z = Math.PI/2; const h = lmesh(lcyl(0.46, 0.4, 14), rim, s*0.82, 0.75, -0.6, G); h.rotation.z = Math.PI/2; wheels.push([w, 0.75], [h, 0.75]);
+        const f = lmesh(ltractorTyre(0.42, 0.24), rub, s*0.62, 0.42, 1.15, G); f.rotation.z = Math.PI/2; const fh = lmesh(lcyl(0.26, 0.22, 12), rim, s*0.62, 0.42, 1.15, G); fh.rotation.z = Math.PI/2; wheels.push([f, 0.42], [fh, 0.42]); }
       lmesh(lbox(2.4, 0.14, 0.3), grey, 0, 0.55, -1.95, G); lmesh(lbox(0.12, 0.12, 0.8), grey, 0, 0.62, -1.5, G); for (let k = -3; k <= 3; k++) { const tn = lmesh(lbox(0.05, 0.45, 0.05), grey, k*0.36, 0.32, -2.0, G); tn.rotation.x = 0.35; }
   return { G, wheels }; }
 function worldBuild() {
