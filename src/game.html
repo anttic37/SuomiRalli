@@ -5065,6 +5065,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'GTA-tilan liikenneautoilta ei enää puutu renkaita, eikä maahan jää varjoa ilman autoa', '18.22'],
   ['3.10.', 'Äänet suomalaisilla puhujilla: omenaisäntänä vanha Väinö, ja suuttunut morsian (Kaisa) huutaa ”SÄ PILASIT MEIDÄN HÄÄT!” ja ”TULE TÄNNE!”', '18.10'],
   ['3.10.', 'Omenaisäntä huutaa nyt ääneen: ”HEI! MUN OMENAT!” ja ”OOTAPPAS KU SAAN KII!” (ElevenLabs-äänet)', '17.50'],
   ['3.10.', 'Hääsaattue kiertää kylää: valkoinen hääauto peltipurkkeineen ja kolme vierasautoa tööttäilee. Aja jonon perään, niin vieraat heittävät riisiä – törmää, niin morsian ja sulhanen juoksevat perääsi', '13.14'],
@@ -5991,7 +5992,7 @@ function farDetail(cam) { const key = trackMeshGroup.children.length + ':' + yar
       if (!o.userData.fdC) { o.updateWorldMatrix(true, false); o.userData.fdC = S.center.clone().applyMatrix4(o.matrixWorld); o.userData.fdR = S.radius*o.matrixWorld.getMaxScaleOnAxis(); }
       if (SHADOW_OFF.has(k)) o.castShadow = false; _fdList.push(o); }); }
   const cx = cam.position.x, cz = cam.position.z;
-  for (const o of _fdList) { const C = o.userData.fdC, d = Math.hypot(C.x - cx, C.z - cz) - o.userData.fdR, k = o.userData.key, far = d > FAR_DETAIL[k];
+  for (const o of _fdList) { const C = o.userData.fdC, k = o.userData.key, d = o.userData.dyn ? 0 : Math.hypot(C.x - cx, C.z - cz) - o.userData.fdR, far = d > FAR_DETAIL[k];   // (dyn: a chunk whose cars drive about in GTA mode — they're anywhere, its home says nothing)
     if (k === 'yardcars' || k === 'yardcarsfine') o.castShadow = d < YARDCAR_SHADOW;
     if (far === !!o.userData.farHid) continue;
     if (far) { if (o.visible) { o.visible = false; o.userData.farHid = true; } } else { o.visible = true; o.userData.farHid = false; } } }   // (hidden by something else meanwhile — the nuke — it stays so)
@@ -11200,7 +11201,8 @@ function trafficStart() { trafficStop(); if (!VEHICLES.length) return;
   VEHICLES.filter(v => v.kind === 'bus' && !v.ai && !v.fire && !v.charred).slice(0, TRAFFIC.buses).forEach(v => pick.push(v));
   for (const v of pick) { const V = { bus: v.kind === 'bus', mode: 'drive', wait: 0.5 + Math.random()*3, dmg: v.damage, shockT: 0, odo: 0, nextStop: 200 + Math.random()*200, wt: 0, wx: v.x, wz: v.z, stuck: 0, hootT: 0, jn: [], narrow: [] };
     v.blockT = v.passT = 0; v.passSide = 1; v.sw = 0; v.stuckT = 0; v.ghostT = 0;
-    if (!trafficRoute(v, V)) continue; v.ai = trafficAI(V); v.traffic = V; v.awake = true; v.ctrl.hand = false; TRAFFIC.list.push(v); } }
+    if (!trafficRoute(v, V)) continue; v.ai = trafficAI(V); v.traffic = V; v.awake = true; v.ctrl.hand = false; TRAFFIC.list.push(v);
+    if (v.view.kind === 'inst') for (const P of v.view.c.inst || []) { P.im.userData.dyn = true; P.im.frustumCulled = false; } } }   // (3.10., Antti: 'renkaat puuttuu ja varjo maassa' — its chunk's bounds and far-detail distance were from where it was parked)
 function trafficStop() { for (const v of TRAFFIC.list) { if (v.gone) continue; v.ai = null; v.traffic = null; v.follow = null; v.vCap = undefined; v.path = null;
     v.x = v.home.x; v.z = v.home.z; v.yaw = v.home.yaw; v.vx = v.vz = v.w = v.vF = 0; v.awake = false; Object.assign(v.ctrl, { thr: 0, brk: 0, steer: 0, hand: true }); vehicleSync(v); }
   TRAFFIC.list.length = 0; VG.dirty = true; }
