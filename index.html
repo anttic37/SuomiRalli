@@ -367,7 +367,7 @@
   <div class="deco top"><svg width="96" height="26" viewBox="0 0 96 26" aria-hidden="true"><path d="M10 26L22 0h9L19 26zM26 26L38 0h9L35 26z" fill="#e0141e"/><g transform="translate(52 0) skewX(-24)" fill="#fff"><rect x="12" y="0" width="8" height="8.6"/><rect x="28" y="0" width="8" height="8.6"/><rect x="20" y="8.6" width="8" height="8.7"/><rect x="12" y="17.3" width="8" height="8.7"/><rect x="28" y="17.3" width="8" height="8.7"/></g></svg></div>
   <h1>YLÄSTÖ 1988</h1>
   <div class="tagline" id="tagline" data-t>Kesä 1988. Vanha Pökö 205, Wihka ajoi eilen 1.29:000. Sinä et.</div>
-  <div class="build-stamp">editorista 16.29 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
+  <div class="build-stamp">editorista 16.47 · 33 katua</div><div id="menu-content"><button id="aja-btn" data-t>▶ AJA</button><div class="start-hint" data-t>paina enter ja aja</div><button id="lehti-btn">📰 LEHTI</button><button id="posti-btn" data-t>✉ LÄHETÄ POSTIA TEKIJÄLLE</button>
     <div id="stats"></div>
     <div id="keys"><span><kbd>↑</kbd><span data-t>kaasu</span></span><span><kbd>↓</kbd><span data-t>jarru / peruutus</span></span><span><kbd>← →</kbd><span data-t>ohjaus</span></span><span><kbd data-t>välilyönti</kbd><span data-t>käsijarru</span></span><span><kbd>R</kbd><span data-t>uusi lähtö</span></span><span><kbd>Esc</kbd><span data-t>alkuruutu</span></span><span><kbd>C</kbd><span data-t>kamera</span></span><span><kbd>G</kbd><span data-t>haamu</span></span><span><kbd>E</kbd><span data-t>radio: seuraava biisi</span></span><span><kbd>1</kbd><kbd>2</kbd><span data-t>radio hiljemmalle / lujemmalle</span></span><span><kbd>B</kbd><span data-t>bassoboost 🔊</span></span><span><kbd>P</kbd><span data-t>tauko</span></span><span><kbd>V</kbd><span data-t>fps-raja 60 / vapaa</span></span><span><kbd>F</kbd><span data-t>ulos autosta / jalkaisin</span></span></div>
     <div id="mradio" class="off"><div class="mr-face">
@@ -626,7 +626,7 @@ const OUTER_WORLD = false;
 const PLANE_FLY = false;   // (2.10., Antti: 'lentokone pois, ei sovi peliin' — OH-YLÄ stands broken in a yard; true brings the flyable one back)
 function Y(x, z) { return worldLifted ? H(x, z) : 0; }
 function H(x, z) {
-  const g = HG, h = g.h; if (!h) return 0;
+  const g = HG, h = g.h; if (!h) return 0; if (x > TESTBED.X0 - 300) return 0;   // (the empty testbed level far east of the village: dead flat)
   if (OUTER_WORLD && (x < g.x0 || z < g.z0 || x > g.x0 + (g.n - 1)*g.step || z > g.z0 + (g.n - 1)*g.step)) return inBase(x, z, 40) ? hOuterRaw(x, z) : hLat(x, z);   // (beyond the village: OUT, below — the drawn 20 m lattice itself, smooth right at the seam)
   let fx = (x - g.x0)/g.step, fz = (z - g.z0)/g.step;
   fx = Math.max(0, Math.min(g.n - 1.001, fx)); fz = Math.max(0, Math.min(g.n - 1.001, fz));
@@ -5062,6 +5062,7 @@ async function onlineRefresh() {   // the leaderboard → the top 10 on the menu
 }
 // ── version history on the start screen (right side): newest first, one line per change — ADD A LINE HERE FOR EVERY CHANGE ──
 const CHANGES = [
+  ['3.10.', 'Tyhjä testikenttä fysiikalle: suomiralli.netlify.app/?tyhja – tasainen kenttä, kuutioita, palloja, sylintereitä, paali, roskis, pyramidi, keilat ja seinä. Fysiikassa auto on nyt auton muotoinen (viisto konepelti): esineet nousevat pellille ja lentävät eivätkä jää keulaan', '19.47'],
   ['3.10.', 'Paalit eivät enää jää auton sisään: törmäys toimii nyt molempiin suuntiin, ja auto hidastuu paalin painon mukaan. Uusi testipenkki: suomiralli.netlify.app/?fysiikka näyttää törmäysmuodot rautalankana ja paalirivin lähtösuoralla', '19.29'],
   ['3.10.', 'Heinäpaali ei enää lennä 500 km/h kuuseen kovassa vauhdissa törmätessä (fysiikka laskee nyt tiheämmin)', '19.19'],
   ['3.10.', 'Peliin oikea fysiikkamoottori (Rapier) irtotavaralle. Ensimmäisenä heinäpaalit: ne kierivät, kolahtavat toisiinsa, puihin ja aittoihin ja pysähtyvät oikean fysiikan mukaan', '19.13'],
@@ -6971,6 +6972,7 @@ function staticNear(x, z, r, fn) { STATIC.near(x, z, r, fn); }
 // Rapier (rapier3d-compat, WASM, from the CDN; loaded once, cached). The car stays the game's own hand-tuned model — in Rapier it's a
 // kinematic box that shoves things. The ground is one heightfield of Y() over the world; houses, sheds and trees go in as fixed colliders
 // round whatever is awake. First user: the hay bales (if Rapier doesn't load, they keep their old code).
+const TESTBED = { want: /[?&]tyhja\b/.test(location.search), on: false, X0: 4000, Z0: 4000, items: [], G: null };
 const PHYS = { R: null, world: null, ready: false, carB: null, carC: null, fixed: new Set(), acc: 0, failed: false, debug: /[?&]fysiikka\b/.test(location.search), dbg: null, CAR_M: 1000 };
 function physLoad() { if (PHYS.R || PHYS.failed || PHYS.loading) return; PHYS.loading = true;
   import('https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat@0.14.0/rapier.es.js').then(async m => { const R = m.default || m; await R.init(); PHYS.R = R; physWorld(); })
@@ -6983,7 +6985,11 @@ function physWorld() { const R = PHYS.R; if (!R || !HG || !HG.n) return; PHYS.wo
   PHYS.world.createCollider(R.ColliderDesc.heightfield(n, n, h, { x: W, y: 1, z: W }).setFriction(0.9), gb);
   // the car: a kinematic box the size of playerBox, moved to the car every step
   PHYS.carB = PHYS.world.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(car.x, Y(car.x, car.z) + 0.6, car.z));
-  PHYS.carC = PHYS.world.createCollider(R.ColliderDesc.cuboid(CAR_HW, 0.6, CAR_HL).setFriction(0.6), PHYS.carB);
+  // the car's shape as the car is shaped (3.10.: a box with a flat front shoved whatever it met in front of it for 80 m; a low bumper and a
+  // raked bonnet lift a thing up and over or off to the side): the 205's side profile, extruded to its width — (z along, y up from the ground)
+  const prof = [[-CAR_HL, 0.22], [-CAR_HL, 0.95], [-1.25, 1.33], [0.25, 1.36], [0.95, 0.9], [CAR_HL, 0.68], [CAR_HL, 0.3], [CAR_HL - 0.25, 0.18]], pts = [];
+  for (const [z, y] of prof) for (const sx of [-1, 1]) pts.push(sx*CAR_HW*(y > 1.0 ? 0.88 : 1), y - 0.6, z);   // (the glasshouse a little narrower)
+  PHYS.carC = PHYS.world.createCollider((R.ColliderDesc.convexHull(new Float32Array(pts)) || R.ColliderDesc.cuboid(CAR_HW, 0.6, CAR_HL)).setFriction(0.5), PHYS.carB);
   PHYS.ready = true; if (BALE.im) physBales(); }
 function physFixedNear(x, z, r) {   // houses, sheds, poles (STATIC boxes) and trees round (x, z) as fixed colliders, each once
   const R = PHYS.R, W = PHYS.world;
@@ -7000,15 +7006,17 @@ function physStep(dt) { if (!PHYS.ready) return; PHYS.acc = Math.min(PHYS.acc + 
 // two ways (3.10., Antti: 'menee sisään, kimpoaa kuuseen'): Rapier moves the car's box as if it weighed infinitely much — the bale took all of
 // the blow and the car drove on into it. After each step, a body the car's box touched gets the share it would have got from a 1000 kg car
 // (momentum kept: its change scaled by m_car/(m_car + m), the car's velocity changed by the rest the other way)
-function physNearBodies() { const out = []; for (const b of BALES) { if (!b.rb || b.rb.isSleeping() && (Math.abs(b.x - car.x) > 6 || Math.abs(b.z - car.z) > 6)) continue; if (Math.abs(b.x - car.x) < 6 && Math.abs(b.z - car.z) < 6) out.push(b); } return out; }
+function physNearBodies() { const out = []; for (const o of TESTBED.items) if (o.rb && Math.abs(o.rb.translation().x - car.x) < 8 && Math.abs(o.rb.translation().z - car.z) < 8) out.push(o); for (const b of BALES) { if (!b.rb || b.rb.isSleeping() && (Math.abs(b.x - car.x) > 6 || Math.abs(b.z - car.z) > 6)) continue; if (Math.abs(b.x - car.x) < 6 && Math.abs(b.z - car.z) < 6) out.push(b); } return out; }
 function physCarExchange(near, v0) { near.forEach((b, k) => { let touch = false; PHYS.world.contactPair(PHYS.carC, b.col, (m) => { if (m.numContacts() > 0) touch = true; }); if (!touch) return;
-  const v1 = b.rb.linvel(), m = b.rb.mass(), M = PHYS.CAR_M, dx = v1.x - v0[k].x, dz = v1.z - v0[k].z, f = M/(M + m);
+  if (b.rb.bodyType && b.rb.bodyType() !== 0) return; const v1 = b.rb.linvel(), m = b.rb.mass(), M = PHYS.CAR_M, dx = v1.x - v0[k].x, dz = v1.z - v0[k].z, f = M/(M + m);
   b.rb.setLinvel({ x: v0[k].x + dx*f, y: v1.y, z: v0[k].z + dz*f }, true); car.vx -= dx*m/(M + m); car.vz -= dz*m/(M + m); b.touched = 0.25; }); }
 // ?fysiikka: every collider as a wireframe over the scene (blue houses, green trunks, yellow the car's box, orange the bales), a row of bales
 // on the road ahead of the start for testing, and the numbers in the corner
-function physDbgAdd(geo, col, x, y, z, q) { if (!PHYS.debug) return null; const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col, wireframe: true, depthTest: false, transparent: true, opacity: 0.8 })); m.renderOrder = 20; m.position.set(x, y, z); if (q) m.quaternion.copy(q); scene.add(m); return m; }
-function physDbgUpdate() { if (!PHYS.debug || !PHYS.ready) return;
-  if (!PHYS.dbg) { PHYS.dbg = { car: physDbgAdd(new THREE.BoxGeometry(CAR_HW*2, 1.2, CAR_HL*2), 0xffe040, 0, 0, 0), bales: BALES.map(() => physDbgAdd(new THREE.CylinderGeometry(BALE.R, BALE.R, BALE.HL*2, 16).rotateZ(Math.PI/2), 0xff8020, 0, 0, 0)) };
+function physCarWireGeo() { const v = PHYS.carC.shape.vertices || null, g = new THREE.BufferGeometry(); if (!v) return new THREE.BoxGeometry(CAR_HW*2, 1.2, CAR_HL*2);   // (the hull's own points, every pair joined: a cage)
+  const P = []; for (let i = 0; i < v.length; i += 3) for (let j = i + 3; j < v.length; j += 3) P.push(v[i], v[i+1], v[i+2], v[j], v[j+1], v[j+2]); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); return g; }
+function physDbgAdd(geo, col, x, y, z, q) { if (!PHYS.debug) return null; const m = geo.index || geo.type !== 'BufferGeometry' ? new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: col, wireframe: true, depthTest: false, transparent: true, opacity: 0.8 })) : new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: col, depthTest: false, transparent: true, opacity: 0.5 })); m.renderOrder = 20; m.position.set(x, y, z); if (q) m.quaternion.copy(q); scene.add(m); return m; }
+function physDbgUpdate() { if (!PHYS.debug || !PHYS.ready || (TESTBED.on && PHYS.dbg)) return;
+  if (!PHYS.dbg) { PHYS.dbg = { car: physDbgAdd(physCarWireGeo(), 0xffe040, 0, 0, 0), bales: BALES.map(() => physDbgAdd(new THREE.CylinderGeometry(BALE.R, BALE.R, BALE.HL*2, 16).rotateZ(Math.PI/2), 0xff8020, 0, 0, 0)) };
     const el = document.createElement('div'); el.id = 'phys-hud'; el.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:50;font:12px monospace;color:#fff;background:rgba(0,0,0,.6);padding:6px 8px;white-space:pre;pointer-events:none'; document.body.appendChild(el); PHYS.dbg.hud = el; }
   const t = PHYS.carB.translation(), r = PHYS.carB.rotation(); PHYS.dbg.car.position.set(t.x, t.y, t.z); PHYS.dbg.car.quaternion.set(r.x, r.y, r.z, r.w);
   let nb = null, nd = 1e9; BALES.forEach((b, i) => { const m = PHYS.dbg.bales[i], bt = b.rb.translation(), br = b.rb.rotation(); m.position.set(bt.x, bt.y, bt.z); m.quaternion.set(br.x, br.y, br.z, br.w); m.material.color.setHex(b.rb.isSleeping() ? 0x806040 : 0xff8020); const d = Math.hypot(bt.x - car.x, bt.z - car.z); if (d < nd) { nd = d; nb = b; } });
@@ -7017,6 +7025,51 @@ function physTestbed() { if (!PHYS.debug || !BALES.length || !trackPoints.length
   const at = (s) => { let acc = 0; for (let i = 1; i < trackPoints.length; i++) { const a = trackPoints[i-1], b = trackPoints[i], l = Math.hypot(b.x - a.x, b.y - a.y); if (acc + l >= s) { const f = (s - acc)/l; return { x: a.x + (b.x - a.x)*f, z: a.y + (b.y - a.y)*f, dx: (b.x - a.x)/l, dz: (b.y - a.y)/l }; } acc += l; } return null; };
   [[30, 0], [45, -1.5], [60, 1.5], [75, -0.9], [75, 0.9], [90, 0]].forEach(([d, o], k) => { const p = at(d), b = BALES[k]; if (!p) return; b.ox = p.x - p.dz*o; b.oz = p.z + p.dx*o; b.oyaw = Math.atan2(p.dx, p.dz) + (k % 2 ? 0 : Math.PI/2); }); }   // (every other one across the road: it rolls; the rest along it: hit on the end, it slides)
 
+// ════════ TESTBED (3.10., Antti: 'tyhjä leveli, perusmuotoja, sylintereitä, palloja, kuutioita — siellä auto pörrää ja näkee mikä menee pieleen') ════════
+// ?tyhja: the same car and the same Rapier, on a flat grey field 4 km east of the village (H() = 0 there, the village hidden by camera layer 2):
+// cubes, balls, standing and lying cylinders, a hay bale, a bin-sized box, a box pyramid, skittles, a fixed wall and a ramp. Wireframes of every
+// collider over them, numbers in the corner, R puts everything back.
+function testbedSetup() { const R = PHYS.R, W = PHYS.world; if (!R || !W || TESTBED.on) return; TESTBED.on = true; PHYS.debug = true;
+  if (!FREE.on) freeEnter(); const X = TESTBED.X0, Z = TESTBED.Z0, G = TESTBED.G = new THREE.Group(); scene.add(G);
+  const lay = (o) => o.traverse(c => { c.layers.enable(2); }); camera.layers.set(2); lay(carGroup); lay(skyDome); scene.traverse(o => { if (o.isLight) o.layers.enable(2); });   // (lights go by layers too: without this, all black)
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 300).rotateX(-Math.PI/2), new THREE.MeshStandardMaterial({ color: 0x8a8d90, roughness: 0.95 })); ground.position.set(X, 0, Z); ground.receiveShadow = true; G.add(ground);
+  const grid = new THREE.GridHelper(300, 60, 0x5a5d60, 0x6f7276); grid.position.set(X, 0.01, Z); G.add(grid);
+  W.createCollider(R.ColliderDesc.cuboid(150, 0.5, 150).setTranslation(X, -0.5, Z).setFriction(0.8));
+  const mat = (c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.6 });
+  const add = (kind, geo, col, desc, x, y, z, q, fixed) => { const mesh = new THREE.Mesh(geo, mat(col)); mesh.castShadow = mesh.receiveShadow = true; G.add(mesh);
+    const bd = (fixed ? R.RigidBodyDesc.fixed() : R.RigidBodyDesc.dynamic().setLinearDamping(0.1).setAngularDamping(0.3).setCanSleep(true).setCcdEnabled(true)).setTranslation(X + x, y, Z + z); if (q) bd.setRotation({ x: q.x, y: q.y, z: q.z, w: q.w });
+    const rb = W.createRigidBody(bd), col_ = W.createCollider(desc.setFriction(0.7).setRestitution(0.2), rb), wire = physDbgAdd(geo.clone(), fixed ? 0x4080ff : 0xff8020, 0, 0, 0);
+    const o = { kind, rb, col: col_, mesh, wire, home: { x: X + x, y, z: Z + z, q: q ? q.clone() : new THREE.Quaternion() } }; TESTBED.items.push(o); return o; };
+  const qz = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI/2), qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/2);
+  // row 1 (z = 30): cubes 0.5, 1, 2 m
+  [[0.5, -8, 0x3a7bd5], [1, 0, 0xd53a3a], [2, 9, 0x3ad56a]].forEach(([e, x, c]) => add('kuutio ' + e + ' m', new THREE.BoxGeometry(e, e, e), c, R.ColliderDesc.cuboid(e/2, e/2, e/2).setDensity(300), x, e/2, 30));
+  // row 2 (z = 50): balls 0.4, 0.8, 1.5 m
+  [[0.2, -8, 0xe0c030], [0.4, 0, 0xe07030], [0.75, 9, 0xb040e0]].forEach(([r, x, c]) => add('pallo Ø' + (r*2) + ' m', new THREE.SphereGeometry(r, 20, 14), c, R.ColliderDesc.ball(r).setDensity(300), x, r, 50));
+  // row 3 (z = 70): cylinders standing, lying across, lying along
+  add('sylinteri pysty', new THREE.CylinderGeometry(0.4, 0.4, 1.6, 20), 0x30a0c0, R.ColliderDesc.cylinder(0.8, 0.4).setDensity(300), -8, 0.8, 70);
+  add('sylinteri poikki', new THREE.CylinderGeometry(0.5, 0.5, 1.4, 20), 0x30c0a0, R.ColliderDesc.cylinder(0.7, 0.5).setDensity(300), 0, 0.5, 70, qz);
+  add('sylinteri pitkin', new THREE.CylinderGeometry(0.5, 0.5, 1.4, 20), 0x80c030, R.ColliderDesc.cylinder(0.7, 0.5).setDensity(300), 9, 0.5, 70, qx);
+  // row 4 (z = 90): the real things — a hay bale, a bin-sized box
+  add('heinäpaali', new THREE.CylinderGeometry(BALE.R, BALE.R, BALE.HL*2, 16), 0xd9c27a, R.ColliderDesc.cylinder(BALE.HL, BALE.R).setDensity(170), -6, BALE.R, 90, qz);
+  add('roskis-laatikko', new THREE.BoxGeometry(0.58, 0.92, 0.7), 0x2f6a3a, R.ColliderDesc.cuboid(0.29, 0.46, 0.35).setDensity(60), 6, 0.46, 90);
+  // row 5 (z = 115): a pyramid of 0.6 m boxes, skittles
+  for (let r = 0; r < 4; r++) for (let k = 0; k <= 3 - r; k++) add('pyramidi', new THREE.BoxGeometry(0.6, 0.6, 0.6), 0xc08050, R.ColliderDesc.cuboid(0.3, 0.3, 0.3).setDensity(200), -10 + (k - (3 - r)/2)*0.62, 0.3 + r*0.61, 115);
+  for (let r = 0; r < 4; r++) for (let k = 0; k <= r; k++) add('keila', new THREE.CylinderGeometry(0.12, 0.15, 0.8, 12), 0xf0f0f0, R.ColliderDesc.cylinder(0.4, 0.14).setDensity(250), 8 + (k - r/2)*0.6, 0.4, 112 + r*0.55);
+  // fixed: a wall and a ramp
+  add('seinä', new THREE.BoxGeometry(12, 2, 0.6), 0x506070, R.ColliderDesc.cuboid(6, 1, 0.3), 0, 1, 140, null, true); addStaticBox({ x: X, z: Z + 140, hw: 6, hl: 0.3, yaw: 0, kind: 'wall', h: 2 });   // (the car's own physics bounces off it too)
+  add('pylväs', new THREE.BoxGeometry(1, 2.5, 1), 0x506070, R.ColliderDesc.cuboid(0.5, 1.25, 0.5), 22, 1.25, 60, null, true); addStaticBox({ x: X + 22, z: Z + 60, hw: 0.5, hl: 0.5, yaw: 0, kind: 'pole', h: 2.5 });
+  lay(G); TESTBED.items.forEach(o => { if (o.wire) lay(o.wire); });
+  car.x = X; car.z = Z; car.angle = 0; car.vx = car.vz = car.speed = 0; PHYS.cp = null;
+  centerMsg(T('TYHJÄ KENTTÄ – aja muotoja päin · R = muodot takaisin'), '#ffe9a8', 3000); }
+function testbedReset() { for (const o of TESTBED.items) { const h = o.home; o.rb.setTranslation({ x: h.x, y: h.y, z: h.z }, true); o.rb.setRotation({ x: h.q.x, y: h.q.y, z: h.q.z, w: h.q.w }, true); if (o.rb.bodyType() === 0) { o.rb.setLinvel({ x: 0, y: 0, z: 0 }, true); o.rb.setAngvel({ x: 0, y: 0, z: 0 }, true); } }
+  car.x = TESTBED.X0; car.z = TESTBED.Z0; car.angle = 0; car.vx = car.vz = car.speed = 0; PHYS.cp = null; }
+function testbedUpdate(dt) { if (!TESTBED.want) return; if (!TESTBED.on) { if (PHYS.ready && gameState !== State.MENU) testbedSetup(); return; }
+  physStep(dt); let near = null, nd = 1e9, awake = 0;
+  for (const o of TESTBED.items) { const t = o.rb.translation(), r = o.rb.rotation(); o.mesh.position.set(t.x, t.y, t.z); o.mesh.quaternion.set(r.x, r.y, r.z, r.w); if (o.wire) { o.wire.position.copy(o.mesh.position); o.wire.quaternion.copy(o.mesh.quaternion); }
+    if (o.rb.bodyType() !== 0) continue; if (!o.rb.isSleeping()) awake++; const d = Math.hypot(t.x - car.x, t.z - car.z); if (d < nd) { nd = d; near = o; } }
+  if (PHYS.dbg && PHYS.dbg.car) { const t = PHYS.carB.translation(), r = PHYS.carB.rotation(); PHYS.dbg.car.position.set(t.x, t.y, t.z); PHYS.dbg.car.quaternion.set(r.x, r.y, r.z, r.w); }
+  else if (!PHYS.dbg) { physDbgUpdate(); if (PHYS.dbg) { PHYS.dbg.car.layers.enable(2); } }
+  if (PHYS.dbg && PHYS.dbg.hud && near) { const v = near.rb.linvel(); PHYS.dbg.hud.textContent = 'TYHJÄ KENTTÄ (Rapier)\nauto ' + (Math.hypot(car.vx, car.vz)*3.6).toFixed(0) + ' km/h\nlähin: ' + near.kind + ' ' + nd.toFixed(1) + ' m, ' + (Math.hypot(v.x, v.y, v.z)*3.6).toFixed(0) + ' km/h' + (near.rb.isSleeping() ? ' (nukkuu)' : '') + '\nhereillä ' + awake + '/' + TESTBED.items.filter(o => o.rb.bodyType() === 0).length + '\nR = muodot takaisin'; } }
 // ════════ HAY BALES ════════
 // Round bales on the fields (≈ 400 kg, Ø 1.5 m, 1.3 m long, lying on their side): the car knocks them — they roll across their axis and
 // barely slide along it, lose the car a good deal of speed and dent it; they stop against trees, houses and each other. R puts them back.
@@ -10217,7 +10270,7 @@ function nukeReset() { NUKE.armT = -1; if (!NUKE.on) return; NUKE.on = false; NU
   S.mats.forEach(([m, c]) => m.color.setHex(c)); setTimeOfDay(timeOfDay); }
 
 function lifeExtras3Build() {
-  TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.bear = null; X3.heli = null; X3.station = null; X3.sauna = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
+  TREEG = null; X3.upd.length = 0; X3.reset.length = 0; X3.reset.push(() => { if (TESTBED.on) testbedReset(); }); X3.bear = null; X3.heli = null; X3.station = null; X3.sauna = null; X3.postVan = null; X3.oly = null; UFO_REDO.length = 0;
   buildPoliceStation(); buildMoose(6); buildBear(); buildPostVan(); buildWedding(); buildBins(); buildApples(); buildGarbageTruck(); buildTow(); buildEs(); buildLpStall(); buildOlympics(); buildGrandstands(); buildFinishArea(); buildTractorTyres(); buildUfos(); buildRoadies(); buildBalloons(); buildMediHeli(); buildSauna(); buildHitch(); buildAbd(); buildCams(); buildMummo();
 }
 // ── the hitchhiker: by the race route a few hundred metres before the K-shop, a cardboard sign "K-KAUPPA" and a thumb out.
@@ -10382,7 +10435,7 @@ function buildHitch() { HITCH.h = null; HITCH.aboard = false; const K = LANDMARK
   HITCH.h = new Human({ x: S.x, z: S.z, yaw: S.yaw, rig, task: hitchTask() }); reserve('hitch', [S.x, S.z], 2); X3.upd.push(hitchUpdate); }
 function buildAbd() { X3.upd.push(abdUpdate); X3.reset.push(abdReset); ABD.M = null; ABD.beam = null; abdReset();
   BIRDS.list.length = 0; DOGRIDE.mesh = null; DOGRIDE.D = null; X3.upd.push(birdsUpdate, camsUpdate, makkaraUpdate, dogRideUpdate); X3.reset.push(birdsReset, camsReset, makkaraReset, () => { dogRideEnd(); }); }
-function extras3Update(dt) { nukeUpdate(dt); for (const f of X3.upd) f(dt); esUpdate(dt); cabbageUpdate(dt); ufoUpdate(dt); }
+function extras3Update(dt) { nukeUpdate(dt); testbedUpdate(dt); for (const f of X3.upd) f(dt); esUpdate(dt); cabbageUpdate(dt); ufoUpdate(dt); }
 function lifeExtras3Reset() { nukeReset(); for (const f of X3.reset) f(); wreckReset(); esReset(); cabbageReset(); ufoReset(); roadiesPlace(true); }
 
 function lifeExtras2Build() {
